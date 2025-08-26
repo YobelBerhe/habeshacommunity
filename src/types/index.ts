@@ -34,6 +34,8 @@ export interface Listing {
   createdAt: number;
   userId?: string;
   featured?: boolean;
+  categoryLabel?: string;
+  jobSubcategoryLabel?: string;
 }
 
 export interface User {
