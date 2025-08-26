@@ -17,7 +17,7 @@ interface HeaderProps {
 const Header = ({ currentCity, onCityChange, onAccountClick, onPostClick }: HeaderProps) => {
   const [cityInput, setCityInput] = useState(currentCity);
   const [language, setLanguage] = useState("en");
-  const [countryFilter, setCountryFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("all");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -83,7 +83,7 @@ const Header = ({ currentCity, onCityChange, onAccountClick, onPostClick }: Head
                 <SelectValue placeholder="All countries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All countries</SelectItem>
+                <SelectItem value="all">All countries</SelectItem>
                 <SelectItem value="et">Ethiopia</SelectItem>
                 <SelectItem value="er">Eritrea</SelectItem>
                 <SelectItem value="us">United States</SelectItem>

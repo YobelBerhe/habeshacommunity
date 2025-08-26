@@ -47,14 +47,14 @@ const FilterBar = ({
         <div className="flex items-center gap-3 flex-wrap">
           {/* Category */}
           <Select 
-            value={filters.category || ""} 
-            onValueChange={(value) => handleFilterChange("category", value || undefined)}
+            value={filters.category || "all"} 
+            onValueChange={(value) => handleFilterChange("category", value === "all" ? undefined : value)}
           >
             <SelectTrigger className="w-48">
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All categories</SelectItem>
+              <SelectItem value="all">All categories</SelectItem>
               {CATEGORIES.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
@@ -66,14 +66,14 @@ const FilterBar = ({
           {/* Job Subcategory (only show if jobs category selected) */}
           {filters.category === "jobs" && (
             <Select 
-              value={filters.jobSubcategory || ""} 
-              onValueChange={(value) => handleFilterChange("jobSubcategory", value || undefined)}
+              value={filters.jobSubcategory || "all"} 
+              onValueChange={(value) => handleFilterChange("jobSubcategory", value === "all" ? undefined : value)}
             >
               <SelectTrigger className="w-64">
                 <SelectValue placeholder="All job types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All job types</SelectItem>
+                <SelectItem value="all">All job types</SelectItem>
                 {jobSubcategories.map((sub) => (
                   <SelectItem key={sub.id} value={sub.id}>
                     {sub.name}
