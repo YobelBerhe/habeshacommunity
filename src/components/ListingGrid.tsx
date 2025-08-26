@@ -1,151 +1,57 @@
-import { useState } from "react";
 import { Listing } from "@/types";
-import ListingCard from "./ListingCard";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface ListingGridProps {
+export default function ListingGrid({
+  listings, onListingSelect, onFavorite, favoritedListings, loading, onPostFirst
+}: {
   listings: Listing[];
-  onListingSelect: (listing: Listing) => void;
-  onFavorite?: (listingId: string) => void;
-  favoritedListings?: string[];
+  onListingSelect: (l: Listing) => void;
+  onFavorite: (id: string) => void;
+  favoritedListings: string[];
   loading?: boolean;
-}
-
-const ListingGrid = ({ 
-  listings, 
-  onListingSelect, 
-  onFavorite, 
-  favoritedListings = [],
-  loading = false 
-}: ListingGridProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
-  
-  const totalPages = Math.ceil(listings.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentListings = listings.slice(startIndex, endIndex);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  if (loading) {
+  onPostFirst?: () => void;
+}) {
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
+  if (!listings.length) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <div 
-            key={index} 
-            className="bg-gradient-card rounded-lg border border-border/50 overflow-hidden animate-pulse"
-          >
-            <div className="aspect-[16/10] bg-muted"></div>
-            <div className="p-4 space-y-3">
-              <div className="h-4 bg-muted rounded"></div>
-              <div className="h-3 bg-muted rounded w-3/4"></div>
-              <div className="h-3 bg-muted rounded w-1/2"></div>
-              <div className="flex justify-between">
-                <div className="h-3 bg-muted rounded w-1/4"></div>
-                <div className="h-3 bg-muted rounded w-1/4"></div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (listings.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-24 h-24 mx-auto mb-6 bg-gradient-primary/10 rounded-full flex items-center justify-center">
-          <span className="text-4xl">📋</span>
+      <div className="py-16 text-center">
+        <div className="text-2xl font-semibold mb-2">No listings found</div>
+        <div className="text-muted-foreground mb-6">
+          Try adjusting your search or be the first to post in this category!
         </div>
-        <h3 className="text-xl font-semibold mb-2">No listings found</h3>
-        <p className="text-muted-foreground mb-6 max-w-sm">
-          Try adjusting your search criteria or be the first to post in this category!
-        </p>
-        <Button variant="hero">
-          Post First Listing
-        </Button>
+        <button className="btn btn-primary" onClick={onPostFirst}>Post First Listing</button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {currentListings.map((listing) => (
-          <ListingCard
-            key={listing.id}
-            listing={listing}
-            onSelect={onListingSelect}
-            onFavorite={onFavorite}
-            isFavorited={favoritedListings.includes(listing.id)}
-          />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-6">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Previous
-          </Button>
-          
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }, (_, index) => {
-              const page = index + 1;
-              const isCurrentPage = page === currentPage;
-              const showPage = Math.abs(page - currentPage) <= 2 || page === 1 || page === totalPages;
-              const showEllipsis = Math.abs(page - currentPage) === 3;
-
-              if (showEllipsis) {
-                return <span key={page} className="px-2 text-muted-foreground">...</span>;
-              }
-
-              if (!showPage) return null;
-
-              return (
-                <Button
-                  key={page}
-                  variant={isCurrentPage ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => handlePageChange(page)}
-                  className="w-8 h-8 p-0"
-                >
-                  {page}
-                </Button>
-              );
-            })}
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {listings.map(card => (
+        <div key={card.id} className="rounded-xl bg-gradient-card border p-3">
+          <div className="aspect-[4/3] rounded-lg bg-muted grid place-items-center text-muted-foreground">
+            {card.images?.[0] ? <img src={card.images[0]} className="w-full h-full object-cover rounded-lg" /> : "No image"}
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          <div className="mt-3">
+            <div className="font-semibold line-clamp-1">{card.title}</div>
+            <div className="text-xs text-muted-foreground mb-2">
+              {card.categoryLabel}{card.jobSubcategoryLabel ? ` • ${card.jobSubcategoryLabel}` : ""}
+            </div>
+            {card.tags?.length ? (
+              <div className="flex flex-wrap gap-1">
+                {card.tags.slice(0,3).map((t,i)=>(
+                  <span key={i} className="px-2 py-0.5 rounded bg-muted text-xs">#{t}</span>
+                ))}
+              </div>
+            ): null}
+            <div className="mt-3 flex items-center justify-between">
+              {card.price ? <div className="font-semibold">${card.price}</div> : <div />}
+              <div className="flex items-center gap-2">
+                <button className="btn" onClick={()=>onFavorite(card.id)} aria-label="favorite">♡</button>
+                <button className="btn btn-primary" onClick={()=>onListingSelect(card)}>View</button>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
-
-      {/* Results info */}
-      <div className="text-center text-sm text-muted-foreground">
-        Showing {startIndex + 1}-{Math.min(endIndex, listings.length)} of {listings.length} listings
-      </div>
+      ))}
     </div>
   );
-};
-
-export default ListingGrid;
+}

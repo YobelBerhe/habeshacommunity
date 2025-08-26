@@ -1,5 +1,6 @@
 import SearchWithHints from "@/components/SearchWithHints";
 import { SearchFilters } from "@/types";
+import { JOB_TYPES } from "@/constants";
 
 export default function FilterBar({
   filters, onFiltersChange, viewMode, onViewModeChange, resultsCount
@@ -16,7 +17,7 @@ export default function FilterBar({
         <select
           className="field md:max-w-[220px]"
           value={filters.category || ""}
-          onChange={e => onFiltersChange({ ...filters, category: e.target.value || undefined })}
+          onChange={e => onFiltersChange({ ...filters, category: e.target.value || undefined, jobSubcategory: undefined })}
         >
           <option value="">All categories</option>
           <option value="housing">Housing & Rentals</option>
@@ -26,6 +27,17 @@ export default function FilterBar({
           <option value="community">Community</option>
         </select>
 
+        {filters.category === "jobs" && (
+          <select
+            className="field md:max-w-[260px]"
+            value={filters.jobSubcategory || ""}
+            onChange={e => onFiltersChange({ ...filters, jobSubcategory: e.target.value || undefined })}
+          >
+            <option value="">All job types</option>
+            {JOB_TYPES.map(j => <option key={j.value} value={j.value}>{j.label}</option>)}
+          </select>
+        )}
+
         <SearchWithHints
           value={filters.query || ""}
           category={filters.category}
@@ -33,14 +45,8 @@ export default function FilterBar({
         />
 
         <div className="flex items-center gap-2">
-          <button
-            className={`btn ${viewMode!=="map" ? "btn-primary" : ""}`}
-            onClick={()=>onViewModeChange("grid")}
-          >Grid</button>
-          <button
-            className={`btn ${viewMode==="map" ? "btn-primary" : ""}`}
-            onClick={()=>onViewModeChange("map")}
-          >Map</button>
+          <button className={`btn ${viewMode!=="map" ? "btn-primary" : ""}`} onClick={()=>onViewModeChange("grid")}>Grid</button>
+          <button className={`btn ${viewMode==="map" ? "btn-primary" : ""}`} onClick={()=>onViewModeChange("map")}>Map</button>
           <span className="text-sm text-muted-foreground ml-2">{resultsCount} results</span>
         </div>
       </div>
