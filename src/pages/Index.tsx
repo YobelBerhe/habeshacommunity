@@ -1,3 +1,7 @@
+/* ======================================================================
+   FILE: /pages/Index.tsx
+   Uses i18n + MapView + fixed modals + safe storage
+   ====================================================================== */
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
@@ -6,36 +10,30 @@ import ListingGrid from "@/components/ListingGrid";
 import LanguageToggle from "@/components/LanguageToggle";
 import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
+import MapView from "@/components/MapView";
 import { Listing, SearchFilters } from "@/types";
-import { getListings, seedDemoData, getAppState, saveAppState, getFavorites, toggleFavorite } from "@/utils/storage";
+import { getListings, seedDemoData, getAppState, saveAppState, getFavorites, toggleFavorite, saveListing } from "@/utils/storage";
+import { t, Lang } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
-  // App state
   const [appState, setAppState] = useState(() => getAppState());
   const [listings, setListings] = useState<Listing[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Detail / modals
   const [postOpen, setPostOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
-  const [selected, setSelected] = useState<Listing | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
 
-  // Language
-  const [lang, setLang] = useState<string>(() => localStorage.getItem("hn.lang") || "EN");
-  const setLanguage = (v:string) => { setLang(v); localStorage.setItem("hn.lang", v); };
+  const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
+  const setLanguage = (v: string) => { setLang((v as Lang) || "EN"); localStorage.setItem("hn.lang", v); };
 
-  // Filters
   const [filters, setFilters] = useState<SearchFilters>(() => ({
     category: searchParams.get("category") || appState.category || undefined,
     query: searchParams.get("q") || undefined,
-    minPrice: searchParams.get("min") ? Number(searchParams.get("min")) : undefined,
-    maxPrice: searchParams.get("max") ? Number(searchParams.get("max")) : undefined,
   }));
 
   // Update URL when filters change
@@ -103,8 +101,8 @@ const Index = () => {
   };
 
   const handleListingSelect = (listing: Listing) => {
-    setSelected(listing);
-    setDetailOpen(true);
+    // TODO: Add listing detail view
+    console.log("Selected listing:", listing);
   };
 
   const handleFavorite = (listingId: string) => {
@@ -126,63 +124,93 @@ const Index = () => {
         rightExtra={<LanguageToggle value={lang} onChange={setLanguage} />}
       />
 
-      <FilterBar
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        viewMode={appState.viewMode}
-        onViewModeChange={handleViewModeChange}
-        resultsCount={filteredListings.length}
-      />
+      <div className="container mx-auto px-4 pt-4">
+        <div className="flex flex-col md:flex-row gap-3 items-stretch">
+          <select
+            className="field md:max-w-[220px]"
+            value={filters.category || ""}
+            onChange={e => setFilters({ ...filters, category: e.target.value || undefined })}
+          >
+            <option value="">{t(lang,"all_categories")}</option>
+            <option value="housing">{t(lang,"housing")}</option>
+            <option value="jobs">{t(lang,"jobs")}</option>
+            <option value="forsale">{t(lang,"forsale")}</option>
+            <option value="services">{t(lang,"services")}</option>
+            <option value="community">{t(lang,"community")}</option>
+          </select>
 
-      <main className="container mx-auto px-4 py-6">
-        {!filters.category && !filters.query && (
-          <section className="mb-12 text-center py-16 bg-gradient-hero rounded-2xl text-white relative overflow-hidden">
+          <input
+            className="field flex-1"
+            placeholder="Search listings…"
+            value={filters.query || ""}
+            onChange={e=>setFilters({ ...filters, query: e.target.value || undefined })}
+          />
+
+          <div className="flex items-center gap-2">
+            <button className="btn btn-primary" onClick={()=>setPostOpen(true)}>+ {t(lang,"post")}</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero */}
+      {!filters.category && !filters.query && (
+        <section className="container mx-auto px-4 mb-10 mt-6">
+          <div className="text-center py-14 bg-gradient-hero rounded-2xl text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-black/20"></div>
             <div className="relative z-10 max-w-3xl mx-auto px-6">
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                Connect with the
+                {t(lang,"connect_headline_1")}
                 <br />
-                <span className="text-primary-glow">Habesha Community</span>
+                <span className="text-primary-glow">{t(lang,"connect_headline_2")}</span>
               </h1>
               <p className="text-xl md:text-2xl mb-8 text-white/90">
-                Find rentals, jobs, services, and opportunities in your city
+                {t(lang,"connect_sub")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => handleFiltersChange({ category: "housing" })}
-                  className="px-8 py-3 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all font-semibold"
-                >
-                  Browse Housing
+                <button className="px-8 py-3 bg-white/20 rounded-lg hover:bg-white/30 font-semibold"
+                        onClick={()=>setFilters({ ...filters, category: "housing" })}>
+                  {t(lang,"browse_housing")}
                 </button>
-                <button
-                  onClick={() => handleFiltersChange({ category: "jobs" })}
-                  className="px-8 py-3 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all font-semibold"
-                >
-                  Find Jobs
+                <button className="px-8 py-3 bg-white/20 rounded-lg hover:bg-white/30 font-semibold"
+                        onClick={()=>setFilters({ ...filters, category: "jobs" })}>
+                  {t(lang,"find_jobs")}
                 </button>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
+      )}
 
-        {/* Grid */}
+      <main className="container mx-auto px-4 pb-8">
+        {/* Map toggle */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-sm text-muted-foreground">
+            {filteredListings.length} {t(lang,"results")}
+          </div>
+          <div className="flex gap-2">
+            <button className="btn">{t(lang,"grid")}</button>
+            <button className="btn" onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}>{t(lang,"map")}</button>
+          </div>
+        </div>
+
         <ListingGrid
           listings={filteredListings}
-          onListingSelect={handleListingSelect}
+          onListingSelect={()=>{}}
           onFavorite={handleFavorite}
           favoritedListings={favorites}
           loading={loading}
-          onPostFirst={() => setPostOpen(true)}
+          onPostFirst={()=>setPostOpen(true)}
         />
+
+        <div className="mt-10">
+          <MapView lat={appState.cityLat} lon={appState.cityLon} />
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 bg-gradient-card/50 mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-muted-foreground">
-            <p>© 2025 HabeshaNetwork — Connecting the global Habesha community</p>
-            <p className="text-sm mt-2">Rentals • Jobs • Services • Community</p>
-          </div>
+      <footer className="border-t border-border/50 bg-gradient-card/50">
+        <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
+          <p>{t(lang,"footer_line1")}</p>
+          <p className="text-sm mt-2">{t(lang,"footer_line2")}</p>
         </div>
       </footer>
 
@@ -192,20 +220,15 @@ const Index = () => {
         onOpenChange={setPostOpen}
         defaultCategory={filters.category || "housing"}
         cityFallback={{ lat: Number(appState.cityLat), lon: Number(appState.cityLon) }}
-        onSave={(newListing) => {
-          try {
-            const key = `hn.posts.${appState.city}`;
-            const arr = Array.isArray(getListings(appState.city)) ? getListings(appState.city) : [];
-            const next = [newListing, ...arr];
-            localStorage.setItem(key, JSON.stringify(next));
-            setListings(next);
-            setSelected(newListing);
-            setDetailOpen(true);
-            toast({ title: "Posted", description: "Your listing is live." });
-          } catch (e: any) {
-            toast({ title: "Save failed", description: String(e?.message || e) });
-            console.error(e);
+        onSave={async (l) => {
+          const res = await saveListing(appState.city || "Asmara", l);
+          if (res.ok) {
+            setListings(getListings(appState.city || "Asmara"));
+            toast({ title: res.note ? "Posted (images skipped)" : "Posted", description: res.note });
+          } else {
+            toast({ title: "Save failed", description: "Browser storage quota exceeded. Add fewer/smaller photos." });
           }
+          return res;
         }}
       />
       <AccountModal open={acctOpen} onOpenChange={setAcctOpen} />

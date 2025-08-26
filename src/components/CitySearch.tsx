@@ -19,16 +19,22 @@ export default function CitySearch({ value, onSelect }:{
   useEffect(()=>{
     if(q.trim().length<2){ setItems([]); return; }
     const t=setTimeout(async()=>{
-      const url=`https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&accept-language=en&q=${encodeURIComponent(q)}`;
-      const res=await fetch(url, { headers: { "Accept": "application/json" }});
-      const data=await res.json();
-      const list=(data as any[]).map(x=>{
-        const a=x.address||{};
-        const name=a.city||a.town||a.village||a.municipality||a.state_district||a.state||x.display_name.split(",")[0];
-        const country=a.country||"";
-        return {name, country, lat:x.lat, lon:x.lon};
-      }).filter(Boolean);
-      setItems(list); setOpen(true);
+      try {
+        const url=`https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&accept-language=en&q=${encodeURIComponent(q)}`;
+        const res=await fetch(url, { headers: { "Accept": "application/json" }});
+        const data=await res.json();
+        const list=(data as any[]).map(x=>{
+          const a=x.address||{};
+          const name=a.city||a.town||a.village||a.municipality||a.state_district||a.state||x.display_name.split(",")[0];
+          const country=a.country||"";
+          return {name, country, lat:x.lat, lon:x.lon};
+        }).filter(Boolean);
+        setItems(list); setOpen(true);
+      } catch (error) {
+        // Allow manual city entry as fallback
+        setItems([{name: q, country: "Manual Entry", lat: "0", lon: "0"}]);
+        setOpen(true);
+      }
     },200); return ()=>clearTimeout(t);
   },[q]);
 

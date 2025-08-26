@@ -1,214 +1,95 @@
-import { Listing, User } from "@/types";
+/* ======================================================================
+   FILE: /utils/storage.ts
+   Safe storage with compression + quota handling
+   ====================================================================== */
+import type { Listing } from "@/types";
 
-// Local storage keys
-const STORAGE_KEYS = {
-  CITY: "habesha_network_city",
-  CITY_LAT: "habesha_network_city_lat", 
-  CITY_LON: "habesha_network_city_lon",
-  CATEGORY: "habesha_network_category",
-  VIEW_MODE: "habesha_network_view_mode",
-  LANGUAGE: "habesha_network_language",
-  USER: "habesha_network_user",
-  FAVORITES: "habesha_network_favorites",
-};
+const APP_KEY = "hn.app";
+const CITY_KEY = (city: string) => `hn.posts.${city}`;
 
-// City-specific listings storage
-const getPostsKey = (city: string) => `habesha_network_posts_${city.toLowerCase().replace(/\s+/g, '_')}`;
-
-// Listings management
-export const getListings = (city: string): Listing[] => {
+export function getAppState() {
   try {
-    const stored = localStorage.getItem(getPostsKey(city));
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error("Error loading listings:", error);
-    return [];
-  }
-};
+    return JSON.parse(localStorage.getItem(APP_KEY) || "{}") || {};
+  } catch { return {}; }
+}
+export function saveAppState(state: any) {
+  localStorage.setItem(APP_KEY, JSON.stringify(state));
+}
 
-export const saveListings = (city: string, listings: Listing[]): void => {
+export function getListings(city: string): Listing[] {
   try {
-    localStorage.setItem(getPostsKey(city), JSON.stringify(listings));
-  } catch (error) {
-    console.error("Error saving listings:", error);
-  }
-};
+    return JSON.parse(localStorage.getItem(CITY_KEY(city)) || "[]");
+  } catch { return []; }
+}
 
-export const addListing = (city: string, listing: Listing): void => {
-  const listings = getListings(city);
-  listings.unshift(listing); // Add to beginning for newest first
-  saveListings(city, listings);
-};
+function safeSetItem(key: string, value: string) {
+  try { localStorage.setItem(key, value); return true; }
+  catch { return false; }
+}
 
-export const updateListing = (city: string, listingId: string, updates: Partial<Listing>): boolean => {
-  const listings = getListings(city);
-  const index = listings.findIndex(l => l.id === listingId);
-  if (index === -1) return false;
-  
-  listings[index] = { ...listings[index], ...updates };
-  saveListings(city, listings);
-  return true;
-};
+export async function saveListing(city: string, l: Listing): Promise<{ok:boolean; note?:string}> {
+  const list = getListings(city);
+  const next = [l, ...list];
 
-export const deleteListing = (city: string, listingId: string): boolean => {
-  const listings = getListings(city);
-  const filtered = listings.filter(l => l.id !== listingId);
-  if (filtered.length === listings.length) return false;
-  
-  saveListings(city, filtered);
-  return true;
-};
+  // Try normal save first
+  if (safeSetItem(CITY_KEY(city), JSON.stringify(next))) return { ok: true };
 
-// User management
-export const getUser = (): User | null => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.USER);
-    return stored ? JSON.parse(stored) : null;
-  } catch (error) {
-    console.error("Error loading user:", error);
-    return null;
-  }
-};
+  // If quota error (usually due to images), strip images and try again
+  const lean = next.map(x => ({ ...x, images: [] }));
+  const ok = safeSetItem(CITY_KEY(city), JSON.stringify(lean));
+  return ok
+    ? { ok: true, note: "Saved without images due to browser storage limit." }
+    : { ok: false };
+}
 
-export const saveUser = (user: User): void => {
-  try {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-  } catch (error) {
-    console.error("Error saving user:", error);
-  }
-};
+/* Client-side compression to keep localStorage small */
+export async function compressImage(file: File, maxSide = 960, quality = 0.82): Promise<string> {
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = reject;
+    i.src = URL.createObjectURL(file);
+  });
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0, w, h);
+  const data = canvas.toDataURL("image/jpeg", quality);
+  URL.revokeObjectURL(img.src);
+  return data;
+}
 
-export const clearUser = (): void => {
-  localStorage.removeItem(STORAGE_KEYS.USER);
-};
+/* Favorites */
+const FAV_KEY = "hn.favs";
+export function getFavorites(): string[] {
+  try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; }
+}
+export function toggleFavorite(id: string): boolean {
+  const f = new Set(getFavorites());
+  if (f.has(id)) f.delete(id); else f.add(id);
+  localStorage.setItem(FAV_KEY, JSON.stringify([...f]));
+  return f.has(id);
+}
 
-// Favorites management
-export const getFavorites = (): string[] => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.FAVORITES);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error("Error loading favorites:", error);
-    return [];
-  }
-};
-
-export const saveFavorites = (favorites: string[]): void => {
-  try {
-    localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
-  } catch (error) {
-    console.error("Error saving favorites:", error);
-  }
-};
-
-export const addFavorite = (listingId: string): void => {
-  const favorites = getFavorites();
-  if (!favorites.includes(listingId)) {
-    favorites.push(listingId);
-    saveFavorites(favorites);
-  }
-};
-
-export const removeFavorite = (listingId: string): void => {
-  const favorites = getFavorites();
-  const filtered = favorites.filter(id => id !== listingId);
-  saveFavorites(filtered);
-};
-
-export const toggleFavorite = (listingId: string): boolean => {
-  const favorites = getFavorites();
-  const isFavorited = favorites.includes(listingId);
-  
-  if (isFavorited) {
-    removeFavorite(listingId);
-  } else {
-    addFavorite(listingId);
-  }
-  
-  return !isFavorited;
-};
-
-// App state management
-export const getAppState = () => ({
-  city: localStorage.getItem(STORAGE_KEYS.CITY) || "Addis Ababa",
-  cityLat: localStorage.getItem(STORAGE_KEYS.CITY_LAT) || null,
-  cityLon: localStorage.getItem(STORAGE_KEYS.CITY_LON) || null,
-  category: localStorage.getItem(STORAGE_KEYS.CATEGORY) || "",
-  viewMode: (localStorage.getItem(STORAGE_KEYS.VIEW_MODE) as "grid" | "map") || "grid",
-  language: localStorage.getItem(STORAGE_KEYS.LANGUAGE) || "en",
-});
-
-export const saveAppState = (state: Partial<ReturnType<typeof getAppState>>): void => {
-  if (state.city !== undefined) localStorage.setItem(STORAGE_KEYS.CITY, state.city);
-  if (state.cityLat !== undefined) localStorage.setItem(STORAGE_KEYS.CITY_LAT, state.cityLat || "");
-  if (state.cityLon !== undefined) localStorage.setItem(STORAGE_KEYS.CITY_LON, state.cityLon || "");
-  if (state.category !== undefined) localStorage.setItem(STORAGE_KEYS.CATEGORY, state.category);
-  if (state.viewMode !== undefined) localStorage.setItem(STORAGE_KEYS.VIEW_MODE, state.viewMode);
-  if (state.language !== undefined) localStorage.setItem(STORAGE_KEYS.LANGUAGE, state.language);
-};
-
-// Generate unique ID
-export const generateId = (): string => {
-  return Math.random().toString(36).substr(2, 9);
-};
-
-// Demo data seeding
-export const seedDemoData = (city: string): void => {
-  const existing = getListings(city);
-  if (existing.length > 0) return;
-
-  const now = Date.now();
-  const demoListings: Listing[] = [
-    {
-      id: generateId(),
-      title: `Furnished Room in ${city}`,
-      description: "Beautiful furnished room in a safe neighborhood. Wi-Fi included, close to public transport.",
-      price: 350,
-      category: "housing",
-      contact: "WhatsApp: +251-900-000-123",
-      images: [],
-      tags: ["furnished", "wifi", "safe", "transport"],
-      city,
-      createdAt: now - 86400000, // 1 day ago
-      featured: true,
-    },
-    {
-      id: generateId(),
-      title: `Used Toyota Corolla (${city})`,
-      description: "2018 Toyota Corolla in excellent condition. Low mileage, well maintained.",
-      price: 5200,
-      category: "forsale",
-      contact: "Call: +1-555-111-2222",
-      images: [],
-      tags: ["car", "toyota", "reliable"],
-      city,
-      createdAt: now - 7200000, // 2 hours ago
-    },
-    {
-      id: generateId(),
-      title: `Barista Position - Eritrean Café (${city})`,
-      description: "Morning shift barista position at busy Eritrean café. Friendly team, training provided.",
-      category: "jobs",
-      jobSubcategory: "food_cafe_barista",
-      contact: "Email: jobs@eritreancafe.com",
-      images: [],
-      tags: ["barista", "morning", "training"],
-      city,
-      createdAt: now - 3600000, // 1 hour ago
-    },
-    {
-      id: generateId(),
-      title: `Traditional Hair Braiding Services`,
-      description: "Professional Ethiopian hair braiding services. All styles available, competitive prices.",
-      price: 50,
-      category: "services",
-      contact: "Call/Text: +1-555-333-4444",
-      images: [],
-      tags: ["braids", "hair", "traditional", "ethiopian"],
-      city,
-      createdAt: now - 1800000, // 30 minutes ago
-    }
-  ];
-
-  saveListings(city, demoListings);
-};
+/* Seed demo */
+export function seedDemoData(city: string) {
+  const key = CITY_KEY(city);
+  if (localStorage.getItem(key)) return;
+  const demo: Listing[] = [{
+    id: "demo1",
+    title: `Furnished Room in ${city}`,
+    category: "housing",
+    categoryLabel: "Housing / Rentals",
+    description: "Beautiful furnished room in a safe neighborhood. Wi-Fi included.",
+    tags: ["furnished","wifi","safe"],
+    price: 350,
+    createdAt: Date.now(),
+    images: [],
+    contact: "WhatsApp: +1-555-0123",
+    city: city,
+  }];
+  localStorage.setItem(key, JSON.stringify(demo));
+}
