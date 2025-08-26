@@ -2,41 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* HabeshaNetwork Design System - Inspired by Ethiopian & Eritrean Heritage */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core colors inspired by Ethiopian flag and heritage */
+    --background: 45 15% 97%;
+    --foreground: 20 8% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 20 8% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 20 8% 8%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary: Rich Ethiopian gold */
+    --primary: 45 95% 45%;
+    --primary-foreground: 20 8% 8%;
+    --primary-glow: 45 95% 55%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary: Warm earth tone */
+    --secondary: 25 25% 92%;
+    --secondary-foreground: 20 8% 8%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted: Soft beige */
+    --muted: 40 20% 94%;
+    --muted-foreground: 20 8% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent: Vibrant green from flag */
+    --accent: 120 60% 35%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Ethiopian red for important actions */
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Eritrean blue for links and secondary actions */
+    --info: 210 100% 50%;
+    --info-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 45 95% 45%;
+
+    /* Design system tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-hero: linear-gradient(135deg, hsl(45 95% 45%), hsl(120 60% 35%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(45 15% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(120 60% 45%));
+    
+    /* Shadows with golden tint */
+    --shadow-sm: 0 1px 2px 0 hsl(45 95% 45% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(45 95% 45% / 0.1), 0 2px 4px -1px hsl(45 95% 45% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(45 95% 45% / 0.1), 0 4px 6px -2px hsl(45 95% 45% / 0.05);
+    --shadow-glow: 0 0 30px hsl(45 95% 45% / 0.3);
+
+    /* Animation tokens */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +81,56 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 20 8% 8%;
+    --foreground: 45 15% 97%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 25 10% 12%;
+    --card-foreground: 45 15% 97%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 25 10% 12%;
+    --popover-foreground: 45 15% 97%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 45 95% 55%;
+    --primary-foreground: 20 8% 8%;
+    --primary-glow: 45 95% 65%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 25 15% 18%;
+    --secondary-foreground: 45 15% 97%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 25 15% 15%;
+    --muted-foreground: 20 8% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 120 60% 45%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --info: 210 100% 60%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 25 15% 20%;
+    --input: 25 15% 20%;
+    --ring: 45 95% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(45 95% 55%), hsl(45 95% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(45 95% 55%), hsl(120 60% 45%));
+    --gradient-card: linear-gradient(180deg, hsl(25 10% 12%), hsl(25 10% 14%));
+    --gradient-accent: linear-gradient(135deg, hsl(120 60% 45%), hsl(120 60% 55%));
+    
+    --shadow-sm: 0 1px 2px 0 hsl(45 95% 55% / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(45 95% 55% / 0.15), 0 2px 4px -1px hsl(45 95% 55% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(45 95% 55% / 0.15), 0 4px 6px -2px hsl(45 95% 55% / 0.1);
+    --shadow-glow: 0 0 30px hsl(45 95% 55% / 0.4);
+
+    --sidebar-background: 25 10% 10%;
+    --sidebar-foreground: 45 15% 97%;
+    --sidebar-primary: 45 95% 55%;
+    --sidebar-primary-foreground: 20 8% 8%;
+    --sidebar-accent: 25 15% 15%;
+    --sidebar-accent-foreground: 45 15% 97%;
+    --sidebar-border: 25 15% 18%;
+    --sidebar-ring: 45 95% 55%;
   }
 }
 
@@ -101,5 +141,33 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  }
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/50;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button, input, select, textarea {
+    transition: var(--transition-smooth);
+  }
+
+  /* Focus ring improvements */
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none;
   }
 }
