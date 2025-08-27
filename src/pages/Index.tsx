@@ -12,9 +12,12 @@ import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
 import ListingDetailModal from "@/components/ListingDetailModal";
 import MapView from "@/components/MapView";
+import CityIndex from "@/components/CityIndex";
 import { Listing, SearchFilters } from "@/types";
 import { getListingsByCity, seedDemoData, getAppState, saveAppState, getFavorites, toggleFavorite, addListing } from "@/utils/storage";
 import { t, Lang } from "@/lib/i18n";
+import { setParams, getParam } from "@/lib/url";
+import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -36,16 +39,21 @@ const Index = () => {
 
   const [filters, setFilters] = useState<SearchFilters>(() => ({
     category: searchParams.get("category") || appState.category || undefined,
+    subcategory: getParam(searchParams, "sub"),
     query: searchParams.get("q") || undefined,
+    minPrice: searchParams.get("min") ? Number(searchParams.get("min")) : undefined,
+    maxPrice: searchParams.get("max") ? Number(searchParams.get("max")) : undefined,
   }));
 
   // Update URL when filters change
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (filters.category) params.set("category", filters.category);
-    if (filters.query) params.set("q", filters.query);
-    if (filters.minPrice) params.set("min", String(filters.minPrice));
-    if (filters.maxPrice) params.set("max", String(filters.maxPrice));
+    const params = setParams(new URLSearchParams(), {
+      category: filters.category,
+      sub: filters.subcategory,
+      q: filters.query,
+      min: filters.minPrice?.toString(),
+      max: filters.maxPrice?.toString(),
+    });
     setSearchParams(params, { replace: true });
   }, [filters, setSearchParams]);
 
@@ -66,6 +74,7 @@ const Index = () => {
   const filteredListings = useMemo(() => {
     let filtered = [...listings];
     if (filters.category) filtered = filtered.filter(l => l.category === filters.category);
+    if (filters.subcategory) filtered = filtered.filter(l => l.subcategory === filters.subcategory);
     if (filters.jobSubcategory) filtered = filtered.filter(l => l.subcategory === filters.jobSubcategory);
     if (filters.query) {
       const q = filters.query.toLowerCase();
@@ -91,11 +100,27 @@ const Index = () => {
   };
 
   const handleFiltersChange = (nf: SearchFilters) => {
+    // Clear subcategory if it doesn't belong to the new category
+    if (nf.category !== filters.category && nf.subcategory) {
+      const categorySubcategories = TAXONOMY[nf.category as CategoryKey]?.sub || [];
+      if (!categorySubcategories.includes(nf.subcategory)) {
+        nf.subcategory = undefined;
+      }
+    }
     setFilters(nf);
     if (nf.category !== filters.category) {
       const next = { ...appState, category: nf.category || "" };
       setAppState(next); saveAppState(next);
     }
+  };
+
+  // Navigation helpers
+  const openCat = (category: CategoryKey, sub?: string) => {
+    handleFiltersChange({ ...filters, category, subcategory: sub });
+    // Optionally scroll to results
+    setTimeout(() => {
+      document.getElementById("listing-root")?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
   };
 
   const handleViewModeChange = (mode: "grid" | "map") => {
@@ -152,8 +177,8 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Hero */}
-      {!filters.category && !filters.query && (
+      {/* Hero or City Index */}
+      {!appState.city ? (
         <section className="container mx-auto px-4 mb-10 mt-6">
           <div className="text-center py-14 bg-gradient-hero rounded-2xl text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-black/20"></div>
@@ -179,32 +204,43 @@ const Index = () => {
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
       <main className="container mx-auto px-4 pb-8">
-        {/* Map toggle */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-sm text-muted-foreground">
-            {filteredListings.length} {t(lang,"results")}
-          </div>
-          <div className="flex gap-2">
-            <button className="btn">{t(lang,"grid")}</button>
-            <button className="btn" onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}>{t(lang,"map")}</button>
-          </div>
-        </div>
+        {/* Show City Index or Listings */}
+        {appState.city && !filters.query && !filters.subcategory && !filters.tags?.length ? (
+          <CityIndex
+            city={appState.city}
+            lang={lang.toLowerCase() as "en" | "ti"}
+            onOpen={({ category, sub }) => openCat(category, sub)}
+          />
+        ) : (
+          <div id="listing-root">
+            {/* Map toggle */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-muted-foreground">
+                {filteredListings.length} {t(lang,"results")}
+              </div>
+              <div className="flex gap-2">
+                <button className="btn">{t(lang,"grid")}</button>
+                <button className="btn" onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}>{t(lang,"map")}</button>
+              </div>
+            </div>
 
-        <ListingGrid
-          listings={filteredListings}
-          onListingSelect={handleListingSelect}
-          onFavorite={handleFavorite}
-          favoritedListings={favorites}
-          loading={loading}
-          onPostFirst={()=>setPostOpen(true)}
-        />
+            <ListingGrid
+              listings={filteredListings}
+              onListingSelect={handleListingSelect}
+              onFavorite={handleFavorite}
+              favoritedListings={favorites}
+              loading={loading}
+              onPostFirst={()=>setPostOpen(true)}
+            />
 
-        <div className="mt-10">
-          <MapView lat={appState.cityLat} lon={appState.cityLon} />
-        </div>
+            <div className="mt-10">
+              <MapView lat={appState.cityLat} lon={appState.cityLon} />
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="border-t border-border/50 bg-gradient-card/50">

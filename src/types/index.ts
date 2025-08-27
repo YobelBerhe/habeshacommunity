@@ -64,6 +64,7 @@ export interface User {
 export interface SearchFilters {
   query?: string;
   category?: string;
+  subcategory?: string;
   jobSubcategory?: string;
   minPrice?: number;
   maxPrice?: number;
