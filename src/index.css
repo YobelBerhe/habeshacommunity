@@ -177,6 +177,23 @@
   @apply w-full px-3 py-2 border border-border rounded-lg bg-background;
 }
 
+/* Chip styles for filters */
+.chip {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip-active {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+
 .btn {
   @apply px-4 py-2 border border-border rounded-lg bg-background hover:bg-muted font-medium transition-colors;
 }

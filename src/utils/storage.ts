@@ -3,19 +3,11 @@
    Safe storage with compression + quota handling
    ====================================================================== */
 import { Listing } from "@/types";
+import type { AppState } from "@/types";
 
 const KEY = "hn.posts"; // root object
 const APP_KEY = "hn.app";
 
-// Legacy functions for backward compatibility
-export function getAppState() {
-  try {
-    return JSON.parse(localStorage.getItem(APP_KEY) || "{}") || {};
-  } catch { return {}; }
-}
-export function saveAppState(state: any) {
-  localStorage.setItem(APP_KEY, JSON.stringify(state));
-}
 
 // New centralized storage functions
 function load(): Record<string, Listing[]> {
@@ -54,6 +46,25 @@ export function addListing(city: string, listing: Listing): { ok: boolean; reaso
   all[k] = arr;
   const ok = save(all);
   return ok ? { ok } : { ok: false, reason: "quota" };
+}
+
+// App state management
+export function getAppState(): AppState {
+  try {
+    const raw = localStorage.getItem("hn.appState");
+    return raw ? JSON.parse(raw) : { city: "", viewMode: "grid", lang: "EN" };
+  } catch {
+    return { city: "", viewMode: "grid", lang: "EN" };
+  }
+}
+
+export function saveAppState(state: AppState): boolean {
+  try {
+    localStorage.setItem("hn.appState", JSON.stringify(state));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // Legacy function for backward compatibility

@@ -66,10 +66,20 @@ export interface SearchFilters {
   category?: string;
   subcategory?: string;
   jobSubcategory?: string;
+  jobKind?: "regular" | "gig";
   minPrice?: number;
   maxPrice?: number;
   tags?: string[];
   city?: string;
+}
+
+export interface AppState {
+  city: string;
+  cityLat?: string;
+  cityLon?: string;
+  category?: string;
+  viewMode?: "grid" | "map";
+  lang?: "EN" | "TI";
 }
 
 export type ForumBoardKey =
