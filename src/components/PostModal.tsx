@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Listing } from "@/types";
 import { JOB_TYPES } from "@/constants";
 import { compressImage } from "@/utils/storage";
+import CitySearch from "@/components/CitySearch";
 
 export default function PostModal({
   open, onOpenChange, defaultCategory, cityFallback, onSave
@@ -26,6 +27,7 @@ export default function PostModal({
   const [images, setImages] = useState<string[]>([]);
   const [lat, setLat] = useState<number | undefined>(cityFallback?.lat);
   const [lon, setLon] = useState<number | undefined>(cityFallback?.lon);
+  const [selectedCity, setSelectedCity] = useState<string>("");
   const [msg, setMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -138,9 +140,22 @@ export default function PostModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button type="button" className="btn" onClick={useMyLocation}>Use my location</button>
-            <span className="text-sm text-muted-foreground">Optional: add a map pin.</span>
+          <div>
+            <label className="text-sm text-muted-foreground block mb-2">Location</label>
+            <div className="flex gap-3 flex-wrap">
+              <div className="flex-1">
+                <CitySearch
+                  value={selectedCity}
+                  onSelect={(city) => {
+                    setSelectedCity(`${city.name}, ${city.country}`);
+                    setLat(Number(city.lat));
+                    setLon(Number(city.lon));
+                    setMsg("City location added to post.");
+                  }}
+                />
+              </div>
+              <button type="button" className="btn" onClick={useMyLocation}>Use my location</button>
+            </div>
           </div>
 
           <button type="submit" className="btn btn-primary disabled:opacity-60" disabled={saving}>
