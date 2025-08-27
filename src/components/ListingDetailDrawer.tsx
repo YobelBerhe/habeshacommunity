@@ -49,7 +49,17 @@ export default function ListingDetailDrawer({
             </div>
             <div className="p-3 rounded-lg border">
               <div className="font-semibold mb-1">Contact</div>
-              <div className="text-sm">{listing.contact || "—"}</div>
+              <div className="text-sm">
+                {typeof listing.contact === 'string' 
+                  ? listing.contact 
+                  : listing.contact 
+                    ? Object.entries(listing.contact)
+                        .filter(([, v]) => v)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join(', ') || "—"
+                    : "—"
+                }
+              </div>
             </div>
             <div id="detail-map" className="w-full h-64 rounded-lg border" />
           </div>

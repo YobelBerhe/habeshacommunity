@@ -2,11 +2,12 @@
    FILE: /utils/storage.ts
    Safe storage with compression + quota handling
    ====================================================================== */
-import type { Listing } from "@/types";
+import { Listing } from "@/types";
 
+const KEY = "hn.posts"; // root object
 const APP_KEY = "hn.app";
-const CITY_KEY = (city: string) => `hn.posts.${city}`;
 
+// Legacy functions for backward compatibility
 export function getAppState() {
   try {
     return JSON.parse(localStorage.getItem(APP_KEY) || "{}") || {};
@@ -16,10 +17,48 @@ export function saveAppState(state: any) {
   localStorage.setItem(APP_KEY, JSON.stringify(state));
 }
 
-export function getListings(city: string): Listing[] {
+// New centralized storage functions
+function load(): Record<string, Listing[]> {
   try {
-    return JSON.parse(localStorage.getItem(CITY_KEY(city)) || "[]");
-  } catch { return []; }
+    const raw = localStorage.getItem(KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function save(data: Record<string, Listing[]>) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data));
+    return true;
+  } catch (e) {
+    console.warn("Save failed:", e);
+    return false;
+  }
+}
+
+function cityKey(city: string) {
+  return city.trim().toLowerCase(); // you can normalize further
+}
+
+export function getListingsByCity(city: string): Listing[] {
+  const all = load();
+  return all[cityKey(city)]?.slice()?.sort((a,b)=>b.createdAt - a.createdAt) ?? [];
+}
+
+export function addListing(city: string, listing: Listing): { ok: boolean; reason?: string } {
+  const all = load();
+  const k = cityKey(city);
+  const arr = all[k] ?? [];
+  arr.unshift(listing);
+  all[k] = arr;
+  const ok = save(all);
+  return ok ? { ok } : { ok: false, reason: "quota" };
+}
+
+// Legacy function for backward compatibility
+export function getListings(city: string): Listing[] {
+  return getListingsByCity(city);
 }
 
 function safeSetItem(key: string, value: string) {
@@ -28,18 +67,19 @@ function safeSetItem(key: string, value: string) {
 }
 
 export async function saveListing(city: string, l: Listing): Promise<{ok:boolean; note?:string}> {
-  const list = getListings(city);
-  const next = [l, ...list];
-
-  // Try normal save first
-  if (safeSetItem(CITY_KEY(city), JSON.stringify(next))) return { ok: true };
-
-  // If quota error (usually due to images), strip images and try again
-  const lean = next.map(x => ({ ...x, images: [] }));
-  const ok = safeSetItem(CITY_KEY(city), JSON.stringify(lean));
-  return ok
-    ? { ok: true, note: "Saved without images due to browser storage limit." }
-    : { ok: false };
+  const result = addListing(city, l);
+  if (result.ok) return { ok: true };
+  
+  if (result.reason === "quota") {
+    // Try again without images
+    const lean = { ...l, images: [], hasImage: false };
+    const retryResult = addListing(city, lean);
+    return retryResult.ok 
+      ? { ok: true, note: "Saved without images due to browser storage limit." }
+      : { ok: false };
+  }
+  
+  return { ok: false };
 }
 
 /* Client-side compression to keep localStorage small */
@@ -76,20 +116,27 @@ export function toggleFavorite(id: string): boolean {
 
 /* Seed demo */
 export function seedDemoData(city: string) {
-  const key = CITY_KEY(city);
-  if (localStorage.getItem(key)) return;
+  const key = cityKey(city);
+  const all = load();
+  if (all[key]?.length) return;
+  
   const demo: Listing[] = [{
     id: "demo1",
     title: `Furnished Room in ${city}`,
     category: "housing",
-    categoryLabel: "Housing / Rentals",
+    subcategory: "apartments",
     description: "Beautiful furnished room in a safe neighborhood. Wi-Fi included.",
     tags: ["furnished","wifi","safe"],
     price: 350,
+    currency: "USD",
     createdAt: Date.now(),
+    updatedAt: Date.now(),
     images: [],
-    contact: "WhatsApp: +1-555-0123",
+    contact: { whatsapp: "+1-555-0123" },
     city: city,
+    hasImage: false,
   }];
-  localStorage.setItem(key, JSON.stringify(demo));
+  
+  all[key] = demo;
+  save(all);
 }

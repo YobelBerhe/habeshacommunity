@@ -1,3 +1,7 @@
+import type { CategoryKey, JobKind } from "@/lib/taxonomy";
+
+export { type CategoryKey, type JobKind };
+
 export interface Category {
   id: string;
   name: string;
@@ -20,18 +24,29 @@ export interface City {
 
 export interface Listing {
   id: string;
+  city: string;                  // normalized "Oakland, US-CA"
+  category: CategoryKey;
+  subcategory: string;           // slug in TAXONOMY
+  jobKind?: JobKind;             // only for jobs: "regular" | "gig"
   title: string;
   description: string;
   price?: number;
-  category: string;
-  jobSubcategory?: string;
-  contact: string;
-  images: string[];
+  currency?: string;
+  contact?: {
+    phone?: string; email?: string; whatsapp?: string; telegram?: string;
+  };
   tags: string[];
-  city: string;
-  lat?: number;
-  lon?: number;
-  createdAt: number;
+  images: string[];              // data URLs for now
+  lat?: number; lon?: number;
+
+  // timestamps
+  createdAt: number;             // ms since epoch (UTC)
+  updatedAt: number;             // ms since epoch (UTC)
+
+  // quick flags
+  hasImage?: boolean;
+  
+  // Legacy fields for backward compatibility
   userId?: string;
   featured?: boolean;
   categoryLabel?: string;

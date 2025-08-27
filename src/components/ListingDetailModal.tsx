@@ -97,7 +97,15 @@ export default function ListingDetailModal({
           <div className="bg-gradient-card border rounded-lg p-4">
             <h4 className="font-semibold mb-2">Contact Information</h4>
             <div className="text-foreground">
-              {listing.contact || "No contact information provided"}
+              {typeof listing.contact === 'string' 
+                ? listing.contact 
+                : listing.contact 
+                  ? Object.entries(listing.contact)
+                      .filter(([, v]) => v)
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join(', ') || "No contact information provided"
+                  : "No contact information provided"
+              }
             </div>
           </div>
 

@@ -35,7 +35,7 @@ const ListingCard = ({ listing, onSelect, onFavorite, isFavorited }: ListingCard
   };
 
   const categoryName = getCategoryName(listing.category);
-  const subcategoryName = listing.jobSubcategory ? getJobSubcategoryName(listing.jobSubcategory) : null;
+  const subcategoryName = listing.subcategory ? listing.subcategory.replace(/_/g, ' ') : null;
 
   return (
     <Card 

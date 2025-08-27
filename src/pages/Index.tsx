@@ -13,7 +13,7 @@ import AccountModal from "@/components/AccountModal";
 import ListingDetailModal from "@/components/ListingDetailModal";
 import MapView from "@/components/MapView";
 import { Listing, SearchFilters } from "@/types";
-import { getListings, seedDemoData, getAppState, saveAppState, getFavorites, toggleFavorite, saveListing } from "@/utils/storage";
+import { getListingsByCity, seedDemoData, getAppState, saveAppState, getFavorites, toggleFavorite, addListing } from "@/utils/storage";
 import { t, Lang } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 
@@ -54,7 +54,7 @@ const Index = () => {
     const loadData = async () => {
       setLoading(true);
       seedDemoData(appState.city);
-      const cityListings = getListings(appState.city);
+      const cityListings = getListingsByCity(appState.city);
       setListings(cityListings);
       setFavorites(getFavorites());
       setLoading(false);
@@ -66,7 +66,7 @@ const Index = () => {
   const filteredListings = useMemo(() => {
     let filtered = [...listings];
     if (filters.category) filtered = filtered.filter(l => l.category === filters.category);
-    if (filters.jobSubcategory) filtered = filtered.filter(l => l.jobSubcategory === filters.jobSubcategory);
+    if (filters.jobSubcategory) filtered = filtered.filter(l => l.subcategory === filters.jobSubcategory);
     if (filters.query) {
       const q = filters.query.toLowerCase();
       filtered = filtered.filter(l =>
@@ -216,19 +216,12 @@ const Index = () => {
 
       {/* Modals */}
       <PostModal
+        city={appState.city || "Asmara"}
         open={postOpen}
-        onOpenChange={setPostOpen}
-        defaultCategory={filters.category || "housing"}
-        cityFallback={{ lat: Number(appState.cityLat), lon: Number(appState.cityLon) }}
-        onSave={async (l) => {
-          const res = await saveListing(appState.city || "Asmara", l);
-          if (res.ok) {
-            setListings(getListings(appState.city || "Asmara"));
-            toast({ title: res.note ? "Posted (images skipped)" : "Posted", description: res.note });
-          } else {
-            toast({ title: "Save failed", description: "Browser storage quota exceeded. Add fewer/smaller photos." });
-          }
-          return res;
+        onClose={() => setPostOpen(false)}
+        onPosted={(listing) => {
+          setListings(getListingsByCity(appState.city || "Asmara"));
+          toast({ title: "Posted successfully", description: "Your listing is now live!" });
         }}
       />
       <AccountModal open={acctOpen} onOpenChange={setAcctOpen} />
