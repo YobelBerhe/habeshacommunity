@@ -113,6 +113,15 @@ export default function Index() {
     toast("City changed to " + city);
   };
 
+  const handleLogoClick = () => {
+    // Clear city and reset to fresh home state
+    const next = { ...appState, city: "", cityLat: undefined, cityLon: undefined, viewMode: "grid" as const };
+    setAppState(next);
+    saveAppState(next);
+    setFilters({ category: undefined, subcategory: undefined, query: "", minPrice: undefined, maxPrice: undefined, jobKind: undefined });
+    window.history.pushState({}, '', '/');
+  };
+
   const handleFiltersChange = (newFilters: SearchFilters) => {
     // Clear subcategory if it doesn't belong to the new category
     if (newFilters.category !== filters.category && newFilters.subcategory) {
@@ -163,6 +172,7 @@ export default function Index() {
         onCityChange={handleCityChange}
         onAccountClick={() => setAcctOpen(true)}
         onPostClick={() => setPostOpen(true)}
+        onLogoClick={handleLogoClick}
         rightExtra={
           <LanguageToggle
             value={lang}

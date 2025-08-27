@@ -1,12 +1,13 @@
 import CitySearch from "@/components/CitySearch";
 
 export default function Header({
-  currentCity, onCityChange, onAccountClick, onPostClick, rightExtra
+  currentCity, onCityChange, onAccountClick, onPostClick, onLogoClick, rightExtra
 }: {
   currentCity: string;
   onCityChange: (city: string, lat?: number, lon?: number) => void;
   onAccountClick: () => void;
   onPostClick: () => void;
+  onLogoClick: () => void;
   rightExtra?: React.ReactNode;
 }) {
   return (
@@ -14,7 +15,7 @@ export default function Header({
       <div className="container mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
         <button 
           className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity"
-          onClick={() => window.location.href = '/'}
+          onClick={onLogoClick}
         >
           <img 
             src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
