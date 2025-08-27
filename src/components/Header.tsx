@@ -12,10 +12,17 @@ export default function Header({
   return (
     <header className="w-full border-b bg-background/70 backdrop-blur">
       <div className="container mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 font-bold">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 text-white grid place-items-center">H</div>
+        <button 
+          className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity"
+          onClick={() => window.location.href = '/'}
+        >
+          <img 
+            src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
+            alt="HabeshaNetwork Logo" 
+            className="w-8 h-8 rounded-lg"
+          />
           <span>HabeshaNetwork</span>
-        </div>
+        </button>
 
         <div className="order-2 md:order-none flex-1 min-w-[260px] z-50">
           <CitySearch
