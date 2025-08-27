@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [appState, setAppState] = useState<AppState>(getAppState);
+  const [appState, setAppState] = useState<AppState>(() => getAppState());
   const [listings, setListings] = useState<Listing[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,14 +30,17 @@ export default function Index() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
 
-  const [filters, setFilters] = useState<SearchFilters>(() => ({
-    category: searchParams.get("category") || appState.category || undefined,
-    subcategory: getParam(searchParams, "sub"),
-    query: searchParams.get("q") || "",
-    minPrice: searchParams.get("min") ? Number(searchParams.get("min")) : undefined,
-    maxPrice: searchParams.get("max") ? Number(searchParams.get("max")) : undefined,
-    jobKind: undefined as "regular"|"gig"|undefined,
-  }));
+  const [filters, setFilters] = useState<SearchFilters>(() => {
+    const initialAppState = getAppState();
+    return {
+      category: searchParams.get("category") || initialAppState.category || undefined,
+      subcategory: getParam(searchParams, "sub"),
+      query: searchParams.get("q") || "",
+      minPrice: searchParams.get("min") ? Number(searchParams.get("min")) : undefined,
+      maxPrice: searchParams.get("max") ? Number(searchParams.get("max")) : undefined,
+      jobKind: undefined as "regular"|"gig"|undefined,
+    };
+  });
 
   // Update URL when filters change
   useEffect(() => {

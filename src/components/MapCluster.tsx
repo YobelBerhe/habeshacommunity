@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import type { Listing } from "@/types";
 
 type Props = {
@@ -11,6 +10,12 @@ type Props = {
 
 export default function MapCluster({ center, listings, height = 440 }: Props) {
   useEffect(() => {
+    // Clear any existing map instance
+    const mapContainer = document.getElementById("hn-map");
+    if (mapContainer) {
+      mapContainer.innerHTML = '';
+    }
+
     const map = L.map("hn-map", { zoomControl: true, scrollWheelZoom: false });
     const tile = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
@@ -37,7 +42,6 @@ export default function MapCluster({ center, listings, height = 440 }: Props) {
 
     return () => {
       map.remove();
-      tile.remove();
     };
   }, [center, listings]);
 

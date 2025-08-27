@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Calendar, Star } from "lucide-react";
 import { Listing } from "@/types";
-import { getCategoryName, getJobSubcategoryName } from "@/data/categories";
+import { TAXONOMY, LABELS } from "@/lib/taxonomy";
 
 interface ListingCardProps {
   listing: Listing;
@@ -34,8 +34,8 @@ const ListingCard = ({ listing, onSelect, onFavorite, isFavorited }: ListingCard
     return date.toLocaleDateString();
   };
 
-  const categoryName = getCategoryName(listing.category);
-  const subcategoryName = listing.subcategory ? listing.subcategory.replace(/_/g, ' ') : null;
+  const categoryName = TAXONOMY[listing.category as keyof typeof TAXONOMY]?.name.en || listing.category;
+  const subcategoryName = listing.subcategory ? (LABELS[listing.subcategory]?.en || listing.subcategory.replace(/_/g, ' ')) : null;
 
   return (
     <Card 
