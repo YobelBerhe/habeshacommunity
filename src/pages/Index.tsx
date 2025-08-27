@@ -11,6 +11,8 @@ import MapCluster from "@/components/MapCluster";
 import SearchBox from "@/components/SearchBox";
 import QuickFilters from "@/components/QuickFilters";
 import LanguageToggle from "@/components/LanguageToggle";
+import HomeDigest from "@/components/HomeDigest";
+import DonationButton from "@/components/DonationButton";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
@@ -280,11 +282,14 @@ export default function Index() {
 
       <main className="container mx-auto px-4 py-6">
         {shouldShowCityIndex ? (
-          <CityIndex
-            city={appState.city}
-            lang={lang.toLowerCase() as "en" | "ti"}
-            onOpen={({ category, sub }) => openCat(category, sub)}
-          />
+          <>
+            <HomeDigest city={appState.city} />
+            <CityIndex
+              city={appState.city}
+              lang={lang.toLowerCase() as "en" | "ti"}
+              onOpen={({ category, sub }) => openCat(category, sub)}
+            />
+          </>
         ) : (
           <div id="listing-root">
             {appState.viewMode === "grid" ? (
@@ -315,6 +320,9 @@ export default function Index() {
           <p className="text-xs text-muted-foreground mt-1">
             {t(lang, "footer_line2")}
           </p>
+          <div className="mt-3 flex justify-center">
+            <DonationButton />
+          </div>
         </div>
       </footer>
 

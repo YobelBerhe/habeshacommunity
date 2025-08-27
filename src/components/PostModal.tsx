@@ -117,6 +117,11 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
 
     onPosted?.(listing);
     onClose();
+
+    // smooth scroll to listings (if present)
+    setTimeout(() => {
+      document.getElementById("listing-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   return (

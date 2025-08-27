@@ -1,4 +1,5 @@
 import CitySearch from "@/components/CitySearch";
+import DonationButton from "@/components/DonationButton";
 
 export default function Header({
   currentCity, onCityChange, onAccountClick, onPostClick, onLogoClick, rightExtra
@@ -33,6 +34,7 @@ export default function Header({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <DonationButton variant="ghost" />
           {rightExtra}
           <button className="btn" onClick={() => window.location.href = '/forums'}>Forums</button>
           <button className="btn" onClick={onAccountClick} aria-label="Account">👤</button>
