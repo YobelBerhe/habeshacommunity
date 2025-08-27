@@ -16,10 +16,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 20 8% 8%;
 
-    /* Primary: Rich Ethiopian gold */
-    --primary: 45 95% 45%;
-    --primary-foreground: 20 8% 8%;
-    --primary-glow: 45 95% 55%;
+    /* Primary: Custom blue */
+    --primary: 215 94% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 215 94% 60%;
 
     /* Secondary: Warm earth tone */
     --secondary: 25 25% 92%;
@@ -43,19 +43,19 @@
 
     --border: 40 20% 88%;
     --input: 40 20% 88%;
-    --ring: 45 95% 45%;
+    --ring: 215 94% 50%;
 
     /* Design system tokens */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-hero: linear-gradient(135deg, hsl(45 95% 45%), hsl(120 60% 35%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 94% 50%), hsl(215 94% 60%));
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(45 15% 98%));
     --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(120 60% 45%));
     
-    /* Shadows with golden tint */
-    --shadow-sm: 0 1px 2px 0 hsl(45 95% 45% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(45 95% 45% / 0.1), 0 2px 4px -1px hsl(45 95% 45% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(45 95% 45% / 0.1), 0 4px 6px -2px hsl(45 95% 45% / 0.05);
-    --shadow-glow: 0 0 30px hsl(45 95% 45% / 0.3);
+    /* Shadows with blue tint */
+    --shadow-sm: 0 1px 2px 0 hsl(215 94% 50% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(215 94% 50% / 0.1), 0 2px 4px -1px hsl(215 94% 50% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(215 94% 50% / 0.1), 0 4px 6px -2px hsl(215 94% 50% / 0.05);
+    --shadow-glow: 0 0 30px hsl(215 94% 50% / 0.3);
 
     /* Animation tokens */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -90,9 +90,9 @@
     --popover: 25 10% 12%;
     --popover-foreground: 45 15% 97%;
 
-    --primary: 45 95% 55%;
-    --primary-foreground: 20 8% 8%;
-    --primary-glow: 45 95% 65%;
+    --primary: 215 94% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 215 94% 60%;
 
     --secondary: 25 15% 18%;
     --secondary-foreground: 45 15% 97%;
@@ -111,26 +111,26 @@
 
     --border: 25 15% 20%;
     --input: 25 15% 20%;
-    --ring: 45 95% 55%;
+    --ring: 215 94% 50%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(45 95% 55%), hsl(45 95% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(45 95% 55%), hsl(120 60% 45%));
+    --gradient-primary: linear-gradient(135deg, hsl(215 94% 50%), hsl(215 94% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 94% 50%), hsl(215 94% 60%));
     --gradient-card: linear-gradient(180deg, hsl(25 10% 12%), hsl(25 10% 14%));
     --gradient-accent: linear-gradient(135deg, hsl(120 60% 45%), hsl(120 60% 55%));
     
-    --shadow-sm: 0 1px 2px 0 hsl(45 95% 55% / 0.1);
-    --shadow-md: 0 4px 6px -1px hsl(45 95% 55% / 0.15), 0 2px 4px -1px hsl(45 95% 55% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(45 95% 55% / 0.15), 0 4px 6px -2px hsl(45 95% 55% / 0.1);
-    --shadow-glow: 0 0 30px hsl(45 95% 55% / 0.4);
+    --shadow-sm: 0 1px 2px 0 hsl(215 94% 50% / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(215 94% 50% / 0.15), 0 2px 4px -1px hsl(215 94% 50% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(215 94% 50% / 0.15), 0 4px 6px -2px hsl(215 94% 50% / 0.1);
+    --shadow-glow: 0 0 30px hsl(215 94% 50% / 0.4);
 
     --sidebar-background: 25 10% 10%;
     --sidebar-foreground: 45 15% 97%;
-    --sidebar-primary: 45 95% 55%;
-    --sidebar-primary-foreground: 20 8% 8%;
+    --sidebar-primary: 215 94% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 25 15% 15%;
     --sidebar-accent-foreground: 45 15% 97%;
     --sidebar-border: 25 15% 18%;
-    --sidebar-ring: 45 95% 55%;
+    --sidebar-ring: 215 94% 50%;
   }
 }
 
