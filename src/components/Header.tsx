@@ -33,6 +33,7 @@ export default function Header({
 
         <div className="ml-auto flex items-center gap-2">
           {rightExtra}
+          <button className="btn" onClick={() => window.location.href = '/forums'}>Forums</button>
           <button className="btn" onClick={onAccountClick} aria-label="Account">👤</button>
           <button className="btn btn-primary" onClick={onPostClick}>+ Post</button>
         </div>
