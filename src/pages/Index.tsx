@@ -10,6 +10,7 @@ import ListingGrid from "@/components/ListingGrid";
 import LanguageToggle from "@/components/LanguageToggle";
 import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
+import ListingDetailModal from "@/components/ListingDetailModal";
 import MapView from "@/components/MapView";
 import { Listing, SearchFilters } from "@/types";
 import { getListings, seedDemoData, getAppState, saveAppState, getFavorites, toggleFavorite, saveListing } from "@/utils/storage";
@@ -27,6 +28,8 @@ const Index = () => {
 
   const [postOpen, setPostOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
   const setLanguage = (v: string) => { setLang((v as Lang) || "EN"); localStorage.setItem("hn.lang", v); };
@@ -101,8 +104,8 @@ const Index = () => {
   };
 
   const handleListingSelect = (listing: Listing) => {
-    // TODO: Add listing detail view
-    console.log("Selected listing:", listing);
+    setSelectedListing(listing);
+    setDetailOpen(true);
   };
 
   const handleFavorite = (listingId: string) => {
@@ -195,7 +198,7 @@ const Index = () => {
 
         <ListingGrid
           listings={filteredListings}
-          onListingSelect={()=>{}}
+          onListingSelect={handleListingSelect}
           onFavorite={handleFavorite}
           favoritedListings={favorites}
           loading={loading}
@@ -232,6 +235,12 @@ const Index = () => {
         }}
       />
       <AccountModal open={acctOpen} onOpenChange={setAcctOpen} />
+      <ListingDetailModal 
+        open={detailOpen} 
+        onOpenChange={setDetailOpen} 
+        listing={selectedListing}
+        lang={lang}
+      />
     </div>
   );
 };
