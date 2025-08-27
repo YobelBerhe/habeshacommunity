@@ -149,9 +149,6 @@ const Index = () => {
             onChange={e=>setFilters({ ...filters, query: e.target.value || undefined })}
           />
 
-          <div className="flex items-center gap-2">
-            <button className="btn btn-primary" onClick={()=>setPostOpen(true)}>+ {t(lang,"post")}</button>
-          </div>
         </div>
       </div>
 
