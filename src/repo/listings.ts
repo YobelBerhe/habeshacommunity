@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import type { ListingRow } from '@/types/db';
 
 export async function fetchListings(filters: {

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 export async function saveSearch(userId: string, name: string, params: any) {
   const { data, error } = await supabase.from('saved_searches').insert({

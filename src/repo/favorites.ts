@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 export async function toggleFavorite(listingId: string, userId: string) {
   const { data: existing } = await supabase

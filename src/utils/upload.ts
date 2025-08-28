@@ -1,5 +1,5 @@
 import imageCompression from 'browser-image-compression';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 export async function uploadListingImages(files: File[], userId: string) {
   const urls: string[] = [];
