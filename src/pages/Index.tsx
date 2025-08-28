@@ -67,20 +67,28 @@ export default function Index() {
   // Setup auth listener
   useEffect(() => {
     const { data: { subscription } } = onAuthChange((session) => {
-      console.log("Auth state changed:", session);
+      console.log("Auth state changed:", session?.user?.id || 'null');
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // If user just signed in, close login modal and show success
+      if (session?.user) {
+        setLoginOpen(false);
+        if (session.access_token) {
+          toast.success('Successfully signed in!');
+        }
+      }
     });
 
     // Also check for existing session on mount
     const checkInitialSession = async () => {
       const { getSession } = await import("@/repo/auth");
       const session = await getSession();
-      console.log("Initial session check:", session);
+      console.log("Initial session check:", session?.user?.id || 'null');
       setSession(session);
       setUser(session?.user ?? null);
     };
-    
+
     checkInitialSession();
 
     return () => subscription.unsubscribe();

@@ -65,6 +65,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
     setSignupLoading(true);
     try {
       // Use magic link signup instead of password
+      console.log('Attempting signup with redirect to:', `${window.location.origin}/`);
       const { error } = await supabase.auth.signInWithOtp({
         email: signupEmail.trim(),
         options: {
