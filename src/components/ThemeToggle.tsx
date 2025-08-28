@@ -1,0 +1,29 @@
+import { useEffect, useState } from "react";
+
+const THEME_KEY = "hn.theme";
+
+export default function ThemeToggle() {
+  const [theme, setTheme] = useState<"light"|"dark">(
+    (localStorage.getItem(THEME_KEY) as "light"|"dark") ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+  );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+
+  return (
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 bg-muted hover:bg-muted/80 transition"
+      aria-label="Toggle theme"
+      title="Toggle theme"
+    >
+      {theme === "dark" ? "☀️" : "🌙"}
+      <span className="text-sm">{theme === "dark" ? "Light" : "Dark"}</span>
+    </button>
+  );
+}

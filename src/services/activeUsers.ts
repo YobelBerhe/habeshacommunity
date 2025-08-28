@@ -1,5 +1,14 @@
 import type { ActiveUsers } from "@/types";
 import { DEMO_ACTIVE } from "@/data/demoActive";
+import { jitterAround } from "@/utils/geoJitter";
+
+export type StarPoint = {
+  id: string;
+  city: string;
+  country: string;
+  lat: number;
+  lon: number;
+};
 
 let currentData: ActiveUsers = { ...DEMO_ACTIVE };
 let lastUpdateTime = Date.now();
@@ -67,4 +76,30 @@ export function subscribeToActiveUsers(callback: (data: ActiveUsers) => void) {
   const interval = setInterval(checkForUpdates, 16000); // Check every 16 seconds
   
   return () => clearInterval(interval);
+}
+
+export async function getStarPoints(): Promise<{ total: number; points: StarPoint[]; demo: boolean; }> {
+  const hasSupabase =
+    import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!hasSupabase) {
+    // explode demo city counts into individual jittered points
+    const pts: StarPoint[] = [];
+    DEMO_ACTIVE.points.forEach((c) => {
+      for (let i = 0; i < c.count; i++) {
+        const j = jitterAround(c.lat, c.lon);
+        pts.push({
+          id: `demo-${c.city}-${i}`,
+          city: c.city,
+          country: c.country,
+          lat: j.lat,
+          lon: j.lon,
+        });
+      }
+    });
+    return { total: pts.length, points: pts, demo: true };
+  }
+
+  // TODO: LIVE mode - replace with actual Supabase query
+  return { total: 0, points: [], demo: true };
 }

@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
-import { divIcon } from 'leaflet';
-import { getActiveUsers, subscribeToActiveUsers } from '@/services/activeUsers';
+import L from 'leaflet';
+import StarFieldLayer from '@/components/StarFieldLayer';
+import { getStarPoints } from '@/services/activeUsers';
 import { t, Lang } from '@/lib/i18n';
-import type { ActiveUsers, ActivePoint } from '@/types';
 import 'leaflet/dist/leaflet.css';
 
 type Props = {
@@ -17,83 +16,112 @@ export default function WorldMapHero({
   onBrowseHousing,
   onFindJobs 
 }: Props) {
-  const [activeUsers, setActiveUsers] = useState<ActiveUsers>({ total: 0, points: [] });
+  const mapRef = useRef<L.Map | null>(null);
+  const [points, setPoints] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [demo, setDemo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const mapRef = useRef<any>(null);
 
   useEffect(() => {
-    // Initial load
-    getActiveUsers().then(data => {
-      setActiveUsers(data);
-      setIsLoading(false);
-    });
+    let mounted = true;
 
-    // Subscribe to updates
-    const unsubscribe = subscribeToActiveUsers(setActiveUsers);
-    
-    return unsubscribe;
+    // init map once
+    if (!mapRef.current) {
+      const map = L.map("worldmap", {
+        center: [15, 30],
+        zoom: 2,
+        zoomControl: false,
+        minZoom: 2,
+        worldCopyJump: true,
+      });
+      mapRef.current = map;
+
+      const theme = document.documentElement.classList.contains("dark")
+        ? "dark"
+        : "light";
+
+      const tileUrl =
+        theme === "dark"
+          ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+      L.tileLayer(tileUrl, {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
+      }).addTo(map);
+    }
+
+    // load points
+    (async () => {
+      const res = await getStarPoints();
+      if (!mounted) return;
+      setPoints(res.points);
+      setTotal(res.total);
+      setDemo(res.demo);
+      setIsLoading(false);
+    })();
+
+    // refresh to keep it lively
+    const id = setInterval(async () => {
+      const res = await getStarPoints();
+      if (!mounted) return;
+      setPoints(res.points);
+      setTotal(res.total);
+    }, 15000);
+
+    return () => {
+      mounted = false;
+      clearInterval(id);
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
   }, []);
 
-  const createPulseIcon = (count: number) => {
-    const size = Math.min(Math.max(count * 2 + 8, 12), 24);
-    const clusterBadge = count > 10 ? `<span class="cluster-badge">+${count - 10}</span>` : '';
-    
-    return divIcon({
-      html: `
-        <div class="pulse-marker" style="width: ${size}px; height: ${size}px;">
-          <div class="pulse-dot"></div>
-          ${clusterBadge}
-        </div>
-      `,
-      className: 'pulse-container',
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2]
-    });
+  // Zoom to city helper (can be called from CitySearch)
+  (window as any).zoomToCity = (lat: number, lon: number) => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.setView([lat, lon], 11, { animate: true });
   };
 
-  const citiesCount = activeUsers.points.length;
-
   return (
-    <section className="relative overflow-hidden bg-gradient-hero">
-      <div className="absolute inset-0 bg-black/20"></div>
-      
-      <div className="relative z-10 container mx-auto px-4 py-12 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Content */}
-          <div className="text-white space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                {t(lang, "connect_headline_1")}
-                <br />
-                <span className="text-primary-glow">{t(lang, "connect_headline_2")}</span>
-              </h1>
-              
-              <div className="flex items-center gap-4 text-lg md:text-xl">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                  <span className="font-semibold">
-                    Live now: {isLoading ? '...' : activeUsers.total.toLocaleString()} people
-                  </span>
-                </div>
-                <div className="text-white/80">
-                  in {isLoading ? '...' : citiesCount} cities
-                </div>
+    <section className="w-full py-10 md:py-14">
+      <div className="container mx-auto px-4">
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-6">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              {t(lang, "connect_headline_1")}
+              <br />
+              <span className="text-primary">{t(lang, "connect_headline_2")}</span>
+            </h1>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-lg">
+                <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                <span className="font-semibold">
+                  Live now: <strong>{isLoading ? '...' : total.toLocaleString()}</strong> people
+                </span>
               </div>
-
-              <p className="text-lg md:text-xl text-white/90 max-w-lg">
-                {t(lang, "connect_sub")}
-              </p>
+              {demo && (
+                <p className="text-xs text-muted-foreground">
+                  demo data until accounts go live
+                </p>
+              )}
             </div>
+
+            <p className="text-lg text-muted-foreground max-w-lg">
+              {t(lang, "connect_sub")}
+            </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                className="px-6 py-3 bg-white/20 rounded-lg hover:bg-white/30 font-semibold transition-colors backdrop-blur-sm border border-white/20"
+                className="px-5 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-colors"
                 onClick={onBrowseHousing}
               >
                 {t(lang, "housing")}
               </button>
               <button 
-                className="px-6 py-3 bg-white/20 rounded-lg hover:bg-white/30 font-semibold transition-colors backdrop-blur-sm border border-white/20"
+                className="px-5 py-3 rounded-lg bg-muted hover:bg-muted/80 font-semibold transition-colors"
                 onClick={onFindJobs}
               >
                 {t(lang, "jobs")}
@@ -101,58 +129,22 @@ export default function WorldMapHero({
             </div>
           </div>
 
-          {/* Map */}
-          <div className="relative">
-            <div className="rounded-xl overflow-hidden shadow-lg border-2 border-white/20 bg-white/10 backdrop-blur-sm">
-              <div className="h-80 lg:h-96 relative">
-                {!isLoading && (
-                  <MapContainer
-                    ref={mapRef}
-                    center={[20, 20]}
-                    zoom={2}
-                    zoomControl={false}
-                    scrollWheelZoom={false}
-                    dragging={true}
-                    className="h-full w-full"
-                    attributionControl={false}
-                  >
-                    <TileLayer
-                      url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                      attribution=""
-                    />
-                    
-                    {activeUsers.points.map((point, index) => (
-                      <Marker
-                        key={`${point.city}-${index}`}
-                        position={[point.lat, point.lon]}
-                        icon={createPulseIcon(point.count)}
-                      >
-                        <Tooltip permanent={false} direction="top" offset={[0, -10]}>
-                          <div className="text-center">
-                            <div className="font-semibold">{point.city}, {point.country}</div>
-                            <div className="text-sm">{point.count} online</div>
-                          </div>
-                        </Tooltip>
-                      </Marker>
-                    ))}
-                  </MapContainer>
-                )}
-                
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-muted/20 backdrop-blur-sm">
-                    <div className="text-white">Loading live data...</div>
-                  </div>
-                )}
+          <div className="relative h-[360px] md:h-[460px] rounded-2xl overflow-hidden shadow-sm bg-muted/30">
+            <div id="worldmap" className="absolute inset-0" />
+            {mapRef.current && (
+              <StarFieldLayer map={mapRef.current} points={points} />
+            )}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/20 backdrop-blur-sm">
+                <div className="text-muted-foreground">Loading live data...</div>
               </div>
-            </div>
-            
-            <div className="absolute -bottom-2 right-4 text-xs text-white/60">
+            )}
+            <div className="absolute right-3 bottom-2 text-[11px] text-muted-foreground">
               Dots show approximate city-level activity
             </div>
           </div>
         </div>
       </div>
-
     </section>
   );
 }
