@@ -226,11 +226,10 @@ export default function Index() {
               >
                 {t(lang, "map")}
               </button>
+              <button className="btn text-xs" onClick={() => setFilters({ category: filters.category })}>
+                {t(lang, "clear_all")}
+              </button>
             </div>
-
-            <button className="btn btn-primary" onClick={() => setPostOpen(true)}>
-              + {t(lang, "post")}
-            </button>
           </div>
 
           <QuickFilters
@@ -240,7 +239,6 @@ export default function Index() {
             maxPrice={filters.maxPrice}
             jobKind={filters.jobKind as any}
             onChange={(next) => setFilters({ ...filters, ...next })}
-            onClearAll={() => setFilters({ category: filters.category })}
           />
 
           <div className="text-sm text-muted-foreground mb-4">

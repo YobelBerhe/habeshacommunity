@@ -7,10 +7,9 @@ type Props = {
   maxPrice?: number;
   jobKind?: "regular"|"gig";
   onChange: (next: Partial<Props>) => void;
-  onClearAll: () => void;
 };
 
-export default function QuickFilters({ lang, category, minPrice, maxPrice, jobKind, onChange, onClearAll }: Props) {
+export default function QuickFilters({ lang, category, minPrice, maxPrice, jobKind, onChange }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-2 py-2">
       <span className="text-sm text-muted-foreground mr-2">{t(lang,"filters")}:</span>
@@ -47,8 +46,6 @@ export default function QuickFilters({ lang, category, minPrice, maxPrice, jobKi
           >{t(lang,"job_gig")}</button>
         </div>
       )}
-
-      <button className="btn text-xs ml-auto" onClick={onClearAll}>{t(lang,"clear_all")}</button>
     </div>
   );
 }
