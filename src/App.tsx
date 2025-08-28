@@ -19,6 +19,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/l/:id" element={<Index />} />
           <Route path="/forums" element={<ForumsBoards />} />
           <Route path="/forums/:board" element={<BoardTopics />} />
           <Route path="/forums/topic/:id" element={<TopicView />} />

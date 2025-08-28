@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import FilterBar from "@/components/FilterBar";
 import ListingGrid from "@/components/ListingGrid";
 import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
 import LoginModal from "@/components/LoginModal";
-import ListingDetailModal from "@/components/ListingDetailModal";
+import ListingDetail from "@/components/ListingDetail";
 import CityIndex from "@/components/CityIndex";
 import MapCluster from "@/components/MapCluster";
 import SearchBox from "@/components/SearchBox";
@@ -20,12 +20,14 @@ import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
 import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
-import { fetchListings } from "@/repo/listings";
+import { fetchListings, fetchListingById } from "@/repo/listings";
 import { onAuthChange, getUserId, signOut } from "@/repo/auth";
 import { toast } from "sonner";
 
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const params = useParams<{ id?: string }>();
   const [appState, setAppState] = useState<AppState>(() => getAppState());
   const [listings, setListings] = useState<Listing[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -138,6 +140,45 @@ export default function Index() {
 
     loadListings();
   }, [appState.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory]);
+
+  // Deep-link: if /l/:id, fetch and open
+  useEffect(() => {
+    const id = params.id;
+    if (!id) return;
+
+    const loadListingById = async () => {
+      try {
+        const row = await fetchListingById(id);
+        const listing: Listing = {
+          id: row.id,
+          city: row.city,
+          category: row.category as CategoryKey,
+          subcategory: row.subcategory || undefined,
+          title: row.title,
+          description: row.description || "",
+          price: row.price_cents ? row.price_cents / 100 : undefined,
+          currency: row.currency || "USD",
+          contact: { phone: row.contact_value || "" },
+          tags: row.tags || [],
+          photos: row.images || [],
+          images: row.images || [],
+          lat: row.location_lat,
+          lon: row.location_lng,
+          createdAt: new Date(row.created_at).getTime(),
+          updatedAt: new Date(row.updated_at).getTime(),
+          hasImage: !!(row.images?.length),
+        };
+        setSelectedListing(listing);
+        setDetailOpen(true);
+      } catch (error) {
+        console.error("Failed to load listing:", error);
+        toast.error("Listing not found");
+        navigate('/', { replace: true });
+      }
+    };
+
+    loadListingById();
+  }, [params.id, navigate]);
 
   // Filter listings
   const filteredListings = useMemo(() => {
@@ -257,6 +298,13 @@ export default function Index() {
   const handleListingSelect = (listing: Listing) => {
     setSelectedListing(listing);
     setDetailOpen(true);
+    navigate(`/l/${listing.id}`, { replace: false });
+  };
+
+  const handleDetailClose = () => {
+    setDetailOpen(false);
+    setSelectedListing(null);
+    navigate(`/`, { replace: true });
   };
 
   const handleFavorite = (listingId: string) => {
@@ -433,11 +481,18 @@ export default function Index() {
         onSignOut={handleSignOut}
       />
 
-      <ListingDetailModal
+      <ListingDetail
         open={detailOpen}
-        onOpenChange={(open) => setDetailOpen(open)}
         listing={selectedListing}
-        lang={lang}
+        onClose={handleDetailClose}
+        onSavedChange={(saved) => {
+          // Handle favorite state change if needed
+          if (saved && selectedListing) {
+            setFavorites(prev => [...prev, selectedListing.id]);
+          } else if (selectedListing) {
+            setFavorites(prev => prev.filter(id => id !== selectedListing.id));
+          }
+        }}
       />
     </div>
   );
