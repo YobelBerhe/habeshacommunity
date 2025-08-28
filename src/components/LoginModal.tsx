@@ -68,7 +68,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
       const { error } = await supabase.auth.signInWithOtp({
         email: signupEmail.trim(),
         options: {
-          emailRedirectTo: window.location.origin
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
 
