@@ -87,6 +87,7 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
       currency,
       contact: normalizeContact(contact),
       tags: splitTags(tags),
+      photos: photos,
       images: photos,
       lat, lon,
       createdAt: now,
@@ -109,6 +110,7 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
     const { ok, reason } = addListing(city, listing);
     if (!ok && reason === "quota") {
       // retry without photos (localStorage full)
+      listing.photos = [];
       listing.images = [];
       listing.hasImage = false;
       addListing(city, listing);

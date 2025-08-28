@@ -114,15 +114,18 @@ export async function compressImage(file: File, maxSide = 960, quality = 0.82): 
 }
 
 /* Favorites */
-const FAV_KEY = "hn.favs";
 export function getFavorites(): string[] {
-  try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; }
+  try { return JSON.parse(localStorage.getItem("hn.favorites") || "[]"); } catch { return []; }
 }
+
+export function setFavorites(ids: string[]) {
+  localStorage.setItem("hn.favorites", JSON.stringify(ids));
+}
+
 export function toggleFavorite(id: string): boolean {
-  const f = new Set(getFavorites());
-  if (f.has(id)) f.delete(id); else f.add(id);
-  localStorage.setItem(FAV_KEY, JSON.stringify([...f]));
-  return f.has(id);
+  const ids = new Set(getFavorites());
+  if (ids.has(id)) { ids.delete(id); setFavorites([...ids]); return false; }
+  ids.add(id); setFavorites([...ids]); return true;
 }
 
 /* Seed demo */

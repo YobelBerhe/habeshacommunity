@@ -4,15 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Calendar, Star } from "lucide-react";
 import { Listing } from "@/types";
 import { TAXONOMY, LABELS } from "@/lib/taxonomy";
+import { getFavorites, toggleFavorite } from "@/utils/storage";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import ImageBox from "./ImageBox";
 
 interface ListingCardProps {
   listing: Listing;
   onSelect: (listing: Listing) => void;
-  onFavorite?: (listingId: string) => void;
-  isFavorited?: boolean;
+  showJustPosted?: boolean;
 }
 
-const ListingCard = ({ listing, onSelect, onFavorite, isFavorited }: ListingCardProps) => {
+const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) => {
+  const [isFavorited, setIsFavorited] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const favorites = getFavorites();
+    setIsFavorited(favorites.includes(listing.id));
+  }, [listing.id]);
+
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newState = toggleFavorite(listing.id);
+    setIsFavorited(newState);
+    toast({
+      description: newState ? "Saved to favorites" : "Removed from favorites",
+      duration: 2000,
+    });
+  };
   const formatPrice = (price?: number) => {
     if (!price) return null;
     return new Intl.NumberFormat('en-US', {
@@ -44,47 +64,37 @@ const ListingCard = ({ listing, onSelect, onFavorite, isFavorited }: ListingCard
     >
       <CardContent className="p-0">
         {/* Image */}
-        <div className="aspect-[16/10] relative overflow-hidden rounded-t-lg bg-gradient-to-br from-muted to-muted/50">
-          {listing.images && listing.images[0] ? (
-            <img 
-              src={listing.images[0]} 
-              alt={listing.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-xl">📷</span>
-                </div>
-                <p className="text-sm">No image</p>
-              </div>
-            </div>
-          )}
+        <div className="relative group-hover:scale-105 transition-transform duration-300">
+          <ImageBox
+            src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
+            alt={listing.title}
+            className="rounded-t-lg"
+          />
           
           {/* Overlay actions */}
           <div className="absolute top-3 right-3 flex gap-2">
+            {showJustPosted && (
+              <Badge className="bg-green-500 text-white border-0 animate-pulse">
+                Posted just now
+              </Badge>
+            )}
             {listing.featured && (
               <Badge className="bg-gradient-primary text-primary-foreground border-0">
                 <Star className="w-3 h-3 mr-1" />
                 Featured
               </Badge>
             )}
-            {onFavorite && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onFavorite(listing.id);
-                }}
-              >
-                <Heart 
-                  className={`w-4 h-4 ${isFavorited ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} 
-                />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+              onClick={handleFavoriteToggle}
+              aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
+            >
+              <Heart 
+                className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'}`} 
+              />
+            </Button>
           </div>
 
           {/* Price overlay */}
@@ -101,7 +111,7 @@ const ListingCard = ({ listing, onSelect, onFavorite, isFavorited }: ListingCard
         <div className="p-4 space-y-3">
           {/* Title and Category */}
           <div className="space-y-2">
-            <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors">
+            <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
               {listing.title}
             </h3>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">

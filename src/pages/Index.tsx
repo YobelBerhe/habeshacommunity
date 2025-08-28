@@ -30,6 +30,7 @@ export default function Index() {
   const [acctOpen, setAcctOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [newlyPostedId, setNewlyPostedId] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
@@ -296,10 +297,9 @@ export default function Index() {
               <ListingGrid
                 listings={filteredListings}
                 onListingSelect={handleListingSelect}
-                onFavorite={handleFavorite}
-                favoritedListings={favorites}
                 loading={loading}
                 onPostFirst={() => setPostOpen(true)}
+                newlyPostedId={newlyPostedId}
               />
             ) : (
               <MapCluster
@@ -332,7 +332,13 @@ export default function Index() {
         open={postOpen}
         onClose={() => setPostOpen(false)}
         onPosted={(listing) => {
-          setListings(getListingsByCity(appState.city));
+          // Optimistic update - prepend new listing immediately
+          setListings(prev => [listing, ...prev]);
+          setNewlyPostedId(listing.id);
+          // Clear the "just posted" indicator after 60 seconds
+          setTimeout(() => {
+            setNewlyPostedId(null);
+          }, 60000);
           toast("Posted successfully!");
         }}
       />

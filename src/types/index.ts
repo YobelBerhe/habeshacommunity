@@ -37,6 +37,7 @@ export interface Listing {
   };
   tags: string[];
   images: string[];              // data URLs for now
+  photos?: string[];             // alias for images for compatibility
   lat?: number; lon?: number;
 
   // timestamps
