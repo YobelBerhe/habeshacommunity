@@ -118,3 +118,16 @@ export type ForumMessage = {
   body: string;
   createdAt: number;
 };
+
+export type ActivePoint = {
+  city: string;
+  country: string;
+  lat: number;
+  lon: number;
+  count: number;
+};
+
+export type ActiveUsers = {
+  total: number;
+  points: ActivePoint[];
+};

@@ -13,6 +13,7 @@ import QuickFilters from "@/components/QuickFilters";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
+import WorldMapHero from "@/components/WorldMapHero";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
@@ -250,35 +251,11 @@ export default function Index() {
 
       {/* Hero section when no city is selected */}
       {!appState.city && (
-        <section className="container mx-auto px-4 py-20">
-          <div className="text-center py-20 bg-gradient-hero rounded-2xl text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-black/20"></div>
-            <div className="relative z-10 max-w-4xl mx-auto px-6">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                {t(lang, "connect_headline_1")}
-                <br />
-                <span className="text-primary-glow">{t(lang, "connect_headline_2")}</span>
-              </h1>
-              <p className="text-xl md:text-2xl mb-8 text-white/90">
-                {t(lang, "connect_sub")}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button 
-                  className="px-8 py-3 bg-white/20 rounded-lg hover:bg-white/30 font-semibold"
-                  onClick={() => setFilters({ ...filters, category: "housing" })}
-                >
-                  {t(lang, "housing")}
-                </button>
-                <button 
-                  className="px-8 py-3 bg-white/20 rounded-lg hover:bg-white/30 font-semibold"
-                  onClick={() => setFilters({ ...filters, category: "jobs" })}
-                >
-                  {t(lang, "jobs")}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <WorldMapHero 
+          lang={lang}
+          onBrowseHousing={() => setFilters({ ...filters, category: "housing" })}
+          onFindJobs={() => setFilters({ ...filters, category: "jobs" })}
+        />
       )}
 
       <main className="container mx-auto px-4 py-6">
