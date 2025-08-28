@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Listing } from "@/types";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -6,13 +6,44 @@ import "leaflet/dist/leaflet.css";
 export default function ListingDetailDrawer({
   open, onOpenChange, listing
 }: { open: boolean; onOpenChange: (v: boolean) => void; listing: Listing | null; }) {
+  const [currentMap, setCurrentMap] = useState<L.Map | null>(null);
+  const [currentTileLayer, setCurrentTileLayer] = useState<L.TileLayer | null>(null);
+
+  const getTileLayerUrl = () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    return isDark 
+      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  };
+
+  const getTileLayerAttribution = () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    return isDark
+      ? "&copy; OpenStreetMap contributors &copy; CARTO"
+      : "&copy; OpenStreetMap contributors";
+  };
+
   useEffect(() => {
     if (!open || !listing) return;
+    
     setTimeout(() => {
       const el = document.getElementById("detail-map");
       if (!el) return;
+      
+      // Clear existing map
+      if (currentMap) {
+        currentMap.remove();
+      }
+      
       const map = L.map(el, { scrollWheelZoom: true });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+      const tile = L.tileLayer(getTileLayerUrl(), { 
+        maxZoom: 19,
+        attribution: getTileLayerAttribution()
+      }).addTo(map);
+      
+      setCurrentMap(map);
+      setCurrentTileLayer(tile);
+      
       const lat = Number(listing.lat), lon = Number(listing.lon);
       if (Number.isFinite(lat) && Number.isFinite(lon)) {
         map.setView([lat, lon], 13);
@@ -20,6 +51,29 @@ export default function ListingDetailDrawer({
       }
     }, 0);
   }, [open, listing]);
+
+  // Theme change listener
+  useEffect(() => {
+    if (!currentMap || !currentTileLayer) return;
+
+    const observer = new MutationObserver(() => {
+      if (currentMap && currentTileLayer) {
+        currentMap.removeLayer(currentTileLayer);
+        const newTile = L.tileLayer(getTileLayerUrl(), {
+          attribution: getTileLayerAttribution(),
+          maxZoom: 19,
+        }).addTo(currentMap);
+        setCurrentTileLayer(newTile);
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, [currentMap, currentTileLayer]);
 
   return (
     <div className={`fixed inset-0 z-50 ${open ? "" : "pointer-events-none"}`}>

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import L from "leaflet";
 import type { Listing } from "@/types";
 
@@ -9,6 +9,23 @@ type Props = {
 };
 
 export default function MapCluster({ center, listings, height = 440 }: Props) {
+  const [currentMap, setCurrentMap] = useState<L.Map | null>(null);
+  const [currentTileLayer, setCurrentTileLayer] = useState<L.TileLayer | null>(null);
+
+  const getTileLayerUrl = () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    return isDark 
+      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  };
+
+  const getTileLayerAttribution = () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    return isDark
+      ? "&copy; OpenStreetMap contributors &copy; CARTO"
+      : "&copy; OpenStreetMap contributors";
+  };
+
   useEffect(() => {
     // Clear any existing map instance
     const mapContainer = document.getElementById("hn-map");
@@ -17,10 +34,13 @@ export default function MapCluster({ center, listings, height = 440 }: Props) {
     }
 
     const map = L.map("hn-map", { zoomControl: true, scrollWheelZoom: false });
-    const tile = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
+    const tile = L.tileLayer(getTileLayerUrl(), {
+      attribution: getTileLayerAttribution(),
       maxZoom: 19,
     }).addTo(map);
+    
+    setCurrentMap(map);
+    setCurrentTileLayer(tile);
 
     const group: L.Marker[] = [];
     listings.forEach((l) => {
@@ -42,8 +62,31 @@ export default function MapCluster({ center, listings, height = 440 }: Props) {
 
     return () => {
       map.remove();
+      setCurrentMap(null);
+      setCurrentTileLayer(null);
     };
   }, [center, listings]);
+
+  // Theme change listener
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      if (currentMap && currentTileLayer) {
+        currentMap.removeLayer(currentTileLayer);
+        const newTile = L.tileLayer(getTileLayerUrl(), {
+          attribution: getTileLayerAttribution(),
+          maxZoom: 19,
+        }).addTo(currentMap);
+        setCurrentTileLayer(newTile);
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, [currentMap, currentTileLayer]);
 
   return <div id="hn-map" style={{ height, width: "100%", borderRadius: 12, overflow: "hidden" }} />;
 }
