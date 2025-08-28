@@ -67,9 +67,21 @@ export default function Index() {
   // Setup auth listener
   useEffect(() => {
     const { data: { subscription } } = onAuthChange((session) => {
+      console.log("Auth state changed:", session);
       setSession(session);
       setUser(session?.user ?? null);
     });
+
+    // Also check for existing session on mount
+    const checkInitialSession = async () => {
+      const { getSession } = await import("@/repo/auth");
+      const session = await getSession();
+      console.log("Initial session check:", session);
+      setSession(session);
+      setUser(session?.user ?? null);
+    };
+    
+    checkInitialSession();
 
     return () => subscription.unsubscribe();
   }, []);
@@ -179,10 +191,15 @@ export default function Index() {
   };
 
   const handlePostClick = async () => {
+    console.log("Post button clicked, user:", user);
+    console.log("Session:", session);
+    
     const userId = await getUserId();
+    console.log("getUserId result:", userId);
+    
     if (!userId) {
       setLoginOpen(true);
-      toast("Please sign in to post a listing");
+      toast.error("Please sign in to post a listing");
       return;
     }
     setPostOpen(true);
