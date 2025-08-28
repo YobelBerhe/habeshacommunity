@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithEmail } from "@/repo/auth";
+import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
 interface LoginModalProps {
@@ -13,23 +14,78 @@ interface LoginModalProps {
 
 export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const [email, setEmail] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [signupLoading, setSignupLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
 
     setLoading(true);
     try {
       await signInWithEmail(email.trim());
-      toast("Check your email for the login link!");
+      toast.success("Check your email for the login link!");
       onOpenChange(false);
       setEmail("");
     } catch (error) {
       console.error("Login error:", error);
-      toast("Failed to send login email. Please try again.");
+      toast.error("Failed to send login email. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEmailLoginLink = async () => {
+    if (!email.trim()) {
+      toast.error("Please enter an email address");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signInWithEmail(email.trim());
+      toast.success("Check your email for the login link!");
+      onOpenChange(false);
+      setEmail("");
+    } catch (error) {
+      console.error("Email link error:", error);
+      toast.error("Failed to send email link. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async () => {
+    if (!signupEmail.trim()) {
+      toast.error("Please enter an email address");
+      return;
+    }
+
+    setSignupLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: signupEmail.trim(),
+        password: Math.random().toString(36).slice(-8), // Temporary password
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success("Check your email to confirm your account!");
+      onOpenChange(false);
+      setSignupEmail("");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      if (error.message?.includes("already registered")) {
+        toast.error("This email is already registered. Try logging in instead.");
+      } else {
+        toast.error("Failed to create account. Please try again.");
+      }
+    } finally {
+      setSignupLoading(false);
     }
   };
 
@@ -42,7 +98,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
             <h2 className="text-lg font-medium text-center text-foreground mb-4">
               Log in
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1">
                 <Label htmlFor="email" className="text-sm text-foreground">
                   Email / Handle
@@ -63,9 +119,10 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   type="button"
                   variant="outline"
                   className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground"
-                  onClick={() => {}}
+                  onClick={handleEmailLoginLink}
+                  disabled={loading || !email.trim()}
                 >
-                  E-mail a login link
+                  {loading ? "Sending..." : "E-mail a login link"}
                 </Button>
                 <Button 
                   type="submit" 
@@ -97,6 +154,9 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
                 <Input
                   id="signup-email"
                   type="email"
+                  value={signupEmail}
+                  onChange={(e) => setSignupEmail(e.target.value)}
+                  disabled={signupLoading}
                   className="bg-background border-input"
                 />
               </div>
@@ -113,8 +173,10 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   type="button"
                   variant="outline"
                   className="px-6 bg-muted hover:bg-muted/80 text-muted-foreground"
+                  onClick={handleSignup}
+                  disabled={signupLoading || !signupEmail.trim()}
                 >
-                  Create account
+                  {signupLoading ? "Creating..." : "Create account"}
                 </Button>
               </div>
             </div>
