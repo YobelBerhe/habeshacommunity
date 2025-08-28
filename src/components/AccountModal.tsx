@@ -1,156 +1,75 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Separator } from "./ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { User, LogOut, Mail, Calendar } from "lucide-react";
 
-export default function AccountModal({
-  open, onOpenChange
-}: { open: boolean; onOpenChange: (v: boolean) => void; }) {
-  const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+interface AccountModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  user?: any;
+  onSignOut: () => void;
+}
 
-  const demoSignIn = () => {
-    if (!email.trim()) return;
-    const u = { name: name || "Friend", email, id: crypto.randomUUID() };
-    localStorage.setItem("hn.user", JSON.stringify(u));
-    onOpenChange(false);
-  };
+export default function AccountModal({ open, onOpenChange, user, onSignOut }: AccountModalProps) {
+  if (!user) return null;
 
-  const handleCreateAccount = () => {
-    if (!email.trim() || !name.trim()) return;
-    const u = { name, email, id: crypto.randomUUID() };
-    localStorage.setItem("hn.user", JSON.stringify(u));
-    onOpenChange(false);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md mx-auto">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-semibold">
-            {isLogin ? "Log in" : "Create an account"}
+          <DialogTitle className="flex items-center gap-2">
+            <User className="w-5 h-5" />
+            Account
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
-          {isLogin ? (
-            // Login Section
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-email">Email / Handle</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full"
-                />
+        <div className="space-y-6">
+          {/* User Profile */}
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={user.user_metadata?.avatar_url} />
+              <AvatarFallback className="text-lg">
+                {user.email?.charAt(0).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-1">
+              <p className="font-semibold">
+                {user.user_metadata?.full_name || "Anonymous User"}
+              </p>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Mail className="w-3 h-3" />
+                {user.email}
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <button className="text-sm text-primary hover:underline">
-                    Forgot password?
-                  </button>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => alert("Email login link feature coming soon!")}
-                  className="flex-1"
-                >
-                  E-mail a login link
-                </Button>
-                <Button onClick={demoSignIn} className="flex-1">
-                  Log in
-                </Button>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Calendar className="w-3 h-3" />
+                Joined {formatDate(user.created_at)}
               </div>
             </div>
-          ) : (
-            // Create Account Section
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signup-name">Full Name</Label>
-                <Input
-                  id="signup-name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-3">
-                <Button 
-                  onClick={handleCreateAccount}
-                  className="w-full"
-                  disabled={!email.trim() || !name.trim()}
-                >
-                  Create account
-                </Button>
-                
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <p>By creating an account, you agree to our:</p>
-                  <div className="flex flex-wrap gap-1">
-                    <button className="text-primary hover:underline">Terms of Service</button>
-                    <span>•</span>
-                    <button className="text-primary hover:underline">Privacy Policy</button>
-                    <span>•</span>
-                    <button className="text-primary hover:underline">Community Guidelines</button>
-                  </div>
-                </div>
-                
-                <button className="text-sm text-primary hover:underline">
-                  Account help
-                </button>
-              </div>
-            </div>
-          )}
-          
-          <div className="text-center">
-            <div className="flex items-center gap-4 mb-4">
-              <Separator className="flex-1" />
-              <span className="text-sm text-muted-foreground">or</span>
-              <Separator className="flex-1" />
-            </div>
-            
-            <Button
-              variant="outline"
-              onClick={() => setIsLogin(!isLogin)}
+          </div>
+
+          {/* Status Badge */}
+          <div className="flex justify-center">
+            <Badge variant="outline" className="text-green-600 border-green-200">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              Signed in
+            </Badge>
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <Button 
+              variant="outline" 
+              onClick={onSignOut}
               className="w-full"
             >
-              {isLogin ? "Create new account" : "Already have an account? Log in"}
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign out
             </Button>
-          </div>
-          
-          <div className="text-xs text-muted-foreground text-center space-y-1">
-            <p>Demo mode: Accounts are stored locally</p>
-            <p>Connect Supabase or other auth providers for production use</p>
           </div>
         </div>
       </DialogContent>

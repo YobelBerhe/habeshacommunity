@@ -3,7 +3,7 @@ import DonationButton from "@/components/DonationButton";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Header({
-  currentCity, onCityChange, onAccountClick, onPostClick, onLogoClick, rightExtra
+  currentCity, onCityChange, onAccountClick, onPostClick, onLogoClick, rightExtra, user
 }: {
   currentCity: string;
   onCityChange: (city: string, lat?: number, lon?: number) => void;
@@ -11,6 +11,7 @@ export default function Header({
   onPostClick: () => void;
   onLogoClick: () => void;
   rightExtra?: React.ReactNode;
+  user?: any;
 }) {
   return (
     <header className="w-full border-b bg-background/70 backdrop-blur">
@@ -39,7 +40,9 @@ export default function Header({
           <DonationButton variant="ghost" />
           {rightExtra}
           <button className="btn" onClick={() => window.location.href = '/forums'}>Forums</button>
-          <button className="btn" onClick={onAccountClick} aria-label="Account">👤</button>
+          <button className="btn" onClick={onAccountClick} aria-label="Account">
+            {user ? user.email?.charAt(0).toUpperCase() || "U" : "👤"}
+          </button>
           <button className="btn btn-primary" onClick={onPostClick}>+ Post</button>
         </div>
       </div>

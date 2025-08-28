@@ -1,8 +1,10 @@
-// /components/PostModal.tsx
 import { useEffect, useMemo, useState } from "react";
 import { TAXONOMY, LABELS, isGig, CategoryKey } from "@/lib/taxonomy";
-import { addListing } from "@/utils/storage";
+import { createListing } from "@/repo/listings";
+import { getUserId } from "@/repo/auth";
+import { uploadListingImages } from "@/utils/upload";
 import type { Listing } from "@/types";
+import { toast } from "sonner";
 
 type Props = {
   city: string;
@@ -29,9 +31,10 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
   const [contact, setContact] = useState({ phone:"", email:"", whatsapp:"", telegram:"" });
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string>("");
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<File[]>([]);
   const [lat, setLat] = useState<number|undefined>(undefined);
   const [lon, setLon] = useState<number|undefined>(undefined);
+  const [submitting, setSubmitting] = useState(false);
 
   // Housing fields
   const [bedrooms, setBedrooms] = useState<number|undefined>(undefined);
@@ -63,67 +66,102 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
 
   if (!open) return null;
 
-  const handlePhotos = async (files: FileList | null) => {
-    if (!files?.length) return;
-    const arr: string[] = [];
-    for (const f of Array.from(files).slice(0, 8)) {
-      const dataUrl = await compressToDataUrl(f, 1400); // simple client compression
-      arr.push(dataUrl);
+  const handlePhotos = (files: FileList | null) => {
+    if (!files?.length) {
+      setPhotos([]);
+      return;
     }
-    setPhotos(arr);
+    setPhotos(Array.from(files).slice(0, 6));
   };
 
-  const submit = () => {
-    const now = Date.now();
-    const listing: Listing = {
-      id: crypto.randomUUID(),
-      city,
-      category,
-      subcategory,
-      jobKind,
-      title: title.trim(),
-      description: description.trim(),
-      price,
-      currency,
-      contact: normalizeContact(contact),
-      tags: splitTags(tags),
-      photos: photos,
-      images: photos,
-      lat, lon,
-      createdAt: now,
-      updatedAt: now,
-      hasImage: photos.length > 0,
-    };
+  const submit = async () => {
+    setSubmitting(true);
+    try {
+      const userId = await getUserId();
+      if (!userId) {
+        toast("Please sign in to post a listing");
+        return;
+      }
 
-    // attach dynamic fields into description footer for now (until DB attrs)
-    if (category === "housing") {
-      listing.description += formatAttrs({
-        bedrooms, bathrooms, furnished, availableFrom
+      // Upload images first
+      const imageUrls = photos.length ? await uploadListingImages(photos, userId) : [];
+
+      // Build description with dynamic fields
+      let finalDescription = description.trim();
+      if (category === "housing") {
+        finalDescription += formatAttrs({
+          bedrooms, bathrooms, furnished, availableFrom
+        });
+      }
+      if (category === "jobs") {
+        finalDescription += formatAttrs({
+          jobKind, employer, employment, pay, remoteOk
+        });
+      }
+
+      // Create the listing in database
+      const dbListing = await createListing({
+        user_id: userId,
+        city,
+        country: "Unknown", // TODO: extract from city
+        category: category as any,
+        subcategory: subcategory || null,
+        title: title.trim(),
+        description: finalDescription,
+        price_cents: price ? Math.round(price * 100) : null,
+        currency: currency || "USD",
+        contact_method: getContactMethod(contact),
+        contact_value: getContactValue(contact),
+        tags: splitTags(tags),
+        images: imageUrls,
+        location_lat: lat || null,
+        location_lng: lon || null,
       });
-    }
-    if (category === "jobs") {
-      listing.description += formatAttrs({
-        jobKind, employer, employment, pay, remoteOk
-      });
-    }
 
-    const { ok, reason } = addListing(city, listing);
-    if (!ok && reason === "quota") {
-      // retry without photos (localStorage full)
-      listing.photos = [];
-      listing.images = [];
-      listing.hasImage = false;
-      addListing(city, listing);
-      alert("Posted without photos due to browser storage limit.");
+      // Convert back to frontend format for optimistic update
+      const frontendListing: Listing = {
+        id: dbListing.id,
+        city: dbListing.city,
+        category: dbListing.category as CategoryKey,
+        subcategory: dbListing.subcategory || "",
+        jobKind,
+        title: dbListing.title,
+        description: dbListing.description || "",
+        price: dbListing.price_cents ? dbListing.price_cents / 100 : undefined,
+        currency: dbListing.currency || "USD",
+        contact: { phone: dbListing.contact_value || "" },
+        tags: dbListing.tags || [],
+        photos: dbListing.images || [],
+        images: dbListing.images || [],
+        lat: dbListing.location_lat || undefined,
+        lon: dbListing.location_lng || undefined,
+        createdAt: new Date(dbListing.created_at).getTime(),
+        updatedAt: new Date(dbListing.updated_at).getTime(),
+        hasImage: !!(dbListing.images?.length),
+      };
+
+      onPosted?.(frontendListing);
+      onClose();
+      
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setTags("");
+      setPhotos([]);
+      setPrice(undefined);
+      
+      toast("Posted successfully!");
+
+      // smooth scroll to listings (if present)
+      setTimeout(() => {
+        document.getElementById("listing-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    } catch (error) {
+      console.error("Failed to post listing:", error);
+      toast("Failed to post listing. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    onPosted?.(listing);
-    onClose();
-
-    // smooth scroll to listings (if present)
-    setTimeout(() => {
-      document.getElementById("listing-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
   };
 
   return (
@@ -233,9 +271,9 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
         <button
           className="w-full py-3 rounded-md bg-primary text-primary-foreground font-semibold"
           onClick={submit}
-          disabled={!title || !subcategory}
+          disabled={!title || !subcategory || submitting}
         >
-          Publish
+          {submitting ? "Publishing..." : "Publish"}
         </button>
       </div>
     </div>
@@ -250,12 +288,15 @@ function splitTags(s: string): string[] {
 function num(v: string): number|undefined {
   const n = Number(v); return isNaN(n) ? undefined : n;
 }
-function normalizeContact(c: any) {
-  const out: any = {};
-  for (const k of ["phone","email","whatsapp","telegram"]) {
-    if (c?.[k]) out[k] = String(c[k]).trim();
-  }
-  return out;
+function getContactMethod(contact: any): 'phone' | 'whatsapp' | 'telegram' | 'email' | null {
+  if (contact.phone) return 'phone';
+  if (contact.whatsapp) return 'whatsapp';
+  if (contact.telegram) return 'telegram';
+  if (contact.email) return 'email';
+  return null;
+}
+function getContactValue(contact: any): string | null {
+  return contact.phone || contact.whatsapp || contact.telegram || contact.email || null;
 }
 function formatAttrs(obj: Record<string, unknown>): string {
   const pairs = Object.entries(obj).filter(([,v])=>v!==undefined && v!=="");
@@ -265,18 +306,4 @@ function formatAttrs(obj: Record<string, unknown>): string {
 }
 function labelize(k: string) {
   return k.replace(/_/g," ").replace(/\b\w/g, m=>m.toUpperCase());
-}
-async function compressToDataUrl(file: File, maxW: number): Promise<string> {
-  const img = await new Promise<HTMLImageElement>((res)=>{
-    const i = new Image(); const r = new FileReader();
-    r.onload = ()=>{ i.onload = ()=>res(i); i.src = r.result as string; }; r.readAsDataURL(file);
-  });
-  const scale = Math.min(1, maxW / img.width);
-  const w = Math.round(img.width * scale);
-  const h = Math.round(img.height * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0, w, h);
-  return canvas.toDataURL("image/jpeg", 0.82);
 }

@@ -5,6 +5,7 @@ import FilterBar from "@/components/FilterBar";
 import ListingGrid from "@/components/ListingGrid";
 import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
+import LoginModal from "@/components/LoginModal";
 import ListingDetailModal from "@/components/ListingDetailModal";
 import CityIndex from "@/components/CityIndex";
 import MapCluster from "@/components/MapCluster";
@@ -18,7 +19,9 @@ import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
 import type { Listing, SearchFilters, AppState } from "@/types";
-import { getAppState, saveAppState, getListingsByCity } from "@/utils/storage";
+import { getAppState, saveAppState } from "@/utils/storage";
+import { fetchListings } from "@/repo/listings";
+import { onAuthChange, getUserId, signOut } from "@/repo/auth";
 import { toast } from "sonner";
 
 export default function Index() {
@@ -29,10 +32,13 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [newlyPostedId, setNewlyPostedId] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
+  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
     const initialAppState = getAppState();
@@ -58,13 +64,60 @@ export default function Index() {
     setSearchParams(params, { replace: true });
   }, [filters, setSearchParams]);
 
-  // Load data when city changes
+  // Setup auth listener
+  useEffect(() => {
+    const { data: { subscription } } = onAuthChange((session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load data when city or filters change
   useEffect(() => {
     if (!appState.city) return;
-    setLoading(true);
-    setListings(getListingsByCity(appState.city));
-    setLoading(false);
-  }, [appState.city]);
+    
+    const loadListings = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchListings({
+          city: appState.city,
+          category: filters.category,
+          q: filters.query,
+          minPrice: filters.minPrice,
+          maxPrice: filters.maxPrice,
+          subcategory: filters.subcategory,
+        });
+        setListings(data.map(row => ({
+          id: row.id,
+          city: row.city,
+          category: row.category as CategoryKey,
+          subcategory: row.subcategory || undefined,
+          title: row.title,
+          description: row.description || "",
+          price: row.price_cents ? row.price_cents / 100 : undefined,
+          currency: row.currency || "USD",
+          contact: { phone: row.contact_value || "" },
+          tags: row.tags || [],
+          photos: row.images || [],
+          images: row.images || [],
+          lat: row.location_lat,
+          lon: row.location_lng,
+          createdAt: new Date(row.created_at).getTime(),
+          updatedAt: new Date(row.updated_at).getTime(),
+          hasImage: !!(row.images?.length),
+        })));
+      } catch (error) {
+        console.error("Failed to load listings:", error);
+        toast("Failed to load listings");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadListings();
+  }, [appState.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory]);
 
   // Filter listings
   const filteredListings = useMemo(() => {
@@ -115,6 +168,30 @@ export default function Index() {
     setAppState(next);
     saveAppState(next);
     toast("City changed to " + city);
+  };
+
+  const handleAccountClick = () => {
+    if (user) {
+      setAcctOpen(true);
+    } else {
+      setLoginOpen(true);
+    }
+  };
+
+  const handlePostClick = async () => {
+    const userId = await getUserId();
+    if (!userId) {
+      setLoginOpen(true);
+      toast("Please sign in to post a listing");
+      return;
+    }
+    setPostOpen(true);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setAcctOpen(false);
+    toast("Signed out successfully");
   };
 
   const handleLogoClick = () => {
@@ -174,9 +251,10 @@ export default function Index() {
       <Header
         currentCity={appState.city}
         onCityChange={handleCityChange}
-        onAccountClick={() => setAcctOpen(true)}
-        onPostClick={() => setPostOpen(true)}
+        onAccountClick={handleAccountClick}
+        onPostClick={handlePostClick}
         onLogoClick={handleLogoClick}
+        user={user}
         rightExtra={
           <LanguageToggle
             value={lang}
@@ -318,9 +396,16 @@ export default function Index() {
         }}
       />
 
+      <LoginModal 
+        open={loginOpen} 
+        onOpenChange={(open) => setLoginOpen(open)}
+      />
+
       <AccountModal 
         open={acctOpen} 
         onOpenChange={(open) => setAcctOpen(open)}
+        user={user}
+        onSignOut={handleSignOut}
       />
 
       <ListingDetailModal
