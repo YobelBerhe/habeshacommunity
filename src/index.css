@@ -233,6 +233,17 @@
   --star-glow-dark: rgba(255, 204, 0, 0.9);
 }
 
+/* Light mode: make map background white so tiles blend nicely */
+:root:not(.dark) .leaflet-container {
+  background: #fff !important;
+  filter: saturate(0.8) contrast(0.9) brightness(1.05);
+}
+
+/* Dark mode untouched */
+.dark .leaflet-container { 
+  background: #0b0e11; 
+}
+
 /* World Map Pulse Animation */
 .pulse-container {
   background: none !important;
