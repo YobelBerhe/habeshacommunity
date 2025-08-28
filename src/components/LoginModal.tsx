@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,9 +64,9 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
     setSignupLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      // Use magic link signup instead of password
+      const { error } = await supabase.auth.signInWithOtp({
         email: signupEmail.trim(),
-        password: Math.random().toString(36).slice(-8), // Temporary password
         options: {
           emailRedirectTo: window.location.origin
         }
@@ -74,16 +74,12 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
       if (error) throw error;
 
-      toast.success("Check your email to confirm your account!");
+      toast.success("Check your email for the signup link!");
       onOpenChange(false);
       setSignupEmail("");
     } catch (error: any) {
       console.error("Signup error:", error);
-      if (error.message?.includes("already registered")) {
-        toast.error("This email is already registered. Try logging in instead.");
-      } else {
-        toast.error("Failed to create account. Please try again.");
-      }
+      toast.error("Failed to send signup email. Please try again.");
     } finally {
       setSignupLoading(false);
     }
@@ -92,6 +88,12 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg bg-muted/20 border-none shadow-lg p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Login or Create Account</DialogTitle>
+          <DialogDescription>
+            Sign in to your account or create a new one using email verification
+          </DialogDescription>
+        </DialogHeader>
         <div className="bg-background rounded-lg overflow-hidden">
           {/* Log in Section */}
           <div className="bg-muted/30 p-6 border-b">
