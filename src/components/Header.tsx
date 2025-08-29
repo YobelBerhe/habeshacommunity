@@ -1,18 +1,23 @@
 import CitySearch from "@/components/CitySearch";
 import DonationButton from "@/components/DonationButton";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from '@/store/auth';
 
 export default function Header({
-  currentCity, onCityChange, onAccountClick, onPostClick, onLogoClick, rightExtra, user
+  currentCity, onCityChange, onAccountClick, onLogoClick, rightExtra
 }: {
   currentCity: string;
   onCityChange: (city: string, lat?: number, lon?: number) => void;
   onAccountClick: () => void;
-  onPostClick: () => void;
   onLogoClick: () => void;
   rightExtra?: React.ReactNode;
-  user?: any;
 }) {
+  const { user, openAuth, openPost } = useAuth();
+
+  const handlePostClick = () => {
+    if (user) openPost();
+    else openAuth();
+  };
   return (
     <header className="w-full border-b bg-background/70 backdrop-blur">
       <div className="container mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
@@ -43,7 +48,7 @@ export default function Header({
           <button className="btn" onClick={onAccountClick} aria-label="Account">
             {user ? user.email?.charAt(0).toUpperCase() || "U" : "👤"}
           </button>
-          <button className="btn btn-primary" onClick={onPostClick}>+ Post</button>
+          <button className="btn btn-primary" onClick={handlePostClick}>+ Post</button>
         </div>
       </div>
     </header>

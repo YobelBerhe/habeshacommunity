@@ -4,10 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ForumsBoards from "./pages/forums/Boards";
-import BoardTopics from "./pages/forums/BoardTopics";
-import TopicView from "./pages/forums/TopicView";
 
 const queryClient = new QueryClient();
 
@@ -20,11 +16,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/l/:id" element={<Index />} />
-          <Route path="/forums" element={<ForumsBoards />} />
-          <Route path="/forums/:board" element={<BoardTopics />} />
-          <Route path="/forums/topic/:id" element={<TopicView />} />
+          <Route path="/forums" element={<div>Forums coming soon</div>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<div>Page not found</div>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

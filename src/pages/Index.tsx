@@ -7,6 +7,8 @@ import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
 import LoginModal from "@/components/LoginModal";
 import ListingDetail from "@/components/ListingDetail";
+import AuthModal from "@/components/AuthModal";
+import BootstrapAuth from "@/components/BootstrapAuth";
 import CityIndex from "@/components/CityIndex";
 import MapCluster from "@/components/MapCluster";
 import SearchBox from "@/components/SearchBox";
@@ -325,9 +327,7 @@ export default function Index() {
         currentCity={appState.city}
         onCityChange={handleCityChange}
         onAccountClick={handleAccountClick}
-        onPostClick={handlePostClick}
         onLogoClick={handleLogoClick}
-        user={user}
         rightExtra={
           <LanguageToggle
             value={lang}
@@ -453,10 +453,10 @@ export default function Index() {
       </footer>
 
       {/* Modals */}
+      <BootstrapAuth />
+      <AuthModal />
       <PostModal
         city={appState.city || "Select a city"}
-        open={postOpen}
-        onClose={() => setPostOpen(false)}
         onPosted={(listing) => {
           // Optimistic update - prepend new listing immediately
           setListings(prev => [listing, ...prev]);

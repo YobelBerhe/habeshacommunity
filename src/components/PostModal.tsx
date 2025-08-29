@@ -5,11 +5,10 @@ import { getUserId } from "@/repo/auth";
 import { uploadListingImages } from "@/utils/upload";
 import type { Listing } from "@/types";
 import { toast } from "sonner";
+import { useAuth } from '@/store/auth';
 
 type Props = {
   city: string;
-  open: boolean;
-  onClose: () => void;
   onPosted?: (listing: Listing) => void;
 };
 
@@ -20,7 +19,11 @@ const catOptions: { key: CategoryKey; label: string }[] = ([
   ["community","Community"],
 ] as const).map(([key,label]) => ({ key: key as CategoryKey, label }));
 
-export default function PostModal({ city, open, onClose, onPosted }: Props) {
+export default function PostModal({ city, onPosted }: Props) {
+  const { postOpen, closePost, user } = useAuth();
+  
+  if (!postOpen) return null;
+  if (!user) return null;
   const [category, setCategory] = useState<CategoryKey>("housing");
   const [subcategory, setSubcategory] = useState<string>("");
   const [jobKind, setJobKind] = useState<"regular"|"gig"|undefined>(undefined);
@@ -64,7 +67,7 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
     }));
   }, [category]);
 
-  if (!open) return null;
+  
 
   const handlePhotos = (files: FileList | null) => {
     if (!files?.length) {
@@ -141,7 +144,7 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
       };
 
       onPosted?.(frontendListing);
-      onClose();
+      closePost();
       
       // Reset form
       setTitle("");
@@ -169,7 +172,7 @@ export default function PostModal({ city, open, onClose, onPosted }: Props) {
       <div className="bg-background w-full md:w-[520px] h-[85vh] md:h-full rounded-t-2xl md:rounded-none p-4 md:p-6 overflow-y-auto shadow-xl">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-semibold">Post a listing</h2>
-          <button onClick={onClose} className="rounded-md px-2 py-1 border">✕</button>
+          <button onClick={closePost} className="rounded-md px-2 py-1 border">✕</button>
         </div>
 
         {/* Step 1: Category */}
