@@ -13,10 +13,19 @@ export default function Header({
   rightExtra?: React.ReactNode;
 }) {
   const { user, openAuth, openPost } = useAuth();
+  
+  console.log('🎯 Header render - user:', user);
+  console.log('🎯 Header render - user type:', typeof user);
 
   const handlePostClick = () => {
-    if (user) openPost();
-    else openAuth();
+    console.log('📌 Post button clicked, user:', user);
+    if (user) {
+      console.log('✅ User found, opening post modal');
+      openPost();
+    } else {
+      console.log('❌ No user, opening auth modal');
+      openAuth();
+    }
   };
   return (
     <header className="w-full border-b bg-background/70 backdrop-blur">

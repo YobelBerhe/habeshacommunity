@@ -322,7 +322,9 @@ export default function Index() {
     !!appState.city && !filters.query && !filters.subcategory;
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <BootstrapAuth />
+      <div className="min-h-screen bg-background">
       <Header
         currentCity={appState.city}
         onCityChange={handleCityChange}
@@ -453,7 +455,6 @@ export default function Index() {
       </footer>
 
       {/* Modals */}
-      <BootstrapAuth />
       <AuthModal />
       <PostModal
         city={appState.city || "Select a city"}
@@ -494,6 +495,7 @@ export default function Index() {
           }
         }}
       />
-    </div>
+      </div>
+    </>
   );
 }
