@@ -51,7 +51,6 @@ export default function Header({
 
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
-          <DonationButton variant="ghost" />
           {rightExtra}
           <button className="btn" onClick={() => window.location.href = '/forums'}>Forums</button>
           <button className="btn" onClick={onAccountClick} aria-label="Account">
