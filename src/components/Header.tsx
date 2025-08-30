@@ -1,6 +1,6 @@
 import CitySearch from "@/components/CitySearch";
-import DonationButton from "@/components/DonationButton";
 import ThemeToggle from "@/components/ThemeToggle";
+import AuthButtons from "@/components/AuthButtons";
 import { useAuth } from '@/store/auth';
 
 export default function Header({
@@ -49,14 +49,12 @@ export default function Header({
           />
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
           {rightExtra}
           <button className="btn" onClick={() => window.location.href = '/forums'}>Forums</button>
-          <button className="btn" onClick={onAccountClick} aria-label="Account">
-            {user ? user.email?.charAt(0).toUpperCase() || "U" : "👤"}
-          </button>
           <button className="btn btn-primary" onClick={handlePostClick}>+ Post</button>
+          <AuthButtons />
         </div>
       </div>
     </header>
