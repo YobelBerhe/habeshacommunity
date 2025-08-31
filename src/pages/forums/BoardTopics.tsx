@@ -7,7 +7,8 @@ import { listBoards } from "@/utils/forumStore";
 import NewTopicModal from "@/components/forums/NewTopicModal";
 
 export default function BoardTopics() {
-  const { board } = useParams<{ board: ForumBoardKey }>();
+  const { boardKey } = useParams<{ boardKey: ForumBoardKey }>();
+  const board = boardKey;
   const navigate = useNavigate();
   const city = getAppState().city || "Select a city";
   const [topics, setTopics] = useState<ForumTopic[]>([]);
