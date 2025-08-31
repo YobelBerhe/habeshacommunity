@@ -27,9 +27,8 @@ export default function AuthButtons() {
   }
 
   return (
-    <div className="flex gap-2">
-      <a href="/auth/login" className="px-3 py-1 rounded border hover:bg-muted transition-colors">Log in</a>
-      <a href="/auth/register" className="px-3 py-1 rounded border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Create account</a>
-    </div>
+    <a href="/auth/login" className="px-3 py-1 rounded border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+      Sign in
+    </a>
   );
 }

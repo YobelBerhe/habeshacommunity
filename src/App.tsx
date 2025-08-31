@@ -8,6 +8,8 @@ import AuthCallback from "./pages/AuthCallback";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Reset from "./pages/auth/Reset";
+import ForumsBoards from "./pages/forums/Boards";
+import BoardTopics from "./pages/forums/BoardTopics";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +26,8 @@ const App = () => (
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register" element={<Register />} />
           <Route path="/auth/reset" element={<Reset />} />
-          <Route path="/forums" element={<div>Forums coming soon</div>} />
+          <Route path="/forums" element={<ForumsBoards />} />
+          <Route path="/forums/:boardKey" element={<BoardTopics />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<div>Page not found</div>} />
         </Routes>
