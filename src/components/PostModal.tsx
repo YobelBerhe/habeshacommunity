@@ -22,8 +22,6 @@ const catOptions: { key: CategoryKey; label: string }[] = ([
 export default function PostModal({ city, onPosted }: Props) {
   const { postOpen, closePost, user } = useAuth();
   
-  if (!postOpen) return null;
-  if (!user) return null;
   const [category, setCategory] = useState<CategoryKey>("housing");
   const [subcategory, setSubcategory] = useState<string>("");
   const [jobKind, setJobKind] = useState<"regular"|"gig"|undefined>(undefined);
@@ -83,6 +81,7 @@ export default function PostModal({ city, onPosted }: Props) {
       const userId = await getUserId();
       if (!userId) {
         toast("Please sign in to post a listing");
+        setSubmitting(false);
         return;
       }
 
@@ -166,6 +165,9 @@ export default function PostModal({ city, onPosted }: Props) {
       setSubmitting(false);
     }
   };
+
+  if (!postOpen) return null;
+  if (!user) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-stretch md:justify-end">

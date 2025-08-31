@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { User } from "lucide-react";
 
 export default function AuthButtons() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -28,8 +29,8 @@ export default function AuthButtons() {
   }
 
   return (
-    <Link to="/auth/login" className="px-3 py-1 rounded border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-      Sign in
+    <Link to="/auth/login" className="p-2 rounded-full border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center">
+      <User size={20} />
     </Link>
   );
 }
