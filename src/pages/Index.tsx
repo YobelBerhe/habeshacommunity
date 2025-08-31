@@ -6,7 +6,7 @@ import ListingGrid from "@/components/ListingGrid";
 import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
 import LoginModal from "@/components/LoginModal";
-import ListingDetail from "@/components/ListingDetail";
+import ListingDetailModal from "@/components/ListingDetailModal";
 import AuthModal from "@/components/AuthModal";
 import BootstrapAuth from "@/components/BootstrapAuth";
 import CityIndex from "@/components/CityIndex";
@@ -115,19 +115,29 @@ export default function Index() {
         });
         setListings(data.map(row => ({
           id: row.id,
+          user_id: row.user_id || "",
           city: row.city,
-          category: row.category as CategoryKey,
-          subcategory: row.subcategory || undefined,
+          country: row.country,
+          category: row.category as string,
+          subcategory: row.subcategory,
           title: row.title,
           description: row.description || "",
-          price: row.price_cents ? row.price_cents / 100 : undefined,
-          currency: row.currency || "USD",
-          contact: { phone: row.contact_value || "" },
+          price: row.price_cents ? row.price_cents / 100 : null,
+          currency: row.currency,
+          contact_phone: row.contact_method === 'phone' ? row.contact_value : null,
+          contact_whatsapp: row.contact_method === 'whatsapp' ? row.contact_value : null,
+          contact_telegram: row.contact_method === 'telegram' ? row.contact_value : null,
+          contact_email: row.contact_method === 'email' ? row.contact_value : null,
+          website_url: row.website_url,
           tags: row.tags || [],
-          photos: row.images || [],
           images: row.images || [],
           lat: row.location_lat,
-          lon: row.location_lng,
+          lng: row.location_lng,
+          created_at: row.created_at,
+          // Legacy compatibility
+          contact: { phone: row.contact_value || "" },
+          photos: row.images || [],
+          lon: row.location_lng || undefined,
           createdAt: new Date(row.created_at).getTime(),
           updatedAt: new Date(row.updated_at).getTime(),
           hasImage: !!(row.images?.length),
@@ -153,19 +163,29 @@ export default function Index() {
         const row = await fetchListingById(id);
         const listing: Listing = {
           id: row.id,
+          user_id: row.user_id || "",
           city: row.city,
-          category: row.category as CategoryKey,
-          subcategory: row.subcategory || undefined,
+          country: row.country,
+          category: row.category as string,
+          subcategory: row.subcategory,
           title: row.title,
           description: row.description || "",
-          price: row.price_cents ? row.price_cents / 100 : undefined,
-          currency: row.currency || "USD",
-          contact: { phone: row.contact_value || "" },
+          price: row.price_cents ? row.price_cents / 100 : null,
+          currency: row.currency,
+          contact_phone: row.contact_method === 'phone' ? row.contact_value : null,
+          contact_whatsapp: row.contact_method === 'whatsapp' ? row.contact_value : null,
+          contact_telegram: row.contact_method === 'telegram' ? row.contact_value : null,
+          contact_email: row.contact_method === 'email' ? row.contact_value : null,
+          website_url: row.website_url,
           tags: row.tags || [],
-          photos: row.images || [],
           images: row.images || [],
           lat: row.location_lat,
-          lon: row.location_lng,
+          lng: row.location_lng,
+          created_at: row.created_at,
+          // Legacy compatibility
+          contact: { phone: row.contact_value || "" },
+          photos: row.images || [],
+          lon: row.location_lng || undefined,
           createdAt: new Date(row.created_at).getTime(),
           updatedAt: new Date(row.updated_at).getTime(),
           hasImage: !!(row.images?.length),
@@ -217,7 +237,7 @@ export default function Index() {
       filtered = filtered.filter(l => (l as any).jobKind === filters.jobKind);
     }
 
-    return filtered.sort((a, b) => b.createdAt - a.createdAt);
+    return filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [listings, filters]);
 
   // Event handlers
@@ -482,16 +502,16 @@ export default function Index() {
         onSignOut={handleSignOut}
       />
 
-      <ListingDetail
+      <ListingDetailModal
         open={detailOpen}
         listing={selectedListing}
         onClose={handleDetailClose}
-        onSavedChange={(saved) => {
+        onSavedChange={(id, saved) => {
           // Handle favorite state change if needed
-          if (saved && selectedListing) {
-            setFavorites(prev => [...prev, selectedListing.id]);
-          } else if (selectedListing) {
-            setFavorites(prev => prev.filter(id => id !== selectedListing.id));
+          if (saved) {
+            setFavorites(prev => [...prev, id]);
+          } else {
+            setFavorites(prev => prev.filter(fId => fId !== id));
           }
         }}
       />

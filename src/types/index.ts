@@ -24,30 +24,36 @@ export interface City {
 
 export interface Listing {
   id: string;
-  city: string;                  // normalized "Oakland, US-CA"
-  category: CategoryKey;
-  subcategory: string;           // slug in TAXONOMY
-  jobKind?: JobKind;             // only for jobs: "regular" | "gig"
+  user_id: string;
+  category: string;              // e.g., 'housing' | 'jobs' | 'services' | 'community'
+  subcategory?: string | null;
   title: string;
   description: string;
-  price?: number;
-  currency?: string;
+  price?: number | null;
+  currency?: string | null;
+  tags: string[];
+  images: string[];              // public URLs
+  contact_phone?: string | null;
+  contact_whatsapp?: string | null;
+  contact_telegram?: string | null;
+  contact_email?: string | null;
+  website_url?: string | null;   // NEW
+  city: string;                  // NEW
+  country?: string | null;       // NEW
+  lat?: number | null;
+  lng?: number | null;
+  created_at: string;            // ISO
+  
+  // Legacy fields for backward compatibility
+  jobKind?: JobKind;             // only for jobs: "regular" | "gig"
   contact?: {
     phone?: string; email?: string; whatsapp?: string; telegram?: string;
   };
-  tags: string[];
-  images: string[];              // data URLs for now
   photos?: string[];             // alias for images for compatibility
-  lat?: number; lon?: number;
-
-  // timestamps
-  createdAt: number;             // ms since epoch (UTC)
-  updatedAt: number;             // ms since epoch (UTC)
-
-  // quick flags
+  lon?: number;                  // alias for lng for compatibility
+  createdAt?: number;            // ms since epoch (UTC)
+  updatedAt?: number;            // ms since epoch (UTC)
   hasImage?: boolean;
-  
-  // Legacy fields for backward compatibility
   userId?: string;
   featured?: boolean;
   categoryLabel?: string;

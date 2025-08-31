@@ -12,7 +12,7 @@ export async function fetchListings(filters: {
 } = {}): Promise<ListingRow[]> {
   let query = supabase.from('listings').select('*').eq('status', 'active');
 
-  if (filters.city) query = query.ilike('city', filters.city);
+  if (filters.city) query = query.eq('city', filters.city);
   if (filters.category) query = query.eq('category', filters.category);
   if (filters.subcategory) query = query.eq('subcategory', filters.subcategory);
   if (filters.minPrice != null) query = query.gte('price_cents', Math.round(filters.minPrice * 100));
@@ -35,7 +35,11 @@ export async function fetchListingById(id: string) {
 }
 
 export async function createListing(input: Omit<ListingRow, 'id' | 'created_at' | 'updated_at' | 'status'>) {
-  const payload = { ...input, status: 'active' as const };
+  const payload = { 
+    ...input, 
+    status: 'active' as const,
+    city: input.city || 'Unknown', // Ensure city is not null
+  };
   const { data, error } = await supabase.from('listings').insert(payload).select('*').single();
   if (error) throw error;
   return data as ListingRow;

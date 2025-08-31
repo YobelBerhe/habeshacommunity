@@ -34,7 +34,10 @@ export default function PostModal({ city, onPosted }: Props) {
   const [tags, setTags] = useState<string>("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [lat, setLat] = useState<number|undefined>(undefined);
-  const [lon, setLon] = useState<number|undefined>(undefined);
+  const [lng, setLng] = useState<number|undefined>(undefined);
+  const [currentCity, setCurrentCity] = useState(city);
+  const [country, setCountry] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Housing fields
@@ -102,10 +105,13 @@ export default function PostModal({ city, onPosted }: Props) {
       }
 
       // Create the listing in database
+      const finalWebsiteUrl = websiteUrl.trim() ? 
+        (websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`) : null;
+      
       const dbListing = await createListing({
         user_id: userId,
-        city,
-        country: "Unknown", // TODO: extract from city
+        city: currentCity || "Unknown",
+        country: country || null,
         category: category as any,
         subcategory: subcategory || null,
         title: title.trim(),
@@ -117,25 +123,36 @@ export default function PostModal({ city, onPosted }: Props) {
         tags: splitTags(tags),
         images: imageUrls,
         location_lat: lat || null,
-        location_lng: lon || null,
+        location_lng: lng || null,
+        website_url: finalWebsiteUrl,
       });
 
       // Convert back to frontend format for optimistic update
       const frontendListing: Listing = {
         id: dbListing.id,
+        user_id: dbListing.user_id || userId,
         city: dbListing.city,
-        category: dbListing.category as CategoryKey,
-        subcategory: dbListing.subcategory || "",
-        jobKind,
+        country: dbListing.country,
+        category: dbListing.category as string,
+        subcategory: dbListing.subcategory,
         title: dbListing.title,
         description: dbListing.description || "",
-        price: dbListing.price_cents ? dbListing.price_cents / 100 : undefined,
-        currency: dbListing.currency || "USD",
-        contact: { phone: dbListing.contact_value || "" },
+        price: dbListing.price_cents ? dbListing.price_cents / 100 : null,
+        currency: dbListing.currency,
+        contact_phone: dbListing.contact_method === 'phone' ? dbListing.contact_value : null,
+        contact_whatsapp: dbListing.contact_method === 'whatsapp' ? dbListing.contact_value : null,
+        contact_telegram: dbListing.contact_method === 'telegram' ? dbListing.contact_value : null,
+        contact_email: dbListing.contact_method === 'email' ? dbListing.contact_value : null,
+        website_url: dbListing.website_url,
         tags: dbListing.tags || [],
-        photos: dbListing.images || [],
         images: dbListing.images || [],
-        lat: dbListing.location_lat || undefined,
+        lat: dbListing.location_lat,
+        lng: dbListing.location_lng,
+        created_at: dbListing.created_at,
+        // Legacy compatibility
+        jobKind,
+        contact: { phone: dbListing.contact_value || "" },
+        photos: dbListing.images || [],
         lon: dbListing.location_lng || undefined,
         createdAt: new Date(dbListing.created_at).getTime(),
         updatedAt: new Date(dbListing.updated_at).getTime(),
@@ -151,6 +168,9 @@ export default function PostModal({ city, onPosted }: Props) {
       setTags("");
       setPhotos([]);
       setPrice(undefined);
+      setContact({ phone:"", email:"", whatsapp:"", telegram:"" });
+      setWebsiteUrl("");
+      setCountry("");
       
       toast("Posted successfully!");
 
@@ -238,6 +258,14 @@ export default function PostModal({ city, onPosted }: Props) {
           </div>
         )}
 
+        {/* City & Country */}
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <input className="border rounded-md px-3 py-2" placeholder="City *"
+            value={currentCity} onChange={(e)=>setCurrentCity(e.target.value)} />
+          <input className="border rounded-md px-3 py-2" placeholder="Country (optional)"
+            value={country} onChange={(e)=>setCountry(e.target.value)} />
+        </div>
+
         {/* Common fields */}
         <input className="border rounded-md px-3 py-2 mb-3 w-full" placeholder="Title *"
           value={title} onChange={(e)=>setTitle(e.target.value)} />
@@ -250,6 +278,9 @@ export default function PostModal({ city, onPosted }: Props) {
           value={description} onChange={(e)=>setDescription(e.target.value)} />
         <input className="border rounded-md px-3 py-2 mb-3 w-full" placeholder="Tags (comma or # separated)"
           value={tags} onChange={(e)=>setTags(e.target.value)} />
+        
+        <input className="border rounded-md px-3 py-2 mb-3 w-full" placeholder="Website (optional)"
+          value={websiteUrl} onChange={(e)=>setWebsiteUrl(e.target.value)} />
 
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1">Photos (up to 8)</label>
@@ -270,13 +301,13 @@ export default function PostModal({ city, onPosted }: Props) {
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           <input className="border rounded-md px-3 py-2" placeholder="Lat (optional)" value={lat ?? ""} onChange={(e)=>setLat(num(e.target.value))}/>
-          <input className="border rounded-md px-3 py-2" placeholder="Lon (optional)" value={lon ?? ""} onChange={(e)=>setLon(num(e.target.value))}/>
+          <input className="border rounded-md px-3 py-2" placeholder="Lng (optional)" value={lng ?? ""} onChange={(e)=>setLng(num(e.target.value))}/>
         </div>
 
         <button
           className="w-full py-3 rounded-md bg-primary text-primary-foreground font-semibold"
           onClick={submit}
-          disabled={!title || !subcategory || submitting}
+          disabled={!title || !subcategory || !currentCity || submitting}
         >
           {submitting ? "Publishing..." : "Publish"}
         </button>

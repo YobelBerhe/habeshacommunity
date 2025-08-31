@@ -136,6 +136,7 @@ export function seedDemoData(city: string) {
   
   const demo: Listing[] = [{
     id: "demo1",
+    user_id: "demo-user",
     title: `Furnished Room in ${city}`,
     category: "housing",
     subcategory: "apartments",
@@ -143,6 +144,15 @@ export function seedDemoData(city: string) {
     tags: ["furnished","wifi","safe"],
     price: 350,
     currency: "USD",
+    contact_phone: null,
+    contact_whatsapp: "+1-555-0123",
+    contact_telegram: null,
+    contact_email: null,
+    website_url: null,
+    country: null,
+    lat: null,
+    lng: null,
+    created_at: new Date().toISOString(),
     createdAt: Date.now(),
     updatedAt: Date.now(),
     images: [],

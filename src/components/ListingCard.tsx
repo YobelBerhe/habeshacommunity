@@ -156,7 +156,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
             </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Calendar className="w-3 h-3" />
-              <span>{formatDate(listing.createdAt)}</span>
+              <span>{formatDate(listing.createdAt || 0)}</span>
             </div>
           </div>
         </div>

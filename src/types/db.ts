@@ -7,7 +7,7 @@ export interface ListingRow {
   id: UUID;
   user_id: UUID | null;
   city: string;
-  country: string;
+  country: string | null;
   category: ListingCategory;
   subcategory: string | null;
   title: string;
@@ -20,6 +20,7 @@ export interface ListingRow {
   images: string[] | null;        // URLs in storage
   location_lat: number | null;
   location_lng: number | null;
+  website_url: string | null;     // NEW
   status: ListingStatus;
   created_at: string;
   updated_at: string;
