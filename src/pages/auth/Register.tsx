@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -48,12 +49,12 @@ export default function Register() {
               <p className="font-medium">Account created!</p>
               <p className="text-sm mt-1">Check your email to confirm your account, then sign in.</p>
             </div>
-            <a 
-              href="/auth/login" 
+            <Link 
+              to="/auth/login" 
               className="block w-full bg-primary text-primary-foreground rounded-md p-3 font-medium text-center hover:bg-primary/90 transition-colors"
             >
               Go to Sign In
-            </a>
+            </Link>
           </div>
         ) : (
           <form onSubmit={onSubmit} className="space-y-4">
@@ -104,7 +105,7 @@ export default function Register() {
         
         {!done && (
           <div className="text-sm mt-6 text-center text-muted-foreground">
-            Already have an account? <a className="text-primary hover:underline" href="/auth/login">Sign in</a>
+            Already have an account? <Link className="text-primary hover:underline" to="/auth/login">Sign in</Link>
           </div>
         )}
       </div>

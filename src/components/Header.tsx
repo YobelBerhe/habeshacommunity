@@ -2,6 +2,7 @@ import CitySearch from "@/components/CitySearch";
 import ThemeToggle from "@/components/ThemeToggle";
 import AuthButtons from "@/components/AuthButtons";
 import { useAuth } from '@/store/auth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Header({
   currentCity, onCityChange, onAccountClick, onLogoClick, rightExtra
@@ -13,6 +14,7 @@ export default function Header({
   rightExtra?: React.ReactNode;
 }) {
   const { user, openAuth, openPost } = useAuth();
+  const navigate = useNavigate();
   
   console.log('🎯 Header render - user:', user);
   console.log('🎯 Header render - user type:', typeof user);
@@ -52,7 +54,7 @@ export default function Header({
         <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
           {rightExtra}
-          <button className="btn" onClick={() => window.location.href = '/forums'}>Forums</button>
+          <button className="btn" onClick={() => navigate('/forums')}>Forums</button>
           <button className="btn btn-primary" onClick={handlePostClick}>+ Post</button>
           <AuthButtons />
         </div>

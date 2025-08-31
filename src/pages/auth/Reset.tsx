@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Reset() {
   const [phase, setPhase] = useState<"request"|"update">("request");
@@ -8,6 +9,7 @@ export default function Reset() {
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // When redirected back from email, exchange for a session then show "update" form
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function Reset() {
     setLoading(false);
     if (error) return setErr(error.message);
     setMsg("Password updated. Redirecting…");
-    setTimeout(()=>{ window.location.href = "/"; }, 800);
+    setTimeout(() => navigate("/"), 800);
   };
 
   return (
@@ -115,7 +117,7 @@ export default function Reset() {
         )}
         
         <div className="text-sm mt-6 text-center text-muted-foreground">
-          <a className="text-primary hover:underline" href="/auth/login">Back to sign in</a>
+          <Link className="text-primary hover:underline" to="/auth/login">Back to sign in</Link>
         </div>
       </div>
     </div>

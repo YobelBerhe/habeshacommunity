@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,7 +16,7 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return setErr(error.message);
-    window.location.href = "/"; // back home
+    navigate("/"); // back home
   };
 
   return (
@@ -66,9 +68,9 @@ export default function Login() {
         </form>
         
         <div className="text-sm mt-6 space-y-2 text-center">
-          <a href="/auth/reset" className="text-primary hover:underline block">Forgot your password?</a>
+          <Link to="/auth/reset" className="text-primary hover:underline block">Forgot your password?</Link>
           <div className="text-muted-foreground">
-            Don't have an account? <a href="/auth/register" className="text-primary hover:underline">Create one</a>
+            Don't have an account? <Link to="/auth/register" className="text-primary hover:underline">Create one</Link>
           </div>
         </div>
       </div>

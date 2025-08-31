@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 export default function AuthButtons() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -27,8 +28,8 @@ export default function AuthButtons() {
   }
 
   return (
-    <a href="/auth/login" className="px-3 py-1 rounded border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+    <Link to="/auth/login" className="px-3 py-1 rounded border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
       Sign in
-    </a>
+    </Link>
   );
 }

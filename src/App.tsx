@@ -10,6 +10,7 @@ import Register from "./pages/auth/Register";
 import Reset from "./pages/auth/Reset";
 import ForumsBoards from "./pages/forums/Boards";
 import BoardTopics from "./pages/forums/BoardTopics";
+import TopicView from "./pages/forums/TopicView";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/auth/reset" element={<Reset />} />
           <Route path="/forums" element={<ForumsBoards />} />
           <Route path="/forums/:boardKey" element={<BoardTopics />} />
+          <Route path="/forums/topic/:id" element={<TopicView />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<div>Page not found</div>} />
         </Routes>
