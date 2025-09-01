@@ -202,6 +202,19 @@
   @apply bg-primary text-primary-foreground border-primary hover:bg-primary/90;
 }
 
+/* Mobile UI utility classes */
+.btn-chip { 
+  @apply px-3 py-2 rounded-full bg-muted text-sm font-medium; 
+}
+
+.btn-chip-outline { 
+  @apply px-3 py-2 rounded-full border text-sm font-medium; 
+}
+
+.btn-secondary { 
+  @apply w-full px-3 py-2 rounded-md border hover:bg-muted text-left; 
+}
+
 /* Star markers for world map */
 .star-container {
   background: none !important;

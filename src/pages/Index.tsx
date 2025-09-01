@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
+import MobileHeader from "@/components/layout/MobileHeader";
 import FilterBar from "@/components/FilterBar";
+import { FiltersBar } from "@/components/search/FiltersBar";
+import { RecentCarousel } from "@/components/home/RecentCarousel";
 import ListingGrid from "@/components/ListingGrid";
 import PostModal from "@/components/PostModal";
 import AccountModal from "@/components/AccountModal";
@@ -345,24 +348,40 @@ export default function Index() {
     <>
       <BootstrapAuth />
       <div className="min-h-screen bg-background">
-      <Header
-        currentCity={appState.city}
-        onCityChange={handleCityChange}
-        onAccountClick={handleAccountClick}
-        onLogoClick={handleLogoClick}
-        rightExtra={
-          <LanguageToggle
-            value={lang}
-            onChange={(newLang) => {
-              setLang(newLang as Lang);
-              localStorage.setItem("hn.lang", newLang);
-            }}
-          />
-        }
-      />
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <Header
+          currentCity={appState.city}
+          onCityChange={handleCityChange}
+          onAccountClick={handleAccountClick}
+          onLogoClick={handleLogoClick}
+          rightExtra={
+            <LanguageToggle
+              value={lang}
+              onChange={(newLang) => {
+                setLang(newLang as Lang);
+                localStorage.setItem("hn.lang", newLang);
+              }}
+            />
+          }
+        />
+      </div>
+      
+      {/* Mobile Header */}
+      <MobileHeader />
+      
+      {/* Mobile Filters Bar - only show when we have listings and a category */}
+      {filters.category && appState.city && (
+        <FiltersBar
+          topCategory={filters.category as CategoryKey}
+          selectedSubcategory={filters.subcategory}
+          onPickSub={(sub) => setFilters({ ...filters, subcategory: sub || undefined })}
+          onClear={() => setFilters({ category: undefined, subcategory: undefined, query: "", minPrice: undefined, maxPrice: undefined, jobKind: undefined })}
+        />
+      )}
 
       {!shouldShowCityIndex && (
-        <div className="container mx-auto px-4 pt-4">
+        <div className="container mx-auto px-4 pt-4 hidden md:block">
           <div className="flex flex-col md:flex-row gap-3 items-stretch mb-2">
             <select
               className="field min-w-[160px]"
@@ -441,6 +460,11 @@ export default function Index() {
           </>
         ) : (
           <div id="listing-root">
+            {/* Mobile Recent Carousel */}
+            <div className="md:hidden mb-4">
+              <RecentCarousel />
+            </div>
+            
             {appState.viewMode === "grid" ? (
               <ListingGrid
                 listings={filteredListings}
