@@ -432,7 +432,13 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      listing_counts: {
+        Row: {
+          subcategory: string | null
+          total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       touch_presence: {
