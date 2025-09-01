@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Heart, MessageCircle, Plus } from 'lucide-react';
+import { X, Heart, MessageCircle, Plus, ChevronDown } from 'lucide-react';
 import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
 import { useLockBody } from '@/hooks/useLockBody';
@@ -78,7 +78,14 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
         {/* Sticky header with safe-area */}
         <div className="sticky top-0 z-[1] bg-background/95 backdrop-blur border-b">
           <div className="pt-[env(safe-area-inset-top)] px-4 h-14 flex items-center justify-between">
-            <h3 className="text-base font-semibold text-primary">HabeshaCommunity</h3>
+            <div className="flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
+                alt="HabeshaCommunity" 
+                className="w-6 h-6 rounded"
+              />
+              <h3 className="text-base font-semibold text-primary">HabeshaCommunity</h3>
+            </div>
             <button
               aria-label="Close"
               onClick={() => onOpenChange(false)}
@@ -95,7 +102,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             <details key={section} className="group border-b last:border-0">
               <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
                 <span className="font-medium capitalize">{getSectionLabel(section)}</span>
-                <span className="text-primary">▾</span>
+                <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
               </summary>
 
               <ul className="pb-2">
@@ -108,7 +115,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                       <button
                         onClick={() => {
                           onOpenChange(false);
-                          navigate(`/?category=${section}&subcategory=${sub}`);
+                          navigate(`/browse?category=${section}&sub=${sub}`);
                         }}
                         className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                       >
@@ -130,7 +137,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               onClick={handlePost}
             >
               <Plus className="w-4 h-4" />
-              + Post
+              Post
             </button>
             
             <Link 
@@ -146,7 +153,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               className="btn-secondary flex items-center gap-3 text-left"
               onClick={handleDonate}
             >
-              <span className="text-blue-500">💙</span>
+              <span>💙</span>
               Support HabeshaCommunity
             </button>
 

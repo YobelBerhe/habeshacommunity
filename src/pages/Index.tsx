@@ -20,6 +20,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
 import WorldMapHero from "@/components/WorldMapHero";
+import CitySearchBar from "@/components/CitySearchBar";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
@@ -441,11 +442,21 @@ export default function Index() {
 
       {/* Hero section when no city is selected */}
       {!appState.city && (
-        <WorldMapHero 
-          lang={lang}
-          onBrowseHousing={() => setFilters({ ...filters, category: "housing" })}
-          onFindJobs={() => setFilters({ ...filters, category: "jobs" })}
-        />
+        <>
+          <WorldMapHero 
+            lang={lang}
+            onBrowseHousing={() => setFilters({ ...filters, category: "housing" })}
+            onFindJobs={() => setFilters({ ...filters, category: "jobs" })}
+          />
+          
+          {/* City Search Bar Below Hero */}
+          <div className="container mx-auto px-4 py-6">
+            <div className="max-w-md mx-auto">
+              <h2 className="text-xl font-semibold mb-4 text-center">Search by City</h2>
+              <CitySearchBar />
+            </div>
+          </div>
+        </>
       )}
 
       <main className="container mx-auto px-4 py-6">
