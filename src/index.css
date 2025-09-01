@@ -212,7 +212,7 @@
 }
 
 .btn-secondary { 
-  @apply w-full px-3 py-2 rounded-md border hover:bg-muted text-left; 
+  @apply w-full px-3 py-2 rounded-md border hover:bg-muted text-left text-sm; 
 }
 
 /* Star markers for world map */

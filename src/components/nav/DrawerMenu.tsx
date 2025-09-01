@@ -1,8 +1,10 @@
 import { Fragment, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { X, Heart, MessageCircle, Settings, Languages, Moon, Sun } from 'lucide-react';
+import { X, Heart, MessageCircle, Settings } from 'lucide-react';
 import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
+import { useLockBody } from '@/hooks/useLockBody';
 import ThemeToggle from '@/components/ThemeToggle';
 
 type Props = { open: boolean; onOpenChange: (v: boolean) => void };
@@ -10,6 +12,8 @@ type Props = { open: boolean; onOpenChange: (v: boolean) => void };
 export function DrawerMenu({ open, onOpenChange }: Props) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const { openAuth } = useAuth();
+  
+  useLockBody(open);
 
   useEffect(() => {
     if (!open) return;
@@ -33,11 +37,9 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
     };
     if (open) {
       document.addEventListener('keydown', onEsc);
-      document.body.style.overflow = 'hidden';
     }
     return () => {
       document.removeEventListener('keydown', onEsc);
-      document.body.style.overflow = 'unset';
     };
   }, [open, onOpenChange]);
 
@@ -49,54 +51,70 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <>
-      {/* backdrop */}
+      {/* Backdrop */}
       <div
-        onClick={() => onOpenChange(false)}
         className="fixed inset-0 z-40 bg-black/40"
+        onClick={() => onOpenChange(false)}
       />
-      {/* drawer */}
-      <aside className="fixed left-0 top-0 h-full w-[85%] max-w-[380px] bg-background shadow-xl z-50">
-        <div className="p-4 border-b flex items-center justify-between">
-          <span className="font-semibold">Browse</span>
-          <button onClick={() => onOpenChange(false)} aria-label="Close" className="p-2 hover:bg-muted rounded">
-            <X className="w-4 h-4" />
-          </button>
+
+      {/* Panel */}
+      <aside
+        className="fixed inset-0 z-50 bg-background shadow-2xl flex flex-col"
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* Sticky header with safe-area */}
+        <div className="sticky top-0 z-[1] bg-background/95 backdrop-blur border-b">
+          <div className="pt-[env(safe-area-inset-top)] px-4 h-14 flex items-center justify-between">
+            <h3 className="text-base font-semibold">Browse</h3>
+            <button
+              aria-label="Close"
+              onClick={() => onOpenChange(false)}
+              className="p-2 rounded hover:bg-muted"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        <nav className="overflow-y-auto p-2 pb-24 h-full">
+        {/* Scroll area */}
+        <div className="overflow-y-auto overscroll-contain px-2 pb-[env(safe-area-inset-bottom)]">
           {(['housing','jobs','services','community'] as const).map(section => (
-            <Fragment key={section}>
-              <p className="mt-4 mb-2 text-xs font-semibold uppercase text-muted-foreground px-3">
-                {TAXONOMY[section].name.en}
-              </p>
-              <div className="rounded-lg border overflow-hidden">
+            <details key={section} className="group border-b last:border-0">
+              <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
+                <span className="font-medium capitalize">{getSectionLabel(section)}</span>
+                <span className="text-muted-foreground">▾</span>
+              </summary>
+
+              <ul className="pb-2">
                 {TAXONOMY[section].sub.slice(0, 8).map(sub => {
                   const key = `${section}:${sub}`;
                   const label = LABELS[sub]?.en || sub.replace(/_/g, ' ');
                   const n = counts[key] ?? 0;
                   return (
-                    <Link
-                      key={key}
-                      to={`/?category=${section}&subcategory=${sub}`}
-                      onClick={() => onOpenChange(false)}
-                      className="flex items-center justify-between px-3 py-3 hover:bg-muted border-b last:border-b-0"
-                    >
-                      <span className="text-sm">{label}</span>
-                      {n > 0 && (
-                        <span className="text-xs bg-muted rounded-full px-2 py-0.5 font-medium">{n}</span>
-                      )}
-                    </Link>
+                    <li key={key}>
+                      <Link
+                        to={`/?category=${section}&subcategory=${sub}`}
+                        onClick={() => onOpenChange(false)}
+                        className="flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50"
+                      >
+                        <span className="text-sm">{label}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {n}
+                        </span>
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
-            </Fragment>
+              </ul>
+            </details>
           ))}
 
-          <div className="mt-6 space-y-2">
+          <div className="mt-4 grid gap-2">
             <Link 
-              className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left" 
+              className="btn-secondary flex items-center gap-3" 
               to="/me/listings" 
               onClick={() => onOpenChange(false)}
             >
@@ -105,7 +123,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </Link>
             
             <Link 
-              className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left" 
+              className="btn-secondary flex items-center gap-3" 
               to="/forums" 
               onClick={() => onOpenChange(false)}
             >
@@ -114,28 +132,36 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </Link>
             
             <button 
-              className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+              className="btn-secondary flex items-center gap-3 text-left"
               onClick={handleDonate}
             >
               <Heart className="w-4 h-4 text-red-500" />
-              Support HabeshaNetwork
+              ❤️ Support HabeshaNetwork
             </button>
-          </div>
 
-          {/* Toggles */}
-          <div className="mt-8 border-t pt-4 space-y-3">
-            <div className="flex items-center justify-between px-3 py-2">
-              <span className="text-sm font-medium">Theme</span>
-              <ThemeToggle />
+            <div className="flex gap-2 mt-4">
+              <button className="btn-secondary w-1/2" onClick={() => {}}>
+                <span className="text-sm">EN / ትግ</span>
+              </button>
+              <div className="btn-secondary w-1/2 flex items-center justify-between">
+                <span className="text-sm">Theme</span>
+                <ThemeToggle />
+              </div>
             </div>
-            
-            <button className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted">
-              <span className="text-sm">Language</span>
-              <span className="text-sm text-muted-foreground">EN ⇄ ትግ</span>
-            </button>
           </div>
-        </nav>
+        </div>
       </aside>
-    </>
+    </>,
+    document.body
   );
+}
+
+function getSectionLabel(section: string) {
+  switch(section) {
+    case 'housing': return 'Housing / Rentals';
+    case 'jobs': return 'Jobs (+Gigs)';
+    case 'services': return 'Services';
+    case 'community': return 'Community';
+    default: return section;
+  }
 }
