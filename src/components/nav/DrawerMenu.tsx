@@ -5,9 +5,9 @@ import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
 import ThemeToggle from '@/components/ThemeToggle';
 
-type Props = { open: boolean; onClose: () => void };
+type Props = { open: boolean; onOpenChange: (v: boolean) => void };
 
-export function DrawerMenu({ open, onClose }: Props) {
+export function DrawerMenu({ open, onOpenChange }: Props) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const { openAuth } = useAuth();
 
@@ -27,26 +27,40 @@ export function DrawerMenu({ open, onClose }: Props) {
     });
   }, [open]);
 
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    if (open) {
+      document.addEventListener('keydown', onEsc);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', onEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [open, onOpenChange]);
+
   const handleDonate = () => {
-    onClose();
+    onOpenChange(false);
     // Trigger existing donate modal
     document.dispatchEvent(new CustomEvent('open-donate'));
   };
 
+  if (!open) return null;
+
   return (
-    <div className={`fixed inset-0 z-50 ${open ? '' : 'pointer-events-none'}`}>
+    <>
       {/* backdrop */}
       <div
-        onClick={onClose}
-        className={`absolute inset-0 bg-black/40 transition-opacity ${open ? 'opacity-100' : 'opacity-0'}`}
+        onClick={() => onOpenChange(false)}
+        className="fixed inset-0 z-40 bg-black/40"
       />
       {/* drawer */}
-      <aside
-        className={`absolute left-0 top-0 h-full w-[85%] max-w-[380px] bg-background shadow-xl transition-transform ${open ? 'translate-x-0' : '-translate-x-full'}`}
-      >
+      <aside className="fixed left-0 top-0 h-full w-[85%] max-w-[380px] bg-background shadow-xl z-50">
         <div className="p-4 border-b flex items-center justify-between">
           <span className="font-semibold">Browse</span>
-          <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-muted rounded">
+          <button onClick={() => onOpenChange(false)} aria-label="Close" className="p-2 hover:bg-muted rounded">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -66,7 +80,7 @@ export function DrawerMenu({ open, onClose }: Props) {
                     <Link
                       key={key}
                       to={`/?category=${section}&subcategory=${sub}`}
-                      onClick={onClose}
+                      onClick={() => onOpenChange(false)}
                       className="flex items-center justify-between px-3 py-3 hover:bg-muted border-b last:border-b-0"
                     >
                       <span className="text-sm">{label}</span>
@@ -84,7 +98,7 @@ export function DrawerMenu({ open, onClose }: Props) {
             <Link 
               className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left" 
               to="/me/listings" 
-              onClick={onClose}
+              onClick={() => onOpenChange(false)}
             >
               <Settings className="w-4 h-4" />
               My listings
@@ -93,7 +107,7 @@ export function DrawerMenu({ open, onClose }: Props) {
             <Link 
               className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left" 
               to="/forums" 
-              onClick={onClose}
+              onClick={() => onOpenChange(false)}
             >
               <MessageCircle className="w-4 h-4" />
               Forums
@@ -122,6 +136,6 @@ export function DrawerMenu({ open, onClose }: Props) {
           </div>
         </nav>
       </aside>
-    </div>
+    </>
   );
 }

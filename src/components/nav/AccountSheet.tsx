@@ -4,7 +4,7 @@ import { X, Heart, Settings, LogOut, LogIn, UserPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
 
-export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void }) {
+export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange:(v:boolean)=>void }) {
   const [email, setEmail] = useState<string|null>(null);
   const { user, refresh } = useAuth();
 
@@ -15,24 +15,38 @@ export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void 
     }
   }, [open, user]);
 
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    if (open) {
+      document.addEventListener('keydown', onEsc);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', onEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [open, onOpenChange]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
     await refresh();
-    onClose();
+    onOpenChange(false);
   };
 
+  if (!open) return null;
+
   return (
-    <div className={`fixed inset-0 z-50 ${open ? '' : 'pointer-events-none'}`}>
+    <>
       <div 
-        className={`absolute inset-0 bg-black/40 transition-opacity ${open ? 'opacity-100' : 'opacity-0'}`} 
-        onClick={onClose}
+        className="fixed inset-0 z-40 bg-black/40" 
+        onClick={() => onOpenChange(false)}
       />
-      <div 
-        className={`absolute left-0 right-0 bottom-0 bg-background rounded-t-2xl shadow-xl transition-transform ${open ? 'translate-y-0' : 'translate-y-full'}`}
-      >
+      <div className="fixed left-0 right-0 bottom-0 z-50 bg-background rounded-t-2xl shadow-xl">
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Account</h3>
-          <button onClick={onClose} className="p-2 hover:bg-muted rounded">
+          <button onClick={() => onOpenChange(false)} className="p-2 hover:bg-muted rounded">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -46,7 +60,7 @@ export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void 
               
               <Link 
                 to="/saved" 
-                onClick={onClose} 
+                onClick={() => onOpenChange(false)} 
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <Heart className="w-4 h-4 text-red-500" />
@@ -55,7 +69,7 @@ export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void 
               
               <Link 
                 to="/account" 
-                onClick={onClose} 
+                onClick={() => onOpenChange(false)} 
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <Settings className="w-4 h-4" />
@@ -64,7 +78,7 @@ export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void 
               
               <button 
                 onClick={signOut} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left text-red-600"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out
@@ -74,7 +88,7 @@ export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void 
             <>
               <Link 
                 to="/auth/login" 
-                onClick={onClose} 
+                onClick={() => onOpenChange(false)} 
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <LogIn className="w-4 h-4" />
@@ -83,7 +97,7 @@ export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void 
               
               <Link 
                 to="/auth/register" 
-                onClick={onClose} 
+                onClick={() => onOpenChange(false)} 
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <UserPlus className="w-4 h-4" />
@@ -93,6 +107,6 @@ export function AccountSheet({ open, onClose }:{ open:boolean; onClose:()=>void 
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

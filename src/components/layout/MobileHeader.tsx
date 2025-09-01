@@ -47,8 +47,8 @@ export default function MobileHeader() {
         </button>
       </div>
 
-      <DrawerMenu open={openDrawer} onClose={() => setOpenDrawer(false)} />
-      <AccountSheet open={openAccount} onClose={() => setOpenAccount(false)} />
+      <DrawerMenu open={openDrawer} onOpenChange={setOpenDrawer} />
+      <AccountSheet open={openAccount} onOpenChange={setOpenAccount} />
     </header>
   );
 }
