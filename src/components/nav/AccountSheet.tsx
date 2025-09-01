@@ -51,17 +51,17 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
           </button>
         </div>
 
-        <div className="p-4 space-y-2">
+        <div className="p-4 space-y-2 flex flex-col items-center">
           {user && email ? (
             <>
-              <div className="text-sm text-muted-foreground mb-4">
+              <div className="text-sm text-muted-foreground mb-4 text-center">
                 Signed in as {email}
               </div>
               
               <Link 
                 to="/account/saved" 
                 onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <Heart className="w-4 h-4 text-red-500" />
                 Saved listings
@@ -70,7 +70,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               <Link 
                 to="/account/listings" 
                 onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <List className="w-4 h-4" />
                 My listings
@@ -79,7 +79,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               <Link 
                 to="/account/settings" 
                 onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <Settings className="w-4 h-4" />
                 Account settings
@@ -87,7 +87,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               
               <button 
                 onClick={signOut} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left text-muted-foreground mt-4"
+                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left text-red-600 hover:text-red-700 mt-4"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out
@@ -98,7 +98,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               <Link 
                 to="/auth/login" 
                 onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <LogIn className="w-4 h-4" />
                 Sign in
@@ -107,7 +107,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               <Link 
                 to="/auth/register" 
                 onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
                 <UserPlus className="w-4 h-4" />
                 Create account
