@@ -1,43 +1,43 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/store/auth';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function AuthCallback() {
-  const [msg, setMsg] = useState('Finishing sign-in…');
   const navigate = useNavigate();
-  const refresh = useAuth(s => s.refresh);
 
   useEffect(() => {
-    (async () => {
+    const handleAuthCallback = async () => {
       try {
-        console.log('🔄 AuthCallback: Starting auth exchange...');
+        const { data, error } = await supabase.auth.getSession();
         
-        // Required for PKCE/magic-link flows in SPAs
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        if (error) throw error;
+        if (error) {
+          console.error('Auth callback error:', error);
+          navigate('/auth/login?error=callback_failed');
+          return;
+        }
 
-        // Check session after exchange
-        const { data: sessionData } = await supabase.auth.getSession();
-        console.log('✅ Session after exchange:', sessionData);
-
-        await refresh(); // update zustand store
-        setMsg('Signed in! Redirecting…');
-      } catch (err: any) {
-        console.error('❌ Auth callback error:', err);
-        setMsg(err?.message ?? 'Could not complete sign-in.');
-      } finally {
-        setTimeout(() => {
-          // Send them back home
+        if (data.session) {
+          // Successfully authenticated, redirect to home
           navigate('/', { replace: true });
-        }, 800);
+        } else {
+          // No session, redirect to login
+          navigate('/auth/login', { replace: true });
+        }
+      } catch (error) {
+        console.error('Auth callback error:', error);
+        navigate('/auth/login?error=callback_failed');
       }
-    })();
-  }, [navigate, refresh]);
+    };
+
+    handleAuthCallback();
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-sm text-muted-foreground">{msg}</p>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-2">Confirming your account...</h2>
+        <p className="text-muted-foreground">Please wait while we sign you in.</p>
+      </div>
     </div>
   );
 }

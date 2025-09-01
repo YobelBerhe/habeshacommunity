@@ -443,16 +443,16 @@ export default function Index() {
       {/* Hero section when no city is selected */}
       {!appState.city && (
         <>
-          <WorldMapHero 
-            lang={lang}
-            onBrowseHousing={() => window.location.href = "/browse?category=housing"}
-            onFindJobs={() => window.location.href = "/browse?category=jobs"}
-          />
-          
-          {/* City Search Bar Below Header */}
+          {/* City Search Bar Above Hero */}
           <div className="container mx-auto px-4 py-4">
             <CitySearchBar placeholder="City (e.g. Asmara, Oakland, Frankfurt)" />
           </div>
+          
+          <WorldMapHero 
+            lang={lang}
+            onBrowseHousing={() => navigate("/browse?category=housing")}
+            onFindJobs={() => navigate("/browse?category=jobs")}
+          />
         </>
       )}
 

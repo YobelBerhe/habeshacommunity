@@ -14,7 +14,7 @@ interface CitySearchBarProps {
 export default function CitySearchBar({ 
   value, 
   onCitySelect, 
-  placeholder = "Type a city… (e.g., Asmara, Oakland, Frankfurt)",
+  placeholder = "City (e.g. Asmara, Oakland, Frankfurt)",
   className = ""
 }: CitySearchBarProps) {
   const [q, setQ] = useState(value ?? "");

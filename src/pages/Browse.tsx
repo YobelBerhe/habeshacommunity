@@ -2,19 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
-import { FiltersBar } from "@/components/search/FiltersBar";
 import ListingGrid from "@/components/ListingGrid";
 import MapCluster from "@/components/MapCluster";
 import CitySearchBar from "@/components/CitySearchBar";
 import LanguageToggle from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { setParams, getParam } from "@/lib/url";
-import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
+import { TAXONOMY, CategoryKey, LABELS } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
 import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings } from "@/repo/listings";
-import { Grid3X3, Map } from "lucide-react";
+import { Grid3X3, Map, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Browse() {
@@ -61,8 +61,6 @@ export default function Browse() {
 
   // Load data when filters change
   useEffect(() => {
-    if (!filters.city) return;
-    
     const loadListings = async () => {
       setLoading(true);
       try {
@@ -211,59 +209,126 @@ export default function Browse() {
       </div>
 
       {/* Filter Controls */}
-      {filters.city && (
-        <div className="border-b bg-background">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              {/* Category Filter */}
-              {filters.category && (
-                <FiltersBar
-                  topCategory={filters.category as CategoryKey}
-                  selectedSubcategory={filters.subcategory}
-                  onPickSub={(sub) => setFilters({ ...filters, subcategory: sub || undefined })}
-                  onClear={handleClearAll}
-                />
-              )}
+      <div className="border-b bg-background">
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2 mb-3">
+            {/* Category Filter */}
+            <Popover modal={false}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  {filters.category 
+                    ? TAXONOMY[filters.category as CategoryKey]?.name.en || "Category"
+                    : "All categories"
+                  }
+                  <ChevronDown className="w-3 h-3 text-primary" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="bottom" 
+                align="start" 
+                className="w-56 p-1"
+                collisionPadding={8}
+              >
+                <div className="space-y-1">
+                  <button
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                    onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
+                  >
+                    All categories
+                  </button>
+                  {Object.entries(TAXONOMY).map(([key, value]) => (
+                    <button
+                      key={key}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                      onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
+                    >
+                      {value.name.en}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Subcategory Filter */}
+            <Popover modal={false}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1"
+                  disabled={!filters.category}
+                >
+                  {filters.subcategory 
+                    ? LABELS[filters.subcategory]?.en || filters.subcategory
+                    : filters.category ? "Subcategory" : "Select category first"
+                  }
+                  <ChevronDown className="w-3 h-3 text-primary" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="bottom" 
+                align="start" 
+                className="w-56 p-1 max-h-64 overflow-y-auto"
+                collisionPadding={8}
+              >
+                {filters.category && (
+                  <div className="space-y-1">
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                      onClick={() => setFilters({ ...filters, subcategory: undefined })}
+                    >
+                      All {TAXONOMY[filters.category as CategoryKey]?.name.en.toLowerCase()}
+                    </button>
+                    {TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
+                      <button
+                        key={sub}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm text-primary"
+                        onClick={() => setFilters({ ...filters, subcategory: sub })}
+                      >
+                        {LABELS[sub]?.en || sub}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
+
+            {/* Clear All */}
+            <Button variant="ghost" size="sm" onClick={handleClearAll}>
+              Clear all
+            </Button>
+          </div>
+          
+          {/* View Mode Toggle & Results Count */}
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              {filteredListings.length} results
+              {filters.city && ` in ${filters.city}`}
             </div>
             
-            {/* View Mode Toggle & Results Count */}
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {filteredListings.length} {t(lang, "results")}
-                {filters.city && ` in ${filters.city}`}
-              </div>
-              
-              <div className="flex gap-1">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "map" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("map")}
-                >
-                  <Map className="w-4 h-4" />
-                </Button>
-              </div>
+            <div className="flex gap-1">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "map" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("map")}
+              >
+                <Map className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        {!filters.city ? (
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold mb-4">Search by City</h1>
-            <div className="max-w-md mx-auto">
-              <CitySearchBar />
-            </div>
-          </div>
-        ) : viewMode === "grid" ? (
+        {viewMode === "grid" ? (
           <ListingGrid
             listings={filteredListings}
             onListingSelect={handleListingSelect}
