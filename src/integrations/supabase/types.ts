@@ -441,6 +441,13 @@ export type Database = {
       }
     }
     Functions: {
+      get_listing_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          subcategory: string
+          total: number
+        }[]
+      }
       touch_presence: {
         Args: { p_city: string }
         Returns: undefined
