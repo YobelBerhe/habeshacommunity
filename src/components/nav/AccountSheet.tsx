@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { X, Heart, Settings, LogOut, LogIn, UserPlus } from 'lucide-react';
+import { X, Heart, Settings, LogOut, LogIn, UserPlus, List } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
 
@@ -65,6 +65,15 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               >
                 <Heart className="w-4 h-4 text-red-500" />
                 Saved listings
+              </Link>
+
+              <Link 
+                to="/my/listings" 
+                onClick={() => onOpenChange(false)} 
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
+              >
+                <List className="w-4 h-4" />
+                My listings
               </Link>
               
               <Link 

@@ -308,3 +308,7 @@
   text-align: center;
   line-height: 1;
 }
+
+.btn-primary {
+  @apply w-full rounded-md bg-primary text-primary-foreground px-3 py-2 text-sm hover:bg-primary/90;
+}

@@ -31,10 +31,10 @@ export default function MobileHeader() {
         <Link to="/" className="flex items-center gap-2">
           <img 
             src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
-            alt="HabeshaNetwork" 
+            alt="HabeshaCommunity" 
             className="w-6 h-6 rounded"
           />
-          <span className="font-semibold tracking-tight text-sm">HabeshaNetwork</span>
+          <span className="font-semibold tracking-tight text-sm">HabeshaCommunity</span>
         </Link>
 
         {/* Account bubble */}

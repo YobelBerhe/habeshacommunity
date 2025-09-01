@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
-import { X, Heart, MessageCircle, Settings } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, Heart, MessageCircle, Plus } from 'lucide-react';
 import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
 import { useLockBody } from '@/hooks/useLockBody';
@@ -11,7 +11,8 @@ type Props = { open: boolean; onOpenChange: (v: boolean) => void };
 
 export function DrawerMenu({ open, onOpenChange }: Props) {
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const { openAuth } = useAuth();
+  const { user, openAuth, openPost } = useAuth();
+  const navigate = useNavigate();
   
   useLockBody(open);
 
@@ -49,6 +50,15 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
     document.dispatchEvent(new CustomEvent('open-donate'));
   };
 
+  const handlePost = () => {
+    onOpenChange(false);
+    if (!user) {
+      openAuth();
+      return;
+    }
+    openPost();
+  };
+
   if (!open) return null;
 
   return createPortal(
@@ -68,7 +78,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
         {/* Sticky header with safe-area */}
         <div className="sticky top-0 z-[1] bg-background/95 backdrop-blur border-b">
           <div className="pt-[env(safe-area-inset-top)] px-4 h-14 flex items-center justify-between">
-            <h3 className="text-base font-semibold">Browse</h3>
+            <h3 className="text-base font-semibold text-primary">HabeshaCommunity</h3>
             <button
               aria-label="Close"
               onClick={() => onOpenChange(false)}
@@ -85,26 +95,28 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             <details key={section} className="group border-b last:border-0">
               <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
                 <span className="font-medium capitalize">{getSectionLabel(section)}</span>
-                <span className="text-muted-foreground">▾</span>
+                <span className="text-primary">▾</span>
               </summary>
 
               <ul className="pb-2">
-                {TAXONOMY[section].sub.slice(0, 8).map(sub => {
+                {TAXONOMY[section].sub.map(sub => {
                   const key = `${section}:${sub}`;
                   const label = LABELS[sub]?.en || sub.replace(/_/g, ' ');
                   const n = counts[key] ?? 0;
                   return (
                     <li key={key}>
-                      <Link
-                        to={`/?category=${section}&subcategory=${sub}`}
-                        onClick={() => onOpenChange(false)}
-                        className="flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50"
+                      <button
+                        onClick={() => {
+                          onOpenChange(false);
+                          navigate(`/?category=${section}&subcategory=${sub}`);
+                        }}
+                        className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                       >
-                        <span className="text-sm">{label}</span>
+                        <span className="text-sm text-primary">{label}</span>
                         <span className="text-xs text-muted-foreground">
                           {n}
                         </span>
-                      </Link>
+                      </button>
                     </li>
                   );
                 })}
@@ -113,14 +125,13 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           ))}
 
           <div className="mt-4 grid gap-2">
-            <Link 
-              className="btn-secondary flex items-center gap-3" 
-              to="/me/listings" 
-              onClick={() => onOpenChange(false)}
+            <button 
+              className="btn-primary flex items-center justify-center gap-3 font-semibold"
+              onClick={handlePost}
             >
-              <Settings className="w-4 h-4" />
-              My listings
-            </Link>
+              <Plus className="w-4 h-4" />
+              + Post
+            </button>
             
             <Link 
               className="btn-secondary flex items-center gap-3" 
@@ -128,15 +139,15 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               onClick={() => onOpenChange(false)}
             >
               <MessageCircle className="w-4 h-4" />
-              Forums
+              Chat
             </Link>
             
             <button 
               className="btn-secondary flex items-center gap-3 text-left"
               onClick={handleDonate}
             >
-              <Heart className="w-4 h-4 text-red-500" />
-              ❤️ Support HabeshaNetwork
+              <span className="text-blue-500">💙</span>
+              Support HabeshaCommunity
             </button>
 
             <div className="flex gap-2 mt-4">
