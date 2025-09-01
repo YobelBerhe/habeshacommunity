@@ -54,7 +54,7 @@ export default function Register() {
             alt="HabeshaNetwork" 
             className="w-12 h-12 mx-auto rounded-lg mb-2"
           />
-          <h1 className="text-2xl font-bold">Join HabeshaNetwork</h1>
+          <h1 className="text-2xl font-bold">Join HabeshaCommunity</h1>
           <p className="text-muted-foreground">Create your account</p>
         </div>
         

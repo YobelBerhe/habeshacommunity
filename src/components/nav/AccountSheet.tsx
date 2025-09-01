@@ -87,7 +87,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               
               <button 
                 onClick={signOut} 
-                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left text-red-600 hover:text-red-700 mt-4"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border hover:bg-muted text-sm text-red-600 hover:text-red-700 mt-4"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out
@@ -98,7 +98,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               <Link 
                 to="/auth/login" 
                 onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border hover:bg-muted text-sm"
               >
                 <LogIn className="w-4 h-4" />
                 Sign in
@@ -107,7 +107,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               <Link 
                 to="/auth/register" 
                 onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border hover:bg-muted text-sm"
               >
                 <UserPlus className="w-4 h-4" />
                 Create account

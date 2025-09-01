@@ -1,16 +1,20 @@
 import { Fragment, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Heart, MessageCircle, Plus, ChevronDown } from 'lucide-react';
+import { X, Heart, MessageCircle, Plus, ChevronDown, Edit3, Bookmark } from 'lucide-react';
 import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
 import { useLockBody } from '@/hooks/useLockBody';
 import ThemeToggle from '@/components/ThemeToggle';
+import LanguageToggle from '@/components/LanguageToggle';
+import { supabase } from '@/integrations/supabase/client';
 
 type Props = { open: boolean; onOpenChange: (v: boolean) => void };
 
 export function DrawerMenu({ open, onOpenChange }: Props) {
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [myListingsOpen, setMyListingsOpen] = useState(false);
+  const [language, setLanguage] = useState('EN');
   const { user, openAuth, openPost } = useAuth();
   const navigate = useNavigate();
   
@@ -18,18 +22,35 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    // Mock counts for now - replace with actual API call
-    setCounts({
-      'housing:apartments': 42,
-      'housing:rooms_shared': 18,
-      'housing:sublets_temporary': 12,
-      'jobs:accounting_finance': 25,
-      'jobs:food_bev_hosp': 38,
-      'services:legal': 15,
-      'services:beauty': 22,
-      'community:events': 31,
-      'community:volunteers': 19,
-    });
+    
+    // Fetch real counts from Supabase
+    const fetchCounts = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_listing_counts');
+        if (error) {
+          console.error('Error fetching counts:', error);
+          return;
+        }
+        
+        const countsMap: Record<string, number> = {};
+        data?.forEach((item: any) => {
+          if (item.subcategory) {
+            // Find which category this subcategory belongs to
+            for (const [category, categoryData] of Object.entries(TAXONOMY)) {
+              if (categoryData.sub.includes(item.subcategory)) {
+                countsMap[`${category}:${item.subcategory}`] = item.total;
+                break;
+              }
+            }
+          }
+        });
+        setCounts(countsMap);
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    };
+    
+    fetchCounts();
   }, [open]);
 
   useEffect(() => {
@@ -46,8 +67,9 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
   const handleDonate = () => {
     onOpenChange(false);
-    // Trigger existing donate modal
-    document.dispatchEvent(new CustomEvent('open-donate'));
+    // Open donation URL from environment variable
+    const donateUrl = import.meta.env.VITE_DONATE_URL || 'https://stripe.com';
+    window.open(donateUrl, '_blank');
   };
 
   const handlePost = () => {
@@ -78,14 +100,14 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
         {/* Sticky header with safe-area */}
         <div className="sticky top-0 z-[1] bg-background/95 backdrop-blur border-b">
           <div className="pt-[env(safe-area-inset-top)] px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2" onClick={() => onOpenChange(false)}>
               <img 
                 src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
                 alt="HabeshaCommunity" 
                 className="w-6 h-6 rounded"
               />
               <h3 className="text-base font-semibold text-primary">HabeshaCommunity</h3>
-            </div>
+            </Link>
             <button
               aria-label="Close"
               onClick={() => onOpenChange(false)}
@@ -139,10 +161,36 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               <Plus className="w-4 h-4" />
               Post
             </button>
+
+            {/* My Listings Toggle */}
+            <details className="group border rounded">
+              <summary className="flex items-center justify-between p-3 cursor-pointer select-none hover:bg-muted/50">
+                <span className="font-medium">My Listings</span>
+                <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
+              </summary>
+              <div className="px-3 pb-2 space-y-1">
+                <Link 
+                  to="/account/saved" 
+                  onClick={() => onOpenChange(false)}
+                  className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 text-sm"
+                >
+                  <Heart className="w-4 h-4 text-red-500" />
+                  ❤️ Saved Listings
+                </Link>
+                <Link 
+                  to="/account/listings" 
+                  onClick={() => onOpenChange(false)}
+                  className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 text-sm"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  ✏️ Edit My Listings
+                </Link>
+              </div>
+            </details>
             
             <Link 
               className="btn-secondary flex items-center gap-3" 
-              to="/forums" 
+              to="/chat" 
               onClick={() => onOpenChange(false)}
             >
               <MessageCircle className="w-4 h-4" />
@@ -154,13 +202,13 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               onClick={handleDonate}
             >
               <span>💙</span>
-              Support HabeshaCommunity
+              💙 Support HabeshaCommunity
             </button>
 
             <div className="flex gap-2 mt-4">
-              <button className="btn-secondary w-1/2" onClick={() => {}}>
-                <span className="text-sm">EN / ትግ</span>
-              </button>
+              <div className="btn-secondary w-1/2 flex items-center justify-center">
+                <LanguageToggle value={language} onChange={setLanguage} />
+              </div>
               <div className="btn-secondary w-1/2 flex items-center justify-between">
                 <span className="text-sm">Theme</span>
                 <ThemeToggle />

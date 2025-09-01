@@ -19,7 +19,7 @@ import QuickFilters from "@/components/QuickFilters";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
-import WorldMapHero from "@/components/WorldMapHero";
+import { getStarPoints } from "@/services/activeUsers";
 import CitySearchBar from "@/components/CitySearchBar";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
@@ -47,6 +47,9 @@ export default function Index() {
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
   const [user, setUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [demo, setDemo] = useState(false);
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
     const initialAppState = getAppState();
@@ -100,6 +103,22 @@ export default function Index() {
     checkInitialSession();
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  // Load live data for hero section
+  useEffect(() => {
+    const loadLiveData = async () => {
+      const res = await getStarPoints();
+      setTotal(res.total);
+      setDemo(res.demo);
+      setIsLoading(false);
+    };
+
+    loadLiveData();
+    
+    // Refresh periodically
+    const interval = setInterval(loadLiveData, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   // Load data when city or filters change
@@ -445,14 +464,56 @@ export default function Index() {
         <>
           {/* City Search Bar Above Hero */}
           <div className="container mx-auto px-4 py-4">
-            <CitySearchBar placeholder="City (e.g. Asmara, Oakland, Frankfurt)" />
+          <CitySearchBar 
+            placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
+            onCitySelect={handleCityChange}
+          />
           </div>
           
-          <WorldMapHero 
-            lang={lang}
-            onBrowseHousing={() => navigate("/browse?category=housing")}
-            onFindJobs={() => navigate("/browse?category=jobs")}
-          />
+          <section className="w-screen relative left-1/2 right-1/2 -mx-[50vw] py-8 md:py-12">
+            <div className="max-w-7xl mx-auto px-4 md:px-6">
+              <div className="text-center space-y-6 mb-8">
+                <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+                  {t(lang, "connect_headline_1")}
+                  <br />
+                  <span className="text-primary">{t(lang, "connect_headline_2")}</span>
+                </h1>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-lg">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                    <span className="font-semibold">
+                      Live now: <strong>{isLoading ? '...' : total.toLocaleString()}</strong> people
+                    </span>
+                  </div>
+                  {demo && (
+                    <p className="text-xs text-muted-foreground">
+                      demo data until accounts go live
+                    </p>
+                  )}
+                </div>
+
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {t(lang, "connect_sub")}
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button 
+                    className="px-5 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-colors"
+                    onClick={() => navigate('/browse?category=housing')}
+                  >
+                    {t(lang, "housing")}
+                  </button>
+                  <button 
+                    className="px-5 py-3 rounded-lg bg-muted hover:bg-muted/80 font-semibold transition-colors"
+                    onClick={() => navigate('/browse?category=jobs')}
+                  >
+                    {t(lang, "jobs")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
         </>
       )}
 
@@ -493,16 +554,14 @@ export default function Index() {
       </main>
 
       {/* Fixed bottom Post button */}
-      {!appState.city && (
-        <div className="fixed bottom-0 left-0 right-0 z-30 bg-background border-t p-4 md:hidden">
-          <button 
-            onClick={handlePostClick}
-            className="btn-primary w-full"
-          >
-            + Post your first listing
-          </button>
-        </div>
-      )}
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-primary text-primary-foreground p-4 md:hidden">
+        <button 
+          onClick={handlePostClick}
+          className="w-full py-3 rounded-lg bg-primary-foreground text-primary font-semibold hover:bg-primary-foreground/90 transition-colors"
+        >
+          + Post your first listing
+        </button>
+      </div>
 
       <footer className="bg-muted/30 mt-12 py-8">
         <div className="container mx-auto px-4 text-center">

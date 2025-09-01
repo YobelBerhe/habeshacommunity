@@ -1,8 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* HabeshaNetwork Design System - Inspired by Ethiopian & Eritrean Heritage */
+/* HabeshaCommunity Design System - Inspired by Ethiopian & Eritrean Heritage */
 
 @layer base {
   :root {
@@ -307,6 +308,20 @@
   min-width: 16px;
   text-align: center;
   line-height: 1;
+}
+
+/* Force inputs to be light themed for better visibility while typing */
+.force-input-light input,
+.force-input-light textarea {
+  background-color: #fff !important;
+  color: #000 !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .force-input-light input::placeholder,
+.dark .force-input-light textarea::placeholder {
+  color: #000 !important;
+  opacity: 0.6 !important;
 }
 
 .btn-primary {
