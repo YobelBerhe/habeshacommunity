@@ -1,6 +1,7 @@
 import type { ActiveUsers } from "@/types";
 import { DEMO_ACTIVE } from "@/data/demoActive";
 import { jitterAround } from "@/utils/geoJitter";
+import { getLivePresence } from "./presence";
 
 export type StarPoint = {
   id: string;
@@ -79,27 +80,48 @@ export function subscribeToActiveUsers(callback: (data: ActiveUsers) => void) {
 }
 
 export async function getStarPoints(): Promise<{ total: number; points: StarPoint[]; demo: boolean; }> {
-  const hasSupabase =
-    import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!hasSupabase) {
-    // explode demo city counts into individual jittered points
-    const pts: StarPoint[] = [];
-    DEMO_ACTIVE.points.forEach((c) => {
-      for (let i = 0; i < c.count; i++) {
-        const j = jitterAround(c.lat, c.lon);
-        pts.push({
-          id: `demo-${c.city}-${i}`,
-          city: c.city,
-          country: c.country,
-          lat: j.lat,
-          lon: j.lon,
-        });
-      }
-    });
-    return { total: pts.length, points: pts, demo: true };
+  try {
+    // Try to get live presence data
+    const liveData = await getLivePresence();
+    
+    if (liveData.total > 0) {
+      // Convert live presence to star points
+      const pts: StarPoint[] = [];
+      liveData.cities.forEach((cityData) => {
+        if (cityData.lat && cityData.lng) {
+          // Create multiple jittered points for each user in the city
+          for (let i = 0; i < cityData.count; i++) {
+            const j = jitterAround(cityData.lat, cityData.lng);
+            pts.push({
+              id: `live-${cityData.city}-${i}`,
+              city: cityData.city,
+              country: "",
+              lat: j.lat,
+              lon: j.lon,
+            });
+          }
+        }
+      });
+      
+      return { total: liveData.total, points: pts, demo: false };
+    }
+  } catch (error) {
+    console.error('Failed to get live presence, falling back to demo:', error);
   }
 
-  // TODO: LIVE mode - replace with actual Supabase query
-  return { total: 0, points: [], demo: true };
+  // Fallback to demo data
+  const pts: StarPoint[] = [];
+  DEMO_ACTIVE.points.forEach((c) => {
+    for (let i = 0; i < c.count; i++) {
+      const j = jitterAround(c.lat, c.lon);
+      pts.push({
+        id: `demo-${c.city}-${i}`,
+        city: c.city,
+        country: c.country,
+        lat: j.lat,
+        lon: j.lon,
+      });
+    }
+  });
+  return { total: pts.length, points: pts, demo: true };
 }

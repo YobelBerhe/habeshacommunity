@@ -25,6 +25,8 @@ export default function WorldMapHero({
   useEffect(() => {
     let mounted = true;
     let handleResize: (() => void) | null = null;
+    let lightTileLayer: L.TileLayer | null = null;
+    let darkTileLayer: L.TileLayer | null = null;
 
     // init map once
     if (!mapRef.current) {
@@ -37,15 +39,22 @@ export default function WorldMapHero({
       });
       mapRef.current = map;
 
-      const isDark = document.documentElement.classList.contains("dark");
-
-      const tileUrl = isDark
-        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-
-      L.tileLayer(tileUrl, {
+      // Create both tile layers
+      lightTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '© OpenStreetMap',
+      });
+      
+      darkTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
         attribution: '© OpenStreetMap, © Carto',
-      }).addTo(map);
+      });
+
+      // Add the appropriate layer based on current theme
+      const isDark = document.documentElement.classList.contains("dark");
+      if (isDark) {
+        darkTileLayer.addTo(map);
+      } else {
+        lightTileLayer.addTo(map);
+      }
 
       // Fit the whole world in view
       map.fitWorld({ animate: false, padding: [20, 20] });
@@ -54,6 +63,38 @@ export default function WorldMapHero({
       // Handle resize to maintain world view
       handleResize = () => map.invalidateSize();
       window.addEventListener("resize", handleResize);
+
+      // Listen for theme changes
+      const observer = new MutationObserver(() => {
+        if (!map) return;
+        
+        const isNowDark = document.documentElement.classList.contains("dark");
+        
+        // Remove current layer and add new one
+        if (isNowDark) {
+          if (lightTileLayer && map.hasLayer(lightTileLayer)) {
+            map.removeLayer(lightTileLayer);
+          }
+          if (darkTileLayer && !map.hasLayer(darkTileLayer)) {
+            darkTileLayer.addTo(map);
+          }
+        } else {
+          if (darkTileLayer && map.hasLayer(darkTileLayer)) {
+            map.removeLayer(darkTileLayer);
+          }
+          if (lightTileLayer && !map.hasLayer(lightTileLayer)) {
+            lightTileLayer.addTo(map);
+          }
+        }
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+
+      // Store observer for cleanup
+      (map as any)._themeObserver = observer;
     }
 
     // load points
@@ -80,8 +121,15 @@ export default function WorldMapHero({
       if (handleResize) {
         window.removeEventListener("resize", handleResize);
       }
-      mapRef.current?.remove();
-      mapRef.current = null;
+      if (mapRef.current) {
+        // Cleanup theme observer
+        const observer = (mapRef.current as any)._themeObserver;
+        if (observer) {
+          observer.disconnect();
+        }
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
     };
   }, []);
 

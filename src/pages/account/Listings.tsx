@@ -1,0 +1,172 @@
+import { useEffect, useState } from 'react';
+import { Plus, Edit, Trash2, Package } from 'lucide-react';
+import { useAuth } from '@/store/auth';
+import { supabase } from '@/integrations/supabase/client';
+import ListingCard from '@/components/ListingCard';
+import MobileHeader from '@/components/layout/MobileHeader';
+import { toast } from 'sonner';
+import type { Listing } from '@/types';
+
+export default function MyListings() {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user, openPost } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadMyListings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const myListings = data?.map(l => ({
+          id: l.id,
+          user_id: l.user_id || "",
+          city: l.city,
+          country: l.country || "",
+          category: l.category,
+          subcategory: l.subcategory,
+          title: l.title,
+          description: l.description || "",
+          price: l.price_cents ? l.price_cents / 100 : null,
+          currency: l.currency,
+          contact_phone: l.contact_method === 'phone' ? l.contact_value : null,
+          contact_whatsapp: l.contact_method === 'whatsapp' ? l.contact_value : null,
+          contact_telegram: l.contact_method === 'telegram' ? l.contact_value : null,
+          contact_email: l.contact_method === 'email' ? l.contact_value : null,
+          website_url: l.website_url,
+          tags: l.tags || [],
+          images: l.images || [],
+          lat: l.location_lat,
+          lng: l.location_lng,
+          created_at: l.created_at,
+          contact: { phone: l.contact_value || "" },
+          photos: l.images || [],
+          lon: l.location_lng || undefined,
+          createdAt: new Date(l.created_at).getTime(),
+          updatedAt: new Date(l.updated_at).getTime(),
+          hasImage: !!(l.images?.length),
+        } as Listing)) || [];
+
+        setListings(myListings);
+      } catch (error) {
+        console.error('Error loading my listings:', error);
+        toast.error('Failed to load your listings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMyListings();
+  }, [user]);
+
+  const handleEdit = (listing: Listing) => {
+    // TODO: Open PostModal with listing prefilled
+    openPost();
+    toast.info('Edit functionality coming soon');
+  };
+
+  const handleDelete = async (listingId: string) => {
+    if (!confirm('Delete this listing? This action cannot be undone.')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .delete()
+        .eq('id', listingId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      
+      setListings(prev => prev.filter(l => l.id !== listingId));
+      toast.success('Listing deleted successfully');
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      toast.error('Failed to delete listing');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MobileHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading your listings...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <MobileHeader />
+      
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Package className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">My Listings</h1>
+          </div>
+          <button 
+            onClick={openPost}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Post
+          </button>
+        </div>
+
+        {listings.length === 0 ? (
+          <div className="text-center py-12">
+            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No listings yet</h2>
+            <p className="text-muted-foreground mb-6">Create your first listing to get started</p>
+            <button 
+              onClick={openPost}
+              className="btn-primary"
+            >
+              Post your first listing
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {listings.map(listing => (
+              <div key={listing.id} className="relative">
+                <ListingCard 
+                  listing={listing}
+                  onSelect={() => window.location.href = `/l/${listing.id}`}
+                />
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(listing);
+                    }}
+                    className="p-2 bg-background/80 hover:bg-background rounded-full shadow-md"
+                  >
+                    <Edit className="w-4 h-4 text-primary" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(listing.id);
+                    }}
+                    className="p-2 bg-background/80 hover:bg-background rounded-full shadow-md"
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

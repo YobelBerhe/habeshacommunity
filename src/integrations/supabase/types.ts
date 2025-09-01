@@ -258,6 +258,48 @@ export type Database = {
           },
         ]
       }
+      presence: {
+        Row: {
+          city: string | null
+          last_seen: string
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          last_seen?: string
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          last_seen?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -393,7 +435,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      touch_presence: {
+        Args: { p_city: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

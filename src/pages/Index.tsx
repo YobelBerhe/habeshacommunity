@@ -445,16 +445,13 @@ export default function Index() {
         <>
           <WorldMapHero 
             lang={lang}
-            onBrowseHousing={() => setFilters({ ...filters, category: "housing" })}
-            onFindJobs={() => setFilters({ ...filters, category: "jobs" })}
+            onBrowseHousing={() => window.location.href = "/browse?category=housing"}
+            onFindJobs={() => window.location.href = "/browse?category=jobs"}
           />
           
-          {/* City Search Bar Below Hero */}
-          <div className="container mx-auto px-4 py-6">
-            <div className="max-w-md mx-auto">
-              <h2 className="text-xl font-semibold mb-4 text-center">Search by City</h2>
-              <CitySearchBar />
-            </div>
+          {/* City Search Bar Below Header */}
+          <div className="container mx-auto px-4 py-4">
+            <CitySearchBar placeholder="City (e.g. Asmara, Oakland, Frankfurt)" />
           </div>
         </>
       )}
@@ -494,6 +491,18 @@ export default function Index() {
           </div>
         )}
       </main>
+
+      {/* Fixed bottom Post button */}
+      {!appState.city && (
+        <div className="fixed bottom-0 left-0 right-0 z-30 bg-background border-t p-4 md:hidden">
+          <button 
+            onClick={handlePostClick}
+            className="btn-primary w-full"
+          >
+            + Post your first listing
+          </button>
+        </div>
+      )}
 
       <footer className="bg-muted/30 mt-12 py-8">
         <div className="container mx-auto px-4 text-center">

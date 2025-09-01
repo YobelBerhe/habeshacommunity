@@ -6,6 +6,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [city, setCity] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,16 +21,27 @@ export default function Register() {
       return setErr("Password must be at least 6 characters");
     }
     
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
       options: { 
-        data: { display_name: name },
+        data: { display_name: name, city },
         emailRedirectTo: `${window.location.origin}/`
       },
     });
+    
     setLoading(false);
     if (error) return setErr(error.message);
+    
+    // Create profile entry
+    if (authData.user) {
+      await supabase.from('profiles').insert({
+        id: authData.user.id,
+        display_name: name,
+        city: city
+      });
+    }
+    
     setDone(true);
   };
 
@@ -68,7 +80,22 @@ export default function Register() {
                 placeholder="Your name"
                 value={name} 
                 onChange={e=>setName(e.target.value)} 
+                required
               />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">City you live in</label>
+              <input 
+                className="w-full border rounded-md p-3 bg-background" 
+                placeholder="e.g. Asmara, Oakland, Frankfurt"
+                value={city} 
+                onChange={e=>setCity(e.target.value)} 
+                required
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                This will appear on our live activity map
+              </p>
             </div>
             
             <div>

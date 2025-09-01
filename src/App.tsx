@@ -9,6 +9,9 @@ import AuthCallback from "./pages/AuthCallback";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Reset from "./pages/auth/Reset";
+import Saved from "./pages/account/Saved";
+import Listings from "./pages/account/Listings";
+import Settings from "./pages/account/Settings";
 import ForumsBoards from "./pages/forums/Boards";
 import BoardTopics from "./pages/forums/BoardTopics";
 import TopicView from "./pages/forums/TopicView";
@@ -29,6 +32,9 @@ const App = () => (
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register" element={<Register />} />
           <Route path="/auth/reset" element={<Reset />} />
+          <Route path="/account/saved" element={<Saved />} />
+          <Route path="/account/listings" element={<Listings />} />
+          <Route path="/account/settings" element={<Settings />} />
           <Route path="/forums" element={<ForumsBoards />} />
           <Route path="/forums/:boardKey" element={<BoardTopics />} />
           <Route path="/forums/topic/:id" element={<TopicView />} />

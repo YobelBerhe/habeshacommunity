@@ -59,7 +59,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               </div>
               
               <Link 
-                to="/saved" 
+                to="/account/saved" 
                 onClick={() => onOpenChange(false)} 
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
@@ -68,7 +68,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               </Link>
 
               <Link 
-                to="/my/listings" 
+                to="/account/listings" 
                 onClick={() => onOpenChange(false)} 
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
@@ -77,7 +77,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               </Link>
               
               <Link 
-                to="/account" 
+                to="/account/settings" 
                 onClick={() => onOpenChange(false)} 
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left"
               >
@@ -87,7 +87,7 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
               
               <button 
                 onClick={signOut} 
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left text-red-600"
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-md border hover:bg-muted text-left text-muted-foreground mt-4"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out
