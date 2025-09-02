@@ -1,6 +1,6 @@
 import { TAXONOMY, LABELS, CategoryKey, isGig } from "@/lib/taxonomy";
 import { getListingsByCity } from "@/utils/storage";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 
 type Props = {
@@ -34,61 +34,49 @@ export default function CityIndex({ city, lang = "en", onOpen }: Props) {
         {cityLabel(city)} — {lang === "ti" ? "መዝገብ ምድብታት" : "Browse by category"}
       </h1>
 
-      {/* Category Toggle Selection */}
-      <div className="mb-8">
-        <ToggleGroup 
-          type="single" 
-          value={selectedCategory} 
-          onValueChange={handleCategorySelect}
-          className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full"
-        >
-          {COLUMNS.map((cat) => (
-            <ToggleGroupItem
-              key={cat}
-              value={cat}
-              className="flex flex-col items-center justify-center p-4 h-auto border border-border/50 bg-card hover:bg-accent data-[state=on]:bg-primary data-[state=on]:text-primary-foreground rounded-lg transition-all"
-            >
-              <span className="font-semibold text-sm">
-                {TAXONOMY[cat].name[lang]}
-              </span>
-              <span className="text-xs text-muted-foreground mt-1">
-                ({count(cat)})
-              </span>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+      {/* Category and Subcategory Dropdowns */}
+      <div className="mb-8 flex flex-col sm:flex-row gap-3">
+        <Select value={selectedCategory} onValueChange={handleCategorySelect}>
+          <SelectTrigger className="w-full sm:w-[200px] bg-card border-border/50">
+            <SelectValue placeholder={lang === "ti" ? "ምርጫ ምድብ" : "Select Category"} />
+          </SelectTrigger>
+          <SelectContent className="bg-popover border-border z-50">
+            {COLUMNS.map((cat) => (
+              <SelectItem key={cat} value={cat} className="hover:bg-accent">
+                <span className="font-medium">
+                  {TAXONOMY[cat].name[lang]} ({count(cat)})
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {selectedCategory && (
+          <Select onValueChange={(sub) => onOpen({ category: selectedCategory, sub })}>
+            <SelectTrigger className="w-full sm:w-[200px] bg-card border-border/50">
+              <SelectValue placeholder={lang === "ti" ? "ምርጫ ንኣብ ምድብ" : "Select Subcategory"} />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border z-50">
+              {TAXONOMY[selectedCategory].sub.map((sub) => {
+                const label = (LABELS[sub]?.[lang] ?? sub.replace(/_/g, " "));
+                const c = count(selectedCategory, sub);
+                return (
+                  <SelectItem key={sub} value={sub} className="hover:bg-accent">
+                    <span className="font-medium">{label} ({c})</span>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
-      {/* Subcategory Grid - only show when category is selected */}
-      {selectedCategory && (
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-4 text-center">
-            {TAXONOMY[selectedCategory].name[lang]} {lang === "ti" ? "ንኣብ ምድብታት" : "Subcategories"}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {TAXONOMY[selectedCategory].sub.map((sub) => {
-              const label = (LABELS[sub]?.[lang] ?? sub.replace(/_/g, " "));
-              const c = count(selectedCategory, sub);
-              return (
-                <button
-                  key={sub}
-                  onClick={() => onOpen({ category: selectedCategory, sub })}
-                  className="flex items-center justify-between rounded-lg px-4 py-3 border border-border/50 bg-card hover:bg-accent transition-colors"
-                >
-                  <span className="text-left font-medium">{label}</span>
-                  <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">{c}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Hints */}
       <div className="text-center text-sm text-muted-foreground">
         {lang === "ti"
           ? "ምድብ ምርጫ ድሕሪኡ ንኣብ ምድብ ንምርዳእ"
-          : "Select a category above, then choose a subcategory to see listings"}
+          : "Select a category, then choose a subcategory to see listings"}
       </div>
     </section>
   );

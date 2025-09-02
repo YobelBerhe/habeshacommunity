@@ -462,8 +462,8 @@ export default function Index() {
         </div>
       )}
 
-      {/* Background Map */}
-      <div id="bg-map" className="fixed inset-0 -z-10 pointer-events-none">
+      {/* Background Map - Full Height for Homepage */}
+      <div id="bg-map" className={`${!appState.city ? 'min-h-[calc(100vh-200px)]' : 'fixed inset-0'} -z-10 pointer-events-none`}>
         <GlobalMap 
           focusCity={appState.cityLat && appState.cityLon ? {
             lat: parseFloat(appState.cityLat),
