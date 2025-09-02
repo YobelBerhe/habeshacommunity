@@ -19,6 +19,7 @@ import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings } from "@/repo/listings";
 import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
 import { useAuth } from '@/store/auth';
+import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
 import { Grid3X3, Map, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
@@ -100,10 +101,10 @@ export default function Browse() {
           description: row.description || "",
           price: row.price_cents ? row.price_cents / 100 : null,
           currency: row.currency,
-          contact_phone: ('contact' in row && row.contact?.contact_method === 'phone') ? row.contact.contact_value : null,
-          contact_whatsapp: ('contact' in row && row.contact?.contact_method === 'whatsapp') ? row.contact.contact_value : null,
-          contact_telegram: ('contact' in row && row.contact?.contact_method === 'telegram') ? row.contact.contact_value : null,
-          contact_email: ('contact' in row && row.contact?.contact_method === 'email') ? row.contact.contact_value : null,
+          contact_phone: hasContactAccess(user, row) ? getContactValue(row.contact, 'phone') : null,
+          contact_whatsapp: hasContactAccess(user, row) ? getContactValue(row.contact, 'whatsapp') : null,
+          contact_telegram: hasContactAccess(user, row) ? getContactValue(row.contact, 'telegram') : null,
+          contact_email: hasContactAccess(user, row) ? getContactValue(row.contact, 'email') : null,
           website_url: row.website_url,
           tags: row.tags || [],
           images: row.images || [],
@@ -111,7 +112,7 @@ export default function Browse() {
           lng: row.location_lng,
           created_at: row.created_at,
           // Legacy compatibility
-          contact: { phone: ('contact' in row && row.contact?.contact_value) || "" },
+          contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
           photos: row.images || [],
           lon: row.location_lng || undefined,
           createdAt: new Date(row.created_at).getTime(),

@@ -17,15 +17,23 @@ export default function MyListings() {
     
     const loadMyListings = async () => {
       try {
-        const { data, error } = await supabase
+        const { data: listings, error: listingsError } = await supabase
           .from('listings')
-          .select('*')
+          .select(`
+            *,
+            listing_contacts (
+              id,
+              contact_method,
+              contact_value,
+              created_at
+            )
+          `)
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (listingsError) throw listingsError;
 
-        const myListings = data?.map(l => ({
+        const myListings = listings?.map(l => ({
           id: l.id,
           user_id: l.user_id || "",
           city: l.city,
@@ -36,17 +44,17 @@ export default function MyListings() {
           description: l.description || "",
           price: l.price_cents ? l.price_cents / 100 : null,
           currency: l.currency,
-          contact_phone: l.contact_method === 'phone' ? l.contact_value : null,
-          contact_whatsapp: l.contact_method === 'whatsapp' ? l.contact_value : null,
-          contact_telegram: l.contact_method === 'telegram' ? l.contact_value : null,
-          contact_email: l.contact_method === 'email' ? l.contact_value : null,
+          contact_phone: l.listing_contacts?.[0]?.contact_method === 'phone' ? l.listing_contacts[0].contact_value : null,
+          contact_whatsapp: l.listing_contacts?.[0]?.contact_method === 'whatsapp' ? l.listing_contacts[0].contact_value : null,
+          contact_telegram: l.listing_contacts?.[0]?.contact_method === 'telegram' ? l.listing_contacts[0].contact_value : null,
+          contact_email: l.listing_contacts?.[0]?.contact_method === 'email' ? l.listing_contacts[0].contact_value : null,
           website_url: l.website_url,
           tags: l.tags || [],
           images: l.images || [],
           lat: l.location_lat,
           lng: l.location_lng,
           created_at: l.created_at,
-          contact: { phone: l.contact_value || "" },
+          contact: { phone: l.listing_contacts?.[0]?.contact_value || "" },
           photos: l.images || [],
           lon: l.location_lng || undefined,
           createdAt: new Date(l.created_at).getTime(),

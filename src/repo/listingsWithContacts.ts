@@ -36,9 +36,9 @@ export async function fetchListingsWithContacts(filters: {
   const { data, error } = await query.order('created_at', { ascending: false }).limit(filters.limit ?? 60);
   if (error) throw error;
   
-  return data.map(item => ({
+  return (data || []).map(item => ({
     ...item,
-    contact: item.listing_contacts?.[0] || undefined
+    contact: (item as any).listing_contacts?.[0] || undefined
   })) as (ListingRow & { contact?: ListingContactRow })[];
 }
 

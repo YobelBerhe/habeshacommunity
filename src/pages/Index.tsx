@@ -30,7 +30,10 @@ import { t, Lang } from "@/lib/i18n";
 import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings, fetchListingById } from "@/repo/listings";
+import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
+import { getListingContact } from "@/repo/contacts";
 import { onAuthChange, getUserId, signOut } from "@/repo/auth";
+import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
 import { toast } from "sonner";
 
 export default function Index() {
@@ -128,56 +131,66 @@ export default function Index() {
   useEffect(() => {
     if (!appState.city) return;
     
-    const loadListings = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchListings({
-          city: appState.city,
-          category: filters.category,
-          q: filters.query,
-          minPrice: filters.minPrice,
-          maxPrice: filters.maxPrice,
-          subcategory: filters.subcategory,
-        });
-        setListings(data.map(row => ({
-          id: row.id,
-          user_id: row.user_id || "",
-          city: row.city,
-          country: row.country,
-          category: row.category as string,
-          subcategory: row.subcategory,
-          title: row.title,
-          description: row.description || "",
-          price: row.price_cents ? row.price_cents / 100 : null,
-          currency: row.currency,
-          contact_phone: row.contact_method === 'phone' ? row.contact_value : null,
-          contact_whatsapp: row.contact_method === 'whatsapp' ? row.contact_value : null,
-          contact_telegram: row.contact_method === 'telegram' ? row.contact_value : null,
-          contact_email: row.contact_method === 'email' ? row.contact_value : null,
-          website_url: row.website_url,
-          tags: row.tags || [],
-          images: row.images || [],
-          lat: row.location_lat,
-          lng: row.location_lng,
-          created_at: row.created_at,
-          // Legacy compatibility
-          contact: { phone: row.contact_value || "" },
-          photos: row.images || [],
-          lon: row.location_lng || undefined,
-          createdAt: new Date(row.created_at).getTime(),
-          updatedAt: new Date(row.updated_at).getTime(),
-          hasImage: !!(row.images?.length),
-        })));
-      } catch (error) {
-        console.error("Failed to load listings:", error);
-        toast("Failed to load listings");
-      } finally {
-        setLoading(false);
-      }
-    };
+      const loadListings = async () => {
+        setLoading(true);
+        try {
+          const data = user 
+            ? await fetchListingsWithContacts({
+                city: appState.city,
+                category: filters.category,
+                q: filters.query,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                subcategory: filters.subcategory,
+              })
+            : await fetchListings({
+                city: appState.city,
+                category: filters.category,
+                q: filters.query,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                subcategory: filters.subcategory,
+              });
+              
+          setListings(data.map(row => ({
+            id: row.id,
+            user_id: row.user_id || "",
+            city: row.city,
+            country: row.country,
+            category: row.category as string,
+            subcategory: row.subcategory,
+            title: row.title,
+            description: row.description || "",
+            price: row.price_cents ? row.price_cents / 100 : null,
+            currency: row.currency,
+            contact_phone: hasContactAccess(user, row) ? getContactValue(row.contact, 'phone') : null,
+            contact_whatsapp: hasContactAccess(user, row) ? getContactValue(row.contact, 'whatsapp') : null,
+            contact_telegram: hasContactAccess(user, row) ? getContactValue(row.contact, 'telegram') : null,
+            contact_email: hasContactAccess(user, row) ? getContactValue(row.contact, 'email') : null,
+            website_url: row.website_url,
+            tags: row.tags || [],
+            images: row.images || [],
+            lat: row.location_lat,
+            lng: row.location_lng,
+            created_at: row.created_at,
+            // Legacy compatibility
+            contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
+            photos: row.images || [],
+            lon: row.location_lng || undefined,
+            createdAt: new Date(row.created_at).getTime(),
+            updatedAt: new Date(row.updated_at).getTime(),
+            hasImage: !!(row.images?.length),
+          })));
+        } catch (error) {
+          console.error("Failed to load listings:", error);
+          toast("Failed to load listings");
+        } finally {
+          setLoading(false);
+        }
+      };
 
     loadListings();
-  }, [appState.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory]);
+  }, [appState.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory, user]);
 
   // Deep-link: if /l/:id, fetch and open
   useEffect(() => {
@@ -187,6 +200,8 @@ export default function Index() {
     const loadListingById = async () => {
       try {
         const row = await fetchListingById(id);
+        const contact = user ? await getListingContact(id) : null;
+        
         const listing: Listing = {
           id: row.id,
           user_id: row.user_id || "",
@@ -198,10 +213,10 @@ export default function Index() {
           description: row.description || "",
           price: row.price_cents ? row.price_cents / 100 : null,
           currency: row.currency,
-          contact_phone: row.contact_method === 'phone' ? row.contact_value : null,
-          contact_whatsapp: row.contact_method === 'whatsapp' ? row.contact_value : null,
-          contact_telegram: row.contact_method === 'telegram' ? row.contact_value : null,
-          contact_email: row.contact_method === 'email' ? row.contact_value : null,
+          contact_phone: (contact?.contact_method === 'phone') ? contact.contact_value : null,
+          contact_whatsapp: (contact?.contact_method === 'whatsapp') ? contact.contact_value : null,
+          contact_telegram: (contact?.contact_method === 'telegram') ? contact.contact_value : null,
+          contact_email: (contact?.contact_method === 'email') ? contact.contact_value : null,
           website_url: row.website_url,
           tags: row.tags || [],
           images: row.images || [],
@@ -209,7 +224,7 @@ export default function Index() {
           lng: row.location_lng,
           created_at: row.created_at,
           // Legacy compatibility
-          contact: { phone: row.contact_value || "" },
+          contact: { phone: contact?.contact_value || "" },
           photos: row.images || [],
           lon: row.location_lng || undefined,
           createdAt: new Date(row.created_at).getTime(),
