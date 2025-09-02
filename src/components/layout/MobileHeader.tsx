@@ -37,7 +37,7 @@ export default function MobileHeader() {
         </Link>
 
         {/* Account dropdown */}
-        <AccountSheet open={false} onOpenChange={() => {}}>
+        <AccountSheet>
           <button
             aria-label="Account"
             className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center font-bold text-sm"
