@@ -53,20 +53,24 @@ export default function Chat() {
           city: selectedCity,
           board: activeBoard
         })
-        .select('*')
-        .single();
+        .select('*');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
-      // Add username to the message for display
-      const messageWithUsername = {
-        ...data,
-        username: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous'
-      };
+      if (data && data.length > 0) {
+        // Add username to the message for display
+        const messageWithUsername = {
+          ...data[0],
+          username: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous'
+        };
 
-      setMessages(prev => [...prev, messageWithUsername]);
-      setMessage('');
-      toast.success('Message sent!');
+        setMessages(prev => [...prev, messageWithUsername]);
+        setMessage('');
+        toast.success('Message sent!');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
