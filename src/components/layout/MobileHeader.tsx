@@ -27,13 +27,13 @@ export default function MobileHeader() {
         </button>
 
         {/* Center logo + name */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title="Go to Homepage">
           <img 
             src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
             alt="HabeshaCommunity" 
             className="w-6 h-6 rounded"
           />
-          <span className="font-semibold tracking-tight text-sm">HabeshaCommunity</span>
+          <span className="font-semibold tracking-tight text-sm hover:text-primary transition-colors">HabeshaCommunity</span>
         </Link>
 
         {/* Account dropdown */}

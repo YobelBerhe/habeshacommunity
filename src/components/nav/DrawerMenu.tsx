@@ -100,13 +100,13 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
         {/* Sticky header with safe-area */}
         <div className="sticky top-0 z-[1] bg-background/95 backdrop-blur border-b">
           <div className="pt-[env(safe-area-inset-top)] px-4 h-14 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2" onClick={() => onOpenChange(false)}>
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" onClick={() => onOpenChange(false)} title="Go to Homepage">
               <img 
                 src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
                 alt="HabeshaCommunity" 
                 className="w-6 h-6 rounded"
               />
-              <h3 className="text-base font-semibold text-primary">HabeshaCommunity</h3>
+              <h3 className="text-base font-semibold text-primary hover:text-primary/80 transition-colors">HabeshaCommunity</h3>
             </Link>
             <button
               aria-label="Close"

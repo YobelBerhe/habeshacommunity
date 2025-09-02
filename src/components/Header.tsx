@@ -33,15 +33,16 @@ export default function Header({
     <header className="w-full border-b bg-background/70 backdrop-blur">
       <div className="container mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
         <button 
-          className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
           onClick={onLogoClick}
+          title="Go to Homepage"
         >
           <img 
             src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
             alt="HabeshaCommunity Logo" 
             className="w-8 h-8 rounded-lg"
           />
-          <span>HabeshaCommunity</span>
+          <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
         </button>
 
         <div className="order-2 md:order-none flex-1 min-w-[260px] z-50">
