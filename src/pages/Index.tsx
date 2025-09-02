@@ -19,7 +19,7 @@ import QuickFilters from "@/components/QuickFilters";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
-import GlobalMap from "@/components/GlobalMap";
+import Globe from "@/components/Globe";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
 import { getStarPoints } from "@/services/activeUsers";
@@ -55,6 +55,7 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [demo, setDemo] = useState(false);
+  const [starPoints, setStarPoints] = useState<any[]>([]);
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
     const initialAppState = getAppState();
@@ -116,6 +117,7 @@ export default function Index() {
       const res = await getStarPoints();
       setTotal(res.total);
       setDemo(res.demo);
+      setStarPoints(res.points || []);
       setIsLoading(false);
     };
 
@@ -464,16 +466,11 @@ export default function Index() {
         </div>
       )}
 
-      {/* Background Map */}
+      {/* Background Globe */}
       <div id="bg-map" className="fixed inset-0 -z-50 pointer-events-none">
-        <GlobalMap
-          focusCity={appState.cityLat && appState.cityLon ? {
-            lat: parseFloat(appState.cityLat),
-            lng: parseFloat(appState.cityLon),
-            name: appState.city
-          } : null}
-          modalOpen={postOpen || acctOpen || loginOpen || detailOpen || authOpen}
-          viewMode={appState.viewMode}
+        <Globe
+          points={starPoints}
+          className="w-full h-full"
         />
       </div>
 
