@@ -190,7 +190,7 @@ export default function PostModal({ city, onPosted }: Props) {
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-stretch md:justify-end">
+    <div className="fixed inset-0 z-[9999] bg-black/50 flex items-end md:items-stretch md:justify-end">
       <div className="bg-background w-full md:w-[520px] h-[85vh] md:h-full rounded-t-2xl md:rounded-none p-4 md:p-6 overflow-y-auto shadow-xl">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-semibold">Post a listing</h2>
@@ -210,7 +210,7 @@ export default function PostModal({ city, onPosted }: Props) {
         {/* Step 2: Subcategory */}
         <label className="block text-sm font-medium mb-1">Subcategory</label>
         <select
-          className="w-full mb-4 border rounded-md px-3 py-2"
+          className="w-full mb-4 border rounded-md px-3 py-2 bg-background text-foreground"
           value={subcategory}
           onChange={(e)=>setSubcategory(e.target.value)}
         >
@@ -222,25 +222,25 @@ export default function PostModal({ city, onPosted }: Props) {
         {category === "housing" && (
           <div className="grid grid-cols-2 gap-3 mb-4">
             <input type="number" min={0} placeholder="Bedrooms"
-              className="border rounded-md px-3 py-2"
+              className="border rounded-md px-3 py-2 bg-background text-foreground"
               value={bedrooms ?? ""} onChange={(e)=>setBedrooms(num(e.target.value))}/>
             <input type="number" min={0} placeholder="Bathrooms"
-              className="border rounded-md px-3 py-2"
+              className="border rounded-md px-3 py-2 bg-background text-foreground"
               value={bathrooms ?? ""} onChange={(e)=>setBathrooms(num(e.target.value))}/>
             <label className="col-span-2 flex items-center gap-2 text-sm">
               <input type="checkbox" checked={furnished} onChange={(e)=>setFurnished(e.target.checked)} />
               Furnished
             </label>
-            <input type="date" className="border rounded-md px-3 py-2 col-span-2"
+            <input type="date" className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
               value={availableFrom} onChange={(e)=>setAvailableFrom(e.target.value)} />
           </div>
         )}
 
         {category === "jobs" && (
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <input placeholder="Employer (optional)" className="border rounded-md px-3 py-2 col-span-2"
+            <input placeholder="Employer (optional)" className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
               value={employer} onChange={(e)=>setEmployer(e.target.value)} />
-            <select className="border rounded-md px-3 py-2"
+            <select className="border rounded-md px-3 py-2 bg-background text-foreground"
               value={employment ?? ""} onChange={(e)=>setEmployment((e.target.value || undefined) as any)}>
               <option value="">Employment type</option>
               <option value="full">Full-time</option>
@@ -249,7 +249,7 @@ export default function PostModal({ city, onPosted }: Props) {
               <option value="temp">Temporary</option>
               <option value="intern">Internship</option>
             </select>
-            <input placeholder="Pay (e.g., $20/hr)" className="border rounded-md px-3 py-2"
+            <input placeholder="Pay (e.g., $20/hr)" className="border rounded-md px-3 py-2 bg-background text-foreground"
               value={pay} onChange={(e)=>setPay(e.target.value)} />
             <label className="col-span-2 flex items-center gap-2 text-sm">
               <input type="checkbox" checked={remoteOk} onChange={(e)=>setRemoteOk(e.target.checked)} />
@@ -260,26 +260,26 @@ export default function PostModal({ city, onPosted }: Props) {
 
         {/* City & Country */}
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <input className="border rounded-md px-3 py-2" placeholder="City *"
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="City *"
             value={currentCity} onChange={(e)=>setCurrentCity(e.target.value)} />
-          <input className="border rounded-md px-3 py-2" placeholder="Country (optional)"
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Country (optional)"
             value={country} onChange={(e)=>setCountry(e.target.value)} />
         </div>
 
         {/* Common fields */}
-        <input className="border rounded-md px-3 py-2 mb-3 w-full" placeholder="Title *"
+        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Title *"
           value={title} onChange={(e)=>setTitle(e.target.value)} />
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <input className="border rounded-md px-3 py-2" placeholder="Price (optional)"
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Price (optional)"
             inputMode="decimal" value={price ?? ""} onChange={(e)=>setPrice(num(e.target.value))} />
-          <input className="border rounded-md px-3 py-2" placeholder="Currency" value={currency} onChange={(e)=>setCurrency(e.target.value.toUpperCase())}/>
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Currency" value={currency} onChange={(e)=>setCurrency(e.target.value.toUpperCase())}/>
         </div>
-        <textarea className="border rounded-md px-3 py-2 mb-3 w-full min-h-[120px]" placeholder="Description"
+        <textarea className="border rounded-md px-3 py-2 mb-3 w-full min-h-[120px] bg-background text-foreground" placeholder="Description"
           value={description} onChange={(e)=>setDescription(e.target.value)} />
-        <input className="border rounded-md px-3 py-2 mb-3 w-full" placeholder="Tags (comma or # separated)"
+        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Tags (comma or # separated)"
           value={tags} onChange={(e)=>setTags(e.target.value)} />
         
-        <input className="border rounded-md px-3 py-2 mb-3 w-full" placeholder="Website (optional)"
+        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Website (optional)"
           value={websiteUrl} onChange={(e)=>setWebsiteUrl(e.target.value)} />
 
         <div className="mb-3">
@@ -289,19 +289,19 @@ export default function PostModal({ city, onPosted }: Props) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <input className="border rounded-md px-3 py-2" placeholder="Phone" value={contact.phone}
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Phone" value={contact.phone}
             onChange={(e)=>setContact({...contact, phone:e.target.value})} />
-          <input className="border rounded-md px-3 py-2" placeholder="Email" value={contact.email}
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Email" value={contact.email}
             onChange={(e)=>setContact({...contact, email:e.target.value})} />
-          <input className="border rounded-md px-3 py-2" placeholder="WhatsApp" value={contact.whatsapp}
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="WhatsApp" value={contact.whatsapp}
             onChange={(e)=>setContact({...contact, whatsapp:e.target.value})} />
-          <input className="border rounded-md px-3 py-2" placeholder="Telegram" value={contact.telegram}
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Telegram" value={contact.telegram}
             onChange={(e)=>setContact({...contact, telegram:e.target.value})} />
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <input className="border rounded-md px-3 py-2" placeholder="Lat (optional)" value={lat ?? ""} onChange={(e)=>setLat(num(e.target.value))}/>
-          <input className="border rounded-md px-3 py-2" placeholder="Lng (optional)" value={lng ?? ""} onChange={(e)=>setLng(num(e.target.value))}/>
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Lat (optional)" value={lat ?? ""} onChange={(e)=>setLat(num(e.target.value))}/>
+          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Lng (optional)" value={lng ?? ""} onChange={(e)=>setLng(num(e.target.value))}/>
         </div>
 
         <button
