@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import { TAXONOMY, LABELS, CategoryKey } from '@/lib/taxonomy';
+import { useLanguage } from '@/store/language';
 
 type Props = {
   topCategory: CategoryKey;
@@ -12,9 +13,11 @@ type Props = {
 export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClear }: Props) {
   const [openCat, setOpenCat] = useState(false);
   const [openMore, setOpenMore] = useState(false);
+  const { language } = useLanguage();
+  const langKey = language.toLowerCase() as 'en' | 'ti';
   
   const subs = TAXONOMY[topCategory].sub;
-  const categoryLabel = TAXONOMY[topCategory].name.en;
+  const categoryLabel = TAXONOMY[topCategory].name[langKey];
 
   return (
     <div className="sticky top-14 z-30 bg-background/90 backdrop-blur border-b md:hidden">
@@ -57,7 +60,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
               All {categoryLabel}
             </button>
             {subs.map(sub => {
-              const label = LABELS[sub]?.en || sub.replace(/_/g, ' ');
+              const label = LABELS[sub]?.[langKey] || sub.replace(/_/g, ' ');
               const isSelected = selectedSubcategory === sub;
               return (
                 <button

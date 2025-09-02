@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey, LABELS } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
+import { useLanguage } from "@/store/language";
 import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings } from "@/repo/listings";
@@ -29,10 +30,10 @@ export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, openAuth, openPost } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const [appState, setAppState] = useState<AppState>(() => getAppState());
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(false);
-  const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
 
   // Initialize filters from URL params
@@ -207,11 +208,8 @@ export default function Browse() {
           onLogoClick={() => navigate("/")}
           rightExtra={
             <LanguageToggle
-              value={lang}
-              onChange={(newLang) => {
-                setLang(newLang as Lang);
-                localStorage.setItem("hn.lang", newLang);
-              }}
+              value={language}
+              onChange={setLanguage}
             />
           }
         />
@@ -237,8 +235,8 @@ export default function Browse() {
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-1 flex-shrink-0">
                   {filters.category 
-                    ? TAXONOMY[filters.category as CategoryKey]?.name.en || "Category"
-                    : "All categories"
+                    ? TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || "Category"
+                    : language === 'EN' ? "All categories" : "ኩሉ ምድብታት"
                   }
                   <ChevronDown className="w-3 h-3 text-primary" />
                 </Button>
@@ -262,7 +260,7 @@ export default function Browse() {
                       className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
                       onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
                     >
-                      {value.name.en}
+                      {value.name[language.toLowerCase() as 'en' | 'ti']}
                     </button>
                   ))}
                 </div>
@@ -279,8 +277,8 @@ export default function Browse() {
                   disabled={!filters.category}
                 >
                   {filters.subcategory 
-                    ? LABELS[filters.subcategory]?.en || filters.subcategory
-                    : filters.category ? "Subcategory" : "Select category first"
+                    ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
+                    : filters.category ? (language === 'EN' ? "Subcategory" : "ንኣብ ምድብ") : (language === 'EN' ? "Select category first" : "ቀዳማይ ምድብ ምረጽ")
                   }
                   <ChevronDown className="w-3 h-3 text-primary" />
                 </Button>
@@ -297,7 +295,7 @@ export default function Browse() {
                       className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
                       onClick={() => setFilters({ ...filters, subcategory: undefined })}
                     >
-                      All {TAXONOMY[filters.category as CategoryKey]?.name.en.toLowerCase()}
+                      {language === 'EN' ? 'All' : 'ኩሉ'} {TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti']?.toLowerCase()}
                     </button>
                     {TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
                       <button
@@ -305,7 +303,7 @@ export default function Browse() {
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm text-primary"
                         onClick={() => setFilters({ ...filters, subcategory: sub })}
                       >
-                        {LABELS[sub]?.en || sub}
+                        {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
                       </button>
                     ))}
                   </div>
@@ -315,15 +313,15 @@ export default function Browse() {
 
             {/* Clear All */}
             <Button variant="ghost" size="sm" className="flex-shrink-0" onClick={handleClearAll}>
-              Clear
+              {language === 'EN' ? 'Clear' : 'ኣጽዓን'}
             </Button>
           </div>
           
           {/* View Mode Toggle & Results Count */}
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              {filteredListings.length} results
-              {filters.city && ` in ${filters.city}`}
+              {filteredListings.length} {language === 'EN' ? 'results' : 'ውጽኢታት'}
+              {filters.city && ` ${language === 'EN' ? 'in' : 'ኣብ'} ${filters.city}`}
             </div>
             
             <div className="flex gap-1">

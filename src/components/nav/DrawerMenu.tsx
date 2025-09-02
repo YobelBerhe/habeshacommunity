@@ -8,13 +8,14 @@ import { useLockBody } from '@/hooks/useLockBody';
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageToggle from '@/components/LanguageToggle';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/store/language';
 
 type Props = { open: boolean; onOpenChange: (v: boolean) => void };
 
 export function DrawerMenu({ open, onOpenChange }: Props) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [myListingsOpen, setMyListingsOpen] = useState(false);
-  const [language, setLanguage] = useState('EN');
+  const { language, setLanguage } = useLanguage();
   const { user, openAuth, openPost } = useAuth();
   const navigate = useNavigate();
   
@@ -123,14 +124,14 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           {(['housing','jobs','services','community'] as const).map(section => (
             <details key={section} className="group border-b last:border-0">
               <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-                <span className="font-medium capitalize">{getSectionLabel(section)}</span>
+                <span className="font-medium">{TAXONOMY[section].name[language.toLowerCase() as 'en' | 'ti']}</span>
                 <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
               </summary>
 
               <ul className="pb-2">
                 {TAXONOMY[section].sub.map(sub => {
                   const key = `${section}:${sub}`;
-                  const label = LABELS[sub]?.en || sub.replace(/_/g, ' ');
+                  const label = LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || LABELS[sub]?.en || sub.replace(/_/g, ' ');
                   const n = counts[key] ?? 0;
                   return (
                     <li key={key}>

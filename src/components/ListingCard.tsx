@@ -8,6 +8,7 @@ import { toggleFavorite, fetchFavorites } from "@/repo/favorites";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
+import { useLanguage } from "@/store/language";
 import ImageBox from "./ImageBox";
 
 interface ListingCardProps {
@@ -83,8 +84,11 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
     return date.toLocaleDateString();
   };
 
-  const categoryName = TAXONOMY[listing.category as keyof typeof TAXONOMY]?.name.en || listing.category;
-  const subcategoryName = listing.subcategory ? (LABELS[listing.subcategory]?.en || listing.subcategory.replace(/_/g, ' ')) : null;
+  const { language } = useLanguage();
+  const langKey = language.toLowerCase() as 'en' | 'ti';
+  
+  const categoryName = TAXONOMY[listing.category as keyof typeof TAXONOMY]?.name[langKey] || listing.category;
+  const subcategoryName = listing.subcategory ? (LABELS[listing.subcategory]?.[langKey] || listing.subcategory.replace(/_/g, ' ')) : null;
 
   return (
     <Card 
