@@ -22,6 +22,7 @@ import DonationButton from "@/components/DonationButton";
 import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
+import { Globe } from "@/components/Globe";
 import { getStarPoints } from "@/services/activeUsers";
 import CitySearchBar from "@/components/CitySearchBar";
 import { setParams, getParam } from "@/lib/url";
@@ -493,12 +494,20 @@ export default function Index() {
       {/* Hero section when no city is selected */}
       {!appState.city && (
         <>
-          {/* City Search Bar Above Hero */}
-          <div className="container mx-auto px-4 py-4">
-          <CitySearchBar 
-            placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
-            onCitySelect={handleCityChange}
-          />
+          {/* City Search Bar Above Hero with Globe Background */}
+          <div className="container mx-auto px-4 py-4 relative">
+            {/* Globe Background */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+              <Globe className="scale-75" />
+            </div>
+            
+            {/* City Search Bar */}
+            <div className="relative z-10">
+              <CitySearchBar 
+                placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
+                onCitySelect={handleCityChange}
+              />
+            </div>
           </div>
           
           <section className="w-screen relative left-1/2 right-1/2 -mx-[50vw] py-8 md:py-12 bg-background/70 backdrop-blur">
