@@ -27,6 +27,7 @@ import CitySearchBar from "@/components/CitySearchBar";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
+import { useLanguage } from "@/store/language";
 import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings, fetchListingById } from "@/repo/listings";
@@ -50,7 +51,7 @@ export default function Index() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [newlyPostedId, setNewlyPostedId] = useState<string | null>(null);
-  const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hn.lang") as Lang) || "EN");
+  const { language: lang, setLanguage } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -279,10 +280,6 @@ export default function Index() {
   }, [listings, filters]);
 
   // Event handlers
-  const setLanguage = (newLang: string) => {
-    setLang(newLang as Lang);
-    localStorage.setItem("hn.lang", newLang);
-  };
 
   const handleCityChange = (city: string, lat?: number, lon?: number) => {
     const next = { ...appState, city, cityLat: lat?.toString(), cityLon: lon?.toString() };
@@ -393,10 +390,7 @@ export default function Index() {
           rightExtra={
             <LanguageToggle
               value={lang}
-              onChange={(newLang) => {
-                setLang(newLang as Lang);
-                localStorage.setItem("hn.lang", newLang);
-              }}
+              onChange={setLanguage}
             />
           }
         />
