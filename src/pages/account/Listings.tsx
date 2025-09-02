@@ -132,15 +132,7 @@ export default function MyListings() {
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Package className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">My Listings</h1>
-              <p className="text-sm text-muted-foreground">Manage your posted items</p>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold text-foreground">My Listings</h1>
           <button 
             onClick={openPost}
             className="btn-primary flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
