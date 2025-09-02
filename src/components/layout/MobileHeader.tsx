@@ -7,7 +7,6 @@ import { useAuth } from '@/store/auth';
 
 export default function MobileHeader() {
   const [openDrawer, setOpenDrawer] = useState(false);
-  const [openAccount, setOpenAccount] = useState(false);
   const { user } = useAuth();
 
   const getUserInitial = () => {
@@ -37,18 +36,18 @@ export default function MobileHeader() {
           <span className="font-semibold tracking-tight text-sm">HabeshaCommunity</span>
         </Link>
 
-        {/* Account bubble */}
-        <button
-          onClick={() => setOpenAccount(true)}
-          aria-label="Account"
-          className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center font-bold text-sm"
-        >
-          {user ? getUserInitial() : <User className="w-4 h-4" />}
-        </button>
+        {/* Account dropdown */}
+        <AccountSheet open={false} onOpenChange={() => {}}>
+          <button
+            aria-label="Account"
+            className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center font-bold text-sm"
+          >
+            {user ? getUserInitial() : <User className="w-4 h-4" />}
+          </button>
+        </AccountSheet>
       </div>
 
       <DrawerMenu open={openDrawer} onOpenChange={setOpenDrawer} />
-      <AccountSheet open={openAccount} onOpenChange={setOpenAccount} />
     </header>
   );
 }
