@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Calendar, Star } from "lucide-react";
 import { Listing } from "@/types";
 import { TAXONOMY, LABELS } from "@/lib/taxonomy";
-import { getFavorites, toggleFavorite } from "@/utils/storage";
+import { toggleFavorite, fetchFavorites } from "@/repo/favorites";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/store/auth";
 import ImageBox from "./ImageBox";
 
 interface ListingCardProps {
@@ -18,20 +19,48 @@ interface ListingCardProps {
 const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
-    const favorites = getFavorites();
-    setIsFavorited(favorites.includes(listing.id));
-  }, [listing.id]);
+    if (!user) return;
+    
+    const loadFavoriteStatus = async () => {
+      try {
+        const favorites = await fetchFavorites(user.id);
+        setIsFavorited(favorites.has(listing.id));
+      } catch (error) {
+        console.error('Error loading favorite status:', error);
+      }
+    };
+    
+    loadFavoriteStatus();
+  }, [listing.id, user]);
 
-  const handleFavoriteToggle = (e: React.MouseEvent) => {
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newState = toggleFavorite(listing.id);
-    setIsFavorited(newState);
-    toast({
-      description: newState ? "Saved to favorites" : "Removed from favorites",
-      duration: 2000,
-    });
+    
+    if (!user) {
+      toast({
+        description: "Please log in to save favorites",
+        duration: 2000,
+      });
+      return;
+    }
+    
+    try {
+      const newState = await toggleFavorite(listing.id, user.id);
+      setIsFavorited(newState);
+      toast({
+        description: newState ? "Saved to favorites" : "Removed from favorites",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        description: "Failed to update favorites",
+        duration: 2000,
+      });
+    }
   };
   const formatPrice = (price?: number) => {
     if (!price) return null;

@@ -16,6 +16,7 @@ export default function SavedListings() {
     
     const loadFavorites = async () => {
       try {
+        console.log('Loading favorites for user:', user.id);
         const { data, error } = await supabase
           .from('favorites')
           .select(`
@@ -33,6 +34,7 @@ export default function SavedListings() {
           `)
           .eq('user_id', user.id);
 
+        console.log('Favorites query result:', { data, error });
         if (error) throw error;
 
         const favListings = data
