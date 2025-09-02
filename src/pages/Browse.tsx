@@ -231,11 +231,11 @@ export default function Browse() {
       {/* Filter Controls - Sticky */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
         <div className="px-4 py-3">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-1 mb-3 overflow-x-auto">
             {/* Category Filter */}
             <Popover modal={false}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1 flex-shrink-0">
                   {filters.category 
                     ? TAXONOMY[filters.category as CategoryKey]?.name.en || "Category"
                     : "All categories"
@@ -275,7 +275,7 @@ export default function Browse() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="gap-1"
+                  className="gap-1 flex-shrink-0"
                   disabled={!filters.category}
                 >
                   {filters.subcategory 
@@ -314,7 +314,7 @@ export default function Browse() {
             </Popover>
 
             {/* Clear All */}
-            <Button variant="ghost" size="sm" onClick={handleClearAll}>
+            <Button variant="ghost" size="sm" className="flex-shrink-0" onClick={handleClearAll}>
               Clear
             </Button>
           </div>
