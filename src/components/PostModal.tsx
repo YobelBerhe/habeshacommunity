@@ -200,7 +200,7 @@ export default function PostModal({ city, onPosted }: Props) {
         {/* Step 1: Category */}
         <label className="block text-sm font-medium mb-1">Category</label>
         <select
-          className="w-full mb-3 border rounded-md px-3 py-2"
+          className="w-full mb-3 border rounded-md px-3 py-2 bg-background text-foreground"
           value={category}
           onChange={(e)=>{ setCategory(e.target.value as CategoryKey); setSubcategory(""); }}
         >
