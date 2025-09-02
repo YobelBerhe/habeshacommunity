@@ -68,6 +68,7 @@ export default function CitySearchBar({
     const cityName = city.name;
     setJustSelected(true);
     setQ(`${cityName}, ${city.country}`);
+    setItems([]); // Clear items immediately
     setOpen(false);
     
     if (onCitySelect) {

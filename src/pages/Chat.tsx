@@ -18,6 +18,7 @@ interface ChatMessage {
   id: string;
   content: string;
   user_id: string;
+  username?: string;
   city: string;
   board: string;
   created_at: string;
@@ -42,14 +43,42 @@ export default function Chat() {
       return;
     }
     
-    // Temporarily show toast until database types are updated
-    toast.info('Chat functionality will be available soon');
-    setMessage('');
+    setLoading(true);
+    try {
+      // Store message in localStorage for now (temporary solution)
+      const storageKey = `chat_${selectedCity}_${activeBoard}`;
+      const existingMessages = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        content: message.trim(),
+        user_id: user.id,
+        username: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
+        city: selectedCity,
+        board: activeBoard,
+        created_at: new Date().toISOString()
+      };
+      
+      const updatedMessages = [...existingMessages, newMessage];
+      localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
+      setMessages(updatedMessages);
+      setMessage('');
+      
+      toast.success('Message sent!');
+    } catch (error) {
+      toast.error('Failed to send message');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Load messages when city/board changes - temporarily disabled
+  // Load messages when city/board changes
   useEffect(() => {
-    // Will implement after database types are updated
+    if (selectedCity && activeBoard) {
+      const storageKey = `chat_${selectedCity}_${activeBoard}`;
+      const existingMessages = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      setMessages(existingMessages);
+    }
   }, [selectedCity, activeBoard]);
 
   return (
@@ -111,17 +140,33 @@ export default function Chat() {
           {/* Chat content */}
           <div className="flex-1 flex flex-col">
             <div className="flex-1 chat-container p-4 space-y-4 overflow-y-auto">
-              <div className="text-center py-8">
-                <h3 className="text-lg font-semibold mb-2">
-                  {CHAT_BOARDS.find(b => b.id === activeBoard)?.name} - {selectedCity}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {CHAT_BOARDS.find(b => b.id === activeBoard)?.description}
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  Chat functionality coming soon!
+              {messages.length === 0 ? (
+                <div className="text-center py-8">
+                  <h3 className="text-lg font-semibold mb-2">
+                    {CHAT_BOARDS.find(b => b.id === activeBoard)?.name} - {selectedCity}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {CHAT_BOARDS.find(b => b.id === activeBoard)?.description}
+                  </p>
+                  <div className="text-sm text-muted-foreground">
+                    Be the first to start the conversation!
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-3">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className="bg-card rounded-lg p-3 border">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">{msg.username}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(msg.created_at).toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <p className="text-sm">{msg.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Message input - always black text */}
