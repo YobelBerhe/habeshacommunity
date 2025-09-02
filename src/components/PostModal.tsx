@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { TAXONOMY, LABELS, isGig, CategoryKey } from "@/lib/taxonomy";
-import { createListingWithContact } from "@/repo/listingsWithContacts";
+import { createListingWithContact, updateListingWithContact } from "@/repo/listingsWithContacts";
 import { getUserId } from "@/repo/auth";
 import { uploadListingImages } from "@/utils/upload";
 import type { Listing } from "@/types";
@@ -20,7 +20,8 @@ const catOptions: { key: CategoryKey; label: string }[] = ([
 ] as const).map(([key,label]) => ({ key: key as CategoryKey, label }));
 
 export default function PostModal({ city, onPosted }: Props) {
-  const { postOpen, closePost, user } = useAuth();
+  const { postOpen, closePost, user, editingListing } = useAuth();
+  const isEditing = !!editingListing;
   
   const [category, setCategory] = useState<CategoryKey>("housing");
   const [subcategory, setSubcategory] = useState<string>("");
@@ -51,6 +52,47 @@ export default function PostModal({ city, onPosted }: Props) {
   const [pay, setPay] = useState<string>(""); // e.g. "$20/hr" or "3000 ETB/mo"
   const [remoteOk, setRemoteOk] = useState<boolean>(false);
   const [employer, setEmployer] = useState<string>("");
+
+  // Load listing data when editing
+  useEffect(() => {
+    if (editingListing) {
+      setCategory(editingListing.category as CategoryKey);
+      setSubcategory(editingListing.subcategory || "");
+      setTitle(editingListing.title);
+      setDescription(editingListing.description || "");
+      setPrice(editingListing.price || undefined);
+      setCurrency(editingListing.currency || "USD");
+      setContact({
+        phone: editingListing.contact_phone || "",
+        email: editingListing.contact_email || "",
+        whatsapp: editingListing.contact_whatsapp || "",
+        telegram: editingListing.contact_telegram || ""
+      });
+      setTags(editingListing.tags?.join(", ") || "");
+      setPhotos([]); // Reset photos, user can upload new ones
+      setLat(editingListing.lat || undefined);
+      setLng(editingListing.lng || undefined);
+      setCurrentCity(editingListing.city);
+      setCountry(editingListing.country || "");
+      setWebsiteUrl(editingListing.website_url || "");
+    } else {
+      // Reset form when not editing
+      setCategory("housing");
+      setSubcategory("");
+      setTitle("");
+      setDescription("");
+      setPrice(undefined);
+      setCurrency("USD");
+      setContact({ phone:"", email:"", whatsapp:"", telegram:"" });
+      setTags("");
+      setPhotos([]);
+      setLat(undefined);
+      setLng(undefined);
+      setCurrentCity(city);
+      setCountry("");
+      setWebsiteUrl("");
+    }
+  }, [editingListing, city]);
 
   useEffect(()=> {
     // whenever subcategory changes, detect gig flag (jobs only)
@@ -88,8 +130,9 @@ export default function PostModal({ city, onPosted }: Props) {
         return;
       }
 
-      // Upload images first
-      const imageUrls = photos.length ? await uploadListingImages(photos, userId) : [];
+      // Upload images first (only if new photos are selected)
+      const imageUrls = photos.length ? await uploadListingImages(photos, userId) : 
+                       (isEditing ? editingListing?.images || [] : []);
 
       // Build description with dynamic fields
       let finalDescription = description.trim();
@@ -104,29 +147,56 @@ export default function PostModal({ city, onPosted }: Props) {
         });
       }
 
-      // Create the listing in database
+      // Create or update the listing in database
       const finalWebsiteUrl = websiteUrl.trim() ? 
         (websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`) : null;
       
-      const { listing: dbListing, contact: dbContact } = await createListingWithContact({
-        user_id: userId,
-        city: currentCity || "Unknown",
-        country: country || null,
-        category: category as any,
-        subcategory: subcategory || null,
-        title: title.trim(),
-        description: finalDescription,
-        price_cents: price ? Math.round(price * 100) : null,
-        currency: currency || "USD",
-        tags: splitTags(tags),
-        images: imageUrls,
-        location_lat: lat || null,
-        location_lng: lng || null,
-        website_url: finalWebsiteUrl,
-      }, {
-        contact_method: getContactMethod(contact),
-        contact_value: getContactValue(contact),
-      });
+      let dbListing, dbContact;
+      
+      if (isEditing && editingListing) {
+        const result = await updateListingWithContact(editingListing.id, {
+          city: currentCity || "Unknown",
+          country: country || null,
+          category: category as any,
+          subcategory: subcategory || null,
+          title: title.trim(),
+          description: finalDescription,
+          price_cents: price ? Math.round(price * 100) : null,
+          currency: currency || "USD",
+          tags: splitTags(tags),
+          images: imageUrls,
+          location_lat: lat || null,
+          location_lng: lng || null,
+          website_url: finalWebsiteUrl,
+        }, {
+          contact_method: getContactMethod(contact),
+          contact_value: getContactValue(contact),
+        });
+        dbListing = result.listing;
+        dbContact = result.contact;
+      } else {
+        const result = await createListingWithContact({
+          user_id: userId,
+          city: currentCity || "Unknown",
+          country: country || null,
+          category: category as any,
+          subcategory: subcategory || null,
+          title: title.trim(),
+          description: finalDescription,
+          price_cents: price ? Math.round(price * 100) : null,
+          currency: currency || "USD",
+          tags: splitTags(tags),
+          images: imageUrls,
+          location_lat: lat || null,
+          location_lng: lng || null,
+          website_url: finalWebsiteUrl,
+        }, {
+          contact_method: getContactMethod(contact),
+          contact_value: getContactValue(contact),
+        });
+        dbListing = result.listing;
+        dbContact = result.contact;
+      }
 
       // Convert back to frontend format for optimistic update
       const frontendListing: Listing = {
@@ -173,7 +243,7 @@ export default function PostModal({ city, onPosted }: Props) {
       setWebsiteUrl("");
       setCountry("");
       
-      toast("Posted successfully!");
+      toast(isEditing ? "Updated successfully!" : "Posted successfully!");
 
       // smooth scroll to listings (if present)
       setTimeout(() => {
@@ -194,7 +264,7 @@ export default function PostModal({ city, onPosted }: Props) {
     <div className="fixed inset-0 z-[9999] bg-black/50 flex items-end md:items-stretch md:justify-end">
       <div className="bg-background w-full md:w-[520px] h-[85vh] md:h-full rounded-t-2xl md:rounded-none p-4 md:p-6 overflow-y-auto shadow-xl">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-semibold">Post a listing</h2>
+          <h2 className="text-xl font-semibold">{isEditing ? "Edit listing" : "Post a listing"}</h2>
           <button onClick={closePost} className="rounded-md px-2 py-1 border">✕</button>
         </div>
 
@@ -310,7 +380,7 @@ export default function PostModal({ city, onPosted }: Props) {
           onClick={submit}
           disabled={!title || !subcategory || !currentCity || submitting}
         >
-          {submitting ? "Publishing..." : "Publish"}
+          {submitting ? (isEditing ? "Updating..." : "Publishing...") : (isEditing ? "Update" : "Publish")}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import type { Listing } from '@/types';
 
 type AuthState = {
   user: User | null;
@@ -8,9 +9,11 @@ type AuthState = {
   // UI flags
   authOpen: boolean;
   postOpen: boolean;
+  editingListing: Listing | null;
   openAuth: () => void;
   closeAuth: () => void;
   openPost: () => void;
+  openEditPost: (listing: Listing) => void;
   closePost: () => void;
   // actions
   init: () => Promise<void>;
@@ -22,10 +25,12 @@ export const useAuth = create<AuthState>((set, get) => ({
   loading: true,
   authOpen: false,
   postOpen: false,
+  editingListing: null,
   openAuth: () => set({ authOpen: true }),
   closeAuth: () => set({ authOpen: false }),
-  openPost: () => set({ postOpen: true }),
-  closePost: () => set({ postOpen: false }),
+  openPost: () => set({ postOpen: true, editingListing: null }),
+  openEditPost: (listing: Listing) => set({ postOpen: true, editingListing: listing }),
+  closePost: () => set({ postOpen: false, editingListing: null }),
 
   init: async () => {
     console.log('🔄 Auth init starting...');

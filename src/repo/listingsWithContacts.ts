@@ -85,3 +85,49 @@ export async function createListingWithContact(
     contact: contactData
   };
 }
+
+// Update listing with contact information
+export async function updateListingWithContact(
+  listingId: string,
+  listing: Partial<Omit<ListingRow, 'id' | 'created_at' | 'updated_at'>>,
+  contact?: {
+    contact_method: 'phone' | 'whatsapp' | 'telegram' | 'email' | null;
+    contact_value: string | null;
+  }
+): Promise<{ listing: ListingRow; contact?: ListingContactRow }> {
+  
+  const { data: listingData, error: listingError } = await supabase
+    .from('listings')
+    .update(listing)
+    .eq('id', listingId)
+    .select('*')
+    .single();
+  
+  if (listingError) throw listingError;
+  
+  let contactData: ListingContactRow | undefined;
+  
+  if (contact && contact.contact_method && contact.contact_value) {
+    // First delete existing contacts
+    await supabase
+      .from('listing_contacts')
+      .delete()
+      .eq('listing_id', listingId);
+    
+    // Then create new contact
+    try {
+      contactData = await createListingContact({
+        listing_id: listingId,
+        contact_method: contact.contact_method,
+        contact_value: contact.contact_value,
+      });
+    } catch (contactError) {
+      console.error('Failed to update contact:', contactError);
+    }
+  }
+  
+  return {
+    listing: listingData as ListingRow,
+    contact: contactData
+  };
+}

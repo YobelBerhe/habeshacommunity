@@ -4,6 +4,7 @@ import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import ListingCard from '@/components/ListingCard';
 import MobileHeader from '@/components/layout/MobileHeader';
+import PostModal from '@/components/PostModal';
 import { toast } from 'sonner';
 import type { Listing } from '@/types';
 
@@ -74,10 +75,24 @@ export default function MyListings() {
     loadMyListings();
   }, [user]);
 
+  const handleListingPosted = (updatedListing: Listing) => {
+    // Refresh listings after edit or create
+    setListings(prev => {
+      const existingIndex = prev.findIndex(l => l.id === updatedListing.id);
+      if (existingIndex >= 0) {
+        // Update existing listing
+        const newListings = [...prev];
+        newListings[existingIndex] = updatedListing;
+        return newListings;
+      } else {
+        // Add new listing
+        return [updatedListing, ...prev];
+      }
+    });
+  };
+
   const handleEdit = (listing: Listing) => {
-    // TODO: Open PostModal with listing prefilled
-    openPost();
-    toast.info('Edit functionality coming soon');
+    useAuth.getState().openEditPost(listing);
   };
 
   const handleDelete = async (listingId: string) => {
@@ -175,6 +190,11 @@ export default function MyListings() {
           </div>
         )}
       </div>
+      
+      <PostModal 
+        city={listings[0]?.city || "Unknown"} 
+        onPosted={handleListingPosted}
+      />
     </div>
   );
 }
