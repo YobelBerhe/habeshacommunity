@@ -31,9 +31,11 @@ import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings, fetchListingById } from "@/repo/listings";
 import { onAuthChange, getUserId, signOut } from "@/repo/auth";
+import { useAuth } from '@/store/auth';
 import { toast } from "sonner";
 
 export default function Index() {
+  const { authOpen } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const params = useParams<{ id?: string }>();
@@ -463,14 +465,14 @@ export default function Index() {
       )}
 
       {/* Background Map */}
-      <div id="bg-map" className="fixed inset-0 -z-10 pointer-events-none">
-        <GlobalMap 
+      <div id="bg-map" className="fixed inset-0 -z-50 pointer-events-none">
+        <GlobalMap
           focusCity={appState.cityLat && appState.cityLon ? {
             lat: parseFloat(appState.cityLat),
             lng: parseFloat(appState.cityLon),
             name: appState.city
           } : null}
-          modalOpen={postOpen || acctOpen || loginOpen || detailOpen}
+          modalOpen={postOpen || acctOpen || loginOpen || detailOpen || authOpen}
           viewMode={appState.viewMode}
         />
       </div>
