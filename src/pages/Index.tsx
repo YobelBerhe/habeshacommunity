@@ -384,10 +384,18 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <BootstrapAuth />
       
-      {/* Modals */}
-      <AuthModal open={loginOpen} onClose={() => setLoginOpen(false)} />
-      <PostModal open={postOpen} onClose={() => setPostOpen(false)} onSuccess={() => {}} />
-      <AccountModal open={acctOpen} onClose={() => setAcctOpen(false)} user={user} onViewAccount={() => {}} />
+      {/* Modals - using auth store */}
+      <AuthModal />
+      <PostModal city={appState.city} onPosted={(listing) => setNewlyPostedId(listing.id)} />
+      <AccountModal 
+        open={acctOpen} 
+        onOpenChange={setAcctOpen}
+        user={user}
+        onSignOut={async () => {
+          await signOut();
+          setAcctOpen(false);
+        }}
+      />
 
       {/* Desktop layout */}
       <div className="hidden md:block">
@@ -403,7 +411,7 @@ export default function Index() {
           onCityChange={handleCityChange}
           onAccountClick={() => setAcctOpen(true)}
           onLogoClick={handleLogoClick}
-          rightExtra={<LanguageToggle lang={lang} onLangChange={setLang} />}
+          rightExtra={<LanguageToggle value={lang} onChange={(v) => setLang(v as Lang)} />}
         />
         <MobileHeader />
 
