@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
-// Desktop components
-import { DesktopHomeHero } from "@/components/desktop/DesktopHomeHero";
-import { DesktopHeader } from "@/components/desktop/DesktopHeader";
-import { StickyFooter } from "@/components/desktop/StickyFooter";
-// Mobile components (existing)
 import Header from "@/components/Header";
 import MobileHeader from "@/components/layout/MobileHeader";
 import FilterBar from "@/components/FilterBar";
@@ -27,7 +22,6 @@ import DonationButton from "@/components/DonationButton";
 import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
-import { Globe } from "@/components/Globe";
 import { getStarPoints } from "@/services/activeUsers";
 import CitySearchBar from "@/components/CitySearchBar";
 import { setParams, getParam } from "@/lib/url";
@@ -294,11 +288,10 @@ export default function Index() {
   };
 
   const handleCityChange = (city: string, lat?: number, lon?: number) => {
-    // For desktop, navigate to browse page
-    // For mobile, update app state to show listings
-    const next = { ...appState, city };
+    const next = { ...appState, city, cityLat: lat?.toString(), cityLon: lon?.toString() };
     setAppState(next);
     saveAppState(next);
+    toast("City changed to " + city);
   };
 
   const handleAccountClick = () => {
@@ -331,7 +324,12 @@ export default function Index() {
   };
 
   const handleLogoClick = () => {
-    navigate('/');
+    // Clear city and reset to fresh home state
+    const next = { ...appState, city: "", cityLat: undefined, cityLon: undefined, viewMode: "grid" as const };
+    setAppState(next);
+    saveAppState(next);
+    setFilters({ category: undefined, subcategory: undefined, query: "", minPrice: undefined, maxPrice: undefined, jobKind: undefined });
+    window.history.pushState({}, '', '/');
   };
 
   const handleFiltersChange = (newFilters: SearchFilters) => {
@@ -385,75 +383,253 @@ export default function Index() {
     !!appState.city && !filters.query && !filters.subcategory;
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <BootstrapAuth />
-      
-      {/* Modals - using auth store */}
-      <AuthModal />
-      <PostModal city={appState.city} onPosted={(listing) => setNewlyPostedId(listing.id)} />
-      <AccountModal 
-        open={acctOpen} 
-        onOpenChange={setAcctOpen}
-        user={user}
-        onSignOut={async () => {
-          await signOut();
-          setAcctOpen(false);
-        }}
-      />
-
-      {/* Desktop layout - Show only on homepage when no city is selected */}
+      <div className="min-h-screen bg-background">
+      {/* Desktop Header */}
       <div className="hidden md:block">
-        <DesktopHeader onCitySelect={handleCityChange} />
-        {!appState.city && <DesktopHomeHero lang={lang} />}
-        <StickyFooter />
-      </div>
-
-      {/* Mobile layout */}
-      <div className="md:hidden">
         <Header
           currentCity={appState.city}
           onCityChange={handleCityChange}
-          onAccountClick={() => setAcctOpen(true)}
+          onAccountClick={handleAccountClick}
           onLogoClick={handleLogoClick}
-          rightExtra={<LanguageToggle value={lang} onChange={(v) => setLang(v as Lang)} />}
+          rightExtra={
+            <LanguageToggle
+              value={lang}
+              onChange={(newLang) => {
+                setLang(newLang as Lang);
+                localStorage.setItem("hn.lang", newLang);
+              }}
+            />
+          }
         />
-        <MobileHeader />
+      </div>
+      
+      {/* Mobile Header */}
+      <MobileHeader />
+      
+      {/* Mobile Filters Bar - only show when we have listings and a category */}
+      {filters.category && appState.city && (
+        <FiltersBar
+          topCategory={filters.category as CategoryKey}
+          selectedSubcategory={filters.subcategory}
+          onPickSub={(sub) => setFilters({ ...filters, subcategory: sub || undefined })}
+          onClear={() => setFilters({ category: undefined, subcategory: undefined, query: "", minPrice: undefined, maxPrice: undefined, jobKind: undefined })}
+        />
+      )}
 
-        {!appState.city ? (
-          <div className="container mx-auto px-4 py-4 relative">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-              <Globe className="scale-75" />
-            </div>
-            <div className="relative z-10">
-              <CitySearchBar 
-                placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
-                onCitySelect={handleCityChange}
-              />
+      {!shouldShowCityIndex && (
+        <div className="container mx-auto px-4 pt-4 hidden md:block">
+          <div className="flex flex-col md:flex-row gap-3 items-stretch mb-2">
+            <select
+              className="field min-w-[160px]"
+              value={filters.category || ""}
+              onChange={(e) => handleFiltersChange({ ...filters, category: e.target.value || undefined, subcategory: undefined })}
+            >
+              <option value="">{t(lang, "all_categories")}</option>
+              {Object.entries(TAXONOMY).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value.name[lang.toLowerCase() as "en" | "ti"]}
+                </option>
+              ))}
+            </select>
+
+            <SearchBox
+              lang={lang}
+              value={filters.query || ""}
+              onChange={(v) => setFilters({ ...filters, query: v })}
+              onPickCategory={(slug) => setFilters({ ...filters, category: slug, subcategory: undefined })}
+              onPickSubcategory={(slug) => setFilters({ ...filters, subcategory: slug })}
+              onPickTag={(tag) => setFilters({ ...filters, query: `${(filters.query || "").trim()} #${tag}`.trim() })}
+            />
+
+            <div className="flex gap-2">
+              <button
+                className={`btn ${appState.viewMode === "grid" ? "btn-primary" : ""}`}
+                onClick={() => handleViewModeChange("grid")}
+              >
+                {t(lang, "grid")}
+              </button>
+              <button
+                className={`btn ${appState.viewMode === "map" ? "btn-primary" : ""}`}
+                onClick={() => handleViewModeChange("map")}
+              >
+                {t(lang, "map")}
+              </button>
+              <button className="btn text-xs" onClick={() => setFilters({ category: filters.category })}>
+                {t(lang, "clear_all")}
+              </button>
             </div>
           </div>
-        ) : (
-          /* Show listings when city is selected */
-          <main className="container mx-auto px-4 py-6 mb-20">
-            <FilterBar 
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-              viewMode={appState.viewMode || "grid"}
-              onViewModeChange={handleViewModeChange}
-              resultsCount={filteredListings.length}
-            />
-            <ListingGrid
-              listings={filteredListings}
-              onListingSelect={handleListingSelect}
-              loading={loading}
-              onPostFirst={handlePostClick}
-              newlyPostedId={newlyPostedId}
-            />
-          </main>
-        )}
 
-        <StickyPostCTA />
-        <Footer />
+          <QuickFilters
+            lang={lang}
+            category={filters.category}
+            minPrice={filters.minPrice}
+            maxPrice={filters.maxPrice}
+            jobKind={filters.jobKind as any}
+            onChange={(next) => setFilters({ ...filters, ...next })}
+          />
+
+          <div className="text-sm text-muted-foreground mb-4">
+            {filteredListings.length} {t(lang, "results")}
+          </div>
+        </div>
+      )}
+
+      {/* Background Map */}
+      <div id="bg-map" className="fixed inset-0 -z-10 pointer-events-none">
+        <GlobalMap 
+          focusCity={appState.cityLat && appState.cityLon ? {
+            lat: parseFloat(appState.cityLat),
+            lng: parseFloat(appState.cityLon),
+            name: appState.city
+          } : null}
+          modalOpen={postOpen || acctOpen || loginOpen || detailOpen}
+          viewMode={appState.viewMode}
+        />
       </div>
-    </div>
+
+      {/* Hero section when no city is selected */}
+      {!appState.city && (
+        <>
+          {/* City Search Bar Above Hero */}
+          <div className="container mx-auto px-4 py-4">
+          <CitySearchBar 
+            placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
+            onCitySelect={handleCityChange}
+          />
+          </div>
+          
+          <section className="w-screen relative left-1/2 right-1/2 -mx-[50vw] py-8 md:py-12 bg-background/70 backdrop-blur">
+            <div className="max-w-7xl mx-auto px-4 md:px-6">
+              <div className="text-center space-y-6 mb-8">
+                <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+                  {t(lang, "connect_headline_1")}
+                  <br />
+                  <span className="text-primary">{t(lang, "connect_headline_2")}</span>
+                </h1>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-lg">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                    <span className="font-semibold">
+                      Live now: <strong>{isLoading ? '...' : total.toLocaleString()}</strong> people
+                    </span>
+                  </div>
+                  {demo && (
+                    <p className="text-xs text-muted-foreground">
+                      demo data until accounts go live
+                    </p>
+                  )}
+                </div>
+
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {t(lang, "connect_sub")}
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button 
+                    className="px-5 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-colors"
+                    onClick={() => navigate('/browse?category=housing')}
+                  >
+                    {t(lang, "housing")}
+                  </button>
+                  <button 
+                    className="px-5 py-3 rounded-lg bg-muted hover:bg-muted/80 font-semibold transition-colors"
+                    onClick={() => navigate('/browse?category=jobs')}
+                  >
+                    {t(lang, "jobs")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
+      <main className="container mx-auto px-4 py-6">
+        {shouldShowCityIndex ? (
+          <>
+            <HomeDigest city={appState.city} />
+            <CityIndex
+              city={appState.city}
+              lang={lang.toLowerCase() as "en" | "ti"}
+              listings={listings}
+              onOpen={({ category, sub }) => openCat(category, sub)}
+            />
+          </>
+        ) : (
+          <div id="listing-root">
+            {/* Mobile Recent Carousel */}
+            <div className="md:hidden mb-4">
+              <RecentCarousel />
+            </div>
+            
+            {appState.viewMode === "grid" ? (
+              <ListingGrid
+                listings={filteredListings}
+                onListingSelect={handleListingSelect}
+                loading={loading}
+                onPostFirst={() => setPostOpen(true)}
+                newlyPostedId={newlyPostedId}
+              />
+            ) : (
+              <MapCluster
+                center={appState.cityLat && appState.cityLon ? { lat: Number(appState.cityLat), lon: Number(appState.cityLon) } : undefined}
+                listings={filteredListings}
+                height={480}
+              />
+            )}
+          </div>
+        )}
+      </main>
+
+      <StickyPostCTA />
+      <Footer />
+
+      {/* Modals */}
+      <AuthModal />
+      <PostModal
+        city={appState.city || "Select a city"}
+        onPosted={(listing) => {
+          // Optimistic update - prepend new listing immediately
+          setListings(prev => [listing, ...prev]);
+          setNewlyPostedId(listing.id);
+          // Clear the "just posted" indicator after 60 seconds
+          setTimeout(() => {
+            setNewlyPostedId(null);
+          }, 60000);
+          toast("Posted successfully!");
+        }}
+      />
+
+      <LoginModal 
+        open={loginOpen} 
+        onOpenChange={(open) => setLoginOpen(open)}
+      />
+
+      <AccountModal 
+        open={acctOpen} 
+        onOpenChange={(open) => setAcctOpen(open)}
+        user={user}
+        onSignOut={handleSignOut}
+      />
+
+      <ListingDetailModal
+        open={detailOpen}
+        listing={selectedListing}
+        onClose={handleDetailClose}
+        onSavedChange={(id, saved) => {
+          // Handle favorite state change if needed
+          if (saved) {
+            setFavorites(prev => [...prev, id]);
+          } else {
+            setFavorites(prev => prev.filter(fId => fId !== id));
+          }
+        }}
+      />
+      </div>
+    </>
   );
 }

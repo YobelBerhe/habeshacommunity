@@ -11,8 +11,6 @@ import CitySearchBar from "@/components/CitySearchBar";
 import LanguageToggle from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DesktopBrowse } from "@/components/desktop/DesktopBrowse";
-import { StickyFooter } from "@/components/desktop/StickyFooter";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey, LABELS } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
@@ -198,194 +196,197 @@ export default function Browse() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop layout */}
+      {/* Desktop Header */}
       <div className="hidden md:block">
-        <DesktopBrowse 
-          listings={filteredListings}
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          onClearAll={handleClearAll}
-          onListingSelect={handleListingSelect}
-          loading={loading}
+        <Header
+          currentCity={filters.city || ""}
+          onCityChange={handleCityChange}
+          onAccountClick={() => {}}
+          onLogoClick={() => navigate("/")}
+          rightExtra={
+            <LanguageToggle
+              value={lang}
+              onChange={(newLang) => {
+                setLang(newLang as Lang);
+                localStorage.setItem("hn.lang", newLang);
+              }}
+            />
+          }
         />
-        <StickyFooter />
+      </div>
+      
+      {/* Mobile Header */}
+      <MobileHeader />
+
+      {/* Mobile City Search Bar */}
+      <div className="md:hidden px-4 py-2 border-b bg-background">
+        <CitySearchBar 
+          value={filters.city}
+          onCitySelect={handleCityChange}
+        />
       </div>
 
-      {/* Mobile layout */}
-      <div className="md:hidden">
-        {/* Mobile Header */}
-        <MobileHeader />
+      {/* Filter Controls - Sticky */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2 mb-3">
+            {/* Category Filter */}
+            <Popover modal={false}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  {filters.category 
+                    ? TAXONOMY[filters.category as CategoryKey]?.name.en || "Category"
+                    : "All categories"
+                  }
+                  <ChevronDown className="w-3 h-3 text-primary" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="bottom" 
+                align="start" 
+                className="w-56 p-1"
+                collisionPadding={8}
+              >
+                <div className="space-y-1">
+                  <button
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                    onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
+                  >
+                    All categories
+                  </button>
+                  {Object.entries(TAXONOMY).map(([key, value]) => (
+                    <button
+                      key={key}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                      onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
+                    >
+                      {value.name.en}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
 
-        {/* Mobile City Search Bar */}
-        <div className="px-4 py-2 border-b bg-background">
-          <CitySearchBar 
-            value={filters.city}
-            onCitySelect={handleCityChange}
-          />
-        </div>
-
-        {/* Filter Controls - Sticky */}
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
-          <div className="px-4 py-3">
-            <div className="flex items-center gap-2 mb-3">
-              {/* Category Filter */}
-              <Popover modal={false}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    {filters.category 
-                      ? TAXONOMY[filters.category as CategoryKey]?.name.en || "Category"
-                      : "All categories"
-                    }
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  side="bottom" 
-                  align="start" 
-                  className="w-56 p-1"
-                  collisionPadding={8}
+            {/* Subcategory Filter */}
+            <Popover modal={false}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1"
+                  disabled={!filters.category}
                 >
+                  {filters.subcategory 
+                    ? LABELS[filters.subcategory]?.en || filters.subcategory
+                    : filters.category ? "Subcategory" : "Select category first"
+                  }
+                  <ChevronDown className="w-3 h-3 text-primary" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="bottom" 
+                align="start" 
+                className="w-56 p-1 max-h-64 overflow-y-auto"
+                collisionPadding={8}
+              >
+                {filters.category && (
                   <div className="space-y-1">
                     <button
                       className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                      onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
+                      onClick={() => setFilters({ ...filters, subcategory: undefined })}
                     >
-                      All categories
+                      All {TAXONOMY[filters.category as CategoryKey]?.name.en.toLowerCase()}
                     </button>
-                    {Object.entries(TAXONOMY).map(([key, value]) => (
+                    {TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
                       <button
-                        key={key}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
+                        key={sub}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm text-primary"
+                        onClick={() => setFilters({ ...filters, subcategory: sub })}
                       >
-                        {value.name.en}
+                        {LABELS[sub]?.en || sub}
                       </button>
                     ))}
                   </div>
-                </PopoverContent>
-              </Popover>
+                )}
+              </PopoverContent>
+            </Popover>
 
-              {/* Subcategory Filter */}
-              <Popover modal={false}>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1"
-                    disabled={!filters.category}
-                  >
-                    {filters.subcategory 
-                      ? LABELS[filters.subcategory]?.en || filters.subcategory
-                      : filters.category ? "Subcategory" : "Select category first"
-                    }
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  side="bottom" 
-                  align="start" 
-                  className="w-56 p-1 max-h-64 overflow-y-auto"
-                  collisionPadding={8}
-                >
-                  {filters.category && (
-                    <div className="space-y-1">
-                      <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, subcategory: undefined })}
-                      >
-                        All {TAXONOMY[filters.category as CategoryKey]?.name.en.toLowerCase()}
-                      </button>
-                      {TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
-                        <button
-                          key={sub}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm text-primary"
-                          onClick={() => setFilters({ ...filters, subcategory: sub })}
-                        >
-                          {LABELS[sub]?.en || sub}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </PopoverContent>
-              </Popover>
-
-              {/* Clear All */}
-              <Button variant="ghost" size="sm" onClick={handleClearAll}>
-                Clear
-              </Button>
+            {/* Clear All */}
+            <Button variant="ghost" size="sm" onClick={handleClearAll}>
+              Clear
+            </Button>
+          </div>
+          
+          {/* View Mode Toggle & Results Count */}
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              {filteredListings.length} results
+              {filters.city && ` in ${filters.city}`}
             </div>
             
-            {/* View Mode Toggle & Results Count */}
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {filteredListings.length} results
-                {filters.city && ` in ${filters.city}`}
-              </div>
-              
-              <div className="flex gap-1">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "map" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("map")}
-                >
-                  <Map className="w-4 h-4" />
-                </Button>
-              </div>
+            <div className="flex gap-1">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "map" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("map")}
+              >
+                <Map className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
-
-        {/* Background Map for city focusing */}
-        {filters.city && (
-          <div className="fixed inset-0 -z-10 pointer-events-none">
-            <GlobalMap 
-              focusCity={{
-                lat: 0, lng: 0, // Will be updated when we have city coordinates
-                name: filters.city
-              }}
-              modalOpen={false}
-              viewMode="grid"
-            />
-          </div>
-        )}
-
-        {/* Main Content */}
-        <main className="container mx-auto px-4 py-6 mb-20">
-          {viewMode === "grid" ? (
-            <ListingGrid
-              listings={filteredListings}
-              onListingSelect={handleListingSelect}
-              loading={loading}
-              onPostFirst={() => {
-                // Use auth from store when available
-                const { openAuth, openPost, user } = require('@/store/auth').useAuth.getState();
-                if (user) {
-                  openPost();
-                } else {
-                  openAuth();
-                }
-              }}
-              newlyPostedId={null}
-            />
-          ) : (
-            <MapCluster
-              center={filters.city ? undefined : undefined}
-              listings={filteredListings}
-              height={480}
-            />
-          )}
-        </main>
-        
-        <StickyPostCTA />
-        <Footer />
       </div>
+
+      {/* Background Map for city focusing */}
+      {filters.city && (
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <GlobalMap 
+            focusCity={{
+              lat: 0, lng: 0, // Will be updated when we have city coordinates
+              name: filters.city
+            }}
+            modalOpen={false}
+            viewMode="grid"
+          />
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6 mb-20">
+        {viewMode === "grid" ? (
+          <ListingGrid
+            listings={filteredListings}
+            onListingSelect={handleListingSelect}
+            loading={loading}
+            onPostFirst={() => {
+              // Use auth from store when available
+              const { openAuth, openPost, user } = require('@/store/auth').useAuth.getState();
+              if (user) {
+                openPost();
+              } else {
+                openAuth();
+              }
+            }}
+            newlyPostedId={null}
+          />
+        ) : (
+          <MapCluster
+            center={filters.city ? undefined : undefined}
+            listings={filteredListings}
+            height={480}
+          />
+        )}
+      </main>
+      
+      <StickyPostCTA />
+      <Footer />
     </div>
   );
 }
