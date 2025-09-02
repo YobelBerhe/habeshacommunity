@@ -9,6 +9,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import LanguageToggle from '@/components/LanguageToggle';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/store/language';
+import { t } from '@/lib/i18n';
 
 type Props = { open: boolean; onOpenChange: (v: boolean) => void };
 
@@ -166,7 +167,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             {/* My Listings Toggle */}
             <details className="group border rounded">
               <summary className="flex items-center justify-between p-3 cursor-pointer select-none hover:bg-muted/50">
-                <span className="font-medium">My Listings</span>
+                <span className="font-medium">{t(language, "my_listings")}</span>
                 <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
               </summary>
               <div className="px-3 pb-2 space-y-1">
@@ -176,7 +177,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                   className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 text-sm"
                 >
                   <Heart className="w-4 h-4 text-red-500" />
-                  ❤️ Saved Listings
+                  ❤️ {t(language, "saved_listings")}
                 </Link>
                 <Link 
                   to="/account/listings" 
@@ -184,7 +185,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                   className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 text-sm"
                 >
                   <Edit3 className="w-4 h-4" />
-                  ✏️ Edit My Listings
+                  ✏️ {t(language, "edit_my_listings")}
                 </Link>
               </div>
             </details>
@@ -195,7 +196,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               onClick={() => onOpenChange(false)}
             >
               <MessageCircle className="w-4 h-4" />
-              Chat
+              {t(language, "chat")}
             </Link>
             
             <button 
@@ -203,7 +204,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               onClick={handleDonate}
             >
               <span>💙</span>
-            💙 Support HabeshaCommunity
+            💙 {t(language, "support_habesha")}
             </button>
 
             <div className="flex gap-2 mt-4">

@@ -6,6 +6,8 @@ import { uploadListingImages } from "@/utils/upload";
 import type { Listing } from "@/types";
 import { toast } from "sonner";
 import { useAuth } from '@/store/auth';
+import { useLanguage } from '@/store/language';
+import { t } from '@/lib/i18n';
 
 type Props = {
   city: string;
@@ -21,6 +23,7 @@ const catOptions: { key: CategoryKey; label: string }[] = ([
 
 export default function PostModal({ city, onPosted }: Props) {
   const { postOpen, closePost, user, editingListing } = useAuth();
+  const { language } = useLanguage();
   const isEditing = !!editingListing;
   
   const [category, setCategory] = useState<CategoryKey>("housing");
@@ -264,7 +267,7 @@ export default function PostModal({ city, onPosted }: Props) {
     <div className="fixed inset-0 z-[9999] bg-black/50 flex items-end md:items-stretch md:justify-end">
       <div className="bg-background w-full md:w-[520px] h-[85vh] md:h-full rounded-t-2xl md:rounded-none p-4 md:p-6 overflow-y-auto shadow-xl">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-semibold">{isEditing ? "Edit listing" : "Post a listing"}</h2>
+          <h2 className="text-xl font-semibold">{isEditing ? t(language, "edit_listing") : t(language, "post_a_listing")}</h2>
           <button onClick={closePost} className="rounded-md px-2 py-1 border">✕</button>
         </div>
 

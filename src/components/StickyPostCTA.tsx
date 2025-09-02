@@ -1,7 +1,10 @@
 import { useAuth } from '@/store/auth';
+import { useLanguage } from '@/store/language';
+import { t } from '@/lib/i18n';
 
 export default function StickyPostCTA() {
   const { user, openAuth, openPost } = useAuth();
+  const { language } = useLanguage();
 
   const handlePostClick = () => {
     if (user) {
@@ -17,7 +20,7 @@ export default function StickyPostCTA() {
         onClick={handlePostClick}
         className="w-full py-3 px-4 border border-primary text-primary bg-white hover:bg-primary/5 rounded-lg transition-colors font-medium"
       >
-        + Post your first listing
+        + {t(language, "post_your_first_listing")}
       </button>
     </div>
   );

@@ -4,12 +4,15 @@ import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import ListingCard from '@/components/ListingCard';
 import MobileHeader from '@/components/layout/MobileHeader';
+import { useLanguage } from '@/store/language';
+import { t } from '@/lib/i18n';
 import type { Listing } from '@/types';
 
 export default function SavedListings() {
   const [favorites, setFavorites] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { language } = useLanguage();
 
   useEffect(() => {
     if (!user) return;
@@ -103,7 +106,7 @@ export default function SavedListings() {
       <div className="min-h-screen bg-background">
         <MobileHeader />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading your saved listings...</div>
+          <div className="text-center">{t(language, "loading_saved_listings")}</div>
         </div>
       </div>
     );
@@ -116,13 +119,13 @@ export default function SavedListings() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
           <Heart className="w-6 h-6 text-red-500 fill-red-500" />
-          <h1 className="text-2xl font-bold">Saved Listings</h1>
+          <h1 className="text-2xl font-bold">{t(language, "saved_listings")}</h1>
         </div>
 
         {favorites.length === 0 ? (
           <div className="text-center py-12">
             <Heart className="w-16 h-16 text-red-500 fill-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No saved listings yet</h2>
+            <h2 className="text-xl font-semibold mb-2">{t(language, "no_saved_listings_yet")}</h2>
             <p className="text-muted-foreground mb-6">Start browsing to save listings you're interested in</p>
             <a 
               href="/browse" 

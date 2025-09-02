@@ -2,10 +2,13 @@ import { Link } from 'react-router-dom';
 import { Heart, Settings, LogOut, LogIn, UserPlus, List } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
+import { useLanguage } from '@/store/language';
+import { t } from '@/lib/i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export function AccountSheet({ children }:{ children?: React.ReactNode }) {
   const { user, refresh } = useAuth();
+  const { language } = useLanguage();
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -31,7 +34,7 @@ export function AccountSheet({ children }:{ children?: React.ReactNode }) {
                  className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-accent rounded-sm"
                >
                 <Heart className="w-4 h-4 text-red-500" />
-                Saved Listings
+                {t(language, "saved_listings")}
               </Link>
 
                <Link 
@@ -39,7 +42,7 @@ export function AccountSheet({ children }:{ children?: React.ReactNode }) {
                  className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-accent rounded-sm"
                >
                 <List className="w-4 h-4" />
-                My Listings
+                {t(language, "my_listings")}
               </Link>
               
                <Link 

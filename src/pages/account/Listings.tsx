@@ -6,12 +6,15 @@ import ListingCard from '@/components/ListingCard';
 import MobileHeader from '@/components/layout/MobileHeader';
 import PostModal from '@/components/PostModal';
 import { toast } from 'sonner';
+import { useLanguage } from '@/store/language';
+import { t } from '@/lib/i18n';
 import type { Listing } from '@/types';
 
 export default function MyListings() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, openPost } = useAuth();
+  const { language } = useLanguage();
 
   useEffect(() => {
     if (!user) return;
@@ -132,7 +135,7 @@ export default function MyListings() {
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-foreground">My Listings</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t(language, "my_listings")}</h1>
           <button 
             onClick={openPost}
             className="btn-primary flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
@@ -151,7 +154,7 @@ export default function MyListings() {
               onClick={openPost}
               className="btn-primary"
             >
-              Post your first listing
+              {t(language, "post_your_first_listing")}
             </button>
           </div>
         ) : (

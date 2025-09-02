@@ -62,6 +62,19 @@ const en = {
   // header and navigation
   post_listing: "Post Listing",
   chat: "Chat",
+  // account and listings
+  my_listings: "My Listings",
+  saved_listings: "Saved Listings",
+  edit_listing: "Edit listing",
+  post_a_listing: "Post a listing",
+  post_your_first_listing: "Post your first listing",
+  no_saved_listings_yet: "No saved listings yet",
+  loading_saved_listings: "Loading your saved listings...",
+  // support and theme
+  support_habesha: "Support HabeshaCommunity",
+  theme_dark: "Dark",
+  theme_light: "Light",
+  edit_my_listings: "Edit My Listings",
 };
 
 const ti = {
@@ -117,6 +130,19 @@ const ti = {
   // header and navigation
   post_listing: "ሓበሬታ ሸጥ",
   chat: "ተዘራረብ",
+  // account and listings
+  my_listings: "ናይ እየ ዝርዝር",
+  saved_listings: "ዝተዓቀብ ዝርዝር",
+  edit_listing: "ዝርዝር ብምምሕዳር",
+  post_a_listing: "ሓበሬታ ሸጥ",
+  post_your_first_listing: "ናይ ቀዳማይ ሓበሬታ ሸጥ",
+  no_saved_listings_yet: "ዝተዓቀብ ዝርዝር የለን",
+  loading_saved_listings: "ዝተዓቀብ ዝርዝር እናጽዓን...",
+  // support and theme
+  support_habesha: "HabeshaCommunity ምድጋፍ",
+  theme_dark: "ጸለማ",
+  theme_light: "ብርሃን",
+  edit_my_listings: "ናይ ዝርዝር ምምሕዳር",
 };
 
 const dict: Record<Lang, typeof en> = { EN: en, TI: ti };

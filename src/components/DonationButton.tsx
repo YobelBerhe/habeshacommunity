@@ -1,4 +1,6 @@
 import React from "react";
+import { useLanguage } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 type Props = {
   variant?: "solid" | "ghost";
@@ -12,6 +14,7 @@ export default function DonationButton({
   provider = "stripe",
   href,
 }: Props) {
+  const { language } = useLanguage();
   const url =
     href ||
     (provider === "paypal"
@@ -29,7 +32,7 @@ export default function DonationButton({
           : "border border-border hover:bg-muted"
       }`}
     >
-      <span>💙 Support HabeshaCommunity</span>
+      <span>💙 {t(language, "support_habesha")}</span>
     </a>
   );
 }
