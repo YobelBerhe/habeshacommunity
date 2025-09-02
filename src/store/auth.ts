@@ -44,12 +44,6 @@ export const useAuth = create<AuthState>((set, get) => ({
       const u = (session as Session | null)?.user ?? null;
       console.log('👤 User after auth change:', u);
       set({ user: u, loading: false, authOpen: false });
-      
-      // Auto-open Post after successful sign-in
-      if (u && get().postOpen === false) {
-        console.log('🎯 Auto-opening post modal for signed-in user');
-        set({ postOpen: true });
-      }
     });
   },
 
