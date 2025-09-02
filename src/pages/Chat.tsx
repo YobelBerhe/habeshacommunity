@@ -37,30 +37,59 @@ export default function Chat() {
   };
 
   const handleSend = async () => {
-    if (!message.trim()) return;
+    console.log('=== CHAT SEND DEBUG ===');
+    console.log('Message:', message.trim());
+    console.log('User object:', user);
+    console.log('User ID:', user?.id);
+    console.log('Selected city:', selectedCity);
+    console.log('Active board:', activeBoard);
+    
+    if (!message.trim()) {
+      console.log('❌ No message content');
+      return;
+    }
+    
     if (!user) {
+      console.log('❌ No authenticated user, opening auth modal');
       openAuth();
+      return;
+    }
+
+    if (!selectedCity) {
+      console.log('❌ No city selected');
+      toast.error('Please select a city first');
       return;
     }
     
     setLoading(true);
     try {
+      console.log('🚀 Attempting to insert message...');
+      
+      const insertData = {
+        content: message.trim(),
+        user_id: user.id,
+        city: selectedCity,
+        board: activeBoard
+      };
+      
+      console.log('📤 Insert data:', insertData);
+      
       const { data, error } = await supabase
         .from('chat_messages')
-        .insert({
-          content: message.trim(),
-          user_id: user.id,
-          city: selectedCity,
-          board: activeBoard
-        })
+        .insert(insertData)
         .select('*');
 
+      console.log('📥 Insert response data:', data);
+      console.log('📥 Insert response error:', error);
+
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('❌ Supabase error:', error);
+        toast.error(`Database error: ${error.message}`);
         throw error;
       }
 
       if (data && data.length > 0) {
+        console.log('✅ Message inserted successfully');
         // Add username to the message for display
         const messageWithUsername = {
           ...data[0],
@@ -70,9 +99,12 @@ export default function Chat() {
         setMessages(prev => [...prev, messageWithUsername]);
         setMessage('');
         toast.success('Message sent!');
+      } else {
+        console.log('⚠️ No data returned from insert');
+        toast.error('No data returned from database');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('💥 Error sending message:', error);
       toast.error('Failed to send message');
     } finally {
       setLoading(false);
