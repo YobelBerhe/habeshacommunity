@@ -51,48 +51,15 @@ export function AccountSheet({ open, onOpenChange }:{ open:boolean; onOpenChange
           </button>
         </div>
 
-        <div className="p-4 space-y-2 flex flex-col items-center">
+        <div className="space-y-2 flex flex-col items-center">
           {user && email ? (
-            <>
-              <div className="text-sm text-muted-foreground mb-4 text-center">
-                Signed in as {email}
-              </div>
-              
-              <Link 
-                to="/account/saved" 
-                onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
-              >
-                <Heart className="w-4 h-4 text-red-500" />
-                Saved listings
-              </Link>
-
-              <Link 
-                to="/account/listings" 
-                onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
-              >
-                <List className="w-4 h-4" />
-                My listings
-              </Link>
-              
-              <Link 
-                to="/account/settings" 
-                onClick={() => onOpenChange(false)} 
-                className="flex items-center gap-3 w-1/2 min-w-[200px] px-3 py-3 rounded-md border hover:bg-muted text-left"
-              >
-                <Settings className="w-4 h-4" />
-                Account settings
-              </Link>
-              
-              <button 
-                onClick={signOut} 
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border hover:bg-muted text-sm text-red-600 hover:text-red-700 mt-4"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign out
-              </button>
-            </>
+            <button 
+              onClick={signOut} 
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md border hover:bg-muted text-sm text-red-600 hover:text-red-700"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
           ) : (
             <>
               <Link 
