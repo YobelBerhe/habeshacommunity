@@ -540,6 +540,7 @@ export default function Index() {
             <CityIndex
               city={appState.city}
               lang={lang.toLowerCase() as "en" | "ti"}
+              listings={listings}
               onOpen={({ category, sub }) => openCat(category, sub)}
             />
           </>

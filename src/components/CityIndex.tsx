@@ -1,18 +1,18 @@
 import { TAXONOMY, LABELS, CategoryKey, isGig } from "@/lib/taxonomy";
-import { getListingsByCity } from "@/utils/storage";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useState } from "react";
+import type { Listing } from "@/types";
 
 type Props = {
   city: string;
   lang?: "en" | "ti";
+  listings: Listing[];
   onOpen: (opts: { category: CategoryKey; sub?: string }) => void;
 };
 
 const COLUMNS: CategoryKey[] = ["community", "housing", "jobs", "services"];
 
-export default function CityIndex({ city, lang = "en", onOpen }: Props) {
-  const listings = getListingsByCity(city);
+export default function CityIndex({ city, lang = "en", listings, onOpen }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | "">("");
 
   const count = (cat: CategoryKey, sub?: string) => {
