@@ -13,7 +13,7 @@ export function StickyFooter() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-900 border-t p-4">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-background border-t p-4">
       <div className="container mx-auto flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           © 2025 HabeshaCommunity — Connecting the global Habesha community • Rentals • Jobs • Services • Community

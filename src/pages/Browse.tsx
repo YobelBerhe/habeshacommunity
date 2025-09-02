@@ -200,7 +200,14 @@ export default function Browse() {
     <div className="min-h-screen bg-background">
       {/* Desktop layout */}
       <div className="hidden md:block">
-        <DesktopBrowse />
+        <DesktopBrowse 
+          listings={filteredListings}
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onClearAll={handleClearAll}
+          onListingSelect={handleListingSelect}
+          loading={loading}
+        />
         <StickyFooter />
       </div>
 

@@ -397,10 +397,10 @@ export default function Index() {
         }}
       />
 
-      {/* Desktop layout */}
+      {/* Desktop layout - Show only on homepage when no city is selected */}
       <div className="hidden md:block">
         <DesktopHeader onCitySelect={handleCityChange} />
-        <DesktopHomeHero lang={lang} />
+        {!appState.city && <DesktopHomeHero lang={lang} />}
         <StickyFooter />
       </div>
 

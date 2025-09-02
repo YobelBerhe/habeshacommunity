@@ -1,150 +1,54 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import MapCluster from '@/components/MapCluster';
 import ListingGrid from '@/components/ListingGrid';
 import { DesktopHeader } from './DesktopHeader';
 import { TAXONOMY, CategoryKey, LABELS } from '@/lib/taxonomy';
-import { setParams, getParam } from '@/lib/url';
 import type { Listing, SearchFilters } from '@/types';
-import { fetchListings } from '@/repo/listings';
-import { fetchListingsWithContacts } from '@/repo/listingsWithContacts';
-import { useAuth } from '@/store/auth';
-import { getContactValue, hasContactAccess } from '@/utils/contactHelpers';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export function DesktopBrowse() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(false);
+type Props = {
+  listings: Listing[];
+  filters: SearchFilters;
+  onFiltersChange: (newFilters: SearchFilters) => void;
+  onClearAll: () => void;
+  onListingSelect: (listing: Listing) => void;
+  loading: boolean;
+};
+
+export function DesktopBrowse({ 
+  listings, 
+  filters, 
+  onFiltersChange, 
+  onClearAll, 
+  onListingSelect,
+  loading 
+}: Props) {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
-  // Initialize filters from URL params
-  const [filters, setFilters] = useState<SearchFilters>(() => ({
-    city: searchParams.get("city") || undefined,
-    category: searchParams.get("category") || undefined,
-    subcategory: getParam(searchParams, "sub"),
-    query: searchParams.get("q") || "",
-    minPrice: searchParams.get("min") ? Number(searchParams.get("min")) : undefined,
-    maxPrice: searchParams.get("max") ? Number(searchParams.get("max")) : undefined,
-    jobKind: undefined as "regular"|"gig"|undefined,
-  }));
-
-  // Update URL when filters change
-  useEffect(() => {
-    const params = setParams(new URLSearchParams(), {
-      city: filters.city,
-      category: filters.category,
-      sub: filters.subcategory,
-      q: filters.query,
-      min: filters.minPrice?.toString(),
-      max: filters.maxPrice?.toString(),
-    });
-    setSearchParams(params, { replace: true });
-  }, [filters, setSearchParams]);
-
-  // Load data when filters change
-  useEffect(() => {
-    const loadListings = async () => {
-      setLoading(true);
-      try {
-        const data = user 
-          ? await fetchListingsWithContacts({
-              city: filters.city,
-              category: filters.category,
-              q: filters.query,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              subcategory: filters.subcategory,
-            })
-          : await fetchListings({
-              city: filters.city,
-              category: filters.category,
-              q: filters.query,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              subcategory: filters.subcategory,
-            });
-            
-        setListings(data.map(row => ({
-          id: row.id,
-          user_id: row.user_id || "",
-          city: row.city,
-          country: row.country,
-          category: row.category as string,
-          subcategory: row.subcategory,
-          title: row.title,
-          description: row.description || "",
-          price: row.price_cents ? row.price_cents / 100 : null,
-          price_cents: row.price_cents,
-          currency: row.currency,
-          images: row.images || [],
-          lat: row.location_lat,
-          lng: row.location_lng,
-          location_lat: row.location_lat,
-          location_lng: row.location_lng,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-          status: row.status,
-          website_url: row.website_url,
-          tags: row.tags || [],
-          contact: hasContactAccess(user, row.user_id) 
-            ? {
-                phone: (row as any).contact_phone,
-                email: (row as any).contact_email,
-                whatsapp: (row as any).contact_whatsapp,
-                telegram: (row as any).contact_telegram,
-              }
-            : undefined,
-        })));
-      } catch (error) {
-        console.error('Failed to load listings:', error);
-        setListings([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadListings();
-  }, [filters, user]);
-
   const handleCitySelect = (city: string) => {
-    setFilters(prev => ({ ...prev, city }));
+    onFiltersChange({ ...filters, city });
   };
 
   const handleCategoryChange = (category: string) => {
-    setFilters(prev => ({ 
-      ...prev, 
+    onFiltersChange({ 
+      ...filters, 
       category: category || undefined,
       subcategory: undefined // Reset subcategory when category changes
-    }));
+    });
   };
 
   const handleSubcategoryChange = (subcategory: string) => {
-    setFilters(prev => ({ ...prev, subcategory: subcategory || undefined }));
-  };
-
-  const handleClearAll = () => {
-    setFilters({
-      city: undefined,
-      category: undefined,
-      subcategory: undefined,
-      query: "",
-      minPrice: undefined,
-      maxPrice: undefined,
-      jobKind: undefined,
-    });
-    navigate('/browse');
+    onFiltersChange({ ...filters, subcategory: subcategory || undefined });
   };
 
   const handleListingSelect = (listing: Listing) => {
     setSelectedListing(listing);
+    onListingSelect(listing);
   };
 
   // Get subcategories for the current category
@@ -238,7 +142,7 @@ export function DesktopBrowse() {
 
               {/* Clear All */}
               <button
-                onClick={handleClearAll}
+                onClick={onClearAll}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto"
               >
                 <X className="w-4 h-4" />
