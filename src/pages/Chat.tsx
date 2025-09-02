@@ -45,27 +45,30 @@ export default function Chat() {
     
     setLoading(true);
     try {
-      // Store message in localStorage for now (temporary solution)
-      const storageKey = `chat_${selectedCity}_${activeBoard}`;
-      const existingMessages = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        content: message.trim(),
-        user_id: user.id,
-        username: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
-        city: selectedCity,
-        board: activeBoard,
-        created_at: new Date().toISOString()
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({
+          content: message.trim(),
+          user_id: user.id,
+          city: selectedCity,
+          board: activeBoard
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      // Add username to the message for display
+      const messageWithUsername = {
+        ...data,
+        username: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous'
       };
-      
-      const updatedMessages = [...existingMessages, newMessage];
-      localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
-      setMessages(updatedMessages);
+
+      setMessages(prev => [...prev, messageWithUsername]);
       setMessage('');
-      
       toast.success('Message sent!');
     } catch (error) {
+      console.error('Error sending message:', error);
       toast.error('Failed to send message');
     } finally {
       setLoading(false);
@@ -74,11 +77,33 @@ export default function Chat() {
 
   // Load messages when city/board changes
   useEffect(() => {
-    if (selectedCity && activeBoard) {
-      const storageKey = `chat_${selectedCity}_${activeBoard}`;
-      const existingMessages = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      setMessages(existingMessages);
-    }
+    const loadMessages = async () => {
+      if (!selectedCity || !activeBoard) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('city', selectedCity)
+          .eq('board', activeBoard)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        // Add usernames to messages for display
+        const messagesWithUsernames = data.map(msg => ({
+          ...msg,
+          username: 'User' // Will show as 'User' for now since we don't store usernames in DB
+        }));
+
+        setMessages(messagesWithUsernames);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+        setMessages([]);
+      }
+    };
+
+    loadMessages();
   }, [selectedCity, activeBoard]);
 
   return (
