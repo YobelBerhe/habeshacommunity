@@ -294,7 +294,11 @@ export default function Index() {
   };
 
   const handleCityChange = (city: string, lat?: number, lon?: number) => {
-    navigate(`/browse?city=${encodeURIComponent(city)}`);
+    // For desktop, navigate to browse page
+    // For mobile, update app state to show listings
+    const next = { ...appState, city };
+    setAppState(next);
+    saveAppState(next);
   };
 
   const handleAccountClick = () => {
@@ -415,7 +419,7 @@ export default function Index() {
         />
         <MobileHeader />
 
-        {!appState.city && (
+        {!appState.city ? (
           <div className="container mx-auto px-4 py-4 relative">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
               <Globe className="scale-75" />
@@ -427,6 +431,24 @@ export default function Index() {
               />
             </div>
           </div>
+        ) : (
+          /* Show listings when city is selected */
+          <main className="container mx-auto px-4 py-6 mb-20">
+            <FilterBar 
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              viewMode={appState.viewMode || "grid"}
+              onViewModeChange={handleViewModeChange}
+              resultsCount={filteredListings.length}
+            />
+            <ListingGrid
+              listings={filteredListings}
+              onListingSelect={handleListingSelect}
+              loading={loading}
+              onPostFirst={handlePostClick}
+              newlyPostedId={newlyPostedId}
+            />
+          </main>
         )}
 
         <StickyPostCTA />
