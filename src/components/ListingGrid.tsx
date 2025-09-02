@@ -1,5 +1,7 @@
 import ListingCard from "@/components/ListingCard";
+import LiveUserMap from "@/components/LiveUserMap";
 import { Listing } from "@/types";
+import { useLocation } from "react-router-dom";
 
 interface ListingGridProps {
   listings: Listing[];
@@ -16,6 +18,8 @@ export default function ListingGrid({
   onPostFirst,
   newlyPostedId
 }: ListingGridProps) {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -25,6 +29,12 @@ export default function ListingGrid({
   }
 
   if (listings.length === 0) {
+    // Show live user map only on homepage
+    if (isHomePage) {
+      return <LiveUserMap className="mx-auto max-w-4xl" />;
+    }
+    
+    // Show regular empty state on other pages
     return (
       <div className="text-center space-y-4 py-12">
         <div className="text-6xl">📝</div>
