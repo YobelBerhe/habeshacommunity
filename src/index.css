@@ -258,6 +258,36 @@
   background: #0b0e11; 
 }
 
+/* Fix z-index issues - ensure map stays below UI elements */
+.leaflet-pane,
+.leaflet-map-pane,
+.leaflet-marker-pane,
+.leaflet-shadow-pane,
+.leaflet-overlay-pane,
+.leaflet-popup-pane,
+.leaflet-tooltip-pane {
+  z-index: 10 !important;
+}
+
+.leaflet-control-container,
+.leaflet-control-zoom,
+.leaflet-control-attribution {
+  z-index: 15 !important;
+}
+
+/* Specifically target leaflet markers */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  z-index: 12 !important;
+}
+
+/* Custom markers (breathing dots, stars, etc.) */
+.breathing-marker,
+.star-container,
+.pulse-container {
+  z-index: 11 !important;
+}
+
 /* World Map Pulse Animation */
 .pulse-container {
   background: none !important;
