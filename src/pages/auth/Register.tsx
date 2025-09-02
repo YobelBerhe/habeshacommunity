@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import CitySearchBar from "@/components/CitySearchBar";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -86,12 +87,11 @@ export default function Register() {
 
             <div>
               <label className="text-sm font-medium block mb-1">City you live in</label>
-              <input 
-                className="w-full border rounded-md p-3 bg-background" 
+              <CitySearchBar 
+                value={city}
+                onCitySelect={(cityName) => setCity(cityName)}
                 placeholder="e.g. Asmara, Oakland, Frankfurt"
-                value={city} 
-                onChange={e=>setCity(e.target.value)} 
-                required
+                className="[&_input]:w-full [&_input]:border [&_input]:rounded-md [&_input]:p-3 [&_input]:bg-background"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 This will appear on our live activity map

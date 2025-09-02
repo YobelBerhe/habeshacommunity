@@ -71,12 +71,15 @@ export default function CitySearchBar({
     setItems([]); // Clear items immediately
     setOpen(false);
     
-    if (onCitySelect) {
-      onCitySelect(cityName, parseFloat(city.lat), parseFloat(city.lon));
-    } else {
-      // Navigate to browse page with city
-      navigate(`/browse?city=${encodeURIComponent(cityName)}`);
-    }
+    // Prevent immediate reopening by adding a small delay
+    setTimeout(() => {
+      if (onCitySelect) {
+        onCitySelect(cityName, parseFloat(city.lat), parseFloat(city.lon));
+      } else {
+        // Navigate to browse page with city
+        navigate(`/browse?city=${encodeURIComponent(cityName)}`);
+      }
+    }, 100);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
