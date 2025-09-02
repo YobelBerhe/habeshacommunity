@@ -463,7 +463,7 @@ export default function Index() {
       )}
 
       {/* Background Map - Full Height for Homepage */}
-      <div id="bg-map" className={`${!appState.city ? 'min-h-[calc(100vh-200px)]' : 'fixed inset-0'} -z-10 pointer-events-none`}>
+      <div id="bg-map" className={`${!appState.city ? 'min-h-[calc(100vh-120px)]' : 'fixed inset-0'} -z-10 pointer-events-none`}>
         <GlobalMap 
           focusCity={appState.cityLat && appState.cityLon ? {
             lat: parseFloat(appState.cityLat),
@@ -479,7 +479,7 @@ export default function Index() {
       {!appState.city && (
         <>
           {/* City Search Bar Above Hero */}
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 pt-2">
           <CitySearchBar 
             placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
             onCitySelect={handleCityChange}
