@@ -201,7 +201,7 @@ export default function LiveUserMap() {
 
   return (
     <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg border border-border/50 bg-gradient-card">
-      <div ref={containerRef} className="absolute inset-0 w-full h-full" />
+      <div ref={containerRef} className="absolute inset-0 w-full h-full -z-50" />
       
       {/* Mobile-friendly info overlay */}
       <div className="absolute top-4 left-4 right-4 md:right-auto bg-background/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm">
