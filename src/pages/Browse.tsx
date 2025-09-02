@@ -298,7 +298,7 @@ export default function Browse() {
 
             {/* Clear All */}
             <Button variant="ghost" size="sm" onClick={handleClearAll}>
-              Clear all
+              Clear
             </Button>
           </div>
           
