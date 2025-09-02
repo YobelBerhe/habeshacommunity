@@ -137,7 +137,7 @@ export default function GlobalMap({ onMapReady, focusCity, viewMode, modalOpen }
   return (
     <div 
       ref={containerRef} 
-      className="fixed inset-0 -z-10 md:-z-20 transition-all duration-300"
+      className="fixed inset-0 -z-50 transition-all duration-300"
     >
       {mapRef.current && (
         <StarFieldLayer map={mapRef.current} points={points} />
