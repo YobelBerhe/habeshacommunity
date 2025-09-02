@@ -31,7 +31,11 @@ export default function ListingGrid({
   if (listings.length === 0) {
     // Show live user map only on homepage
     if (isHomePage) {
-      return <LiveUserMap className="mx-auto max-w-4xl" />;
+      return (
+        <div className="mx-auto max-w-4xl">
+          <LiveUserMap />
+        </div>
+      );
     }
     
     // Show regular empty state on other pages
