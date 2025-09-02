@@ -4,6 +4,9 @@ import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
 import ListingGrid from "@/components/ListingGrid";
 import MapCluster from "@/components/MapCluster";
+import GlobalMap from "@/components/GlobalMap";
+import StickyPostCTA from "@/components/StickyPostCTA";
+import Footer from "@/components/Footer";
 import CitySearchBar from "@/components/CitySearchBar";
 import LanguageToggle from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
@@ -208,8 +211,8 @@ export default function Browse() {
         />
       </div>
 
-      {/* Filter Controls */}
-      <div className="border-b bg-background">
+      {/* Filter Controls - Sticky */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
         <div className="px-4 py-3">
           <div className="flex items-center gap-2 mb-3">
             {/* Category Filter */}
@@ -326,8 +329,22 @@ export default function Browse() {
         </div>
       </div>
 
+      {/* Background Map for city focusing */}
+      {filters.city && (
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <GlobalMap 
+            focusCity={{
+              lat: 0, lng: 0, // Will be updated when we have city coordinates
+              name: filters.city
+            }}
+            modalOpen={false}
+            viewMode="grid"
+          />
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 mb-20">
         {viewMode === "grid" ? (
           <ListingGrid
             listings={filteredListings}
@@ -344,6 +361,9 @@ export default function Browse() {
           />
         )}
       </main>
+      
+      <StickyPostCTA />
+      <Footer />
     </div>
   );
 }

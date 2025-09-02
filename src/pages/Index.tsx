@@ -19,6 +19,9 @@ import QuickFilters from "@/components/QuickFilters";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
+import GlobalMap from "@/components/GlobalMap";
+import StickyPostCTA from "@/components/StickyPostCTA";
+import Footer from "@/components/Footer";
 import { getStarPoints } from "@/services/activeUsers";
 import CitySearchBar from "@/components/CitySearchBar";
 import { setParams, getParam } from "@/lib/url";
@@ -459,6 +462,19 @@ export default function Index() {
         </div>
       )}
 
+      {/* Background Map */}
+      <div id="bg-map" className="fixed inset-0 -z-10 pointer-events-none">
+        <GlobalMap 
+          focusCity={appState.cityLat && appState.cityLon ? {
+            lat: parseFloat(appState.cityLat),
+            lng: parseFloat(appState.cityLon),
+            name: appState.city
+          } : null}
+          modalOpen={postOpen || acctOpen || loginOpen || detailOpen}
+          viewMode={appState.viewMode}
+        />
+      </div>
+
       {/* Hero section when no city is selected */}
       {!appState.city && (
         <>
@@ -470,7 +486,7 @@ export default function Index() {
           />
           </div>
           
-          <section className="w-screen relative left-1/2 right-1/2 -mx-[50vw] py-8 md:py-12">
+          <section className="w-screen relative left-1/2 right-1/2 -mx-[50vw] py-8 md:py-12 bg-background/70 backdrop-blur">
             <div className="max-w-7xl mx-auto px-4 md:px-6">
               <div className="text-center space-y-6 mb-8">
                 <h1 className="text-4xl md:text-5xl font-bold leading-tight">
@@ -553,29 +569,8 @@ export default function Index() {
         )}
       </main>
 
-      {/* Fixed bottom Post button */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-primary text-primary-foreground p-4 md:hidden">
-        <button 
-          onClick={handlePostClick}
-          className="w-full py-3 rounded-lg bg-primary-foreground text-primary font-semibold hover:bg-primary-foreground/90 transition-colors"
-        >
-          + Post your first listing
-        </button>
-      </div>
-
-      <footer className="bg-muted/30 mt-12 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            {t(lang, "footer_line1")}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {t(lang, "footer_line2")}
-          </p>
-          <div className="mt-3 flex justify-center">
-            <DonationButton />
-          </div>
-        </div>
-      </footer>
+      <StickyPostCTA />
+      <Footer />
 
       {/* Modals */}
       <AuthModal />

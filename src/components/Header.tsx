@@ -38,10 +38,10 @@ export default function Header({
         >
           <img 
             src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
-            alt="HabeshaNetwork Logo" 
+            alt="HabeshaCommunity Logo" 
             className="w-8 h-8 rounded-lg"
           />
-          <span>HabeshaNetwork</span>
+          <span>HabeshaCommunity</span>
         </button>
 
         <div className="order-2 md:order-none flex-1 min-w-[260px] z-50">
@@ -54,7 +54,7 @@ export default function Header({
         <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
           {rightExtra}
-          <button className="btn" onClick={() => navigate('/forums')}>Forums</button>
+          <button className="btn" onClick={() => navigate('/chat')}>Chat</button>
           <button className="btn btn-primary" onClick={handlePostClick}>+ Post</button>
           <AuthButtons />
         </div>

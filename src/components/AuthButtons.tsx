@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
 import { User } from "lucide-react";
+import { AccountSheet } from "@/components/nav/AccountSheet";
 
 export default function AuthButtons() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
@@ -14,23 +15,11 @@ export default function AuthButtons() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  if (userEmail) {
-    return (
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground">{userEmail}</span>
-        <button
-          onClick={async () => { await supabase.auth.signOut(); }}
-          className="px-3 py-1 rounded border hover:bg-muted transition-colors"
-        >
-          Sign out
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <Link to="/auth/login" className="p-2 rounded-full border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center">
-      <User size={20} />
-    </Link>
+    <AccountSheet open={accountOpen} onOpenChange={setAccountOpen}>
+      <button className="p-2 rounded-full border bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center">
+        <User size={20} />
+      </button>
+    </AccountSheet>
   );
 }
