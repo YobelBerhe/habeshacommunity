@@ -20,6 +20,7 @@ export default function CitySearchBar({
   const [q, setQ] = useState(value ?? "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<City[]>([]);
+  const [justSelected, setJustSelected] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -34,8 +35,9 @@ export default function CitySearchBar({
   }, []);
 
   useEffect(() => {
-    if (q.trim().length < 2) { 
-      setItems([]); 
+    if (q.trim().length < 2 || justSelected) { 
+      setItems([]);
+      if (justSelected) setJustSelected(false);
       return; 
     }
     
@@ -60,10 +62,11 @@ export default function CitySearchBar({
     }, 200); 
     
     return () => clearTimeout(t);
-  }, [q]);
+  }, [q, justSelected]);
 
   const handleSelect = (city: City) => {
     const cityName = city.name;
+    setJustSelected(true);
     setQ(`${cityName}, ${city.country}`);
     setOpen(false);
     
