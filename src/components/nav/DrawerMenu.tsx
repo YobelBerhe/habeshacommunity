@@ -102,7 +102,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           <div className="pt-[env(safe-area-inset-top)] px-4 h-14 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2" onClick={() => onOpenChange(false)}>
               <img 
-                src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
+                src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
                 alt="HabeshaCommunity" 
                 className="w-6 h-6 rounded"
               />

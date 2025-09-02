@@ -37,7 +37,7 @@ export default function Header({
           onClick={onLogoClick}
         >
           <img 
-            src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
+            src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
             alt="HabeshaCommunity Logo" 
             className="w-8 h-8 rounded-lg"
           />

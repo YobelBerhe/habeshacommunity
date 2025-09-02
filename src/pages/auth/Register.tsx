@@ -50,7 +50,7 @@ export default function Register() {
       <div className="max-w-sm w-full mx-auto p-6 bg-card border rounded-lg shadow-sm">
         <div className="text-center mb-6">
           <img 
-            src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
+            src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
             alt="HabeshaCommunity" 
             className="w-12 h-12 mx-auto rounded-lg mb-2"
           />
