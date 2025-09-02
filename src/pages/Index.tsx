@@ -19,7 +19,7 @@ import QuickFilters from "@/components/QuickFilters";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
-import Globe from "@/components/Globe";
+import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
 import { getStarPoints } from "@/services/activeUsers";
@@ -31,11 +31,9 @@ import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings, fetchListingById } from "@/repo/listings";
 import { onAuthChange, getUserId, signOut } from "@/repo/auth";
-import { useAuth } from '@/store/auth';
 import { toast } from "sonner";
 
 export default function Index() {
-  const { authOpen } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const params = useParams<{ id?: string }>();
@@ -55,7 +53,6 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [demo, setDemo] = useState(false);
-  const [starPoints, setStarPoints] = useState<any[]>([]);
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
     const initialAppState = getAppState();
@@ -117,7 +114,6 @@ export default function Index() {
       const res = await getStarPoints();
       setTotal(res.total);
       setDemo(res.demo);
-      setStarPoints(res.points || []);
       setIsLoading(false);
     };
 
@@ -466,11 +462,16 @@ export default function Index() {
         </div>
       )}
 
-      {/* Background Globe */}
-      <div id="bg-map" className="fixed inset-0 -z-50 pointer-events-none">
-        <Globe
-          points={starPoints}
-          className="w-full h-full"
+      {/* Background Map */}
+      <div id="bg-map" className="fixed inset-0 -z-10 pointer-events-none">
+        <GlobalMap 
+          focusCity={appState.cityLat && appState.cityLon ? {
+            lat: parseFloat(appState.cityLat),
+            lng: parseFloat(appState.cityLon),
+            name: appState.city
+          } : null}
+          modalOpen={postOpen || acctOpen || loginOpen || detailOpen}
+          viewMode={appState.viewMode}
         />
       </div>
 

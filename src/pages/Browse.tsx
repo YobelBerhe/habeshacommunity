@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useAuth } from '@/store/auth';
 import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
 import ListingGrid from "@/components/ListingGrid";
@@ -353,7 +352,7 @@ export default function Browse() {
             loading={loading}
             onPostFirst={() => {
               // Use auth from store when available
-              const { openAuth, openPost, user } = useAuth.getState();
+              const { openAuth, openPost, user } = require('@/store/auth').useAuth.getState();
               if (user) {
                 openPost();
               } else {
