@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { TAXONOMY, LABELS, isGig, CategoryKey } from "@/lib/taxonomy";
-import { createListing } from "@/repo/listings";
+import { createListingWithContact } from "@/repo/listingsWithContacts";
 import { getUserId } from "@/repo/auth";
 import { uploadListingImages } from "@/utils/upload";
 import type { Listing } from "@/types";
@@ -108,7 +108,7 @@ export default function PostModal({ city, onPosted }: Props) {
       const finalWebsiteUrl = websiteUrl.trim() ? 
         (websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`) : null;
       
-      const dbListing = await createListing({
+      const { listing: dbListing, contact: dbContact } = await createListingWithContact({
         user_id: userId,
         city: currentCity || "Unknown",
         country: country || null,
@@ -118,13 +118,14 @@ export default function PostModal({ city, onPosted }: Props) {
         description: finalDescription,
         price_cents: price ? Math.round(price * 100) : null,
         currency: currency || "USD",
-        contact_method: getContactMethod(contact),
-        contact_value: getContactValue(contact),
         tags: splitTags(tags),
         images: imageUrls,
         location_lat: lat || null,
         location_lng: lng || null,
         website_url: finalWebsiteUrl,
+      }, {
+        contact_method: getContactMethod(contact),
+        contact_value: getContactValue(contact),
       });
 
       // Convert back to frontend format for optimistic update
@@ -139,10 +140,10 @@ export default function PostModal({ city, onPosted }: Props) {
         description: dbListing.description || "",
         price: dbListing.price_cents ? dbListing.price_cents / 100 : null,
         currency: dbListing.currency,
-        contact_phone: dbListing.contact_method === 'phone' ? dbListing.contact_value : null,
-        contact_whatsapp: dbListing.contact_method === 'whatsapp' ? dbListing.contact_value : null,
-        contact_telegram: dbListing.contact_method === 'telegram' ? dbListing.contact_value : null,
-        contact_email: dbListing.contact_method === 'email' ? dbListing.contact_value : null,
+        contact_phone: dbContact?.contact_method === 'phone' ? dbContact.contact_value : null,
+        contact_whatsapp: dbContact?.contact_method === 'whatsapp' ? dbContact.contact_value : null,
+        contact_telegram: dbContact?.contact_method === 'telegram' ? dbContact.contact_value : null,
+        contact_email: dbContact?.contact_method === 'email' ? dbContact.contact_value : null,
         website_url: dbListing.website_url,
         tags: dbListing.tags || [],
         images: dbListing.images || [],
@@ -151,7 +152,7 @@ export default function PostModal({ city, onPosted }: Props) {
         created_at: dbListing.created_at,
         // Legacy compatibility
         jobKind,
-        contact: { phone: dbListing.contact_value || "" },
+        contact: { phone: dbContact?.contact_value || "" },
         photos: dbListing.images || [],
         lon: dbListing.location_lng || undefined,
         createdAt: new Date(dbListing.created_at).getTime(),

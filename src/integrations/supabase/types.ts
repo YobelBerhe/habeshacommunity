@@ -208,12 +208,42 @@ export type Database = {
           },
         ]
       }
+      listing_contacts: {
+        Row: {
+          contact_method: string | null
+          contact_value: string | null
+          created_at: string
+          id: string
+          listing_id: string
+        }
+        Insert: {
+          contact_method?: string | null
+          contact_value?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+        }
+        Update: {
+          contact_method?: string | null
+          contact_value?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_contacts_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           category: string | null
           city: string
-          contact_method: string | null
-          contact_value: string | null
           country: string | null
           created_at: string | null
           currency: string | null
@@ -234,8 +264,6 @@ export type Database = {
         Insert: {
           category?: string | null
           city: string
-          contact_method?: string | null
-          contact_value?: string | null
           country?: string | null
           created_at?: string | null
           currency?: string | null
@@ -256,8 +284,6 @@ export type Database = {
         Update: {
           category?: string | null
           city?: string
-          contact_method?: string | null
-          contact_value?: string | null
           country?: string | null
           created_at?: string | null
           currency?: string | null

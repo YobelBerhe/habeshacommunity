@@ -17,12 +17,15 @@ import { t, Lang } from "@/lib/i18n";
 import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings } from "@/repo/listings";
+import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
+import { useAuth } from '@/store/auth';
 import { Grid3X3, Map, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [appState, setAppState] = useState<AppState>(() => getAppState());
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(false);
@@ -67,14 +70,25 @@ export default function Browse() {
     const loadListings = async () => {
       setLoading(true);
       try {
-        const data = await fetchListings({
-          city: filters.city,
-          category: filters.category,
-          q: filters.query,
-          minPrice: filters.minPrice,
-          maxPrice: filters.maxPrice,
-          subcategory: filters.subcategory,
-        });
+        // Use contact-aware fetch if user is authenticated, otherwise regular fetch
+        const data = user 
+          ? await fetchListingsWithContacts({
+              city: filters.city,
+              category: filters.category,
+              q: filters.query,
+              minPrice: filters.minPrice,
+              maxPrice: filters.maxPrice,
+              subcategory: filters.subcategory,
+            })
+          : await fetchListings({
+              city: filters.city,
+              category: filters.category,
+              q: filters.query,
+              minPrice: filters.minPrice,
+              maxPrice: filters.maxPrice,
+              subcategory: filters.subcategory,
+            });
+            
         setListings(data.map(row => ({
           id: row.id,
           user_id: row.user_id || "",
@@ -86,10 +100,10 @@ export default function Browse() {
           description: row.description || "",
           price: row.price_cents ? row.price_cents / 100 : null,
           currency: row.currency,
-          contact_phone: row.contact_method === 'phone' ? row.contact_value : null,
-          contact_whatsapp: row.contact_method === 'whatsapp' ? row.contact_value : null,
-          contact_telegram: row.contact_method === 'telegram' ? row.contact_value : null,
-          contact_email: row.contact_method === 'email' ? row.contact_value : null,
+          contact_phone: ('contact' in row && row.contact?.contact_method === 'phone') ? row.contact.contact_value : null,
+          contact_whatsapp: ('contact' in row && row.contact?.contact_method === 'whatsapp') ? row.contact.contact_value : null,
+          contact_telegram: ('contact' in row && row.contact?.contact_method === 'telegram') ? row.contact.contact_value : null,
+          contact_email: ('contact' in row && row.contact?.contact_method === 'email') ? row.contact.contact_value : null,
           website_url: row.website_url,
           tags: row.tags || [],
           images: row.images || [],
@@ -97,7 +111,7 @@ export default function Browse() {
           lng: row.location_lng,
           created_at: row.created_at,
           // Legacy compatibility
-          contact: { phone: row.contact_value || "" },
+          contact: { phone: ('contact' in row && row.contact?.contact_value) || "" },
           photos: row.images || [],
           lon: row.location_lng || undefined,
           createdAt: new Date(row.created_at).getTime(),
@@ -113,7 +127,7 @@ export default function Browse() {
     };
 
     loadListings();
-  }, [filters.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory]);
+  }, [filters.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory, user]);
 
   // Filter listings
   const filteredListings = useMemo(() => {

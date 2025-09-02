@@ -14,16 +14,22 @@ export interface ListingRow {
   description: string;
   price_cents: number | null;
   currency: string | null;
-  contact_method: 'phone' | 'whatsapp' | 'telegram' | 'email' | null;
-  contact_value: string | null;
   tags: string[] | null;
   images: string[] | null;        // URLs in storage
   location_lat: number | null;
   location_lng: number | null;
-  website_url: string | null;     // NEW
+  website_url: string | null;
   status: ListingStatus;
   created_at: string;
   updated_at: string;
+}
+
+export interface ListingContactRow {
+  id: UUID;
+  listing_id: UUID;
+  contact_method: 'phone' | 'whatsapp' | 'telegram' | 'email' | null;
+  contact_value: string | null;
+  created_at: string;
 }
 
 export interface FavoriteRow {
