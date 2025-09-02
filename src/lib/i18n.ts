@@ -51,6 +51,17 @@ const en = {
   // footer
   footer_line1: "© 2025 HabeshaCommunity — Connecting the global Habesha community",
   footer_line2: "Rentals • Jobs • Services • Community",
+  // hero section
+  live_now: "Live now:",
+  live_people: "people",
+  demo_data: "demo data until accounts go live",
+  browse_housing: "Browse Housing",
+  find_jobs: "Find Jobs",
+  loading_live_data: "Loading live data...",
+  dots_show_activity: "Dots show approximate city-level activity",
+  // header and navigation
+  post_listing: "Post Listing",
+  chat: "Chat",
 };
 
 const ti = {
@@ -95,6 +106,17 @@ const ti = {
   reply: "መልሲ",
   footer_line1: "© 2025 HabeshaCommunity — ሓበሻ ማሕበር ምግናእ",
   footer_line2: "ኪራይ • ስራሕ • ኣገልግሎታት • ማሕበር",
+  // hero section
+  live_now: "ህሉው:",
+  live_people: "ሰባት",
+  demo_data: "ንመኸተ ሓበሬታ ክሳብ ኣካውንት ይጅምር",
+  browse_housing: "ቤት መርምር",
+  find_jobs: "ስራሕ ድለ",
+  loading_live_data: "ህሉው ሓበሬታ እናጽዓን...",
+  dots_show_activity: "ነጠብጣብ ከተማ ንጥፈታት ምርኡይ",
+  // header and navigation
+  post_listing: "ሓበሬታ ሸጥ",
+  chat: "ተዘራረብ",
 };
 
 const dict: Record<Lang, typeof en> = { EN: en, TI: ti };

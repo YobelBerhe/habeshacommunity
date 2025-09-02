@@ -508,17 +508,17 @@ export default function Index() {
                 </h1>
                 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2 text-lg">
-                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                    <span className="font-semibold">
-                      Live now: <strong>{isLoading ? '...' : total.toLocaleString()}</strong> people
-                    </span>
-                  </div>
-                  {demo && (
-                    <p className="text-xs text-muted-foreground">
-                      demo data until accounts go live
-                    </p>
-                  )}
+                <div className="flex items-center justify-center gap-2 text-lg">
+                  <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                  <span className="font-semibold">
+                    {t(lang, "live_now")} <strong>{isLoading ? '...' : total.toLocaleString()}</strong> {t(lang, "live_people")}
+                  </span>
+                </div>
+                {demo && (
+                  <p className="text-xs text-muted-foreground">
+                    {t(lang, "demo_data")}
+                  </p>
+                )}
                 </div>
 
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

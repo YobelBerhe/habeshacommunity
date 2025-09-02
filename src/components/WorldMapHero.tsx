@@ -154,12 +154,12 @@ export default function WorldMapHero({
             <div className="flex items-center justify-center gap-2 text-lg">
               <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
               <span className="font-semibold">
-                Live now: <strong>{isLoading ? '...' : total.toLocaleString()}</strong> people
+                {t(lang, "live_now")} <strong>{isLoading ? '...' : total.toLocaleString()}</strong> {t(lang, "live_people")}
               </span>
             </div>
             {demo && (
               <p className="text-xs text-muted-foreground">
-                demo data until accounts go live
+                {t(lang, "demo_data")}
               </p>
             )}
           </div>
@@ -192,11 +192,11 @@ export default function WorldMapHero({
         )}
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/20 backdrop-blur-sm">
-            <div className="text-muted-foreground">Loading live data...</div>
+            <div className="text-muted-foreground">{t(lang, "loading_live_data")}</div>
           </div>
         )}
         <div className="absolute right-3 bottom-2 text-[11px] text-muted-foreground">
-          Dots show approximate city-level activity
+          {t(lang, "dots_show_activity")}
         </div>
       </div>
     </section>

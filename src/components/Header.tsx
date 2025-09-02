@@ -3,6 +3,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AuthButtons from "@/components/AuthButtons";
 import { useAuth } from '@/store/auth';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/store/language';
+import { t } from '@/lib/i18n';
 
 export default function Header({
   currentCity, onCityChange, onAccountClick, onLogoClick, rightExtra
@@ -15,6 +17,7 @@ export default function Header({
 }) {
   const { user, openAuth, openPost } = useAuth();
   const navigate = useNavigate();
+  const { language: lang } = useLanguage();
   
   console.log('🎯 Header render - user:', user);
   console.log('🎯 Header render - user type:', typeof user);
@@ -55,8 +58,8 @@ export default function Header({
         <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
           {rightExtra}
-          <button className="btn" onClick={() => navigate('/chat')}>Chat</button>
-          <button className="btn btn-primary" onClick={handlePostClick}>+ Post</button>
+          <button className="btn" onClick={() => navigate('/chat')}>{t(lang, "chat")}</button>
+          <button className="btn btn-primary" onClick={handlePostClick}>+ {t(lang, "post")}</button>
           <AuthButtons />
         </div>
       </div>
