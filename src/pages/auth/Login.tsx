@@ -38,7 +38,7 @@ export default function Login() {
         <div className="text-center mb-6">
           <img 
             src="/lovable-uploads/b4a1d9ff-6ada-4004-84e1-e2a43ad47cc5.png" 
-            alt="HabeshaNetwork" 
+            alt="HabeshaCommunity" 
             className="w-12 h-12 mx-auto rounded-lg mb-2"
           />
           <h1 className="text-2xl font-bold">Welcome back</h1>

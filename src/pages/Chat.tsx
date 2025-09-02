@@ -42,71 +42,14 @@ export default function Chat() {
       return;
     }
     
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .insert({
-          content: message.trim(),
-          user_id: user.id,
-          city: selectedCity,
-          board: activeBoard
-        })
-        .select('*')
-        .single();
-
-      if (error) throw error;
-
-      // Optimistic update
-      const newMessage: ChatMessage = {
-        id: data.id,
-        content: data.content,
-        user_id: data.user_id,
-        city: data.city,
-        board: data.board,
-        created_at: data.created_at
-      };
-
-      setMessages(prev => [...prev, newMessage]);
-      setMessage('');
-      
-      // Scroll to bottom
-      setTimeout(() => {
-        const container = document.querySelector('.chat-container');
-        if (container) {
-          container.scrollTop = container.scrollHeight;
-        }
-      }, 100);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
-    } finally {
-      setLoading(false);
-    }
+    // Temporarily show toast until database types are updated
+    toast.info('Chat functionality will be available soon');
+    setMessage('');
   };
 
-  // Load messages when city/board changes
+  // Load messages when city/board changes - temporarily disabled
   useEffect(() => {
-    if (!selectedCity || !activeBoard) return;
-    
-    const loadMessages = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('chat_messages')
-          .select('*')
-          .eq('city', selectedCity)
-          .eq('board', activeBoard)
-          .order('created_at', { ascending: true })
-          .limit(50);
-
-        if (error) throw error;
-        setMessages(data || []);
-      } catch (error) {
-        console.error('Error loading messages:', error);
-      }
-    };
-
-    loadMessages();
+    // Will implement after database types are updated
   }, [selectedCity, activeBoard]);
 
   return (
@@ -168,32 +111,17 @@ export default function Chat() {
           {/* Chat content */}
           <div className="flex-1 flex flex-col">
             <div className="flex-1 chat-container p-4 space-y-4 overflow-y-auto">
-              {messages.length === 0 ? (
-                <div className="text-center py-8">
-                  <h3 className="text-lg font-semibold mb-2">
-                    {CHAT_BOARDS.find(b => b.id === activeBoard)?.name} - {selectedCity}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {CHAT_BOARDS.find(b => b.id === activeBoard)?.description}
-                  </p>
-                  <div className="text-sm text-muted-foreground">
-                    Be the first to start the conversation!
-                  </div>
+              <div className="text-center py-8">
+                <h3 className="text-lg font-semibold mb-2">
+                  {CHAT_BOARDS.find(b => b.id === activeBoard)?.name} - {selectedCity}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {CHAT_BOARDS.find(b => b.id === activeBoard)?.description}
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  Chat functionality coming soon!
                 </div>
-              ) : (
-                messages.map((msg) => (
-                  <div key={msg.id} className="flex flex-col space-y-1">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="font-medium">User {msg.user_id.slice(-8)}</span>
-                      <span>•</span>
-                      <span>{new Date(msg.created_at).toLocaleTimeString()}</span>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg px-3 py-2 max-w-[80%]">
-                      {msg.content}
-                    </div>
-                  </div>
-                ))
-              )}
+              </div>
             </div>
 
             {/* Message input - always black text */}

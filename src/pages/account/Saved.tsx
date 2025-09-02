@@ -108,13 +108,13 @@ export default function SavedListings() {
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
-          <Heart className="w-6 h-6 text-red-500" />
+          <Heart className="w-6 h-6 text-red-500 fill-red-500" />
           <h1 className="text-2xl font-bold">Saved Listings</h1>
         </div>
 
         {favorites.length === 0 ? (
           <div className="text-center py-12">
-            <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <Heart className="w-16 h-16 text-red-500 fill-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">No saved listings yet</h2>
             <p className="text-muted-foreground mb-6">Start browsing to save listings you're interested in</p>
             <a 

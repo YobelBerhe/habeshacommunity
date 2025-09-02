@@ -350,7 +350,15 @@ export default function Browse() {
             listings={filteredListings}
             onListingSelect={handleListingSelect}
             loading={loading}
-            onPostFirst={() => {}}
+            onPostFirst={() => {
+              // Use auth from store when available
+              const { openAuth, openPost, user } = require('@/store/auth').useAuth.getState();
+              if (user) {
+                openPost();
+              } else {
+                openAuth();
+              }
+            }}
             newlyPostedId={null}
           />
         ) : (

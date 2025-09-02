@@ -29,7 +29,7 @@ export default function DonationButton({
           : "border border-border hover:bg-muted"
       }`}
     >
-      <span>❤ Support HabeshaNetwork</span>
+      <span>💙 Support HabeshaCommunity</span>
     </a>
   );
 }

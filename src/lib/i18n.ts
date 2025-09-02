@@ -5,7 +5,7 @@
 export type Lang = "EN" | "TI";
 
 const en = {
-  brand: "HabeshaNetwork",
+  brand: "HabeshaCommunity",
   connect_headline_1: "Connect with the",
   connect_headline_2: "Habesha Community",
   connect_sub: "Find rentals, jobs, services, and opportunities in your city",
@@ -49,12 +49,12 @@ const en = {
   name_optional: "Name (optional)",
   reply: "Reply",
   // footer
-  footer_line1: "© 2025 HabeshaNetwork — Connecting the global Habesha community",
+  footer_line1: "© 2025 HabeshaCommunity — Connecting the global Habesha community",
   footer_line2: "Rentals • Jobs • Services • Community",
 };
 
 const ti = {
-  brand: "HabeshaNetwork",
+  brand: "HabeshaCommunity",
   connect_headline_1: "ተገናእ ምስ",
   connect_headline_2: "ሓበሻ ማሕበር",
   connect_sub: "ቤት፣ ስራሕ፣ ኣገልግሎታት ኣብ ከተማኻ ድለ",
@@ -93,7 +93,7 @@ const ti = {
   write_reply: "መልሲ ጽሓፍ…",
   name_optional: "ስም (እቲ ዝፈትሐ)",
   reply: "መልሲ",
-  footer_line1: "© 2025 HabeshaNetwork — ሓበሻ ማሕበር ምግናእ",
+  footer_line1: "© 2025 HabeshaCommunity — ሓበሻ ማሕበር ምግናእ",
   footer_line2: "ኪራይ • ስራሕ • ኣገልግሎታት • ማሕበር",
 };
 

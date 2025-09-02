@@ -1,24 +1,41 @@
+import ListingCard from "@/components/ListingCard";
 import { Listing } from "@/types";
-import ListingCard from "./ListingCard";
+
+interface ListingGridProps {
+  listings: Listing[];
+  onListingSelect: (listing: Listing) => void;
+  loading?: boolean;
+  onPostFirst: () => void;
+  newlyPostedId: string | null;
+}
 
 export default function ListingGrid({
-  listings, onListingSelect, loading, onPostFirst, newlyPostedId
-}: {
-  listings: Listing[];
-  onListingSelect: (l: Listing) => void;
-  loading?: boolean;
-  onPostFirst?: () => void;
-  newlyPostedId?: string;
-}) {
-  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
-  if (!listings.length) {
+  listings,
+  onListingSelect,
+  loading,
+  onPostFirst,
+  newlyPostedId
+}: ListingGridProps) {
+  if (loading) {
     return (
-      <div className="py-16 text-center">
-        <div className="text-2xl font-semibold mb-2">No listings found</div>
-        <div className="text-muted-foreground mb-6">
-          Try adjusting your search or be the first to post in this category!
-        </div>
-        <button className="btn btn-primary" onClick={onPostFirst}>Post First Listing</button>
+      <div className="text-center py-12">
+        <div className="text-lg">Loading listings...</div>
+      </div>
+    );
+  }
+
+  if (listings.length === 0) {
+    return (
+      <div className="text-center space-y-4 py-12">
+        <div className="text-6xl">📝</div>
+        <h3 className="text-xl font-semibold">No listings found</h3>
+        <p className="text-muted-foreground">Be the first to post in this area!</p>
+        <button
+          onClick={onPostFirst}
+          className="inline-block py-3 px-6 border border-primary text-primary bg-white hover:bg-primary/5 rounded-lg transition-colors font-medium"
+        >
+          Post First Listing
+        </button>
       </div>
     );
   }
