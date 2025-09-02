@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,7 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
             <User className="w-5 h-5" />
             Account
           </DialogTitle>
+          <DialogDescription>Manage your account settings and profile information</DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
