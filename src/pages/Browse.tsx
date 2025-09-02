@@ -22,6 +22,8 @@ import { useAuth } from '@/store/auth';
 import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
 import { Grid3X3, Map, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import AuthModal from "@/components/AuthModal";
+import PostModal from "@/components/PostModal";
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -387,6 +389,10 @@ export default function Browse() {
       
       <StickyPostCTA />
       <Footer />
+      
+      {/* Modals */}
+      <AuthModal />
+      <PostModal city={filters.city || "Select a city"} />
     </div>
   );
 }
