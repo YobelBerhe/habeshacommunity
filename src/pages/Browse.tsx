@@ -28,7 +28,7 @@ import PostModal from "@/components/PostModal";
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, openAuth, openPost } = useAuth();
   const [appState, setAppState] = useState<AppState>(() => getAppState());
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(false);
@@ -368,8 +368,6 @@ export default function Browse() {
             onListingSelect={handleListingSelect}
             loading={loading}
             onPostFirst={() => {
-              // Use auth from store when available
-              const { openAuth, openPost, user } = require('@/store/auth').useAuth.getState();
               if (user) {
                 openPost();
               } else {
