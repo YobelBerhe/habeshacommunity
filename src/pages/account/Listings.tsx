@@ -131,17 +131,22 @@ export default function MyListings() {
       <MobileHeader />
       
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <Package className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">My Listings</h1>
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Package className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">My Listings</h1>
+              <p className="text-sm text-muted-foreground">Manage your posted items</p>
+            </div>
           </div>
           <button 
             onClick={openPost}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
           >
             <Plus className="w-4 h-4" />
-            Post
+            New Post
           </button>
         </div>
 
