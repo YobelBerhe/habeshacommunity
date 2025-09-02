@@ -334,7 +334,7 @@ export default function ListingDetailModal({ open, listing, onClose, onSavedChan
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onClose}>
-        <DrawerContent className="max-h-[90vh]">
+        <DrawerContent className="max-h-[90vh] animate-slide-in-right">
           <DrawerHeader>
             <DrawerTitle className="sr-only">Listing Details</DrawerTitle>
           </DrawerHeader>
@@ -348,7 +348,7 @@ export default function ListingDetailModal({ open, listing, onClose, onSavedChan
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in">
         <DialogHeader>
           <DialogTitle className="sr-only">Listing Details</DialogTitle>
         </DialogHeader>

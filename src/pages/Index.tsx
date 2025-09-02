@@ -88,12 +88,9 @@ export default function Index() {
       setSession(session);
       setUser(session?.user ?? null);
       
-      // If user just signed in, close login modal and show success
+      // Close login modal when user signs in
       if (session?.user) {
         setLoginOpen(false);
-        if (session.access_token) {
-          toast.success('Successfully signed in!');
-        }
       }
     });
 
