@@ -41,7 +41,7 @@ export default function ListingGrid({
     // Show regular empty state on other pages
     return (
       <div className="text-center space-y-4 py-12">
-        <div className="text-6xl">📝</div>
+        
         <h3 className="text-xl font-semibold">No listings found</h3>
         <p className="text-muted-foreground">Be the first to post in this area!</p>
         <button
