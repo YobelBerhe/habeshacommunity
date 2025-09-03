@@ -343,33 +343,68 @@ export default function PostModal({ city, onPosted }: Props) {
           </div>
         )}
 
+        {/* Street Address - moved above city */}
+        <input 
+          className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" 
+          placeholder="Street Address (optional - helps with map location)"
+          value={streetAddress} 
+          onChange={(e)=>setStreetAddress(e.target.value)}
+          list="street-suggestions"
+        />
+        <datalist id="street-suggestions">
+          <option value="123 Main St" />
+          <option value="456 Oak Avenue" />
+          <option value="789 Pine Street" />
+          <option value="321 Elm Drive" />
+        </datalist>
+
         {/* City & Country */}
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="City *"
-            value={currentCity} onChange={(e)=>setCurrentCity(e.target.value)} />
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Country (optional)"
-            value={country} onChange={(e)=>setCountry(e.target.value)} />
+          <div className="relative">
+            <input 
+              className="border rounded-md px-3 py-2 bg-background text-foreground w-full" 
+              placeholder="City *"
+              value={currentCity} 
+              onChange={(e)=>setCurrentCity(e.target.value)}
+              list="city-suggestions"
+            />
+            <datalist id="city-suggestions">
+              <option value="New York" />
+              <option value="Los Angeles" />
+              <option value="Chicago" />
+              <option value="Houston" />
+              <option value="Phoenix" />
+              <option value="Philadelphia" />
+              <option value="San Antonio" />
+              <option value="San Diego" />
+              <option value="Dallas" />
+              <option value="San Jose" />
+              <option value="Oakland" />
+              <option value="San Francisco" />
+            </datalist>
+          </div>
+          <div className="relative">
+            <input 
+              className="border rounded-md px-3 py-2 bg-background text-foreground w-full" 
+              placeholder="Country (optional)"
+              value={country} 
+              onChange={(e)=>setCountry(e.target.value)}
+              list="country-suggestions"
+            />
+            <datalist id="country-suggestions">
+              <option value="United States" />
+              <option value="Canada" />
+              <option value="United Kingdom" />
+              <option value="Germany" />
+              <option value="France" />
+              <option value="Italy" />
+              <option value="Spain" />
+              <option value="Netherlands" />
+              <option value="Australia" />
+              <option value="Japan" />
+            </datalist>
+          </div>
         </div>
-
-        {/* Common fields */}
-        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Title *"
-          value={title} onChange={(e)=>setTitle(e.target.value)} />
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Price (optional)"
-            inputMode="decimal" value={price ?? ""} onChange={(e)=>setPrice(num(e.target.value))} />
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Currency" value={currency} onChange={(e)=>setCurrency(e.target.value.toUpperCase())}/>
-        </div>
-        <textarea className="border rounded-md px-3 py-2 mb-3 w-full min-h-[120px] bg-background text-foreground" placeholder="Description"
-          value={description} onChange={(e)=>setDescription(e.target.value)} />
-        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Tags (comma or # separated)"
-          value={tags} onChange={(e)=>setTags(e.target.value)} />
-        
-        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Website (optional)"
-          value={websiteUrl} onChange={(e)=>setWebsiteUrl(e.target.value)} />
-
-        {/* Street Address */}
-        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Street Address (optional - helps with map location)"
-          value={streetAddress} onChange={(e)=>setStreetAddress(e.target.value)} />
 
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1">Photos (up to 8)</label>
