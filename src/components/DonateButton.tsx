@@ -55,7 +55,7 @@ export default function DonateButton() {
       <Button
         variant="outline"
         onClick={() => setOpen(true)}
-        className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+        className="w-full border-border hover:bg-muted"
       >
         💙 Support HabeshaCommunity
       </Button>

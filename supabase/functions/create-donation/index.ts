@@ -12,17 +12,30 @@ serve(async (req) => {
   }
 
   try {
+    console.log("🔵 Donation function called");
     const { amount, email } = await req.json();
+    console.log("📝 Request data:", { amount, email });
 
     // amount is in cents; validate range ($2 – $500)
     if (typeof amount !== "number" || amount < 200 || amount > 50000) {
+      console.log("❌ Invalid amount:", amount);
       return new Response(JSON.stringify({ error: "Invalid amount" }), { 
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      console.log("❌ No Stripe secret key found");
+      return new Response(JSON.stringify({ error: "Stripe not configured" }), { 
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    console.log("✅ Stripe key found, initializing...");
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2023-10-16",
     });
 
