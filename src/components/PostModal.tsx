@@ -443,11 +443,18 @@ export default function PostModal({ city, onPosted }: Props) {
         </div>
 
         <button
-          className="w-full py-3 rounded-md bg-primary text-primary-foreground font-semibold"
+          className="w-full py-3 rounded-md bg-primary text-primary-foreground font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
           onClick={submit}
           disabled={!title || !subcategory || !currentCity || submitting}
         >
-          {submitting ? (isEditing ? "Updating..." : "Publishing...") : (isEditing ? "Update" : "Publish")}
+          {submitting ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+              {isEditing ? "Updating..." : "Publishing..."}
+            </div>
+          ) : (
+            isEditing ? "Update" : "Publish"
+          )}
         </button>
       </div>
     </div>

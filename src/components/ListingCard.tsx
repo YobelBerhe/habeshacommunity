@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Heart, MapPin, Calendar, Star, MoreHorizontal, EyeOff, Share2 } from "lucide-react";
+import { Heart, MapPin, Calendar, Star, MoreHorizontal, EyeOff, Share2, Phone, Mail, MessageSquare, Globe } from "lucide-react";
 import { Listing } from "@/types";
 import { TAXONOMY, LABELS } from "@/lib/taxonomy";
 import { toggleFavorite, fetchFavorites } from "@/repo/favorites";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
 import { useLanguage } from "@/store/language";
 import ImageBox from "./ImageBox";
+import MessageModal from "./MessageModal";
 
 interface ListingCardProps {
   listing: Listing;
@@ -20,6 +21,7 @@ interface ListingCardProps {
 
 const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -64,6 +66,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
       });
     }
   };
+
   const formatPrice = (price?: number) => {
     if (!price) return null;
     return new Intl.NumberFormat('en-US', {
@@ -91,114 +94,173 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
   const categoryName = TAXONOMY[listing.category as keyof typeof TAXONOMY]?.name[langKey] || listing.category;
   const subcategoryName = listing.subcategory ? (LABELS[listing.subcategory]?.[langKey] || listing.subcategory.replace(/_/g, ' ')) : null;
 
+  // Check if contact is accessible
+  const hasContactAccess = user && (
+    listing.user_id === user.id || 
+    (!(listing as any).contact_hidden && listing.contact_phone)
+  );
+
+  const handleContactAction = (e: React.MouseEvent, action: string) => {
+    e.stopPropagation();
+    
+    if (action === 'message') {
+      setMessageModalOpen(true);
+    } else if (action === 'phone' && listing.contact_phone) {
+      window.open(`tel:${listing.contact_phone}`, '_self');
+    } else if (action === 'email' && (listing as any).contact_email) {
+      window.open(`mailto:${(listing as any).contact_email}`, '_self');
+    } else if (action === 'website' && (listing as any).website_url) {
+      window.open((listing as any).website_url, '_blank');
+    }
+  };
+
   return (
-    <Card 
-      className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.02] cursor-pointer bg-gradient-card border-border/50"
-      onClick={() => {
-        // Store current scroll position and URL for back navigation
-        sessionStorage.setItem('hn.index.scrollY', String(window.scrollY));
-        sessionStorage.setItem('hn.lastSearchUrl', window.location.pathname + window.location.search);
-        onSelect(listing);
-      }}
-    >
-      <CardContent className="p-0">
-        {/* Image */}
-        <div className="relative group-hover:scale-105 transition-transform duration-300">
-          <ImageBox
-            src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
-            alt={listing.title}
-            className="rounded-t-lg h-48 w-full"
-          />
-          
-          {/* Overlay actions */}
-          <div className="absolute top-3 right-3 flex gap-2">
-            {showJustPosted && (
-              <Badge className="bg-green-500 text-white border-0 animate-pulse">
-                Posted just now
-              </Badge>
-            )}
-            {listing.featured && (
-              <Badge className="bg-gradient-primary text-primary-foreground border-0">
-                <Star className="w-3 h-3 mr-1" />
-                Featured
-              </Badge>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
-              onClick={handleFavoriteToggle}
-              aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
-            >
-              <Heart 
-                className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'}`} 
-              />
-            </Button>
+    <>
+      <Card 
+        className="group hover:shadow-lg transition-all duration-200 cursor-pointer bg-background border border-border/50 overflow-hidden"
+        onClick={() => {
+          // Store current scroll position and URL for back navigation
+          sessionStorage.setItem('hn.index.scrollY', String(window.scrollY));
+          sessionStorage.setItem('hn.lastSearchUrl', window.location.pathname + window.location.search);
+          onSelect(listing);
+        }}
+      >
+        <CardContent className="p-0">
+          {/* Zillow-style compact image */}
+          <div className="relative">
+            <ImageBox
+              src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
+              alt={listing.title}
+              className="rounded-t-lg h-40 w-full object-cover"
+            />
             
-            {/* Three dots menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuItem className="gap-2">
-                  <EyeOff className="w-4 h-4" />
-                  Hide
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2">
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Overlay actions */}
+            <div className="absolute top-2 right-2 flex gap-1">
+              {showJustPosted && (
+                <Badge className="bg-green-500 text-white border-0 animate-pulse text-xs px-2 py-1">
+                  Posted
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+                onClick={handleFavoriteToggle}
+                aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
+              >
+                <Heart 
+                  className={`w-3 h-3 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'}`} 
+                />
+              </Button>
+            </div>
+
+            {/* Photo count - Zillow style */}
+            {((listing as any).photos?.length > 1 || (listing as any).images?.length > 1) && (
+              <div className="absolute bottom-2 right-2">
+                <Badge className="bg-black/60 text-white text-xs px-2 py-1 backdrop-blur-sm">
+                  {(listing as any).photos?.length || (listing as any).images?.length} photos
+                </Badge>
+              </div>
+            )}
           </div>
 
-          {/* Price overlay */}
-          {listing.price && (
-            <div className="absolute bottom-3 left-3">
-              <Badge className="bg-gradient-primary text-primary-foreground border-0 font-bold text-sm">
+          {/* Zillow-style content - compact and efficient */}
+          <div className="p-3 space-y-2">
+            {/* Price - most prominent */}
+            {listing.price && (
+              <div className="text-lg font-bold text-foreground">
                 {formatPrice(listing.price)}
+              </div>
+            )}
+
+            {/* Title - smaller, more compact */}
+            <h3 className="font-medium text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2">
+              {listing.title}
+            </h3>
+
+            {/* Address/Location - Zillow style */}
+            <div className="text-xs text-muted-foreground line-clamp-1">
+              {(listing as any).street_address ? (listing as any).street_address : listing.city}
+              {listing.country && `, ${listing.country}`}
+            </div>
+
+            {/* Property details in compact grid */}
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <Badge variant="outline" className="text-xs px-2 py-1 h-5">
+                {subcategoryName || categoryName}
               </Badge>
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                <span>{formatDate(listing.createdAt || 0)}</span>
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Content */}
-        <div className="p-3 space-y-2">
-          {/* Price - First Line */}
-          {listing.price && (
-            <div className="text-lg font-semibold text-foreground">
-              {formatPrice(listing.price)}
+            {/* Zillow-style action buttons */}
+            <div className="flex gap-1 pt-1">
+              {/* Contact buttons for accessible contacts */}
+              {hasContactAccess && listing.contact_phone && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 h-7 text-xs px-2"
+                  onClick={(e) => handleContactAction(e, 'phone')}
+                >
+                  <Phone className="h-3 w-3 mr-1" />
+                  Call
+                </Button>
+              )}
+              
+              {hasContactAccess && (listing as any).contact_email && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 h-7 text-xs px-2"
+                  onClick={(e) => handleContactAction(e, 'email')}
+                >
+                  <Mail className="h-3 w-3 mr-1" />
+                  Email
+                </Button>
+              )}
+              
+              {/* Message button - when contacts are hidden or for non-owners */}
+              {(!hasContactAccess || (listing as any).contact_hidden) && user && listing.user_id !== user.id && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 h-7 text-xs px-2"
+                  onClick={(e) => handleContactAction(e, 'message')}
+                >
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  Message
+                </Button>
+              )}
+              
+              {/* Website button */}
+              {(listing as any).website_url && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 h-7 text-xs px-2"
+                  onClick={(e) => handleContactAction(e, 'website')}
+                >
+                  <Globe className="h-3 w-3 mr-1" />
+                  Visit
+                </Button>
+              )}
             </div>
-          )}
-
-          {/* Title - Second Line */}
-          <h3 className="font-medium text-sm leading-tight group-hover:text-primary transition-colors line-clamp-1">
-            {listing.title}
-          </h3>
-
-          {/* Address - Third Line */}
-          <div className="text-xs text-muted-foreground line-clamp-1">
-            {(listing as any).street_address ? (listing as any).street_address : listing.city}
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Footer with date only */}
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Calendar className="w-3 h-3" />
-              <span>{formatDate(listing.createdAt || 0)}</span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      {/* Message Modal */}
+      <MessageModal
+        isOpen={messageModalOpen}
+        onClose={() => setMessageModalOpen(false)}
+        listingId={listing.id}
+        listingTitle={listing.title}
+        listingOwnerId={listing.user_id}
+      />
+    </>
   );
 };
 
