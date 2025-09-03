@@ -357,33 +357,7 @@ export default function ListingDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Title & Price */}
-            <div>
-              <div className="flex items-start justify-between mb-2">
-                <h1 className="text-3xl font-bold leading-tight">{listing.title}</h1>
-                {listing.price && (
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-primary">
-                      {formatPrice(listing.price, listing.currency)}
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{timeAgo(new Date(listing.created_at).getTime())}</span>
-                </div>
-                <Badge variant="secondary">{categoryName}</Badge>
-              </div>
-            </div>
-
-            {/* Photo Gallery */}
+            {/* Photo Gallery - Move to top, Zillow style */}
             {listing.images && listing.images.length > 0 && (
               <Card>
                 <CardContent className="p-0">
@@ -423,6 +397,32 @@ export default function ListingDetail() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Title & Price - Move below photos, Zillow style */}
+            <div>
+              <div className="flex items-start justify-between mb-2">
+                <h1 className="text-3xl font-bold leading-tight">{listing.title}</h1>
+                {listing.price && (
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-primary">
+                      {formatPrice(listing.price, listing.currency)}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  <span>{timeAgo(new Date(listing.created_at).getTime())}</span>
+                </div>
+                <Badge variant="secondary">{categoryName}</Badge>
+              </div>
+            </div>
 
             {/* Tags */}
             {listing.tags && listing.tags.length > 0 && (

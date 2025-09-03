@@ -1,69 +1,69 @@
-import ListingCard from "@/components/ListingCard";
-import LiveUserMap from "@/components/LiveUserMap";
 import { Listing } from "@/types";
-import { useLocation } from "react-router-dom";
+import ListingCard from "./ListingCard";
 
-interface ListingGridProps {
+export interface ListingGridProps {
   listings: Listing[];
-  onListingSelect: (listing: Listing) => void;
   loading?: boolean;
-  onPostFirst: () => void;
-  newlyPostedId: string | null;
+  onListingClick: (listing: Listing) => void;
+  currentUserId?: string;
+  newlyPostedId?: string | null;
+  favorites?: string[];
+  onFavorite?: (listingId: string) => void;
+  viewMode?: "list" | "grid" | "gallery" | "map";
 }
 
 export default function ListingGrid({
   listings,
-  onListingSelect,
-  loading,
-  onPostFirst,
-  newlyPostedId
+  loading = false,
+  onListingClick,
+  currentUserId,
+  newlyPostedId,
+  favorites = [],
+  onFavorite,
+  viewMode = "grid",
 }: ListingGridProps) {
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-lg">Loading listings...</div>
-      </div>
-    );
-  }
-
-  if (listings.length === 0) {
-    // Show live user map only on homepage
-    if (isHomePage) {
-      return (
-        <div className="mx-auto max-w-4xl">
-          <LiveUserMap />
-        </div>
-      );
+  const getGridClass = () => {
+    switch (viewMode) {
+      case "list":
+        return "grid grid-cols-1 gap-4";
+      case "gallery":
+        return "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2";
+      case "grid":
+      default:
+        return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
     }
-    
-    // Show regular empty state on other pages
-    return (
-      <div className="text-center space-y-4 py-12">
-        
-        <h3 className="text-xl font-semibold">No listings found</h3>
-        <p className="text-muted-foreground">Be the first to post in this area!</p>
-        <button
-          onClick={onPostFirst}
-          className="inline-block py-3 px-6 border border-primary text-primary bg-white hover:bg-primary/5 rounded-lg transition-colors font-medium"
-        >
-          Post First Listing
-        </button>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div id="listing-root" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {listings.map(listing => (
-        <ListingCard
-          key={listing.id}
-          listing={listing}
-          onSelect={onListingSelect}
-          showJustPosted={listing.id === newlyPostedId}
-        />
-      ))}
+    <div id="listing-root" className="space-y-4">
+      {listings.length === 0 && !loading ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground text-lg">No listings found</p>
+          <p className="text-sm text-muted-foreground">Try adjusting your search or category</p>
+        </div>
+      ) : (
+        <div className={getGridClass()}>
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              onSelect={onListingClick}
+              showJustPosted={listing.id === newlyPostedId}
+            />
+          ))}
+          {loading && (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-video bg-muted rounded-lg mb-3"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

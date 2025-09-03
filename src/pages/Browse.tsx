@@ -363,15 +363,8 @@ export default function Browse() {
         {viewMode === "grid" ? (
           <ListingGrid
             listings={filteredListings}
-            onListingSelect={handleListingSelect}
+            onListingClick={handleListingSelect}
             loading={loading}
-            onPostFirst={() => {
-              if (user) {
-                openPost();
-              } else {
-                openAuth();
-              }
-            }}
             newlyPostedId={null}
           />
         ) : (

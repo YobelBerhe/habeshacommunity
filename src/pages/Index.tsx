@@ -16,6 +16,9 @@ import CityIndex from "@/components/CityIndex";
 import MapCluster from "@/components/MapCluster";
 import SearchBox from "@/components/SearchBox";
 import QuickFilters from "@/components/QuickFilters";
+import ViewToggle from "@/components/ViewToggle";
+import SortDropdown from "@/components/SortDropdown";
+import FilterChips from "@/components/FilterChips";
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
@@ -29,12 +32,15 @@ import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
 import { useLanguage } from "@/store/language";
 import type { Listing, SearchFilters, AppState } from "@/types";
+import type { ViewMode, SortKey } from "@/components/ViewToggle";
+import type { SortKey as SortDropdownKey } from "@/components/SortDropdown";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings, fetchListingById } from "@/repo/listings";
 import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
 import { getListingContact } from "@/repo/contacts";
 import { onAuthChange, getUserId, signOut } from "@/repo/auth";
 import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
+import { sortListings, applyQuickFilters } from "@/utils/ui";
 import { toast } from "sonner";
 
 export default function Index() {
@@ -69,6 +75,30 @@ export default function Index() {
       jobKind: undefined as "regular"|"gig"|undefined,
     };
   });
+
+  // View and sorting state
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    (localStorage.getItem('hn.viewMode') as ViewMode) || 'grid'
+  );
+  
+  const [sortKey, setSortKey] = useState<SortKey>(() =>
+    (localStorage.getItem('hn.sort') as SortKey) || 'relevance'
+  );
+  
+  // Quick filters state
+  const [hasImageFilter, setHasImageFilter] = useState(() =>
+    localStorage.getItem('hn.filter.hasImage') === 'true'
+  );
+  
+  const [postedTodayFilter, setPostedTodayFilter] = useState(() =>
+    localStorage.getItem('hn.filter.postedToday') === 'true'
+  );
+
+  // Persist view and filter states
+  useEffect(() => localStorage.setItem('hn.viewMode', viewMode), [viewMode]);
+  useEffect(() => localStorage.setItem('hn.sort', sortKey), [sortKey]);
+  useEffect(() => localStorage.setItem('hn.filter.hasImage', hasImageFilter.toString()), [hasImageFilter]);
+  useEffect(() => localStorage.setItem('hn.filter.postedToday', postedTodayFilter.toString()), [postedTodayFilter]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -241,10 +271,11 @@ export default function Index() {
     loadListingById();
   }, [params.id, navigate]);
 
-  // Filter listings
-  const filteredListings = useMemo(() => {
+  // Filter and sort listings
+  const processedListings = useMemo(() => {
     let filtered = [...listings];
 
+    // Apply category filters
     if (filters.category) {
       filtered = filtered.filter(
         (listing) => listing.category === filters.category
@@ -257,6 +288,7 @@ export default function Index() {
       );
     }
 
+    // Apply search query
     if (filters.query) {
       const q = filters.query.toLowerCase();
       filtered = filtered.filter(
@@ -267,17 +299,26 @@ export default function Index() {
       );
     }
 
+    // Apply price filters for housing
     if (filters.category === "housing") {
       if (filters.minPrice != null) filtered = filtered.filter(l => l.price != null && (l.price as number) >= filters.minPrice!);
       if (filters.maxPrice != null) filtered = filtered.filter(l => l.price != null && (l.price as number) <= filters.maxPrice!);
     }
 
+    // Apply job kind filter
     if (filters.category === "jobs" && filters.jobKind) {
       filtered = filtered.filter(l => (l as any).jobKind === filters.jobKind);
     }
 
-    return filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }, [listings, filters]);
+    // Apply quick filters
+    filtered = applyQuickFilters(filtered, { 
+      hasImage: hasImageFilter, 
+      postedToday: postedTodayFilter 
+    });
+
+    // Apply sorting
+    return sortListings(filtered, sortKey);
+  }, [listings, filters, hasImageFilter, postedTodayFilter, sortKey]);
 
   // Event handlers
 
@@ -346,13 +387,17 @@ export default function Index() {
     }, 0);
   };
 
-  const handleViewModeChange = (mode: "grid" | "map") => {
-    const next = { ...appState, viewMode: mode };
-    setAppState(next);
-    saveAppState(next);
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    // Also store scroll position for listings page
+    sessionStorage.setItem('hn.index.scrollY', String(window.scrollY));
+    sessionStorage.setItem('hn.lastSearchUrl', location.pathname + location.search);
   };
 
   const handleListingSelect = (listing: Listing) => {
+    // Store current position and URL for back navigation
+    sessionStorage.setItem('hn.index.scrollY', String(window.scrollY));
+    sessionStorage.setItem('hn.lastSearchUrl', location.pathname + location.search);
     navigate(`/l/${listing.id}`);
   };
 
@@ -432,36 +477,39 @@ export default function Index() {
               onPickTag={(tag) => setFilters({ ...filters, query: `${(filters.query || "").trim()} #${tag}`.trim() })}
             />
 
-            <div className="flex gap-2">
-              <button
-                className={`btn ${appState.viewMode === "grid" ? "btn-primary" : ""}`}
-                onClick={() => handleViewModeChange("grid")}
-              >
-                {t(lang, "grid")}
-              </button>
-              <button
-                className={`btn ${appState.viewMode === "map" ? "btn-primary" : ""}`}
-                onClick={() => handleViewModeChange("map")}
-              >
-                {t(lang, "map")}
-              </button>
+            <div className="flex items-center gap-3">
+              <ViewToggle viewMode={viewMode} onChange={handleViewModeChange} />
+              <SortDropdown sortKey={sortKey} onChange={setSortKey} />
               <button className="btn text-xs" onClick={() => setFilters({ category: filters.category })}>
                 {t(lang, "clear_all")}
               </button>
             </div>
           </div>
 
-          <QuickFilters
-            lang={lang}
-            category={filters.category}
-            minPrice={filters.minPrice}
-            maxPrice={filters.maxPrice}
-            jobKind={filters.jobKind as any}
-            onChange={(next) => setFilters({ ...filters, ...next })}
-          />
+          <div className="flex flex-col md:flex-row gap-3 items-start justify-between">
+            <QuickFilters
+              lang={lang}
+              category={filters.category}
+              minPrice={filters.minPrice}
+              maxPrice={filters.maxPrice}
+              jobKind={filters.jobKind as any}
+              onChange={(next) => setFilters({ ...filters, ...next })}
+            />
+            
+            <FilterChips
+              hasImage={hasImageFilter}
+              postedToday={postedTodayFilter}
+              onToggleImage={() => setHasImageFilter(!hasImageFilter)}
+              onToggleToday={() => setPostedTodayFilter(!postedTodayFilter)}
+              onClear={() => {
+                setHasImageFilter(false);
+                setPostedTodayFilter(false);
+              }}
+            />
+          </div>
 
           <div className="text-sm text-muted-foreground mb-4">
-            {filteredListings.length} {t(lang, "results")}
+            {processedListings.length} {t(lang, "results")}
           </div>
         </div>
       )}
@@ -555,19 +603,27 @@ export default function Index() {
               <RecentCarousel />
             </div>
             
-            {appState.viewMode === "grid" ? (
-              <ListingGrid
-                listings={filteredListings}
-                onListingSelect={handleListingSelect}
-                loading={loading}
-                onPostFirst={() => setPostOpen(true)}
-                newlyPostedId={newlyPostedId}
-              />
+            {viewMode === "map" ? (
+              <div className="h-[70vh] rounded-lg overflow-hidden">
+                <MapCluster
+                  listings={processedListings}
+                  height={480}
+                  center={appState.cityLat && appState.cityLon ? {
+                    lat: Number(appState.cityLat),
+                    lon: Number(appState.cityLon)
+                  } : undefined}
+                />
+              </div>
             ) : (
-              <MapCluster
-                center={appState.cityLat && appState.cityLon ? { lat: Number(appState.cityLat), lon: Number(appState.cityLon) } : undefined}
-                listings={filteredListings}
-                height={480}
+              <ListingGrid
+                listings={processedListings}
+                loading={loading}
+                onListingClick={handleListingSelect}
+                currentUserId={user?.id}
+                newlyPostedId={newlyPostedId}
+                favorites={favorites}
+                onFavorite={handleFavorite}
+                viewMode={viewMode}
               />
             )}
           </div>
