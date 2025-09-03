@@ -240,6 +240,27 @@ export type Database = {
           },
         ]
       }
+      listing_views: {
+        Row: {
+          id: string
+          listing_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           category: string | null
@@ -503,6 +524,10 @@ export type Database = {
       }
       touch_presence: {
         Args: { p_city: string }
+        Returns: undefined
+      }
+      track_listing_view: {
+        Args: { listing_id: string }
         Returns: undefined
       }
     }

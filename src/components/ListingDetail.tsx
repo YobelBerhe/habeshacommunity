@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Listing } from "@/types";
 import MapMini from "@/components/MapMini";
 import { toggleFavorite, fetchFavorites } from "@/repo/favorites";
+import { trackListingView } from "@/repo/contacts";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -34,11 +35,13 @@ export default function ListingDetail({ open, listing, onClose, onSavedChange }:
     if (!listing) return;
     setActiveIdx(0);
     
-    // Check if favorited
+    // Track listing view and check if favorited
     (async () => {
       try {
         const { data: auth } = await supabase.auth.getUser();
         if (auth.user) {
+          // Track that user viewed this listing for legitimate interest
+          await trackListingView(listing.id);
           const favorites = await fetchFavorites(auth.user.id);
           setSaved(favorites.has(listing.id));
         }

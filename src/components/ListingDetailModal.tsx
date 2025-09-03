@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Heart, Phone, MessageCircle, Mail, ExternalLink, MapPin, Flag, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Listing } from "@/types";
+import { trackListingView } from "@/repo/contacts";
 import MapMini from "./MapMini";
 
 interface Props {
@@ -37,6 +38,9 @@ export default function ListingDetailModal({ open, listing, onClose, onSavedChan
       setActiveImageIndex(0);
       setShowReportForm(false);
       setReportReason("");
+      
+      // Track listing view for legitimate interest
+      trackListingView(listing.id).catch(console.error);
     }
   }, [listing]);
 
