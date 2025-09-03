@@ -53,6 +53,12 @@ export default function InteractiveListingMap({
     };
   }, [center.lat, center.lng, zoom]);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('InteractiveListingMap received listings:', listings.length);
+    console.log('Listings with coordinates:', listings.filter(l => l.lat && l.lng).length);
+  }, [listings]);
+
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
@@ -68,6 +74,8 @@ export default function InteractiveListingMap({
       typeof listing.lat === 'number' && 
       typeof listing.lng === 'number'
     );
+
+    console.log('Valid listings for map:', validListings.length);
 
     if (validListings.length === 0) return;
 
@@ -172,6 +180,13 @@ export default function InteractiveListingMap({
 
   }, [listings, onListingClick]);
 
+  // Calculate validListings for the notice
+  const validListings = listings.filter(listing => 
+    listing.lat && listing.lng && 
+    typeof listing.lat === 'number' && 
+    typeof listing.lng === 'number'
+  );
+
   return (
     <div className="relative">
       <div 
@@ -179,6 +194,17 @@ export default function InteractiveListingMap({
         style={{ height }}
         className="w-full rounded-lg overflow-hidden border border-border/50"
       />
+      
+      {/* Show notice if no listings have coordinates */}
+      {listings.length > 0 && validListings.length === 0 && (
+        <div className="absolute top-4 left-4 right-4 bg-background/90 backdrop-blur-sm rounded-lg p-4 border border-border/50">
+          <h3 className="font-semibold text-sm mb-2">No map locations available</h3>
+          <p className="text-xs text-muted-foreground">
+            The current listings don't have location coordinates set. When posting a listing, add latitude/longitude or a street address to show it on the map.
+          </p>
+        </div>
+      )}
+      
       <style dangerouslySetInnerHTML={{
         __html: `
           .listing-popup-container {
