@@ -7,6 +7,7 @@ import { useAuth } from '@/store/auth';
 import { useLockBody } from '@/hooks/useLockBody';
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageToggle from '@/components/LanguageToggle';
+import DonateButton from '@/components/DonateButton';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/store/language';
 import { t } from '@/lib/i18n';
@@ -67,12 +68,6 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
     };
   }, [open, onOpenChange]);
 
-  const handleDonate = () => {
-    onOpenChange(false);
-    // Open donation URL from environment variable
-    const donateUrl = import.meta.env.VITE_DONATE_URL || 'https://stripe.com';
-    window.open(donateUrl, '_blank');
-  };
 
   const handlePost = () => {
     onOpenChange(false);
@@ -199,13 +194,9 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               {t(language, "chat")}
             </Link>
             
-            <button 
-              className="btn-secondary flex items-center gap-3 text-left"
-              onClick={handleDonate}
-            >
-              <span>💙</span>
-            💙 {t(language, "support_habesha")}
-            </button>
+            <div onClick={() => onOpenChange(false)}>
+              <DonateButton />
+            </div>
 
             <div className="flex gap-2 mt-4">
               <div className="btn-secondary w-1/2 flex items-center justify-center">
