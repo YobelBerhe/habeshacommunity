@@ -194,9 +194,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               {t(language, "chat")}
             </Link>
             
-            <div onClick={() => onOpenChange(false)}>
-              <DonateButton />
-            </div>
+            <DonateButton />
 
             <div className="flex gap-2 mt-4">
               <div className="btn-secondary w-1/2 flex items-center justify-center">

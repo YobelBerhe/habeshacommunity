@@ -50,11 +50,15 @@ export default function DonateButton() {
     getStripe();
   }, []);
 
+  const handleClick = () => {
+    setOpen(true);
+  };
+
   return (
     <>
       <Button
         variant="outline"
-        onClick={() => setOpen(true)}
+        onClick={handleClick}
         className="w-full border-border hover:bg-muted"
       >
         💙 Support HabeshaCommunity
