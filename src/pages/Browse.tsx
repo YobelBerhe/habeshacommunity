@@ -25,6 +25,11 @@ import { Grid3X3, Map, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
 import PostModal from "@/components/PostModal";
+import ViewToggle from "@/components/ViewToggle";
+import SortDropdown from "@/components/SortDropdown";
+import FilterChips from "@/components/FilterChips";
+import type { ViewMode, SortKey } from "@/components/ViewToggle";
+import { sortListings, applyQuickFilters } from "@/utils/ui";
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,7 +39,24 @@ export default function Browse() {
   const [appState, setAppState] = useState<AppState>(() => getAppState());
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+  
+  // View and sorting state with localStorage persistence
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    (localStorage.getItem('hn.viewMode') as ViewMode) || 'grid'
+  );
+  
+  const [sortKey, setSortKey] = useState<SortKey>(() =>
+    (localStorage.getItem('hn.sort') as SortKey) || 'relevance'
+  );
+  
+  // Quick filters state
+  const [hasImageFilter, setHasImageFilter] = useState(() =>
+    localStorage.getItem('hn.filter.hasImage') === 'true'
+  );
+  
+  const [postedTodayFilter, setPostedTodayFilter] = useState(() =>
+    localStorage.getItem('hn.filter.postedToday') === 'true'
+  );
 
   // Initialize filters from URL params
   const [filters, setFilters] = useState<SearchFilters>(() => ({
@@ -46,6 +68,12 @@ export default function Browse() {
     maxPrice: searchParams.get("max") ? Number(searchParams.get("max")) : undefined,
     jobKind: undefined as "regular"|"gig"|undefined,
   }));
+
+  // Persist view and filter states
+  useEffect(() => localStorage.setItem('hn.viewMode', viewMode), [viewMode]);
+  useEffect(() => localStorage.setItem('hn.sort', sortKey), [sortKey]);
+  useEffect(() => localStorage.setItem('hn.filter.hasImage', hasImageFilter.toString()), [hasImageFilter]);
+  useEffect(() => localStorage.setItem('hn.filter.postedToday', postedTodayFilter.toString()), [postedTodayFilter]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -133,8 +161,8 @@ export default function Browse() {
     loadListings();
   }, [filters.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory, user]);
 
-  // Filter listings
-  const filteredListings = useMemo(() => {
+  // Filter and sort listings
+  const processedListings = useMemo(() => {
     let filtered = [...listings];
 
     if (filters.category) {
@@ -163,8 +191,15 @@ export default function Browse() {
       filtered = filtered.filter(l => (l as any).jobKind === filters.jobKind);
     }
 
-    return filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }, [listings, filters]);
+    // Apply quick filters
+    filtered = applyQuickFilters(filtered, { 
+      hasImage: hasImageFilter, 
+      postedToday: postedTodayFilter 
+    });
+
+    // Apply sorting
+    return sortListings(filtered, sortKey);
+  }, [listings, filters, hasImageFilter, postedTodayFilter, sortKey]);
 
   const handleCityChange = (city: string, lat?: number, lon?: number) => {
     setFilters({ ...filters, city });
@@ -317,28 +352,29 @@ export default function Browse() {
             </Button>
           </div>
           
-          {/* View Mode Toggle & Results Count */}
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              {filteredListings.length} {language === 'EN' ? 'results' : 'ውጽኢታት'}
-              {filters.city && ` ${language === 'EN' ? 'in' : 'ኣብ'} ${filters.city}`}
-            </div>
+          {/* Filter chips and controls */}
+          <div className="flex flex-col gap-3">
+            <FilterChips
+              hasImage={hasImageFilter}
+              postedToday={postedTodayFilter}
+              onToggleImage={() => setHasImageFilter(!hasImageFilter)}
+              onToggleToday={() => setPostedTodayFilter(!postedTodayFilter)}
+              onClear={() => {
+                setHasImageFilter(false);
+                setPostedTodayFilter(false);
+              }}
+            />
             
-            <div className="flex gap-1">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "map" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("map")}
-              >
-                <Map className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {processedListings.length} {language === 'EN' ? 'results' : 'ውጽኢታት'}
+                {filters.city && ` ${language === 'EN' ? 'in' : 'ኣብ'} ${filters.city}`}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
+                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+              </div>
             </div>
           </div>
         </div>
@@ -362,15 +398,40 @@ export default function Browse() {
       <main className="container mx-auto px-4 py-6 mb-20">
         {viewMode === "grid" ? (
           <ListingGrid
-            listings={filteredListings}
+            listings={processedListings}
             onListingClick={handleListingSelect}
             loading={loading}
             newlyPostedId={null}
           />
+        ) : viewMode === "list" ? (
+          <div className="space-y-4">
+            {processedListings.map((listing) => (
+              <div key={listing.id} className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
+                   onClick={() => handleListingSelect(listing)}>
+                <h3 className="font-semibold">{listing.title}</h3>
+                <p className="text-sm text-muted-foreground">{listing.description}</p>
+                {listing.price && <p className="font-medium">${listing.price}</p>}
+              </div>
+            ))}
+          </div>
+        ) : viewMode === "gallery" ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {processedListings.map((listing) => (
+              <div key={listing.id} className="aspect-square cursor-pointer" onClick={() => handleListingSelect(listing)}>
+                {listing.images?.length > 0 ? (
+                  <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover rounded-lg" />
+                ) : (
+                  <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
+                    No image
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         ) : (
           <MapCluster
             center={filters.city ? undefined : undefined}
-            listings={filteredListings}
+            listings={processedListings}
             height={480}
           />
         )}
