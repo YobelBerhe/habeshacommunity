@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, MapPin, Calendar, Star } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Heart, MapPin, Calendar, Star, MoreHorizontal, EyeOff, Share2 } from "lucide-react";
 import { Listing } from "@/types";
 import { TAXONOMY, LABELS } from "@/lib/taxonomy";
 import { toggleFavorite, fetchFavorites } from "@/repo/favorites";
@@ -106,7 +107,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
           <ImageBox
             src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
             alt={listing.title}
-            className="rounded-t-lg"
+            className="rounded-t-lg h-48 w-full"
           />
           
           {/* Overlay actions */}
@@ -133,6 +134,30 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
                 className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'}`} 
               />
             </Button>
+            
+            {/* Three dots menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem className="gap-2">
+                  <EyeOff className="w-4 h-4" />
+                  Hide
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2">
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Price overlay */}
@@ -146,52 +171,26 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-3">
-          {/* Title and Category */}
-          <div className="space-y-2">
-            <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
-              {listing.title}
-            </h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{categoryName}</span>
-              {subcategoryName && (
-                <>
-                  <span>•</span>
-                  <span>{subcategoryName}</span>
-                </>
-              )}
+        <div className="p-3 space-y-2">
+          {/* Price - First Line */}
+          {listing.price && (
+            <div className="text-lg font-semibold text-foreground">
+              {formatPrice(listing.price)}
             </div>
+          )}
+
+          {/* Title - Second Line */}
+          <h3 className="font-medium text-sm leading-tight group-hover:text-primary transition-colors line-clamp-1">
+            {listing.title}
+          </h3>
+
+          {/* Address - Third Line */}
+          <div className="text-xs text-muted-foreground line-clamp-1">
+            {(listing as any).street_address ? (listing as any).street_address : listing.city}
           </div>
 
-          {/* Description */}
-          {listing.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {listing.description}
-            </p>
-          )}
-
-          {/* Tags */}
-          {listing.tags && listing.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {listing.tags.slice(0, 3).map((tag, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
-                  #{tag}
-                </Badge>
-              ))}
-              {listing.tags.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{listing.tags.length - 3} more
-                </Badge>
-              )}
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-2 border-t border-border/50">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="w-3 h-3" />
-              <span>{listing.city}</span>
-            </div>
+          {/* Footer with date only */}
+          <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Calendar className="w-3 h-3" />
               <span>{formatDate(listing.createdAt || 0)}</span>

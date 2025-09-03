@@ -13,7 +13,7 @@ const ImageBox = ({ src, alt, className = "" }: ImageBoxProps) => {
 
   if (!src || hasError) {
     return (
-      <div className={`relative overflow-hidden rounded-lg bg-muted aspect-[4/3] ${className}`}>
+      <div className={`relative overflow-hidden rounded-lg bg-muted ${className.includes('h-') ? '' : 'aspect-[4/3]'} ${className}`}>
         <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
           <div className="text-center">
             <div className="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-full flex items-center justify-center">
@@ -27,7 +27,7 @@ const ImageBox = ({ src, alt, className = "" }: ImageBoxProps) => {
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-lg bg-muted aspect-[4/3] ${className}`}>
+    <div className={`relative overflow-hidden rounded-lg bg-muted ${className.includes('h-') ? '' : 'aspect-[4/3]'} ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 animate-pulse bg-muted" />
       )}
