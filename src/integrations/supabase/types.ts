@@ -265,6 +265,7 @@ export type Database = {
         Row: {
           category: string | null
           city: string
+          contact_hidden: boolean | null
           country: string | null
           created_at: string | null
           currency: string | null
@@ -285,6 +286,7 @@ export type Database = {
         Insert: {
           category?: string | null
           city: string
+          contact_hidden?: boolean | null
           country?: string | null
           created_at?: string | null
           currency?: string | null
@@ -305,6 +307,7 @@ export type Database = {
         Update: {
           category?: string | null
           city?: string
+          contact_hidden?: boolean | null
           country?: string | null
           created_at?: string | null
           currency?: string | null

@@ -43,6 +43,7 @@ export default function PostModal({ city, onPosted }: Props) {
   const [country, setCountry] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [contactHidden, setContactHidden] = useState(false);
 
   // Housing fields
   const [bedrooms, setBedrooms] = useState<number|undefined>(undefined);
@@ -78,6 +79,7 @@ export default function PostModal({ city, onPosted }: Props) {
       setCurrentCity(editingListing.city);
       setCountry(editingListing.country || "");
       setWebsiteUrl(editingListing.website_url || "");
+      setContactHidden((editingListing as any).contact_hidden || false);
     } else {
       // Reset form when not editing
       setCategory("housing");
@@ -94,6 +96,7 @@ export default function PostModal({ city, onPosted }: Props) {
       setCurrentCity(city);
       setCountry("");
       setWebsiteUrl("");
+      setContactHidden(false);
     }
   }, [editingListing, city]);
 
@@ -171,7 +174,8 @@ export default function PostModal({ city, onPosted }: Props) {
           location_lat: lat || null,
           location_lng: lng || null,
           website_url: finalWebsiteUrl,
-        }, {
+          contact_hidden: contactHidden,
+        } as any, {
           contact_method: getContactMethod(contact),
           contact_value: getContactValue(contact),
         });
@@ -193,7 +197,8 @@ export default function PostModal({ city, onPosted }: Props) {
           location_lat: lat || null,
           location_lng: lng || null,
           website_url: finalWebsiteUrl,
-        }, {
+          contact_hidden: contactHidden,
+        } as any, {
           contact_method: getContactMethod(contact),
           contact_value: getContactValue(contact),
         });
@@ -371,6 +376,20 @@ export default function PostModal({ city, onPosted }: Props) {
             onChange={(e)=>setContact({...contact, whatsapp:e.target.value})} />
           <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Telegram" value={contact.telegram}
             onChange={(e)=>setContact({...contact, telegram:e.target.value})} />
+        </div>
+
+        <div className="mb-3">
+          <label className="flex items-center gap-2 text-sm">
+            <input 
+              type="checkbox" 
+              checked={contactHidden} 
+              onChange={(e)=>setContactHidden(e.target.checked)} 
+            />
+            Hide contact information (only you can see it)
+          </label>
+          <p className="text-xs text-muted-foreground mt-1">
+            When hidden, only you can see contact details. Others will need to message you through the platform.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">

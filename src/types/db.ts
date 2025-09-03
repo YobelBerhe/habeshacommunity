@@ -19,6 +19,7 @@ export interface ListingRow {
   location_lat: number | null;
   location_lng: number | null;
   website_url: string | null;
+  contact_hidden: boolean | null;
   status: ListingStatus;
   created_at: string;
   updated_at: string;

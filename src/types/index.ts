@@ -42,6 +42,7 @@ export interface Listing {
   country?: string | null;       // NEW
   lat?: number | null;
   lng?: number | null;
+  contact_hidden?: boolean;      // NEW
   created_at: string;            // ISO
   
   // Legacy fields for backward compatibility
