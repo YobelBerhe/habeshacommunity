@@ -44,6 +44,7 @@ export default function PostModal({ city, onPosted }: Props) {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [contactHidden, setContactHidden] = useState(false);
+  const [streetAddress, setStreetAddress] = useState("");
 
   // Housing fields
   const [bedrooms, setBedrooms] = useState<number|undefined>(undefined);
@@ -80,6 +81,7 @@ export default function PostModal({ city, onPosted }: Props) {
       setCountry(editingListing.country || "");
       setWebsiteUrl(editingListing.website_url || "");
       setContactHidden((editingListing as any).contact_hidden || false);
+      setStreetAddress((editingListing as any).street_address || "");
     } else {
       // Reset form when not editing
       setCategory("housing");
@@ -97,6 +99,7 @@ export default function PostModal({ city, onPosted }: Props) {
       setCountry("");
       setWebsiteUrl("");
       setContactHidden(false);
+      setStreetAddress("");
     }
   }, [editingListing, city]);
 
@@ -175,6 +178,7 @@ export default function PostModal({ city, onPosted }: Props) {
           location_lng: lng || null,
           website_url: finalWebsiteUrl,
           contact_hidden: contactHidden,
+          street_address: streetAddress.trim() || null,
         } as any, {
           contact_method: getContactMethod(contact),
           contact_value: getContactValue(contact),
@@ -198,6 +202,7 @@ export default function PostModal({ city, onPosted }: Props) {
           location_lng: lng || null,
           website_url: finalWebsiteUrl,
           contact_hidden: contactHidden,
+          street_address: streetAddress.trim() || null,
         } as any, {
           contact_method: getContactMethod(contact),
           contact_value: getContactValue(contact),
@@ -250,6 +255,7 @@ export default function PostModal({ city, onPosted }: Props) {
       setContact({ phone:"", email:"", whatsapp:"", telegram:"" });
       setWebsiteUrl("");
       setCountry("");
+      setStreetAddress("");
       
       toast(isEditing ? "Updated successfully!" : "Posted successfully!");
 
@@ -360,6 +366,10 @@ export default function PostModal({ city, onPosted }: Props) {
         
         <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Website (optional)"
           value={websiteUrl} onChange={(e)=>setWebsiteUrl(e.target.value)} />
+
+        {/* Street Address */}
+        <input className="border rounded-md px-3 py-2 mb-3 w-full bg-background text-foreground" placeholder="Street Address (optional - helps with map location)"
+          value={streetAddress} onChange={(e)=>setStreetAddress(e.target.value)} />
 
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1">Photos (up to 8)</label>

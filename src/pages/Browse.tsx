@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
 import ListingGrid from "@/components/ListingGrid";
-import MapCluster from "@/components/MapCluster";
+import InteractiveListingMap from "@/components/InteractiveListingMap";
 import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
@@ -429,10 +429,15 @@ export default function Browse() {
             ))}
           </div>
         ) : (
-          <MapCluster
-            center={filters.city ? undefined : undefined}
+          <InteractiveListingMap
             listings={processedListings}
-            height={480}
+            onListingClick={handleListingSelect}
+            center={
+              processedListings.length > 0 && processedListings[0].lat && processedListings[0].lng
+                ? { lat: processedListings[0].lat, lng: processedListings[0].lng }
+                : { lat: 40.7128, lng: -74.0060 }
+            }
+            height="calc(100vh - 250px)"
           />
         )}
       </main>

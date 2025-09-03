@@ -276,6 +276,7 @@ export type Database = {
           location_lng: number | null
           price_cents: number | null
           status: string | null
+          street_address: string | null
           subcategory: string | null
           tags: string[] | null
           title: string
@@ -297,6 +298,7 @@ export type Database = {
           location_lng?: number | null
           price_cents?: number | null
           status?: string | null
+          street_address?: string | null
           subcategory?: string | null
           tags?: string[] | null
           title: string
@@ -318,6 +320,7 @@ export type Database = {
           location_lng?: number | null
           price_cents?: number | null
           status?: string | null
+          street_address?: string | null
           subcategory?: string | null
           tags?: string[] | null
           title?: string
