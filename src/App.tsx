@@ -19,6 +19,7 @@ import TopicView from "./pages/forums/TopicView";
 import GlobalMap from "./components/GlobalMap";
 import DonateSuccess from "./pages/donate/Success";
 import DonateCancel from "./pages/donate/Cancel";
+import ListingDetail from "./pages/ListingDetail";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +34,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/l/:id" element={<Index />} />
+          <Route path="/l/:id" element={<ListingDetail />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register" element={<Register />} />

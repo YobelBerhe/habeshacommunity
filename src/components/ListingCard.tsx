@@ -93,7 +93,12 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
   return (
     <Card 
       className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.02] cursor-pointer bg-gradient-card border-border/50"
-      onClick={() => onSelect(listing)}
+      onClick={() => {
+        // Store current scroll position and URL for back navigation
+        sessionStorage.setItem('hn.index.scrollY', String(window.scrollY));
+        sessionStorage.setItem('hn.lastSearchUrl', window.location.pathname + window.location.search);
+        onSelect(listing);
+      }}
     >
       <CardContent className="p-0">
         {/* Image */}

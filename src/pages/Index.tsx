@@ -353,9 +353,7 @@ export default function Index() {
   };
 
   const handleListingSelect = (listing: Listing) => {
-    setSelectedListing(listing);
-    setDetailOpen(true);
-    navigate(`/l/${listing.id}`, { replace: false });
+    navigate(`/l/${listing.id}`);
   };
 
   const handleDetailClose = () => {
