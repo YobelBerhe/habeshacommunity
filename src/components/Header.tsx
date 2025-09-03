@@ -1,6 +1,7 @@
 import CitySearch from "@/components/CitySearch";
 import ThemeToggle from "@/components/ThemeToggle";
 import AuthButtons from "@/components/AuthButtons";
+import DonateButton from "@/components/DonateButton";
 import { useAuth } from '@/store/auth';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/store/language';
@@ -58,6 +59,7 @@ export default function Header({
         <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
           {rightExtra}
+          <DonateButton />
           <button className="btn" onClick={() => navigate('/chat')}>{t(lang, "chat")}</button>
           <button className="btn btn-primary" onClick={handlePostClick}>+ {t(lang, "post")}</button>
           <AuthButtons />

@@ -17,6 +17,8 @@ import ForumsBoards from "./pages/forums/Boards";
 import BoardTopics from "./pages/forums/BoardTopics";
 import TopicView from "./pages/forums/TopicView";
 import GlobalMap from "./components/GlobalMap";
+import DonateSuccess from "./pages/donate/Success";
+import DonateCancel from "./pages/donate/Cancel";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,8 @@ const App = () => (
           <Route path="/forums" element={<ForumsBoards />} />
           <Route path="/forums/:boardKey" element={<BoardTopics />} />
           <Route path="/forums/topic/:id" element={<TopicView />} />
+          <Route path="/donate/success" element={<DonateSuccess />} />
+          <Route path="/donate/cancel" element={<DonateCancel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<div>Page not found</div>} />
         </Routes>
