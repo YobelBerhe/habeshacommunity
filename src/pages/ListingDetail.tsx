@@ -124,6 +124,7 @@ export default function ListingDetail() {
 
   const loadSimilarListings = async (currentListing: Listing) => {
     try {
+      console.log('Loading similar listings for:', currentListing.city, currentListing.category);
       const { data, error } = await supabase
         .from('listings')
         .select('id, title, price_cents, images, city')
@@ -133,8 +134,12 @@ export default function ListingDetail() {
         .neq('id', currentListing.id)
         .limit(6);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      console.log('Similar listings data:', data);
       setSimilarListings(data.map(item => ({
         id: item.id,
         title: item.title,
@@ -448,22 +453,32 @@ export default function ListingDetail() {
             )}
 
             {/* Map */}
-            {listing.lat && listing.lng && (
+            {listing.lat && listing.lng ? (
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4">Location</h2>
                   <div className="h-64 rounded-lg overflow-hidden">
                     <MapMini lat={listing.lat} lng={listing.lng} />
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Coordinates: {listing.lat.toFixed(4)}, {listing.lng.toFixed(4)}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold mb-4">Location</h2>
+                  <p className="text-muted-foreground">No location data available for this listing.</p>
                 </CardContent>
               </Card>
             )}
 
             {/* Similar Listings */}
-            {similarListings.length > 0 && (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">Similar Listings</h2>
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Similar Listings</h2>
+                {similarListings.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {similarListings.map((similar) => (
                       <button
@@ -493,9 +508,11 @@ export default function ListingDetail() {
                       </button>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <p className="text-muted-foreground">No similar listings found in {listing?.city} for {categoryName}.</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
