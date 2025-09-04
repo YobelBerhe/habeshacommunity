@@ -94,18 +94,28 @@ export default function WorldActivityHero({
       });
       
       const marker = L.marker([p.lat, p.lng], { icon: div }).addTo(layer);
-      marker.bindTooltip(`${p.city} • ${p.count}`, { 
+      marker.bindTooltip(`View listings in ${p.city} • ${p.count}`, { 
         direction: "top", 
         offset: L.point(0, -18) 
       });
       
       marker.on("click", () => onCityClick?.(p.city));
+      marker.on("keydown", (e: any) => {
+        if (e.originalEvent.key === "Enter" || e.originalEvent.key === " ") {
+          e.originalEvent.preventDefault();
+          onCityClick?.(p.city);
+        }
+      });
       
       setTimeout(() => {
         const el = document.getElementById(`p-${index}`);
         if (el) {
           el.innerHTML = `
-            <div class="hc-dot${mode === "light" ? " hc-dot-light" : ""}${prefersReduced ? " hc-dot-static" : ""}">
+            <div class="hc-dot${mode === "light" ? " hc-dot-light" : ""}${prefersReduced ? " hc-dot-static" : ""}" 
+                 style="cursor: pointer;" 
+                 tabindex="0" 
+                 role="button" 
+                 aria-label="View listings in ${p.city}">
               <span class="hc-badge">+${p.count}</span>
             </div>`;
         }

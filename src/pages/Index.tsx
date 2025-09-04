@@ -379,6 +379,21 @@ export default function Index() {
     setFilters(newFilters);
   };
 
+  // Handle URL city parameter on initial load
+  useEffect(() => {
+    const urlCity = searchParams.get('city');
+    if (urlCity && urlCity !== appState.city) {
+      handleCityChange(urlCity);
+      // Scroll to results after city loads
+      setTimeout(() => {
+        const resultsElement = document.getElementById('listing-root');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500);
+    }
+  }, [searchParams, appState.city]);
+
   // Navigation helpers
   const openCat = (category: CategoryKey, sub?: string) => {
     handleFiltersChange({ ...filters, category, subcategory: sub });
@@ -428,6 +443,19 @@ export default function Index() {
 
   const handleCityClick = (city: string) => {
     handleCityChange(city);
+    
+    // Update URL with city parameter
+    const params = new URLSearchParams(searchParams);
+    params.set('city', city);
+    setSearchParams(params);
+    
+    // Smooth scroll to results
+    setTimeout(() => {
+      const resultsElement = document.getElementById('listing-root');
+      if (resultsElement) {
+        resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   const shouldShowCityIndex =
