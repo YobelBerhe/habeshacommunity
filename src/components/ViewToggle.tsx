@@ -2,7 +2,7 @@ import { Grid3X3, List, Map, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type ViewMode = "list" | "grid" | "gallery" | "map";
-export type SortKey = "relevance" | "newest" | "oldest" | "price_asc" | "price_desc" | "upcoming";
+export type SortKey = "relevance" | "newest" | "oldest" | "price_asc" | "price_desc" | "upcoming" | "has_image";
 
 interface ViewToggleProps {
   viewMode: ViewMode;

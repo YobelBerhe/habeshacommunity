@@ -18,7 +18,7 @@ import SearchBox from "@/components/SearchBox";
 import QuickFilters from "@/components/QuickFilters";
 import ViewToggle from "@/components/ViewToggle";
 import SortDropdown from "@/components/SortDropdown";
-import FilterChips from "@/components/FilterChips";
+
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
 import DonationButton from "@/components/DonationButton";
@@ -496,16 +496,6 @@ export default function Index() {
                 onChange={(next) => setFilters({ ...filters, ...next })}
               />
               
-              <FilterChips
-                hasImage={hasImageFilter}
-                postedToday={postedTodayFilter}
-                onToggleImage={() => setHasImageFilter(!hasImageFilter)}
-                onToggleToday={() => setPostedTodayFilter(!postedTodayFilter)}
-                onClear={() => {
-                  setHasImageFilter(false);
-                  setPostedTodayFilter(false);
-                }}
-              />
             </div>
 
             <div className="text-sm text-muted-foreground mb-4">

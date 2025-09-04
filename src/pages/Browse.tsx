@@ -27,7 +27,7 @@ import AuthModal from "@/components/AuthModal";
 import PostModal from "@/components/PostModal";
 import ViewToggle from "@/components/ViewToggle";
 import SortDropdown from "@/components/SortDropdown";
-import FilterChips from "@/components/FilterChips";
+
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";
 
@@ -193,7 +193,7 @@ export default function Browse() {
 
     // Apply quick filters
     filtered = applyQuickFilters(filtered, { 
-      hasImage: hasImageFilter, 
+      hasImage: hasImageFilter || sortKey === "has_image", 
       postedToday: postedTodayFilter 
     });
 
@@ -352,29 +352,26 @@ export default function Browse() {
             </Button>
           </div>
           
-          {/* Filter chips and controls */}
-          <div className="flex flex-col gap-3">
-            <FilterChips
-              hasImage={hasImageFilter}
-              postedToday={postedTodayFilter}
-              onToggleImage={() => setHasImageFilter(!hasImageFilter)}
-              onToggleToday={() => setPostedTodayFilter(!postedTodayFilter)}
-              onClear={() => {
-                setHasImageFilter(false);
-                setPostedTodayFilter(false);
-              }}
-            />
-            
-            <div className="flex items-center justify-between">
+          {/* Results and controls */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
               <div className="text-sm text-muted-foreground">
                 {processedListings.length} {language === 'EN' ? 'results' : 'ውጽኢታት'}
                 {filters.city && ` ${language === 'EN' ? 'in' : 'ኣብ'} ${filters.city}`}
               </div>
-              
-              <div className="flex items-center gap-2">
-                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
-                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+              <div className="text-xs text-muted-foreground">
+                Sorted by {sortKey === 'relevance' ? 'Recommended' : 
+                          sortKey === 'price_asc' ? 'Price (Low to High)' : 
+                          sortKey === 'price_desc' ? 'Price (High to Low)' :
+                          sortKey === 'newest' ? 'Newest' :
+                          sortKey === 'oldest' ? 'Oldest' : 
+                          sortKey === 'has_image' ? 'Has Image' : 'Upcoming'}
               </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+              <SortDropdown sortKey={sortKey} onChange={setSortKey} />
             </div>
           </div>
         </div>

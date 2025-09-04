@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type SortKey = "relevance" | "newest" | "oldest" | "price_asc" | "price_desc" | "upcoming";
+export type SortKey = "relevance" | "newest" | "oldest" | "price_asc" | "price_desc" | "upcoming" | "has_image";
 
 interface SortDropdownProps {
   sortKey: SortKey;
@@ -22,6 +22,7 @@ export default function SortDropdown({ sortKey, onChange }: SortDropdownProps) {
     { key: "price_asc" as const, label: "$ → $$$" },
     { key: "price_desc" as const, label: "$$$ → $" },
     { key: "upcoming" as const, label: "Upcoming" },
+    { key: "has_image" as const, label: "Has image" },
   ];
 
   const currentLabel = sortOptions.find(opt => opt.key === sortKey)?.label || "Sort";

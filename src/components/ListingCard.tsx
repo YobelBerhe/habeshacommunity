@@ -126,15 +126,24 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
         }}
       >
         <CardContent className="p-0">
-          {/* Zillow-style compact image */}
+          {/* Zillow-style elongated image */}
           <div className="relative">
             <ImageBox
               src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
               alt={listing.title}
-              className="rounded-t-lg h-40 w-full object-cover"
+              className="rounded-t-lg h-48 w-full object-cover"
             />
             
-            {/* Overlay actions */}
+            {/* Price overlay - top left */}
+            {listing.price && (
+              <div className="absolute top-2 left-2">
+                <div className="bg-white/95 backdrop-blur-sm px-2 py-1 rounded text-sm font-bold text-foreground shadow-sm">
+                  {formatPrice(listing.price)}
+                </div>
+              </div>
+            )}
+            
+            {/* Overlay actions - top right */}
             <div className="absolute top-2 right-2 flex gap-1">
               {showJustPosted && (
                 <Badge className="bg-green-500 text-white border-0 animate-pulse text-xs px-2 py-1">
@@ -144,12 +153,12 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+                className="h-8 w-8 bg-transparent hover:bg-white/10"
                 onClick={handleFavoriteToggle}
                 aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
               >
                 <Heart 
-                  className={`w-3 h-3 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'}`} 
+                  className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-white/80 hover:text-red-500'} drop-shadow-lg`} 
                 />
               </Button>
             </div>
@@ -157,7 +166,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
             {/* Photo count - Zillow style */}
             {((listing as any).photos?.length > 1 || (listing as any).images?.length > 1) && (
               <div className="absolute bottom-2 right-2">
-                <Badge className="bg-black/60 text-white text-xs px-2 py-1 backdrop-blur-sm">
+                <Badge className="bg-black/70 text-white text-xs px-2 py-1 backdrop-blur-sm">
                   {(listing as any).photos?.length || (listing as any).images?.length} photos
                 </Badge>
               </div>
@@ -165,13 +174,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
           </div>
 
           {/* Zillow-style content - compact and efficient */}
-          <div className="p-3 space-y-2">
-            {/* Price - most prominent */}
-            {listing.price && (
-              <div className="text-lg font-bold text-foreground">
-                {formatPrice(listing.price)}
-              </div>
-            )}
+          <div className="p-3 space-y-1.5">
 
             {/* Title - smaller, more compact */}
             <h3 className="font-medium text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2">
@@ -186,26 +189,26 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
 
             {/* Property details in compact grid */}
             <div className="flex justify-between items-center text-xs text-muted-foreground">
-              <Badge variant="outline" className="text-xs px-2 py-1 h-5">
+              <Badge variant="outline" className="text-xs px-1.5 py-0.5 h-4 text-[10px]">
                 {subcategoryName || categoryName}
               </Badge>
               <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                <span>{formatDate(listing.createdAt || 0)}</span>
+                <Calendar className="w-2.5 h-2.5" />
+                <span className="text-[10px]">{formatDate(listing.createdAt || 0)}</span>
               </div>
             </div>
 
             {/* Zillow-style action buttons */}
-            <div className="flex gap-1 pt-1">
+            <div className="flex gap-0.5 pt-1">
               {/* Contact buttons for accessible contacts */}
               {hasContactAccess && listing.contact_phone && (
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex-1 h-7 text-xs px-2"
+                  className="flex-1 h-6 text-[10px] px-1.5"
                   onClick={(e) => handleContactAction(e, 'phone')}
                 >
-                  <Phone className="h-3 w-3 mr-1" />
+                  <Phone className="h-2.5 w-2.5 mr-1" />
                   Call
                 </Button>
               )}
@@ -214,10 +217,10 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex-1 h-7 text-xs px-2"
+                  className="flex-1 h-6 text-[10px] px-1.5"
                   onClick={(e) => handleContactAction(e, 'email')}
                 >
-                  <Mail className="h-3 w-3 mr-1" />
+                  <Mail className="h-2.5 w-2.5 mr-1" />
                   Email
                 </Button>
               )}
@@ -227,10 +230,10 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex-1 h-7 text-xs px-2"
+                  className="flex-1 h-6 text-[10px] px-1.5"
                   onClick={(e) => handleContactAction(e, 'message')}
                 >
-                  <MessageSquare className="h-3 w-3 mr-1" />
+                  <MessageSquare className="h-2.5 w-2.5 mr-1" />
                   Message
                 </Button>
               )}
@@ -240,10 +243,10 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex-1 h-7 text-xs px-2"
+                  className="flex-1 h-6 text-[10px] px-1.5"
                   onClick={(e) => handleContactAction(e, 'website')}
                 >
-                  <Globe className="h-3 w-3 mr-1" />
+                  <Globe className="h-2.5 w-2.5 mr-1" />
                   Visit
                 </Button>
               )}

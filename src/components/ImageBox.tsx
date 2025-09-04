@@ -27,7 +27,7 @@ const ImageBox = ({ src, alt, className = "" }: ImageBoxProps) => {
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-lg bg-muted ${className.includes('h-') ? '' : 'aspect-[4/3]'} ${className}`}>
+    <div className={`relative overflow-hidden ${className.includes('rounded-t-lg') ? 'rounded-t-lg' : 'rounded-lg'} bg-muted ${className.includes('h-') ? '' : 'aspect-[4/3]'} ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 animate-pulse bg-muted" />
       )}
