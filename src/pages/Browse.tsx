@@ -354,21 +354,23 @@ export default function Browse() {
           
           {/* Results and controls */}
           <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-1">
-              <div className="text-sm text-muted-foreground">
-                {processedListings.length} {language === 'EN' ? 'results' : 'ውጽኢታት'}
-                {filters.city && ` ${language === 'EN' ? 'in' : 'ኣብ'} ${filters.city}`}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Sorted by {sortKey === 'relevance' ? 'Recommended' : 
-                          sortKey === 'price_asc' ? 'Price (Low to High)' : 
-                          sortKey === 'price_desc' ? 'Price (High to Low)' :
-                          sortKey === 'newest' ? 'Newest' :
-                          sortKey === 'oldest' ? 'Oldest' : 
-                          sortKey === 'has_image' ? 'Has Image' : 'Upcoming'}
-              </div>
+            <div className="text-sm text-muted-foreground">
+              {processedListings.length} {language === 'EN' ? 'results' : 'ውጽኢታት'}
+              {filters.city && ` ${language === 'EN' ? 'in' : 'ኣብ'} ${filters.city}`}
             </div>
             
+            <div className="text-sm text-muted-foreground">
+              Sorted by {sortKey === 'relevance' ? 'Recommended' : 
+                        sortKey === 'price_asc' ? 'Price (Low to High)' : 
+                        sortKey === 'price_desc' ? 'Price (High to Low)' :
+                        sortKey === 'newest' ? 'Newest' :
+                        sortKey === 'oldest' ? 'Oldest' : 
+                        sortKey === 'has_image' ? 'Has Image' : 'Upcoming'}
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between pt-2">
+            <div></div>
             <div className="flex items-center gap-2">
               <ViewToggle viewMode={viewMode} onChange={setViewMode} />
               <SortDropdown sortKey={sortKey} onChange={setSortKey} />

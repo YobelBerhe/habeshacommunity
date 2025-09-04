@@ -134,10 +134,10 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
               className="rounded-t-lg h-48 w-full object-cover"
             />
             
-            {/* Price overlay - top left */}
+            {/* Price overlay - top left with dark background */}
             {listing.price && (
               <div className="absolute top-2 left-2">
-                <div className="bg-white/95 backdrop-blur-sm px-2 py-1 rounded text-sm font-bold text-foreground shadow-sm">
+                <div className="bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-sm font-bold text-white shadow-lg">
                   {formatPrice(listing.price)}
                 </div>
               </div>
@@ -153,12 +153,16 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 bg-transparent hover:bg-white/10"
+                className="h-10 w-10 bg-transparent hover:bg-white/10"
                 onClick={handleFavoriteToggle}
                 aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
               >
                 <Heart 
-                  className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-white/80 hover:text-red-500'} drop-shadow-lg`} 
+                  className={`w-7 h-7 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-white/90 hover:text-red-500'}`}
+                  style={{
+                    filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.8)) drop-shadow(0 0 1px rgba(0,0,0,0.9))',
+                    WebkitTextStroke: '0.5px rgba(0,0,0,0.5)'
+                  }}
                 />
               </Button>
             </div>
