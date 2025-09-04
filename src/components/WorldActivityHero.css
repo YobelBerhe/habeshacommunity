@@ -1,0 +1,71 @@
+.hc-dot {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  background: #2dd4bf;
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgba(45, 212, 191, 0.9);
+  transform: translate(-50%, -50%);
+}
+
+.hc-dot::before, 
+.hc-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  animation: hc-pulse 2.4s ease-out infinite;
+  border: 2px solid rgba(45, 212, 191, 0.5);
+}
+
+.hc-dot::after { 
+  animation-delay: 1.2s; 
+}
+
+.hc-dot-static::before,
+.hc-dot-static::after {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes hc-pulse {
+  0% {
+    opacity: 0.7;
+    width: 10px;
+    height: 10px;
+  }
+  100% {
+    opacity: 0;
+    width: 42px;
+    height: 42px;
+  }
+}
+
+.hc-badge {
+  position: absolute;
+  top: -24px;
+  left: 8px;
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  user-select: none;
+  font-weight: 600;
+}
+
+.hc-dot-light {
+  background: #111;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+}
+
+.hc-dot-light::before,
+.hc-dot-light::after {
+  border-color: rgba(17, 17, 17, 0.5);
+}

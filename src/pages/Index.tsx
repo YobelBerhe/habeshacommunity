@@ -18,6 +18,8 @@ import SearchBox from "@/components/SearchBox";
 import QuickFilters from "@/components/QuickFilters";
 import ViewToggle from "@/components/ViewToggle";
 import SortDropdown from "@/components/SortDropdown";
+import WorldActivityHero from "@/components/WorldActivityHero";
+import CitySearchBar from "@/components/CitySearchBar";
 
 import LanguageToggle from "@/components/LanguageToggle";
 import HomeDigest from "@/components/HomeDigest";
@@ -26,7 +28,6 @@ import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
 import { getStarPoints } from "@/services/activeUsers";
-import CitySearchBar from "@/components/CitySearchBar";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
@@ -416,6 +417,19 @@ export default function Index() {
     toast(favorites.includes(listingId) ? "Removed from favorites" : "Added to favorites");
   };
 
+  // Hero action handlers
+  const handleHousingClick = () => {
+    openCat('housing');
+  };
+
+  const handleJobsClick = () => {
+    openCat('jobs');
+  };
+
+  const handleCityClick = (city: string) => {
+    handleCityChange(city);
+  };
+
   const shouldShowCityIndex =
     !!appState.city && !filters.query && !filters.subcategory;
 
@@ -520,60 +534,16 @@ export default function Index() {
 
       {/* Hero section when no city is selected */}
       {!appState.city && (
-        <>
-          {/* City Search Bar Above Hero */}
-          <div className="container mx-auto px-4 py-4">
-          <CitySearchBar 
+        <WorldActivityHero
+          mode="dark"
+          SearchBar={() => <CitySearchBar 
             placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
             onCitySelect={handleCityChange}
-          />
-          </div>
-          
-          <section className="w-screen relative left-1/2 right-1/2 -mx-[50vw] py-8 md:py-12 bg-background/70 backdrop-blur">
-            <div className="max-w-7xl mx-auto px-4 md:px-6">
-              <div className="text-center space-y-6 mb-8">
-                <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                  {t(lang, "connect_headline_1")}
-                  <br />
-                  <span className="text-primary">{t(lang, "connect_headline_2")}</span>
-                </h1>
-                
-                <div className="space-y-2">
-                <div className="flex items-center justify-center gap-2 text-lg">
-                  <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                  <span className="font-semibold">
-                    {t(lang, "live_now")} <strong>{isLoading ? '...' : total.toLocaleString()}</strong> {t(lang, "live_people")}
-                  </span>
-                </div>
-                {demo && (
-                  <p className="text-xs text-muted-foreground">
-                    {t(lang, "demo_data")}
-                  </p>
-                )}
-                </div>
-
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  {t(lang, "connect_sub")}
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button 
-                    className="px-5 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-colors"
-                    onClick={() => navigate('/browse?category=housing')}
-                  >
-                    {t(lang, "housing")}
-                  </button>
-                  <button 
-                    className="px-5 py-3 rounded-lg bg-muted hover:bg-muted/80 font-semibold transition-colors"
-                    onClick={() => navigate('/browse?category=jobs')}
-                  >
-                    {t(lang, "jobs")}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
+          />}
+          onPrimary={handleHousingClick}
+          onSecondary={handleJobsClick}
+          onCityClick={handleCityClick}
+        />
       )}
 
       <main className="container mx-auto px-4 py-6">
