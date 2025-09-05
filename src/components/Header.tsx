@@ -56,6 +56,14 @@ export default function Header({
           />
         </div>
 
+        <nav className="hidden md:flex items-center gap-1">
+          <button className="btn btn-ghost" onClick={() => navigate('/mentor')}>Mentor</button>
+          <button className="btn btn-ghost" onClick={() => navigate('/match')}>Match</button>
+          <button className="btn btn-ghost" onClick={() => navigate('/market')}>Market</button>
+          <button className="btn btn-ghost" onClick={() => navigate('/forums')}>Forums</button>
+          <button className="btn btn-ghost" onClick={() => navigate('/inbox')}>Inbox</button>
+        </nav>
+
         <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
           {rightExtra}

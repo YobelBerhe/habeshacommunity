@@ -16,6 +16,14 @@ import Settings from "./pages/account/Settings";
 import ForumsBoards from "./pages/forums/Boards";
 import BoardTopics from "./pages/forums/BoardTopics";
 import TopicView from "./pages/forums/TopicView";
+import MentorList from "./pages/mentor/MentorList";
+import MentorDetail from "./pages/mentor/MentorDetail";
+import MatchOnboarding from "./pages/match/MatchOnboarding";
+import MatchDiscover from "./pages/match/MatchDiscover";
+import MatchProfile from "./pages/match/MatchProfile";
+import Marketplace from "./pages/marketplace/Marketplace";
+import MarketplaceDetail from "./pages/marketplace/MarketplaceDetail";
+import Inbox from "./pages/inbox/Inbox";
 import GlobalMap from "./components/GlobalMap";
 import DonateSuccess from "./pages/donate/Success";
 import DonateCancel from "./pages/donate/Cancel";
@@ -45,6 +53,14 @@ const App = () => (
           <Route path="/forums" element={<ForumsBoards />} />
           <Route path="/forums/:boardKey" element={<BoardTopics />} />
           <Route path="/forums/topic/:id" element={<TopicView />} />
+          <Route path="/mentor" element={<MentorList />} />
+          <Route path="/mentor/:id" element={<MentorDetail />} />
+          <Route path="/match" element={<MatchOnboarding />} />
+          <Route path="/match/discover" element={<MatchDiscover />} />
+          <Route path="/match/profile/:id" element={<MatchProfile />} />
+          <Route path="/market" element={<Marketplace />} />
+          <Route path="/market/:id" element={<MarketplaceDetail />} />
+          <Route path="/inbox" element={<Inbox />} />
           <Route path="/donate/success" element={<DonateSuccess />} />
           <Route path="/donate/cancel" element={<DonateCancel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

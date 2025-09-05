@@ -1,5 +1,5 @@
 // /lib/taxonomy.ts
-export type CategoryKey = "housing" | "jobs" | "services" | "community";
+export type CategoryKey = "housing" | "jobs" | "services" | "community" | "mentor" | "marketplace";
 export type JobKind = "regular" | "gig";
 
 export const TAXONOMY: Record<
@@ -55,6 +55,19 @@ export const TAXONOMY: Record<
       "politics","rants_raves","rideshare","volunteers",
     ],
   },
+  mentor: {
+    name: { en: "Mentor", ti: "መሪሕ" },
+    sub: [
+      "language","health","career","tech","finance","immigration","business",
+    ],
+  },
+  marketplace: {
+    name: { en: "Marketplace", ti: "ዕዳጋ" },
+    sub: [
+      "electronics","furniture","vehicles","clothing","services","home_garden",
+      "jobs_gigs","tickets",
+    ],
+  },
 };
 
 // Human labels for subcategories (keep keys stable; add more over time)
@@ -81,6 +94,24 @@ export const LABELS: Record<string, { en: string; ti: string }> = {
   // community examples
   volunteers: { en: "volunteers", ti: "በዓል ዘይኮርኦ" },
   events: { en: "events", ti: "ክስተታት" },
+
+  // mentor examples
+  language: { en: "language", ti: "ቋንቋ" },
+  health: { en: "health", ti: "ጥዕና" },
+  career: { en: "career", ti: "ሞያ" },
+  tech: { en: "tech", ti: "ቴክኖሎጂ" },
+  finance: { en: "finance", ti: "ገንዘብ" },
+  immigration: { en: "immigration", ti: "ስደት" },
+  business: { en: "business", ti: "ንግዲ" },
+
+  // marketplace examples
+  electronics: { en: "electronics", ti: "ኤለክትሮኒክስ" },
+  furniture: { en: "furniture", ti: "ዕቁባት" },
+  vehicles: { en: "vehicles", ti: "መኪናታት" },
+  clothing: { en: "clothing", ti: "ክዳን" },
+  home_garden: { en: "home & garden", ti: "ገዛ ኣትክልቲ" },
+  jobs_gigs: { en: "jobs & gigs", ti: "ስራሕ ግጥሚት" },
+  tickets: { en: "tickets", ti: "ሰነዳት" },
 };
 
 export function isGig(sub: string): boolean {
