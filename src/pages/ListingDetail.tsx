@@ -315,250 +315,267 @@ export default function ListingDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header Bar */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleBack}
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleFavoriteToggle}
-              className={isFavorited ? "text-red-500" : ""}
-            >
-              <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
-            </Button>
+      {/* Mobile-first Zillow-style layout */}
+      <div className="relative">
+        {/* Full-screen Image Gallery */}
+        {listing.images && listing.images.length > 0 && (
+          <div className="relative h-[60vh] md:h-[50vh]">
+            <ImageBox
+              src={listing.images[activeImageIndex]}
+              alt={listing.title}
+              className="w-full h-full object-cover"
+            />
             
-            <Button variant="ghost" size="icon" onClick={handleShare}>
-              <Share2 className="w-5 h-5" />
-            </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="w-5 h-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setReportOpen(true)}>
-                  Report
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Photo Gallery - Move to top, Zillow style */}
-            {listing.images && listing.images.length > 0 && (
-              <Card>
-                <CardContent className="p-0">
-                  <div className="relative">
-                    <ImageBox
-                      src={listing.images[activeImageIndex]}
-                      alt={listing.title}
-                      className="w-full h-96 object-cover rounded-t-lg"
-                    />
-                    
-                    {listing.images.length > 1 && (
-                      <>
-                        <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                          {activeImageIndex + 1} / {listing.images.length}
-                        </div>
-                        
-                        <div className="flex gap-2 p-4 overflow-x-auto">
-                          {listing.images.map((image, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setActiveImageIndex(index)}
-                              className={`flex-shrink-0 w-20 h-20 rounded border-2 overflow-hidden ${
-                                index === activeImageIndex ? 'border-primary' : 'border-border'
-                              }`}
-                            >
-                              <ImageBox
-                                src={image}
-                                alt={`${listing.title} - Image ${index + 1}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Title & Price - Move below photos, Zillow style */}
-            <div>
-              <div className="flex items-start justify-between mb-2">
-                <h1 className="text-3xl font-bold leading-tight">{listing.title}</h1>
-                {listing.price && (
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-primary">
-                      {formatPrice(listing.price, listing.currency)}
-                    </div>
-                  </div>
-                )}
-              </div>
+            {/* Navigation Overlay */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+              <button
+                onClick={handleBack}
+                className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-800" />
+              </button>
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{timeAgo(new Date(listing.created_at).getTime())}</span>
-                </div>
-                <Badge variant="secondary">{categoryName}</Badge>
+              <div className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+                <button
+                  onClick={handleFavoriteToggle}
+                  className={`${isFavorited ? "text-red-500" : "text-gray-700 hover:text-red-500"} transition-colors`}
+                >
+                  <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+                </button>
+                
+                <button onClick={handleShare} className="text-gray-700 hover:text-gray-900 transition-colors">
+                  <Share2 className="w-5 h-5" />
+                </button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="text-gray-700 hover:text-gray-900 transition-colors">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setReportOpen(true)}>
+                      Report
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-
-            {/* Tags */}
-            {listing.tags && listing.tags.length > 0 && (
+            
+            {/* Image Counter */}
+            {listing.images.length > 1 && (
+              <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                {activeImageIndex + 1} of {listing.images.length}
+              </div>
+            )}
+            
+            {/* Image Navigation Arrows */}
+            {listing.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveImageIndex(activeImageIndex > 0 ? activeImageIndex - 1 : listing.images.length - 1)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => setActiveImageIndex(activeImageIndex < listing.images.length - 1 ? activeImageIndex + 1 : 0)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                >
+                  <ArrowLeft className="w-6 h-6 rotate-180" />
+                </button>
+              </>
+            )}
+          </div>
+        )}
+        
+        {/* Map and Street View buttons */}
+        <div className="sticky top-0 z-40 bg-white border-b flex">
+          <button className="flex-1 py-3 text-center text-primary font-medium border-b-2 border-primary bg-blue-50">
+            Map
+          </button>
+          <button className="flex-1 py-3 text-center text-gray-600 font-medium hover:bg-gray-50">
+            Street View
+          </button>
+        </div>
+        
+        {/* Content Container */}
+        <div className="bg-white">
+          {/* Property Title and Address */}
+          <div className="px-4 py-6 border-b">
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
+              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-gray-600">{listing.city}{listing.country && `, ${listing.country}`}</p>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="px-4 py-4 flex gap-3">
+            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3">
+              Tour
+            </Button>
+            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3">
+              Apply
+            </Button>
+            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3">
+              Email
+            </Button>
+          </div>
+          
+          {/* Property Details Grid */}
+          <div className="px-4 py-4 grid grid-cols-2 gap-4 border-b">
+            {/* Building Type */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0v-4a2 2 0 012-2h4a2 2 0 012 2v4z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Building Type</p>
+                <p className="font-medium text-gray-900">{categoryName}</p>
+              </div>
+            </div>
+            
+            {/* Beds */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Bedrooms</p>
+                <p className="font-medium text-gray-900">
+                  {listing.price ? `${Math.floor(listing.price / 1000)} bed` : 'Studio'}
+                </p>
+              </div>
+            </div>
+            
+            {/* Price */}
+            {listing.price && (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Rent</p>
+                  <p className="font-medium text-gray-900">{formatPrice(listing.price, listing.currency)}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Amenities */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Pet-friendly</p>
+                <p className="font-medium text-gray-900">Yes</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* What's Available Section */}
+          <div className="px-4 py-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">What's available</h2>
+            <div className="flex gap-4">
+              <button className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-medium bg-blue-50">
+                Matches
+              </button>
+              <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">
+                2 bd
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">Price may not include required fees and charges.</p>
+          </div>
+          
+          {/* Description */}
+          {listing.description && (
+            <div className="px-4 py-6 border-t">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{listing.description}</p>
+            </div>
+          )}
+          
+          {/* Tags */}
+          {listing.tags && listing.tags.length > 0 && (
+            <div className="px-4 py-6 border-t">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Features</h2>
               <div className="flex flex-wrap gap-2">
                 {listing.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline">
+                  <Badge key={index} variant="outline" className="py-1 px-3">
                     #{tag}
                   </Badge>
                 ))}
               </div>
-            )}
-
-            {/* Description */}
-            {listing.description && (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">Description</h2>
-                  <div className="prose max-w-none">
-                    <p className="whitespace-pre-wrap">{listing.description}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Map */}
-            {listing.lat && listing.lng ? (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">Location</h2>
-                  <div className="h-64 rounded-lg overflow-hidden">
-                    <MapMini lat={listing.lat} lng={listing.lng} />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Coordinates: {listing.lat.toFixed(4)}, {listing.lng.toFixed(4)}
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">Location</h2>
-                  <p className="text-muted-foreground">No location data available for this listing.</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Similar Listings */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Similar Listings</h2>
-                {similarListings.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {similarListings.map((similar) => (
-                      <button
-                        key={similar.id}
-                        onClick={() => navigate(`/l/${similar.id}`)}
-                        className="text-left hover:opacity-80 transition-opacity"
-                      >
-                        <div className="aspect-video rounded-lg overflow-hidden mb-2">
-                          {similar.image ? (
-                            <ImageBox
-                              src={similar.image}
-                              alt={similar.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <span className="text-muted-foreground text-sm">No image</span>
-                            </div>
-                          )}
+            </div>
+          )}
+          
+          {/* Map Section */}
+          {listing.lat && listing.lng && (
+            <div className="px-4 py-6 border-t">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
+              <div className="h-64 rounded-lg overflow-hidden border">
+                <MapMini lat={listing.lat} lng={listing.lng} />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Coordinates: {listing.lat.toFixed(4)}, {listing.lng.toFixed(4)}
+              </p>
+            </div>
+          )}
+          
+          {/* Similar Listings */}
+          {similarListings.length > 0 && (
+            <div className="px-4 py-6 border-t">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Similar Listings</h2>
+              <div className="grid grid-cols-2 gap-4">
+                {similarListings.slice(0, 4).map((similar) => (
+                  <button
+                    key={similar.id}
+                    onClick={() => navigate(`/l/${similar.id}`)}
+                    className="text-left hover:opacity-80 transition-opacity"
+                  >
+                    <div className="aspect-video rounded-lg overflow-hidden mb-2">
+                      {similar.image ? (
+                        <ImageBox
+                          src={similar.image}
+                          alt={similar.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <span className="text-gray-500 text-sm">No image</span>
                         </div>
-                        <h3 className="font-medium text-sm line-clamp-2 mb-1">{similar.title}</h3>
-                        {similar.price && (
-                          <p className="text-sm font-semibold text-primary">
-                            {formatPrice(similar.price)}
-                          </p>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">No similar listings found in {listing?.city} for {categoryName}.</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Contact Card */}
-            <Card className="sticky top-20">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Contact</h2>
-                
-                <div className="space-y-3">
-                  {getContactButtons().map((button, index) => (
-                    <Button
-                      key={index}
-                      variant={button.variant}
-                      className="w-full justify-start"
-                      asChild
-                    >
-                      <a href={button.href} target="_blank" rel="noopener noreferrer">
-                        <button.icon className="w-4 h-4 mr-2" />
-                        {button.label}
-                      </a>
-                    </Button>
-                  ))}
-                  
-                  {listing.website_url && (
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <a href={listing.website_url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Visit Website
-                      </a>
-                    </Button>
-                  )}
-                </div>
-
-                <Separator className="my-4" />
-                
-                <div className="text-xs text-muted-foreground">
-                  <p className="font-medium mb-1">Safety Tips:</p>
-                  <ul className="space-y-1">
-                    <li>• Meet in a public place</li>
-                    <li>• Don't send money in advance</li>
-                    <li>• Trust your instincts</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+                      )}
+                    </div>
+                    <h3 className="font-medium text-sm mb-1 line-clamp-2">{similar.title}</h3>
+                    {similar.price && (
+                      <p className="text-sm font-semibold text-blue-600">
+                        {formatPrice(similar.price)}
+                      </p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Costs & Fees Section */}
+          <div className="px-4 py-6 border-t">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Costs & fees breakdown</h2>
+            <p className="text-gray-600">Contact the property for detailed pricing information.</p>
           </div>
         </div>
       </div>
