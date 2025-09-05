@@ -30,7 +30,7 @@ export default function MentorList() {
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [topicFilter, setTopicFilter] = useState('');
+  const [topicFilter, setTopicFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('');
   const appState = getAppState();
 
@@ -59,7 +59,7 @@ export default function MentorList() {
       mentor.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       mentor.bio?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesTopic = !topicFilter || mentor.topics?.includes(topicFilter);
+    const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
     const matchesCity = !cityFilter || mentor.city?.toLowerCase().includes(cityFilter.toLowerCase());
     
     return matchesSearch && matchesTopic && matchesCity;
@@ -114,7 +114,7 @@ export default function MentorList() {
               <SelectValue placeholder="Topic" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Topics</SelectItem>
+              <SelectItem value="all">All Topics</SelectItem>
               <SelectItem value="language">Language</SelectItem>
               <SelectItem value="health">Health</SelectItem>
               <SelectItem value="career">Career</SelectItem>
@@ -131,7 +131,7 @@ export default function MentorList() {
           />
           <Button variant="outline" onClick={() => {
             setSearchTerm('');
-            setTopicFilter('');
+            setTopicFilter('all');
             setCityFilter('');
           }}>
             Clear Filters

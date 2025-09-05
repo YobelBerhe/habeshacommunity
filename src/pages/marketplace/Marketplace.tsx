@@ -42,7 +42,7 @@ export default function Marketplace() {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [subcategoryFilter, setSubcategoryFilter] = useState('');
+  const [subcategoryFilter, setSubcategoryFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const appState = getAppState();
@@ -74,7 +74,7 @@ export default function Marketplace() {
       listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       listing.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesSubcategory = !subcategoryFilter || listing.subcategory === subcategoryFilter;
+    const matchesSubcategory = !subcategoryFilter || subcategoryFilter === 'all' || listing.subcategory === subcategoryFilter;
     const matchesCity = !cityFilter || listing.city?.toLowerCase().includes(cityFilter.toLowerCase());
     
     const minPrice = priceRange.min ? parseFloat(priceRange.min) * 100 : 0;
@@ -138,7 +138,7 @@ export default function Marketplace() {
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {MARKETPLACE_SUBCATEGORIES.map(sub => (
                 <SelectItem key={sub} value={sub}>
                   {LABELS[sub]?.en || sub}
