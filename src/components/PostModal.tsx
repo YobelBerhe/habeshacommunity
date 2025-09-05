@@ -682,15 +682,23 @@ export default function PostModal({ city, onPosted }: Props) {
         
         {/* Show current coordinates if available */}
         {(lat && lng) && (
-          <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-            📍 Location: {lat.toFixed(4)}, {lng.toFixed(4)}
+          <div className="text-xs bg-green-50 border border-green-200 rounded p-2 mb-2 flex items-center gap-1">
+            <span className="text-green-700">📍 Map location found: {lat.toFixed(4)}, {lng.toFixed(4)}</span>
             <button 
               type="button" 
-              onClick={() => {setLat(undefined); setLng(undefined);}} 
+              onClick={() => {setLat(undefined); setLng(undefined); toast.info("Location cleared");}} 
               className="text-red-500 hover:text-red-700 ml-1"
+              title="Clear location"
             >
               ✕
             </button>
+          </div>
+        )}
+
+        {/* Location help text */}
+        {(!lat || !lng) && (
+          <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2 mb-2">
+            💡 <strong>Tip:</strong> Add your street address and city to make your listing visible on the map view
           </div>
         )}
 
