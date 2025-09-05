@@ -1,5 +1,5 @@
 // /lib/taxonomy.ts
-export type CategoryKey = "housing" | "jobs" | "services" | "community" | "mentor" | "marketplace";
+export type CategoryKey = "housing" | "jobs" | "services" | "community" | "mentor" | "marketplace" | "match";
 export type JobKind = "regular" | "gig";
 
 export const TAXONOMY: Record<
@@ -68,6 +68,12 @@ export const TAXONOMY: Record<
       "jobs_gigs","tickets",
     ],
   },
+  match: {
+    name: { en: "Match & Connect", ti: "ምትእምማን ኣገናዝብ" },
+    sub: [
+      "friends","dating","networking",
+    ],
+  },
 };
 
 // Human labels for subcategories (keep keys stable; add more over time)
@@ -112,6 +118,11 @@ export const LABELS: Record<string, { en: string; ti: string }> = {
   home_garden: { en: "home & garden", ti: "ገዛ ኣትክልቲ" },
   jobs_gigs: { en: "jobs & gigs", ti: "ስራሕ ግጥሚት" },
   tickets: { en: "tickets", ti: "ሰነዳት" },
+
+  // match examples
+  friends: { en: "friends", ti: "ኣዕሩኽቲ" },
+  dating: { en: "dating", ti: "ፍቕሪ" },
+  networking: { en: "networking", ti: "ኣገናዝባ" },
 };
 
 export function isGig(sub: string): boolean {
