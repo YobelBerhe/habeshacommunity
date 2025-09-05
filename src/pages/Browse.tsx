@@ -441,8 +441,8 @@ export default function Browse() {
         )}
       </main>
       
-      <StickyPostCTA />
       <Footer />
+      <StickyPostCTA />
       
       {/* Modals */}
       <AuthModal />
