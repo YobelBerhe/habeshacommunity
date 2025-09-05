@@ -48,6 +48,7 @@ export default function PostModal({ city, onPosted }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [contactHidden, setContactHidden] = useState(false);
   const [streetAddress, setStreetAddress] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Housing fields
   const [bedrooms, setBedrooms] = useState<number|undefined>(undefined);
@@ -185,7 +186,45 @@ export default function PostModal({ city, onPosted }: Props) {
     setPhotos(Array.from(files).slice(0, 6));
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    // Basic required fields for all categories
+    if (!title.trim()) newErrors.title = "Title is required";
+    if (!subcategory) newErrors.subcategory = "Subcategory is required";
+    if (!currentCity.trim()) newErrors.currentCity = "City is required";
+    
+    // Category-specific validation
+    if (category === "mentor") {
+      if (!displayName.trim()) newErrors.displayName = "Display name is required";
+      if (!bio.trim()) newErrors.bio = "Bio is required";
+    }
+    
+    if (category === "marketplace") {
+      if (!condition) newErrors.condition = "Condition is required";
+    }
+    
+    if (category === "match") {
+      if (!age) newErrors.age = "Age is required";
+      if (!gender) newErrors.gender = "Gender is required";
+      if (!seeking) newErrors.seeking = "Seeking preference is required";
+    }
+    
+    // At least one contact method required
+    if (!contact.phone && !contact.email && !contact.whatsapp && !contact.telegram) {
+      newErrors.contact = "At least one contact method is required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const submit = async () => {
+    if (!validateForm()) {
+      toast("Please fill in all required fields");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const userId = await getUserId();
@@ -329,6 +368,7 @@ export default function PostModal({ city, onPosted }: Props) {
       setWebsiteUrl("");
       setCountry("");
       setStreetAddress("");
+      setErrors({});
       
       toast(isEditing ? "Updated successfully!" : "Posted successfully!");
 
@@ -344,57 +384,6 @@ export default function PostModal({ city, onPosted }: Props) {
     }
   };
 
-  const isFormValid = () => {
-    console.log("🔍 Form validation check:", {
-      title: !!title,
-      subcategory: !!subcategory,
-      currentCity: !!currentCity,
-      category,
-      contact: {
-        phone: !!contact.phone,
-        email: !!contact.email,
-        whatsapp: !!contact.whatsapp,
-        telegram: !!contact.telegram
-      }
-    });
-
-    // Basic required fields for all categories
-    if (!title || !subcategory || !currentCity) {
-      console.log("❌ Basic validation failed:", { title: !!title, subcategory: !!subcategory, currentCity: !!currentCity });
-      return false;
-    }
-    
-    // Category-specific validation
-    if (category === "mentor") {
-      if (!displayName || !bio) {
-        console.log("❌ Mentor validation failed:", { displayName: !!displayName, bio: !!bio });
-        return false;
-      }
-    }
-    
-    if (category === "marketplace") {
-      if (!condition) {
-        console.log("❌ Marketplace validation failed:", { condition: !!condition });
-        return false;
-      }
-    }
-    
-    if (category === "match") {
-      if (!age || !gender || !seeking) {
-        console.log("❌ Match validation failed:", { age: !!age, gender: !!gender, seeking: !!seeking });
-        return false;
-      }
-    }
-    
-    // At least one contact method required
-    if (!contact.phone && !contact.email && !contact.whatsapp && !contact.telegram) {
-      console.log("❌ Contact validation failed - no contact method provided");
-      return false;
-    }
-    
-    console.log("✅ Form validation passed!");
-    return true;
-  };
 
   if (!postOpen) return null;
   if (!user) return null;
@@ -408,25 +397,87 @@ export default function PostModal({ city, onPosted }: Props) {
         </div>
 
         {/* Step 1: Category */}
-        <label className="block text-sm font-medium mb-1">Category</label>
+        <label className="block text-sm font-medium mb-1">Category *</label>
         <select
-          className="w-full mb-3 border rounded-md px-3 py-2 bg-background text-foreground"
+          className={`w-full mb-1 border rounded-md px-3 py-2 bg-background text-foreground ${errors.category ? 'border-red-500' : ''}`}
           value={category}
-          onChange={(e)=>{ setCategory(e.target.value); setSubcategory(""); }}
+          onChange={(e)=>{ setCategory(e.target.value); setSubcategory(""); setErrors({...errors, category: "", subcategory: ""}); }}
         >
           {catOptions.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
         </select>
+        {errors.category && <p className="text-red-500 text-xs mb-2">{errors.category}</p>}
 
         {/* Step 2: Subcategory */}
-        <label className="block text-sm font-medium mb-1">Subcategory</label>
+        <label className="block text-sm font-medium mb-1">Subcategory *</label>
         <select
-          className="w-full mb-4 border rounded-md px-3 py-2 bg-background text-foreground"
+          className={`w-full mb-1 border rounded-md px-3 py-2 bg-background text-foreground ${errors.subcategory ? 'border-red-500' : ''}`}
           value={subcategory}
-          onChange={(e)=>setSubcategory(e.target.value)}
+          onChange={(e)=>{setSubcategory(e.target.value); setErrors({...errors, subcategory: ""});}}
         >
           <option value="" disabled>Select…</option>
           {subOptions.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
         </select>
+        {errors.subcategory && <p className="text-red-500 text-xs mb-2">{errors.subcategory}</p>}
+        <div className="mb-2"></div>
+
+        {/* Title Field */}
+        <label className="block text-sm font-medium mb-1">Title *</label>
+        <input 
+          className={`w-full mb-1 border rounded-md px-3 py-2 bg-background text-foreground ${errors.title ? 'border-red-500' : ''}`}
+          placeholder="Enter a descriptive title"
+          value={title}
+          onChange={(e)=>{setTitle(e.target.value); setErrors({...errors, title: ""});}}
+        />
+        {errors.title && <p className="text-red-500 text-xs mb-2">{errors.title}</p>}
+        <div className="mb-3"></div>
+
+        {/* Description Field */}
+        <label className="block text-sm font-medium mb-1">Description</label>
+        <textarea 
+          className="w-full mb-3 border rounded-md px-3 py-2 bg-background text-foreground min-h-20"
+          placeholder="Describe what you're offering"
+          value={description}
+          onChange={(e)=>setDescription(e.target.value)}
+        />
+
+        {/* Price Field */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <input 
+            type="number" 
+            placeholder="Price (optional)" 
+            className="border rounded-md px-3 py-2 bg-background text-foreground"
+            value={price ?? ""} 
+            onChange={(e)=>setPrice(num(e.target.value))}
+          />
+          <select 
+            className="border rounded-md px-3 py-2 bg-background text-foreground"
+            value={currency}
+            onChange={(e)=>setCurrency(e.target.value)}
+          >
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="ETB">ETB</option>
+            <option value="CAD">CAD</option>
+          </select>
+        </div>
+
+        {/* Tags Field */}
+        <label className="block text-sm font-medium mb-1">Tags</label>
+        <input 
+          className="w-full mb-4 border rounded-md px-3 py-2 bg-background text-foreground"
+          placeholder="Comma separated tags"
+          value={tags}
+          onChange={(e)=>setTags(e.target.value)}
+        />
+
+        {/* Website URL Field */}
+        <label className="block text-sm font-medium mb-1">Website URL (optional)</label>
+        <input 
+          className="w-full mb-4 border rounded-md px-3 py-2 bg-background text-foreground"
+          placeholder="https://yourwebsite.com"
+          value={websiteUrl}
+          onChange={(e)=>setWebsiteUrl(e.target.value)}
+        />
 
         {/* Dynamic fields */}
         {category === "housing" && (
@@ -470,10 +521,26 @@ export default function PostModal({ city, onPosted }: Props) {
 
         {category === "mentor" && (
           <div className="grid grid-cols-1 gap-3 mb-4">
-            <input placeholder="Display Name" className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={displayName} onChange={(e)=>setDisplayName(e.target.value)} />
-            <textarea placeholder="Bio - Tell people about your expertise" className="border rounded-md px-3 py-2 bg-background text-foreground min-h-20"
-              value={bio} onChange={(e)=>setBio(e.target.value)} />
+            <div>
+              <label className="block text-sm font-medium mb-1">Display Name *</label>
+              <input 
+                placeholder="Display Name" 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.displayName ? 'border-red-500' : ''}`}
+                value={displayName} 
+                onChange={(e)=>{setDisplayName(e.target.value); setErrors({...errors, displayName: ""});}}
+              />
+              {errors.displayName && <p className="text-red-500 text-xs mt-1">{errors.displayName}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Bio *</label>
+              <textarea 
+                placeholder="Bio - Tell people about your expertise" 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground min-h-20 ${errors.bio ? 'border-red-500' : ''}`}
+                value={bio} 
+                onChange={(e)=>{setBio(e.target.value); setErrors({...errors, bio: ""});}}
+              />
+              {errors.bio && <p className="text-red-500 text-xs mt-1">{errors.bio}</p>}
+            </div>
             <input placeholder="Topics (comma separated: language, career, health)" className="border rounded-md px-3 py-2 bg-background text-foreground"
               value={topics} onChange={(e)=>setTopics(e.target.value)} />
             <input placeholder="Languages (comma separated: English, Tigrinya, Amharic)" className="border rounded-md px-3 py-2 bg-background text-foreground"
@@ -485,39 +552,69 @@ export default function PostModal({ city, onPosted }: Props) {
 
         {category === "marketplace" && (
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <select className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={condition ?? ""} onChange={(e)=>setCondition((e.target.value || undefined) as any)}>
-              <option value="">Condition</option>
-              <option value="new">New</option>
-              <option value="like-new">Like New</option>
-              <option value="good">Good</option>
-              <option value="fair">Fair</option>
-            </select>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Condition *</label>
+              <select 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.condition ? 'border-red-500' : ''}`}
+                value={condition ?? ""} 
+                onChange={(e)=>{setCondition((e.target.value || undefined) as any); setErrors({...errors, condition: ""});}}
+              >
+                <option value="">Select condition</option>
+                <option value="new">New</option>
+                <option value="like-new">Like New</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+              </select>
+              {errors.condition && <p className="text-red-500 text-xs mt-1">{errors.condition}</p>}
+            </div>
             <input placeholder="Brand" className="border rounded-md px-3 py-2 bg-background text-foreground"
               value={brand} onChange={(e)=>setBrand(e.target.value)} />
-            <input placeholder="Model" className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
+            <input placeholder="Model" className="border rounded-md px-3 py-2 bg-background text-foreground"
               value={model} onChange={(e)=>setModel(e.target.value)} />
           </div>
         )}
 
         {category === "match" && (
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <input type="number" placeholder="Age" className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={age ?? ""} onChange={(e)=>setAge(num(e.target.value))} />
-            <select className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={gender ?? ""} onChange={(e)=>setGender((e.target.value || undefined) as any)}>
-              <option value="">My Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-            <select className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
-              value={seeking ?? ""} onChange={(e)=>setSeeking((e.target.value || undefined) as any)}>
-              <option value="">Seeking</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Any</option>
-            </select>
+            <div>
+              <label className="block text-sm font-medium mb-1">Age *</label>
+              <input 
+                type="number" 
+                placeholder="Age" 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.age ? 'border-red-500' : ''}`}
+                value={age ?? ""} 
+                onChange={(e)=>{setAge(num(e.target.value)); setErrors({...errors, age: ""});}}
+              />
+              {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">My Gender *</label>
+              <select 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.gender ? 'border-red-500' : ''}`}
+                value={gender ?? ""} 
+                onChange={(e)=>{setGender((e.target.value || undefined) as any); setErrors({...errors, gender: ""});}}
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+              {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Seeking *</label>
+              <select 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.seeking ? 'border-red-500' : ''}`}
+                value={seeking ?? ""} 
+                onChange={(e)=>{setSeeking((e.target.value || undefined) as any); setErrors({...errors, seeking: ""});}}
+              >
+                <option value="">Select preference</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Any</option>
+              </select>
+              {errors.seeking && <p className="text-red-500 text-xs mt-1">{errors.seeking}</p>}
+            </div>
           </div>
         )}
 
@@ -537,13 +634,14 @@ export default function PostModal({ city, onPosted }: Props) {
         </datalist>
 
         {/* City & Country */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-2 gap-3 mb-1">
           <div className="relative">
+            <label className="block text-sm font-medium mb-1">City *</label>
             <input 
-              className="border rounded-md px-3 py-2 bg-background text-foreground w-full" 
-              placeholder="City *"
+              className={`border rounded-md px-3 py-2 bg-background text-foreground w-full ${errors.currentCity ? 'border-red-500' : ''}`}
+              placeholder="City"
               value={currentCity} 
-              onChange={(e)=>setCurrentCity(e.target.value)}
+              onChange={(e)=>{setCurrentCity(e.target.value); setErrors({...errors, currentCity: ""});}}
               list="city-suggestions"
             />
             <datalist id="city-suggestions">
@@ -562,9 +660,10 @@ export default function PostModal({ city, onPosted }: Props) {
             </datalist>
           </div>
           <div className="relative">
+            <label className="block text-sm font-medium mb-1">Country (optional)</label>
             <input 
               className="border rounded-md px-3 py-2 bg-background text-foreground w-full" 
-              placeholder="Country (optional)"
+              placeholder="Country"
               value={country} 
               onChange={(e)=>setCountry(e.target.value)}
               list="country-suggestions"
@@ -583,6 +682,8 @@ export default function PostModal({ city, onPosted }: Props) {
             </datalist>
           </div>
         </div>
+        {errors.currentCity && <p className="text-red-500 text-xs mb-2">{errors.currentCity}</p>}
+        <div className="mb-2"></div>
 
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1">Photos (up to 8)</label>
@@ -590,16 +691,35 @@ export default function PostModal({ city, onPosted }: Props) {
           {!!photos.length && <p className="text-xs text-muted-foreground mt-1">{photos.length} selected</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Phone" value={contact.phone}
-            onChange={(e)=>setContact({...contact, phone:e.target.value})} />
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Email" value={contact.email}
-            onChange={(e)=>setContact({...contact, email:e.target.value})} />
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="WhatsApp" value={contact.whatsapp}
-            onChange={(e)=>setContact({...contact, whatsapp:e.target.value})} />
-          <input className="border rounded-md px-3 py-2 bg-background text-foreground" placeholder="Telegram" value={contact.telegram}
-            onChange={(e)=>setContact({...contact, telegram:e.target.value})} />
+        <label className="block text-sm font-medium mb-1">Contact Information * (at least one required)</label>
+        <div className="grid grid-cols-2 gap-3 mb-1">
+          <input 
+            className={`border rounded-md px-3 py-2 bg-background text-foreground ${errors.contact ? 'border-red-500' : ''}`}
+            placeholder="Phone" 
+            value={contact.phone}
+            onChange={(e)=>{setContact({...contact, phone:e.target.value}); setErrors({...errors, contact: ""});}}
+          />
+          <input 
+            className={`border rounded-md px-3 py-2 bg-background text-foreground ${errors.contact ? 'border-red-500' : ''}`}
+            placeholder="Email" 
+            value={contact.email}
+            onChange={(e)=>{setContact({...contact, email:e.target.value}); setErrors({...errors, contact: ""});}}
+          />
+          <input 
+            className={`border rounded-md px-3 py-2 bg-background text-foreground ${errors.contact ? 'border-red-500' : ''}`}
+            placeholder="WhatsApp" 
+            value={contact.whatsapp}
+            onChange={(e)=>{setContact({...contact, whatsapp:e.target.value}); setErrors({...errors, contact: ""});}}
+          />
+          <input 
+            className={`border rounded-md px-3 py-2 bg-background text-foreground ${errors.contact ? 'border-red-500' : ''}`}
+            placeholder="Telegram" 
+            value={contact.telegram}
+            onChange={(e)=>{setContact({...contact, telegram:e.target.value}); setErrors({...errors, contact: ""});}}
+          />
         </div>
+        {errors.contact && <p className="text-red-500 text-xs mb-2">{errors.contact}</p>}
+        <div className="mb-1"></div>
 
         <div className="mb-3">
           <label className="flex items-center gap-2 text-sm">
@@ -623,7 +743,7 @@ export default function PostModal({ city, onPosted }: Props) {
         <button
           className="w-full py-3 rounded-md bg-primary text-primary-foreground font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
           onClick={submit}
-          disabled={!isFormValid() || submitting}
+          disabled={submitting}
         >
           {submitting ? (
             <div className="flex items-center justify-center gap-2">
