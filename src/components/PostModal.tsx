@@ -344,6 +344,31 @@ export default function PostModal({ city, onPosted }: Props) {
     }
   };
 
+  const isFormValid = () => {
+    // Basic required fields for all categories
+    if (!title || !subcategory || !currentCity) return false;
+    
+    // Category-specific validation
+    if (category === "mentor") {
+      if (!displayName || !bio) return false;
+    }
+    
+    if (category === "marketplace") {
+      if (!condition) return false;
+    }
+    
+    if (category === "match") {
+      if (!age || !gender || !seeking) return false;
+    }
+    
+    // At least one contact method required
+    if (!contact.phone && !contact.email && !contact.whatsapp && !contact.telegram) {
+      return false;
+    }
+    
+    return true;
+  };
+
   if (!postOpen) return null;
   if (!user) return null;
 
@@ -571,7 +596,7 @@ export default function PostModal({ city, onPosted }: Props) {
         <button
           className="w-full py-3 rounded-md bg-primary text-primary-foreground font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
           onClick={submit}
-          disabled={!title || !subcategory || !currentCity || submitting}
+          disabled={!isFormValid() || submitting}
         >
           {submitting ? (
             <div className="flex items-center justify-center gap-2">
