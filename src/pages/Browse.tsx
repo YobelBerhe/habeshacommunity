@@ -101,6 +101,7 @@ export default function Browse() {
   useEffect(() => {
     const loadListings = async () => {
       setLoading(true);
+      console.log('🔍 Fetching listings with filters:', filters);
       try {
         // Use contact-aware fetch if user is authenticated, otherwise regular fetch
         const data = user 
@@ -121,7 +122,10 @@ export default function Browse() {
               subcategory: filters.subcategory,
             });
             
-        setListings(data.map(row => ({
+        console.log('📦 Raw data from database:', data.length, 'listings');
+        console.log('🏙️ Requested city:', filters.city);
+        
+        const processedListings = data.map(row => ({
           id: row.id,
           user_id: row.user_id || "",
           city: row.city,
@@ -149,7 +153,10 @@ export default function Browse() {
           createdAt: new Date(row.created_at).getTime(),
           updatedAt: new Date(row.updated_at).getTime(),
           hasImage: !!(row.images?.length),
-        })));
+        }));
+        
+        console.log('✅ Processed listings:', processedListings.length);
+        setListings(processedListings);
       } catch (error) {
         console.error("Failed to load listings:", error);
         toast("Failed to load listings");
