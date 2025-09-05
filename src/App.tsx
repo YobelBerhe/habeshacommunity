@@ -31,6 +31,7 @@ import GlobalMap from "./components/GlobalMap";
 import DonateSuccess from "./pages/donate/Success";
 import DonateCancel from "./pages/donate/Cancel";
 import ListingDetail from "./pages/ListingDetail";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
           <Route path="/admin/seed" element={<AdminSeed />} />
           <Route path="/donate/success" element={<DonateSuccess />} />
           <Route path="/donate/cancel" element={<DonateCancel />} />
+          <Route path="/notifications" element={<Notifications />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<div>Page not found</div>} />
         </Routes>

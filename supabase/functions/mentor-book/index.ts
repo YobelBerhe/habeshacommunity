@@ -11,6 +11,17 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_ANON_KEY') ?? '',
 );
 
+// Helper function to create notifications
+async function createNotification(supabase: any, userId: string, type: string, title: string, body?: string, link?: string) {
+  try {
+    await supabase.functions.invoke('create-notification', {
+      body: { userId, type, title, body, link }
+    });
+  } catch (error) {
+    console.error('Failed to create notification:', error);
+  }
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -92,6 +103,25 @@ serve(async (req: Request) => {
         );
       }
 
+      // Create notifications for booking creation
+      await createNotification(
+        supabase,
+        mentor.user_id,
+        'booking.created',
+        'New mentor request',
+        'You have a new session request.',
+        '/mentor/requests'
+      );
+
+      await createNotification(
+        supabase,
+        user.id,
+        'booking.sent',
+        'Request sent',
+        "We'll notify you when the mentor responds.",
+        '/mentor/bookings'
+      );
+
       return new Response(
         JSON.stringify({ ok: true, booking: data }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -172,6 +202,27 @@ serve(async (req: Request) => {
         return new Response(
           JSON.stringify({ error: error.message }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Create notifications for status updates
+      const targetUserId = isMentor ? booking.mentee_id : booking.mentors.user_id;
+      const statusMessages: Record<string, { title: string; body: string; link: string }> = {
+        accepted: { title: 'Request accepted', body: 'Your mentor accepted your session request.', link: '/inbox' },
+        declined: { title: 'Request declined', body: 'Your mentor declined the request.', link: '/mentor' },
+        cancelled: { title: 'Request cancelled', body: 'This request was cancelled.', link: '/mentor/bookings' },
+        completed: { title: 'Session completed', body: 'Your mentor marked the session completed.', link: '/mentor/bookings' },
+      };
+
+      const messageData = statusMessages[nextStatus];
+      if (messageData) {
+        await createNotification(
+          supabase,
+          targetUserId,
+          `booking.${nextStatus}`,
+          messageData.title,
+          messageData.body,
+          messageData.link
         );
       }
 
