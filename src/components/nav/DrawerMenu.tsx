@@ -166,31 +166,37 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </summary>
             <ul className="pb-2">
               <li>
-                <Link 
-                  to="/mentor" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=mentor&sub=business');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Browse Mentors</span>
-                </Link>
+                  <span className="text-sm text-primary">Business Mentors</span>
+                </button>
               </li>
               <li>
-                <Link 
-                  to="/mentor/bookings" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=mentor&sub=career');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">My Requests</span>
-                </Link>
+                  <span className="text-sm text-primary">Career Mentors</span>
+                </button>
               </li>
               <li>
-                <Link 
-                  to="/mentor/requests" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=mentor&sub=life');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Mentor Dashboard</span>
-                </Link>
+                  <span className="text-sm text-primary">Life Coach</span>
+                </button>
               </li>
             </ul>
           </details>
@@ -206,22 +212,37 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </summary>
             <ul className="pb-2">
               <li>
-                <Link 
-                  to="/match" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=match&sub=friends');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Get Started</span>
-                </Link>
+                  <span className="text-sm text-primary">Find Friends</span>
+                </button>
               </li>
               <li>
-                <Link 
-                  to="/match/discover" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=match&sub=dating');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Discover Matches</span>
-                </Link>
+                  <span className="text-sm text-primary">Dating</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=match&sub=networking');
+                  }}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Professional Network</span>
+                </button>
               </li>
             </ul>
           </details>
@@ -237,40 +258,48 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </summary>
             <ul className="pb-2">
               <li>
-                <Link 
-                  to="/market" 
-                  onClick={() => onOpenChange(false)}
-                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
-                >
-                  <span className="text-sm text-primary">Browse All</span>
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/market?category=electronics" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=marketplace&sub=electronics');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
                   <span className="text-sm text-primary">Electronics</span>
-                </Link>
+                </button>
               </li>
               <li>
-                <Link 
-                  to="/market?category=furniture" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=marketplace&sub=furniture');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
                   <span className="text-sm text-primary">Furniture</span>
-                </Link>
+                </button>
               </li>
               <li>
-                <Link 
-                  to="/market?category=vehicles" 
-                  onClick={() => onOpenChange(false)}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=marketplace&sub=vehicles');
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
                   <span className="text-sm text-primary">Vehicles</span>
-                </Link>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/browse?category=marketplace&sub=books');
+                  }}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Books</span>
+                </button>
               </li>
             </ul>
           </details>
