@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Heart, MessageCircle, Plus, ChevronDown, Edit3, Bookmark, Users, Target, ShoppingBag, MessageSquare, Inbox } from 'lucide-react';
+import { X, Heart, MessageCircle, Plus, ChevronDown, Edit3, Bookmark, Users, Target, ShoppingBag, MessageSquare, Inbox, Home, Briefcase, Wrench, Users2 } from 'lucide-react';
 import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
 import { useLockBody } from '@/hooks/useLockBody';
@@ -17,6 +17,9 @@ type Props = { open: boolean; onOpenChange: (v: boolean) => void };
 export function DrawerMenu({ open, onOpenChange }: Props) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [myListingsOpen, setMyListingsOpen] = useState(false);
+  const [mentorOpen, setMentorOpen] = useState(false);
+  const [matchOpen, setMatchOpen] = useState(false);
+  const [marketplaceOpen, setMarketplaceOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
   const { user, openAuth, openPost } = useAuth();
   const navigate = useNavigate();
@@ -117,10 +120,171 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
         {/* Scroll area */}
         <div className="overflow-y-auto overscroll-contain px-2 pb-[env(safe-area-inset-bottom)]">
-          {(['housing','jobs','services','community'] as const).map(section => (
-            <details key={section} className="group border-b last:border-0">
+          {/* Community first */}
+          <details className="group border-b">
+            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
+              <div className="flex items-center gap-2">
+                <Users2 className="w-4 h-4 text-primary" />
+                <span className="font-medium">{TAXONOMY.community.name[language.toLowerCase() as 'en' | 'ti']}</span>
+              </div>
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+            </summary>
+
+            <ul className="pb-2">
+              {TAXONOMY.community.sub.map(sub => {
+                const key = `community:${sub}`;
+                const label = LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || LABELS[sub]?.en || sub.replace(/_/g, ' ');
+                const n = counts[key] ?? 0;
+                return (
+                  <li key={key}>
+                    <button
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/browse?category=community&sub=${sub}`);
+                      }}
+                      className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                    >
+                      <span className="text-sm text-primary">{label}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {n}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+
+          {/* Find a Mentor - Toggleable */}
+          <details className="group border-b">
+            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                <span className="font-medium">Find a Mentor</span>
+              </div>
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+            </summary>
+            <ul className="pb-2">
+              <li>
+                <Link 
+                  to="/mentor" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Browse Mentors</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/mentor?category=tech" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Tech & Career</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/mentor?category=immigration" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Immigration & Legal</span>
+                </Link>
+              </li>
+            </ul>
+          </details>
+
+          {/* Match & Connect - Toggleable */}
+          <details className="group border-b">
+            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" />
+                <span className="font-medium">Match & Connect</span>
+              </div>
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+            </summary>
+            <ul className="pb-2">
+              <li>
+                <Link 
+                  to="/match" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Get Started</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/match/discover" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Discover Matches</span>
+                </Link>
+              </li>
+            </ul>
+          </details>
+
+          {/* Marketplace - Toggleable */}
+          <details className="group border-b">
+            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-primary" />
+                <span className="font-medium">Marketplace</span>
+              </div>
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+            </summary>
+            <ul className="pb-2">
+              <li>
+                <Link 
+                  to="/market" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Browse All</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/market?category=electronics" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Electronics</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/market?category=furniture" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Furniture</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/market?category=vehicles" 
+                  onClick={() => onOpenChange(false)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Vehicles</span>
+                </Link>
+              </li>
+            </ul>
+          </details>
+
+          {/* Other categories with icons */}
+          {(['housing','jobs','services'] as const).map(section => (
+            <details key={section} className="group border-b">
               <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-                <span className="font-medium">{TAXONOMY[section].name[language.toLowerCase() as 'en' | 'ti']}</span>
+                <div className="flex items-center gap-2">
+                  {section === 'housing' && <Home className="w-4 h-4 text-primary" />}
+                  {section === 'jobs' && <Briefcase className="w-4 h-4 text-primary" />}
+                  {section === 'services' && <Wrench className="w-4 h-4 text-primary" />}
+                  <span className="font-medium">{TAXONOMY[section].name[language.toLowerCase() as 'en' | 'ti']}</span>
+                </div>
                 <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
               </summary>
 
@@ -150,35 +314,8 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </details>
           ))}
 
-          {/* New Sections */}
+          {/* Forums */}
           <div className="border-b py-2">
-            <Link 
-              to="/mentor" 
-              onClick={() => onOpenChange(false)}
-              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
-            >
-              <Users className="w-5 h-5 text-primary" />
-              <span className="font-medium">Find a Mentor</span>
-            </Link>
-            
-            <Link 
-              to="/match" 
-              onClick={() => onOpenChange(false)}
-              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
-            >
-              <Target className="w-5 h-5 text-primary" />
-              <span className="font-medium">Match & Connect</span>
-            </Link>
-            
-            <Link 
-              to="/marketplace" 
-              onClick={() => onOpenChange(false)}
-              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
-            >
-              <ShoppingBag className="w-5 h-5 text-primary" />
-              <span className="font-medium">Marketplace</span>
-            </Link>
-            
             <Link 
               to="/forums" 
               onClick={() => onOpenChange(false)}
@@ -186,15 +323,6 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             >
               <MessageSquare className="w-5 h-5 text-primary" />
               <span className="font-medium">Forums</span>
-            </Link>
-            
-            <Link 
-              to="/inbox" 
-              onClick={() => onOpenChange(false)}
-              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
-            >
-              <Inbox className="w-5 h-5 text-primary" />
-              <span className="font-medium">Inbox</span>
             </Link>
           </div>
 
@@ -240,6 +368,15 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             >
               <MessageCircle className="w-4 h-4" />
               {t(language, "chat")}
+            </Link>
+
+            <Link 
+              className="btn-secondary flex items-center gap-3" 
+              to="/inbox" 
+              onClick={() => onOpenChange(false)}
+            >
+              <Inbox className="w-4 h-4" />
+              Inbox
             </Link>
             
             <DonateButton />
