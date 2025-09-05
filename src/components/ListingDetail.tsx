@@ -120,6 +120,29 @@ export default function ListingDetail({ open, listing, onClose, onSavedChange }:
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Share button with Zillow-style icon */}
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: listing.title,
+                    text: listing.description || listing.title,
+                    url: window.location.href
+                  });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied to clipboard");
+                }
+              }}
+              className="px-3 py-1 rounded-md border hover:bg-muted transition-colors"
+              title="Share listing"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <path d="m9 9 6-6"/>
+                <path d="m15 3 3 3-3 3"/>
+              </svg>
+            </button>
             <button
               onClick={handleSave}
               className={`px-3 py-1 rounded-md border ${saved ? "bg-red-500 text-white border-red-500" : "bg-background"}`}
@@ -161,18 +184,55 @@ export default function ListingDetail({ open, listing, onClose, onSavedChange }:
             </div>
           )}
 
-          {/* price + tags */}
-          <div className="flex flex-wrap items-center gap-2">
-            {listing.price != null && (
-              <span className="px-3 py-1 rounded-md bg-amber-100 text-amber-900 border">
-                {listing.currency ?? "USD"} {listing.price.toLocaleString()}
-              </span>
+          {/* price + details like Zillow/Craigslist */}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {listing.price != null && (
+                <span className="px-3 py-1 rounded-md bg-green-100 text-green-900 border font-semibold text-lg">
+                  ${listing.price.toLocaleString()}
+                </span>
+              )}
+              {listing.subcategory && (
+                <span className="px-2 py-1 text-sm rounded-md bg-blue-100 text-blue-900 border">
+                  {listing.subcategory.replace(/_/g, ' ')}
+                </span>
+              )}
+            </div>
+            
+            {/* Property details grid like Zillow */}
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="space-y-1">
+                <span className="text-muted-foreground">Type:</span>
+                <div className="font-medium">{listing.category || 'General'}</div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-muted-foreground">Listed:</span>
+                <div className="font-medium">{new Date(listing.createdAt || 0).toLocaleDateString()}</div>
+              </div>
+              {listing.city && (
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Location:</span>
+                  <div className="font-medium">{listing.city}</div>
+                </div>
+              )}
+              {(listing as any).street_address && (
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Address:</span>
+                  <div className="font-medium">{(listing as any).street_address}</div>
+                </div>
+              )}
+            </div>
+            
+            {/* Tags */}
+            {(listing.tags ?? []).length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {(listing.tags ?? []).map((t) => (
+                  <span key={t} className="px-2 py-1 text-xs rounded-full bg-muted">
+                    #{t}
+                  </span>
+                ))}
+              </div>
             )}
-            {(listing.tags ?? []).map((t) => (
-              <span key={t} className="px-2 py-1 text-xs rounded-full bg-muted">
-                #{t}
-              </span>
-            ))}
           </div>
 
           {/* description */}

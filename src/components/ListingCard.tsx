@@ -191,14 +191,26 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
               {listing.country && `, ${listing.country}`}
             </div>
 
-            {/* Property details in compact grid */}
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
-              <Badge variant="outline" className="text-xs px-1.5 py-0.5 h-4 text-[10px]">
-                {subcategoryName || categoryName}
-              </Badge>
-              <div className="flex items-center gap-1">
-                <Calendar className="w-2.5 h-2.5" />
-                <span className="text-[10px]">{formatDate(listing.createdAt || 0)}</span>
+            {/* Property details like Craigslist/Zillow */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <Badge variant="outline" className="text-xs px-1.5 py-0.5 h-4 text-[10px]">
+                  {subcategoryName || categoryName}
+                </Badge>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Calendar className="w-2.5 h-2.5" />
+                  <span className="text-[10px]">{formatDate(listing.createdAt || 0)}</span>
+                </div>
+              </div>
+              
+              {/* Additional details like Zillow */}
+              <div className="text-[10px] text-muted-foreground space-y-0.5">
+                {(listing as any).street_address && (
+                  <div className="line-clamp-1">{(listing as any).street_address}</div>
+                )}
+                {listing.description && (
+                  <div className="line-clamp-2">{listing.description}</div>
+                )}
               </div>
             </div>
 
