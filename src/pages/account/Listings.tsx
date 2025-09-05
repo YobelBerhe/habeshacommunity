@@ -154,7 +154,7 @@ export default function MyListings() {
               onClick={openPost}
               className="btn-primary"
             >
-              {t(language, "post_your_first_listing")}
+              {t(language, "post_listing")}
             </button>
           </div>
         ) : (

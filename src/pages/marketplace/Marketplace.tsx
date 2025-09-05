@@ -242,8 +242,8 @@ export default function Marketplace() {
             <p className="text-muted-foreground mb-4">
               Try adjusting your search criteria or be the first to post in this category.
             </p>
-            <Button onClick={() => navigate('/?category=marketplace')}>
-              Post First Item
+            <Button onClick={() => navigate('/')}>
+              Post Item
             </Button>
           </div>
         )}

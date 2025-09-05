@@ -14,19 +14,22 @@ type Props = {
   onPosted?: (listing: Listing) => void;
 };
 
-const catOptions: { key: CategoryKey; label: string }[] = ([
-  ["housing","Housing / Rentals"],
-  ["jobs","Jobs (+ Gigs)"],
-  ["services","Services"],
-  ["community","Community"],
-] as const).map(([key,label]) => ({ key: key as CategoryKey, label }));
+const catOptions: { key: string; label: string }[] = [
+  { key: "housing", label: "Housing / Rentals" },
+  { key: "jobs", label: "Jobs (+ Gigs)" },
+  { key: "services", label: "Services" },
+  { key: "community", label: "Community" },
+  { key: "mentor", label: "Mentor Profile" },
+  { key: "marketplace", label: "Marketplace Item" },
+  { key: "match", label: "Match & Connect" },
+];
 
 export default function PostModal({ city, onPosted }: Props) {
   const { postOpen, closePost, user, editingListing } = useAuth();
   const { language } = useLanguage();
   const isEditing = !!editingListing;
   
-  const [category, setCategory] = useState<CategoryKey>("housing");
+  const [category, setCategory] = useState<string>("housing");
   const [subcategory, setSubcategory] = useState<string>("");
   const [jobKind, setJobKind] = useState<"regular"|"gig"|undefined>(undefined);
 
@@ -58,10 +61,27 @@ export default function PostModal({ city, onPosted }: Props) {
   const [remoteOk, setRemoteOk] = useState<boolean>(false);
   const [employer, setEmployer] = useState<string>("");
 
+  // Mentor fields
+  const [displayName, setDisplayName] = useState<string>("");
+  const [bio, setBio] = useState<string>("");
+  const [topics, setTopics] = useState<string>("");
+  const [languages, setLanguages] = useState<string>("");
+  const [priceCents, setPriceCents] = useState<number|undefined>(undefined);
+
+  // Marketplace fields  
+  const [condition, setCondition] = useState<"new"|"like-new"|"good"|"fair"|undefined>(undefined);
+  const [brand, setBrand] = useState<string>("");
+  const [model, setModel] = useState<string>("");
+
+  // Match fields
+  const [age, setAge] = useState<number|undefined>(undefined);
+  const [gender, setGender] = useState<"male"|"female"|"other"|undefined>(undefined);
+  const [seeking, setSeeking] = useState<"male"|"female"|"other"|undefined>(undefined);
+
   // Load listing data when editing
   useEffect(() => {
     if (editingListing) {
-      setCategory(editingListing.category as CategoryKey);
+      setCategory(editingListing.category);
       setSubcategory(editingListing.subcategory || "");
       setTitle(editingListing.title);
       setDescription(editingListing.description || "");
@@ -113,10 +133,46 @@ export default function PostModal({ city, onPosted }: Props) {
   }, [subcategory, category]);
 
   const subOptions = useMemo(() => {
-    return TAXONOMY[category].sub.map((slug) => ({
-      slug,
-      label: LABELS[slug]?.en ?? slug.replace(/_/g, " "),
-    }));
+    if (category === "mentor") {
+      return [
+        { slug: "language", label: "Language" },
+        { slug: "health", label: "Health" },
+        { slug: "career", label: "Career" },
+        { slug: "finance", label: "Finance" },
+        { slug: "education", label: "Education" },
+        { slug: "immigration", label: "Immigration" },
+        { slug: "business", label: "Business" },
+        { slug: "tech", label: "Technology" },
+        { slug: "life", label: "Life Coaching" },
+      ];
+    }
+    if (category === "marketplace") {
+      return [
+        { slug: "electronics", label: "Electronics" },
+        { slug: "furniture", label: "Furniture" },
+        { slug: "clothing", label: "Clothing" },
+        { slug: "books", label: "Books" },
+        { slug: "vehicles", label: "Vehicles" },
+        { slug: "home", label: "Home & Garden" },
+        { slug: "sports", label: "Sports & Recreation" },
+        { slug: "other", label: "Other" },
+      ];
+    }
+    if (category === "match") {
+      return [
+        { slug: "dating", label: "Dating" },
+        { slug: "friendship", label: "Friendship" },
+        { slug: "networking", label: "Professional Networking" },
+        { slug: "activity", label: "Activity Partner" },
+      ];
+    }
+    if (TAXONOMY[category as CategoryKey]) {
+      return TAXONOMY[category as CategoryKey].sub.map((slug) => ({
+        slug,
+        label: LABELS[slug]?.en ?? slug.replace(/_/g, " "),
+      }));
+    }
+    return [];
   }, [category]);
 
   
@@ -153,6 +209,23 @@ export default function PostModal({ city, onPosted }: Props) {
       if (category === "jobs") {
         finalDescription += formatAttrs({
           jobKind, employer, employment, pay, remoteOk
+        });
+      }
+      if (category === "mentor") {
+        finalDescription += formatAttrs({
+          topics: topics.split(',').map(t => t.trim()).filter(Boolean),
+          languages: languages.split(',').map(l => l.trim()).filter(Boolean),
+          price: priceCents ? `$${priceCents/100}/session` : undefined
+        });
+      }
+      if (category === "marketplace") {
+        finalDescription += formatAttrs({
+          condition, brand, model
+        });
+      }
+      if (category === "match") {
+        finalDescription += formatAttrs({
+          age, gender, seeking
         });
       }
 
@@ -287,7 +360,7 @@ export default function PostModal({ city, onPosted }: Props) {
         <select
           className="w-full mb-3 border rounded-md px-3 py-2 bg-background text-foreground"
           value={category}
-          onChange={(e)=>{ setCategory(e.target.value as CategoryKey); setSubcategory(""); }}
+          onChange={(e)=>{ setCategory(e.target.value); setSubcategory(""); }}
         >
           {catOptions.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
         </select>
@@ -340,6 +413,59 @@ export default function PostModal({ city, onPosted }: Props) {
               <input type="checkbox" checked={remoteOk} onChange={(e)=>setRemoteOk(e.target.checked)} />
               Remote OK
             </label>
+          </div>
+        )}
+
+        {category === "mentor" && (
+          <div className="grid grid-cols-1 gap-3 mb-4">
+            <input placeholder="Display Name" className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={displayName} onChange={(e)=>setDisplayName(e.target.value)} />
+            <textarea placeholder="Bio - Tell people about your expertise" className="border rounded-md px-3 py-2 bg-background text-foreground min-h-20"
+              value={bio} onChange={(e)=>setBio(e.target.value)} />
+            <input placeholder="Topics (comma separated: language, career, health)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={topics} onChange={(e)=>setTopics(e.target.value)} />
+            <input placeholder="Languages (comma separated: English, Tigrinya, Amharic)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={languages} onChange={(e)=>setLanguages(e.target.value)} />
+            <input type="number" placeholder="Price per session (USD)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={priceCents ? priceCents/100 : ""} onChange={(e)=>setPriceCents(e.target.value ? parseFloat(e.target.value) * 100 : undefined)} />
+          </div>
+        )}
+
+        {category === "marketplace" && (
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <select className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={condition ?? ""} onChange={(e)=>setCondition((e.target.value || undefined) as any)}>
+              <option value="">Condition</option>
+              <option value="new">New</option>
+              <option value="like-new">Like New</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+            </select>
+            <input placeholder="Brand" className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={brand} onChange={(e)=>setBrand(e.target.value)} />
+            <input placeholder="Model" className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
+              value={model} onChange={(e)=>setModel(e.target.value)} />
+          </div>
+        )}
+
+        {category === "match" && (
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <input type="number" placeholder="Age" className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={age ?? ""} onChange={(e)=>setAge(num(e.target.value))} />
+            <select className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={gender ?? ""} onChange={(e)=>setGender((e.target.value || undefined) as any)}>
+              <option value="">My Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+            <select className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
+              value={seeking ?? ""} onChange={(e)=>setSeeking((e.target.value || undefined) as any)}>
+              <option value="">Seeking</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Any</option>
+            </select>
           </div>
         )}
 

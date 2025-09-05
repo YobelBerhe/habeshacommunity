@@ -20,7 +20,7 @@ export default function StickyPostCTA() {
         onClick={handlePostClick}
         className="w-full py-3 px-4 border border-primary text-primary bg-white hover:bg-primary/5 rounded-lg transition-colors font-medium"
       >
-        + {t(language, "post_your_first_listing")}
+        + {t(language, "post_listing")}
       </button>
     </div>
   );
