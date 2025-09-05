@@ -345,27 +345,54 @@ export default function PostModal({ city, onPosted }: Props) {
   };
 
   const isFormValid = () => {
+    console.log("🔍 Form validation check:", {
+      title: !!title,
+      subcategory: !!subcategory,
+      currentCity: !!currentCity,
+      category,
+      contact: {
+        phone: !!contact.phone,
+        email: !!contact.email,
+        whatsapp: !!contact.whatsapp,
+        telegram: !!contact.telegram
+      }
+    });
+
     // Basic required fields for all categories
-    if (!title || !subcategory || !currentCity) return false;
+    if (!title || !subcategory || !currentCity) {
+      console.log("❌ Basic validation failed:", { title: !!title, subcategory: !!subcategory, currentCity: !!currentCity });
+      return false;
+    }
     
     // Category-specific validation
     if (category === "mentor") {
-      if (!displayName || !bio) return false;
+      if (!displayName || !bio) {
+        console.log("❌ Mentor validation failed:", { displayName: !!displayName, bio: !!bio });
+        return false;
+      }
     }
     
     if (category === "marketplace") {
-      if (!condition) return false;
+      if (!condition) {
+        console.log("❌ Marketplace validation failed:", { condition: !!condition });
+        return false;
+      }
     }
     
     if (category === "match") {
-      if (!age || !gender || !seeking) return false;
+      if (!age || !gender || !seeking) {
+        console.log("❌ Match validation failed:", { age: !!age, gender: !!gender, seeking: !!seeking });
+        return false;
+      }
     }
     
     // At least one contact method required
     if (!contact.phone && !contact.email && !contact.whatsapp && !contact.telegram) {
+      console.log("❌ Contact validation failed - no contact method provided");
       return false;
     }
     
+    console.log("✅ Form validation passed!");
     return true;
   };
 
