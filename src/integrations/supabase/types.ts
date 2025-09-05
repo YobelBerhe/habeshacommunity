@@ -41,6 +41,76 @@ export type Database = {
         }
         Relationships: []
       }
+      dm_members: {
+        Row: {
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_members_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "dm_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dm_messages: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          sender_id: string | null
+          thread_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          sender_id?: string | null
+          thread_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          sender_id?: string | null
+          thread_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "dm_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dm_threads: {
+        Row: {
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           amount: number | null
@@ -337,6 +407,199 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      match_answers: {
+        Row: {
+          choice_index: number
+          created_at: string | null
+          importance: number | null
+          question_id: number
+          user_id: string
+        }
+        Insert: {
+          choice_index: number
+          created_at?: string | null
+          importance?: number | null
+          question_id: number
+          user_id: string
+        }
+        Update: {
+          choice_index?: number
+          created_at?: string | null
+          importance?: number | null
+          question_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "match_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_profiles: {
+        Row: {
+          age: number | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          display_name: string | null
+          gender: string | null
+          photos: string[] | null
+          seeking: string | null
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          gender?: string | null
+          photos?: string[] | null
+          seeking?: string | null
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          gender?: string | null
+          photos?: string[] | null
+          seeking?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      match_questions: {
+        Row: {
+          choices: string[]
+          id: number
+          text: string
+          weight: number | null
+        }
+        Insert: {
+          choices: string[]
+          id?: number
+          text: string
+          weight?: number | null
+        }
+        Update: {
+          choices?: string[]
+          id?: number
+          text?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      match_scores: {
+        Row: {
+          score: number
+          updated_at: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          score: number
+          updated_at?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          score?: number
+          updated_at?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      mentor_bookings: {
+        Row: {
+          created_at: string | null
+          id: string
+          mentee_id: string
+          mentor_id: string
+          message: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          mentee_id: string
+          mentor_id: string
+          message?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          mentee_id?: string
+          mentor_id?: string
+          message?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_bookings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentors: {
+        Row: {
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          currency: string | null
+          display_name: string | null
+          id: string
+          languages: string[] | null
+          price_cents: number | null
+          rating: number | null
+          topics: string[] | null
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: string | null
+          id?: string
+          languages?: string[] | null
+          price_cents?: number | null
+          rating?: number | null
+          topics?: string[] | null
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: string | null
+          id?: string
+          languages?: string[] | null
+          price_cents?: number | null
+          rating?: number | null
+          topics?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
