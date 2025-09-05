@@ -24,6 +24,7 @@ import MatchProfile from "./pages/match/MatchProfile";
 import Marketplace from "./pages/marketplace/Marketplace";
 import MarketplaceDetail from "./pages/marketplace/MarketplaceDetail";
 import Inbox from "./pages/inbox/Inbox";
+import AdminSeed from "./pages/admin/Seed";
 import GlobalMap from "./components/GlobalMap";
 import DonateSuccess from "./pages/donate/Success";
 import DonateCancel from "./pages/donate/Cancel";
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/market" element={<Marketplace />} />
           <Route path="/market/:id" element={<MarketplaceDetail />} />
           <Route path="/inbox" element={<Inbox />} />
+          <Route path="/admin/seed" element={<AdminSeed />} />
           <Route path="/donate/success" element={<DonateSuccess />} />
           <Route path="/donate/cancel" element={<DonateCancel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
