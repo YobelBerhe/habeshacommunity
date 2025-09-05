@@ -124,6 +124,52 @@ export default function PostModal({ city, onPosted }: Props) {
     }
   }, [editingListing, city]);
 
+  // Geocoding function to get coordinates from address
+  const geocodeAddress = async (address: string): Promise<{lat: number, lng: number} | null> => {
+    try {
+      // Using OpenStreetMap Nominatim API for free geocoding
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
+  };
+
+  // Handle address blur to geocode
+  const handleAddressBlur = async () => {
+    if (streetAddress.trim() && currentCity.trim()) {
+      const fullAddress = `${streetAddress}, ${currentCity}${country ? ', ' + country : ''}`;
+      const coords = await geocodeAddress(fullAddress);
+      if (coords) {
+        setLat(coords.lat);
+        setLng(coords.lng);
+        toast.success("📍 Location found on map!");
+      }
+    }
+  };
+
+  // Handle city blur to geocode if no street address
+  const handleCityBlur = async () => {
+    if (!streetAddress.trim() && currentCity.trim()) {
+      const cityAddress = `${currentCity}${country ? ', ' + country : ''}`;
+      const coords = await geocodeAddress(cityAddress);
+      if (coords) {
+        setLat(coords.lat);
+        setLng(coords.lng);
+        toast.success("📍 City location found on map!");
+      }
+    }
+  };
+
   useEffect(()=> {
     // whenever subcategory changes, detect gig flag (jobs only)
     if (category === "jobs") {
@@ -624,6 +670,7 @@ export default function PostModal({ city, onPosted }: Props) {
           placeholder="Street Address (optional - helps with map location)"
           value={streetAddress} 
           onChange={(e)=>setStreetAddress(e.target.value)}
+          onBlur={handleAddressBlur}
           list="street-suggestions"
         />
         <datalist id="street-suggestions">
@@ -632,6 +679,20 @@ export default function PostModal({ city, onPosted }: Props) {
           <option value="789 Pine Street" />
           <option value="321 Elm Drive" />
         </datalist>
+        
+        {/* Show current coordinates if available */}
+        {(lat && lng) && (
+          <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+            📍 Location: {lat.toFixed(4)}, {lng.toFixed(4)}
+            <button 
+              type="button" 
+              onClick={() => {setLat(undefined); setLng(undefined);}} 
+              className="text-red-500 hover:text-red-700 ml-1"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* City & Country */}
         <div className="grid grid-cols-2 gap-3 mb-1">
@@ -642,6 +703,7 @@ export default function PostModal({ city, onPosted }: Props) {
               placeholder="City"
               value={currentCity} 
               onChange={(e)=>{setCurrentCity(e.target.value); setErrors({...errors, currentCity: ""});}}
+              onBlur={handleCityBlur}
               list="city-suggestions"
             />
             <datalist id="city-suggestions">
