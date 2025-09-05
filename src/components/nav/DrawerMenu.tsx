@@ -176,20 +176,20 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               </li>
               <li>
                 <Link 
-                  to="/mentor?category=tech" 
+                  to="/mentor/bookings" 
                   onClick={() => onOpenChange(false)}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Tech & Career</span>
+                  <span className="text-sm text-primary">My Requests</span>
                 </Link>
               </li>
               <li>
                 <Link 
-                  to="/mentor?category=immigration" 
+                  to="/mentor/requests" 
                   onClick={() => onOpenChange(false)}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Immigration & Legal</span>
+                  <span className="text-sm text-primary">Mentor Dashboard</span>
                 </Link>
               </li>
             </ul>

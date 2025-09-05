@@ -18,6 +18,8 @@ import BoardTopics from "./pages/forums/BoardTopics";
 import TopicView from "./pages/forums/TopicView";
 import MentorList from "./pages/mentor/MentorList";
 import MentorDetail from "./pages/mentor/MentorDetail";
+import MentorRequests from "./pages/mentor/MentorRequests";
+import MyBookings from "./pages/mentor/MyBookings";
 import MatchOnboarding from "./pages/match/MatchOnboarding";
 import MatchDiscover from "./pages/match/MatchDiscover";
 import MatchProfile from "./pages/match/MatchProfile";
@@ -56,6 +58,8 @@ const App = () => (
           <Route path="/forums/topic/:id" element={<TopicView />} />
           <Route path="/mentor" element={<MentorList />} />
           <Route path="/mentor/:id" element={<MentorDetail />} />
+          <Route path="/mentor/requests" element={<MentorRequests />} />
+          <Route path="/mentor/bookings" element={<MyBookings />} />
           <Route path="/match" element={<MatchOnboarding />} />
           <Route path="/match/discover" element={<MatchDiscover />} />
           <Route path="/match/profile/:id" element={<MatchProfile />} />

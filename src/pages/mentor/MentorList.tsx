@@ -213,7 +213,7 @@ export default function MentorList() {
                     size="sm"
                     onClick={() => navigate(`/mentor/${mentor.id}`)}
                   >
-                    View Profile
+                    Request Session
                   </Button>
                 </div>
               </CardFooter>
