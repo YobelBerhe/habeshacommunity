@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Heart, MessageCircle, Plus, ChevronDown, Edit3, Bookmark } from 'lucide-react';
+import { X, Heart, MessageCircle, Plus, ChevronDown, Edit3, Bookmark, Users, Target, ShoppingBag, MessageSquare, Inbox } from 'lucide-react';
 import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
 import { useLockBody } from '@/hooks/useLockBody';
@@ -149,6 +149,54 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               </ul>
             </details>
           ))}
+
+          {/* New Sections */}
+          <div className="border-b py-2">
+            <Link 
+              to="/mentor" 
+              onClick={() => onOpenChange(false)}
+              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
+            >
+              <Users className="w-5 h-5 text-primary" />
+              <span className="font-medium">Find a Mentor</span>
+            </Link>
+            
+            <Link 
+              to="/match" 
+              onClick={() => onOpenChange(false)}
+              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
+            >
+              <Target className="w-5 h-5 text-primary" />
+              <span className="font-medium">Match & Connect</span>
+            </Link>
+            
+            <Link 
+              to="/marketplace" 
+              onClick={() => onOpenChange(false)}
+              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
+            >
+              <ShoppingBag className="w-5 h-5 text-primary" />
+              <span className="font-medium">Marketplace</span>
+            </Link>
+            
+            <Link 
+              to="/forums" 
+              onClick={() => onOpenChange(false)}
+              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
+            >
+              <MessageSquare className="w-5 h-5 text-primary" />
+              <span className="font-medium">Forums</span>
+            </Link>
+            
+            <Link 
+              to="/inbox" 
+              onClick={() => onOpenChange(false)}
+              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
+            >
+              <Inbox className="w-5 h-5 text-primary" />
+              <span className="font-medium">Inbox</span>
+            </Link>
+          </div>
 
           <div className="mt-4 grid gap-2">
             <button 
