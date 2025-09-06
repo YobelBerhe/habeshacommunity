@@ -21,6 +21,7 @@ import { TAXONOMY } from "@/lib/taxonomy";
 import MapMini from "@/components/MapMini";
 import ImageBox from "@/components/ImageBox";
 import { timeAgo } from "@/lib/time";
+import { bumpListingView } from "@/lib/trending";
 
 interface ListingSimilar {
   id: string;
@@ -86,7 +87,10 @@ export default function ListingDetail() {
 
         setListing(listingData);
 
-        // Track view
+        // Track view for trending algorithm
+        await bumpListingView(id);
+        
+        // Track view for user analytics
         if (user) {
           await supabase.rpc('track_listing_view', { listing_id: id });
         }

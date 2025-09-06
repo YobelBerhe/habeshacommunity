@@ -19,6 +19,7 @@ import QuickFilters from "@/components/QuickFilters";
 import ViewToggle from "@/components/ViewToggle";
 import SortDropdown from "@/components/SortDropdown";
 import WorldActivityHero from "@/components/WorldActivityHero";
+import TrendingRail from "@/components/TrendingRail";
 import CitySearchBar from "@/components/CitySearchBar";
 
 import LanguageToggle from "@/components/LanguageToggle";
@@ -567,6 +568,37 @@ export default function Index() {
           onSecondary={handleJobsClick}
           onCityClick={handleCityClick}
         />
+      )}
+
+      {/* Trending Rails Section */}
+      {!appState.city && (
+        <div className="space-y-6 mb-12">
+          <TrendingRail 
+            label="Featured Picks" 
+            featured 
+            link="/browse?featured=true" 
+          />
+          <TrendingRail 
+            label="Housing & Rentals" 
+            category="housing" 
+            link="/browse?category=housing" 
+          />
+          <TrendingRail 
+            label="Jobs" 
+            category="jobs" 
+            link="/browse?category=jobs" 
+          />
+          <TrendingRail 
+            label="Services" 
+            category="services" 
+            link="/browse?category=services" 
+          />
+          <TrendingRail 
+            label="Marketplace" 
+            category="marketplace" 
+            link="/browse?category=marketplace" 
+          />
+        </div>
       )}
 
       <main className="container mx-auto px-4 py-6">

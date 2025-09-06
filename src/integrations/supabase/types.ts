@@ -342,6 +342,7 @@ export type Database = {
           description: string | null
           id: string
           images: string[] | null
+          is_featured: boolean | null
           location_lat: number | null
           location_lng: number | null
           price_cents: number | null
@@ -352,6 +353,7 @@ export type Database = {
           title: string
           updated_at: string | null
           user_id: string | null
+          views: number | null
           website_url: string | null
         }
         Insert: {
@@ -364,6 +366,7 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[] | null
+          is_featured?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
           price_cents?: number | null
@@ -374,6 +377,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           user_id?: string | null
+          views?: number | null
           website_url?: string | null
         }
         Update: {
@@ -386,6 +390,7 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[] | null
+          is_featured?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
           price_cents?: number | null
@@ -396,6 +401,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string | null
+          views?: number | null
           website_url?: string | null
         }
         Relationships: [
@@ -864,6 +870,10 @@ export type Database = {
           subcategory: string
           total: number
         }[]
+      }
+      increment_views: {
+        Args: { listing_id: string }
+        Returns: undefined
       }
       touch_presence: {
         Args: { p_city: string }
