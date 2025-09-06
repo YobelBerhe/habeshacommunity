@@ -311,30 +311,6 @@ export default function Browse() {
                 </button>
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
-                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
-                  onClick={() => navigate('/market')}
-                >
-                  Market
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
-                  onClick={() => navigate('/forums')}
-                >
-                  Forums
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
-                  onClick={() => navigate('/inbox')}
-                >
-                  Inbox
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
                     filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                   onClick={() => setFilters({ ...filters, category: 'housing' })}
