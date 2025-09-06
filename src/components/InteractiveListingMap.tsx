@@ -34,11 +34,12 @@ export default function InteractiveListingMap({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Create map
+    // Create map with limited zoom for security
     const map = L.map(mapRef.current, {
       center: [center.lat, center.lng],
-      zoom: zoom,
+      zoom: Math.min(zoom, 8),
       zoomControl: true,
+      maxZoom: 8,
     });
 
     mapInstanceRef.current = map;

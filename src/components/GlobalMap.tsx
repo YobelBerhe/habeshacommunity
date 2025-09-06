@@ -29,6 +29,7 @@ export default function GlobalMap({ onMapReady, focusCity, viewMode, modalOpen }
         zoom: 2,
         zoomControl: false,
         minZoom: 2,
+        maxZoom: 8,
         worldCopyJump: true,
       });
       mapRef.current = map;
@@ -119,10 +120,10 @@ export default function GlobalMap({ onMapReady, focusCity, viewMode, modalOpen }
     };
   }, [onMapReady]);
 
-  // Focus on city when focusCity changes
+  // Focus on city when focusCity changes - limit zoom for security
   useEffect(() => {
     if (focusCity && mapRef.current) {
-      mapRef.current.flyTo([focusCity.lat, focusCity.lng], 12, { animate: true });
+      mapRef.current.flyTo([focusCity.lat, focusCity.lng], 6, { animate: true });
     }
   }, [focusCity]);
 

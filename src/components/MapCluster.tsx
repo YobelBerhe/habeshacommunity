@@ -33,10 +33,10 @@ export default function MapCluster({ center, listings, height = 440 }: Props) {
       mapContainer.innerHTML = '';
     }
 
-    const map = L.map("hn-map", { zoomControl: true, scrollWheelZoom: false });
+    const map = L.map("hn-map", { zoomControl: true, scrollWheelZoom: false, maxZoom: 8 });
     const tile = L.tileLayer(getTileLayerUrl(), {
       attribution: getTileLayerAttribution(),
-      maxZoom: 19,
+      maxZoom: 8,
     }).addTo(map);
     
     setCurrentMap(map);
@@ -74,7 +74,7 @@ export default function MapCluster({ center, listings, height = 440 }: Props) {
         currentMap.removeLayer(currentTileLayer);
         const newTile = L.tileLayer(getTileLayerUrl(), {
           attribution: getTileLayerAttribution(),
-          maxZoom: 19,
+          maxZoom: 8,
         }).addTo(currentMap);
         setCurrentTileLayer(newTile);
       }

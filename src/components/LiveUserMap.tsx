@@ -19,7 +19,7 @@ export default function LiveUserMap() {
       center: [20, 0],
       zoom: 2,
       minZoom: 2,
-      maxZoom: 18,
+      maxZoom: 8,
       zoomControl: true,
       scrollWheelZoom: true,
       doubleClickZoom: true,
@@ -170,9 +170,9 @@ export default function LiveUserMap() {
           }
         );
 
-        // Add click handler for mobile interaction
+        // Add click handler for mobile interaction - limit zoom for security
         marker.on('click', () => {
-          mapRef.current?.setView([point.lat, point.lon], Math.max(mapRef.current.getZoom(), 8), {
+          mapRef.current?.setView([point.lat, point.lon], Math.min(mapRef.current.getZoom() + 1, 8), {
             animate: true,
             duration: 1
           });
