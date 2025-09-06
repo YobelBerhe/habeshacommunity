@@ -204,33 +204,22 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=match&sub=friends');
+                    navigate('/match');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Find Friends</span>
+                  <span className="text-sm text-primary">Browse Matches</span>
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=match&sub=dating');
+                    navigate('/match/onboarding');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Dating</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => {
-                    onOpenChange(false);
-                    navigate('/browse?category=match&sub=networking');
-                  }}
-                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
-                >
-                  <span className="text-sm text-primary">Professional Network</span>
+                  <span className="text-sm text-primary">Complete Profile</span>
                 </button>
               </li>
             </ul>

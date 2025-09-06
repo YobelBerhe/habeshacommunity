@@ -32,9 +32,18 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
         
         <button 
           className="flex items-center gap-1 px-3 py-2 rounded-full bg-muted text-sm font-medium"
-          onClick={() => setOpenMore(true)}
+          onClick={() => {
+            if (topCategory === 'mentor') {
+              window.location.href = '/mentor/onboarding';
+            } else if (topCategory === 'match') {
+              setOpenMore(true);
+            } else {
+              setOpenMore(true);
+            }
+          }}
         >
-          More
+          {topCategory === 'mentor' ? 'Become a Mentor' : 
+           topCategory === 'match' ? 'Complete Profile & Find Matches' : 'More'}
           <ChevronDown className="w-3 h-3" />
         </button>
         
@@ -80,7 +89,33 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
       )}
 
       {/* More sheet */}
-      {openMore && (
+      {openMore && topCategory === 'match' && (
+        <BottomSheet title="Complete Profile & Find Matches" onClose={() => setOpenMore(false)}>
+          <div className="p-4 space-y-4">
+            <button 
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 rounded-lg font-medium"
+              onClick={() => {
+                window.location.href = '/match/onboarding';
+                setOpenMore(false);
+              }}
+            >
+              Complete Your Profile
+            </button>
+            <button 
+              className="w-full border border-border hover:bg-accent px-4 py-3 rounded-lg font-medium"
+              onClick={() => {
+                window.location.href = '/match';
+                setOpenMore(false);
+              }}
+            >
+              Find Matches
+            </button>
+          </div>
+        </BottomSheet>
+      )}
+      
+      {/* Default More sheet for other categories */}
+      {openMore && topCategory !== 'match' && topCategory !== 'mentor' && (
         <BottomSheet title="More filters" onClose={() => setOpenMore(false)}>
           <div className="p-4 text-sm text-muted-foreground">
             <p>Price range, location distance, and other filters will be added here.</p>

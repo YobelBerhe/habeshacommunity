@@ -236,6 +236,10 @@ export default function Browse() {
       maxPrice: undefined,
       jobKind: undefined,
     });
+    // Also clear app state city
+    const next = { ...appState, city: undefined };
+    setAppState(next);
+    saveAppState(next);
   };
 
   const handleListingSelect = (listing: Listing) => {
@@ -317,17 +321,17 @@ export default function Browse() {
                 </button>
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
-                    false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                   }`}
-                  onClick={() => navigate('/mentor')}
+                  onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
                 >
                   Mentor
                 </button>
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
-                    false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                   }`}
-                  onClick={() => navigate('/match')}
+                  onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
                 >
                   Match
                 </button>

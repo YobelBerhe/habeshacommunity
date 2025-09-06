@@ -123,7 +123,7 @@ export default function Marketplace() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Marketplace</h1>
-          <Button onClick={() => navigate('/?category=marketplace')}>Post Item</Button>
+          <Button onClick={() => navigate('/browse?category=marketplace')}>Post Item</Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -242,7 +242,7 @@ export default function Marketplace() {
             <p className="text-muted-foreground mb-4">
               Try adjusting your search criteria or be the first to post in this category.
             </p>
-            <Button onClick={() => navigate('/')}>
+            <Button onClick={() => navigate('/browse?category=marketplace')}>
               Post Item
             </Button>
           </div>
