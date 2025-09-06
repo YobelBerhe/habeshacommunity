@@ -880,6 +880,20 @@ export type Database = {
           total: number
         }[]
       }
+      get_potential_matches: {
+        Args: { p_limit?: number; p_user_id?: string }
+        Returns: {
+          age: number
+          bio: string
+          city: string
+          country: string
+          display_name: string
+          gender: string
+          photos: string[]
+          seeking: string
+          user_id: string
+        }[]
+      }
       increment_views: {
         Args: { listing_id: string }
         Returns: undefined

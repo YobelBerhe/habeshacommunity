@@ -52,14 +52,17 @@ export default function MatchProfile() {
     if (!user || !id) return;
 
     try {
-      // Get the profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('match_profiles')
-        .select('*')
-        .eq('user_id', id)
-        .single();
+      // Get the profile through secure function (only returns profiles available for matching)
+      const { data: potentialMatches, error: profileError } = await supabase
+        .rpc('get_potential_matches', { p_limit: 100 });
 
       if (profileError) throw profileError;
+      
+      const profileData = potentialMatches?.find((p: any) => p.user_id === id);
+      if (!profileData) {
+        throw new Error('Profile not found or not available for viewing');
+      }
+      
       setProfile(profileData);
 
       // Get their answers with questions

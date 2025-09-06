@@ -62,19 +62,29 @@ export default function MatchDiscover() {
         .select('*')
         .eq('user_id', user.id);
 
-      // Get all other profiles with their answers
+      // Use secure function to get potential matches
       const { data: profiles, error } = await supabase
-        .from('match_profiles')
-        .select(`
-          *,
-          match_answers (question_id, choice_index, importance)
-        `)
-        .neq('user_id', user.id);
+        .rpc('get_potential_matches', { p_limit: 50 });
 
       if (error) throw error;
 
+      // Get answers for each profile to calculate compatibility
+      const profilesWithAnswers = await Promise.all(
+        (profiles || []).map(async (profile: any) => {
+          const { data: answers } = await supabase
+            .from('match_answers')
+            .select('question_id, choice_index, importance')
+            .eq('user_id', profile.user_id);
+          
+          return {
+            ...profile,
+            match_answers: answers || []
+          };
+        })
+      );
+
       // Calculate compatibility scores
-      const matchesWithScores = (profiles || []).map((profile: any) => {
+      const matchesWithScores = profilesWithAnswers.map((profile: any) => {
         const compatibility = calculateCompatibility(userAnswers || [], profile.match_answers || []);
         return {
           ...profile,
