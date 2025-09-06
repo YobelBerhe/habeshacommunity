@@ -11,6 +11,10 @@ import { useToast } from '@/components/ui/use-toast';
 import MobileHeader from '@/components/layout/MobileHeader';
 import Header from '@/components/Header';
 import { getAppState } from '@/utils/storage';
+import CountryFlag from '@/components/CountryFlag';
+import ImageBox from '@/components/ImageBox';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface Mentor {
   id: string;
@@ -24,6 +28,7 @@ interface Mentor {
   price_cents: number;
   currency: string;
   rating: number;
+  photos: string[];
 }
 
 export default function MentorDetail() {
@@ -35,6 +40,7 @@ export default function MentorDetail() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [booking, setBooking] = useState(false);
+  const [isFree, setIsFree] = useState(false);
   const appState = getAppState();
 
   useEffect(() => {
@@ -199,69 +205,48 @@ export default function MentorDetail() {
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-2xl mb-2">{mentor.display_name}</CardTitle>
-                    <div className="flex items-center gap-4 text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
-                      </div>
-                      {mentor.rating > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span>{mentor.rating.toFixed(1)} rating</span>
-                        </div>
+          <div className="lg:col-span-1">
+            {/* Profile Photo */}
+            <div className="relative mb-6">
+              {mentor.photos?.[0] ? (
+                <div className="relative">
+                  <ImageBox
+                    src={mentor.photos[0]}
+                    alt={mentor.display_name}
+                    className="w-full h-80 object-cover rounded-lg"
+                  />
+                  {/* Price Overlay */}
+                  <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full border">
+                    <div className="flex items-center gap-1 text-sm font-semibold">
+                      {isFree ? (
+                        <span className="text-green-600">Free</span>
+                      ) : (
+                        <>
+                          <DollarSign className="w-4 h-4" />
+                          {formatPrice(mentor.price_cents, mentor.currency)}/hr
+                        </>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 text-lg font-semibold">
-                      <DollarSign className="w-5 h-5" />
-                      {formatPrice(mentor.price_cents, mentor.currency)}
-                    </div>
-                    <span className="text-sm text-muted-foreground">per hour</span>
-                  </div>
                 </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-2">About</h3>
-                  <p className="text-muted-foreground">{mentor.bio}</p>
+              ) : (
+                <div className="w-full h-80 bg-muted rounded-lg flex items-center justify-center">
+                  <span className="text-muted-foreground">No photo</span>
                 </div>
+              )}
+            </div>
 
-                <div>
-                  <h3 className="font-semibold mb-2">Expertise Areas</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {mentor.topics?.map((topic) => (
-                      <Badge key={topic} variant="secondary">
-                        {topic}
-                      </Badge>
-                    ))}
-                  </div>
+            {/* Free Toggle */}
+            <Card className="mb-4">
+              <CardContent className="pt-6">
+                <div className="flex items-center space-x-2">
+                  <Switch id="free-mode" checked={isFree} onCheckedChange={setIsFree} />
+                  <Label htmlFor="free-mode">Free Session</Label>
                 </div>
-
-                {mentor.languages?.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Languages</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {mentor.languages.map((lang) => (
-                        <Badge key={lang} variant="outline">
-                          {lang.toUpperCase()}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
-          </div>
 
-          <div className="space-y-4">
+            {/* Contact Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -286,7 +271,7 @@ export default function MentorDetail() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="mt-4">
               <CardContent className="pt-6">
                 <Button
                   variant="outline"
@@ -296,6 +281,66 @@ export default function MentorDetail() {
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Send Message
                 </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CardTitle className="text-2xl">{mentor.display_name}</CardTitle>
+                      {mentor.country && (
+                        <CountryFlag country={mentor.country} className="w-6 h-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
+                      </div>
+                      {mentor.rating > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span>{mentor.rating.toFixed(1)} rating</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2 text-base">About</h3>
+                  <p className="text-muted-foreground text-sm">{mentor.bio}</p>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2 text-base">Expertise Areas</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {mentor.topics?.map((topic) => (
+                      <Badge key={topic} variant="secondary" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {mentor.languages?.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-2 text-base">Languages</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {mentor.languages.map((lang) => (
+                        <Badge key={lang} variant="outline" className="text-xs">
+                          {lang.toUpperCase()}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

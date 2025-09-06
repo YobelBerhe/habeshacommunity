@@ -73,7 +73,7 @@ export default function CountryFlag({ country, className = "w-4 h-3" }: CountryF
     <img
       src={`https://flagcdn.com/${countryCode.toLowerCase()}.svg`}
       alt={`${country} flag`}
-      className={`inline-block object-cover rounded-sm ${className}`}
+      className={`inline-block object-cover ${className}`}
       onError={(e) => {
         // Hide flag if image fails to load
         (e.target as HTMLImageElement).style.display = 'none';

@@ -12,7 +12,7 @@ import Header from '@/components/Header';
 import { getAppState } from '@/utils/storage';
 import CountryFlag from '@/components/CountryFlag';
 import ImageBox from '@/components/ImageBox';
-import MessageModal from '@/components/MessageModal';
+import MessageMentorModal from '@/components/MessageMentorModal';
 
 interface Mentor {
   id: string;
@@ -149,21 +149,34 @@ export default function MentorList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMentors.map((mentor) => (
             <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
-              {/* Profile Photo */}
-              {mentor.photos?.[0] && (
-                <ImageBox
-                  src={mentor.photos[0]}
-                  alt={mentor.display_name}
-                  className="rounded-t-lg h-48 w-full object-cover"
-                />
-              )}
+              {/* Profile Photo with Price Overlay */}
+              <div className="relative">
+                {mentor.photos?.[0] ? (
+                  <ImageBox
+                    src={mentor.photos[0]}
+                    alt={mentor.display_name}
+                    className="rounded-t-lg h-64 w-full object-cover"
+                  />
+                ) : (
+                  <div className="rounded-t-lg h-64 w-full bg-muted flex items-center justify-center">
+                    <span className="text-muted-foreground">No photo</span>
+                  </div>
+                )}
+                {/* Price Overlay */}
+                <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full border">
+                  <div className="flex items-center gap-1 text-xs font-semibold">
+                    <DollarSign className="w-3 h-3" />
+                    {formatPrice(mentor.price_cents, mentor.currency)}/hr
+                  </div>
+                </div>
+              </div>
               
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span>{mentor.display_name}</span>
                     {mentor.country && (
-                      <CountryFlag country={mentor.country} className="w-5 h-3.5" />
+                      <CountryFlag country={mentor.country} className="w-5 h-4" />
                     )}
                   </div>
                   {mentor.rating > 0 && (
@@ -179,23 +192,23 @@ export default function MentorList() {
                 </div>
               </CardHeader>
               
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+              <CardContent className="pb-3">
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                   {mentor.bio}
                 </p>
                 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <div>
                     <span className="text-xs font-medium text-muted-foreground">Topics:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {mentor.topics?.slice(0, 3).map((topic) => (
-                        <Badge key={topic} variant="secondary" className="text-xs">
+                      {mentor.topics?.slice(0, 2).map((topic) => (
+                        <Badge key={topic} variant="secondary" className="text-xs px-1.5 py-0.5">
                           {topic}
                         </Badge>
                       ))}
-                      {mentor.topics?.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{mentor.topics.length - 3} more
+                      {mentor.topics?.length > 2 && (
+                        <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                          +{mentor.topics.length - 2}
                         </Badge>
                       )}
                     </div>
@@ -205,8 +218,8 @@ export default function MentorList() {
                     <div>
                       <span className="text-xs font-medium text-muted-foreground">Languages:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {mentor.languages.slice(0, 3).map((lang) => (
-                          <Badge key={lang} variant="outline" className="text-xs">
+                        {mentor.languages.slice(0, 2).map((lang) => (
+                          <Badge key={lang} variant="outline" className="text-xs px-1.5 py-0.5">
                             {lang.toUpperCase()}
                           </Badge>
                         ))}
@@ -216,14 +229,8 @@ export default function MentorList() {
                 </div>
               </CardContent>
               
-              <CardFooter className="flex justify-between items-center">
-                <div className="flex items-center gap-1">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="font-medium">
-                    {formatPrice(mentor.price_cents, mentor.currency)}/hour
-                  </span>
-                </div>
-                <div className="flex gap-2">
+              <CardFooter className="pt-2">
+                <div className="flex gap-2 w-full">
                   <Button
                     variant="outline"
                     size="sm"
@@ -231,14 +238,17 @@ export default function MentorList() {
                       setSelectedMentor(mentor);
                       setMessageModalOpen(true);
                     }}
+                    className="flex-1"
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    Message
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => navigate(`/mentor/${mentor.id}`)}
+                    className="flex-1"
                   >
-                    Request Session
+                    Book Session
                   </Button>
                 </div>
               </CardFooter>
@@ -255,15 +265,15 @@ export default function MentorList() {
 
       {/* Message Modal */}
       {selectedMentor && (
-        <MessageModal
+        <MessageMentorModal
           isOpen={messageModalOpen}
           onClose={() => {
             setMessageModalOpen(false);
             setSelectedMentor(null);
           }}
-          listingId={selectedMentor.id}
-          listingTitle={`Mentorship with ${selectedMentor.display_name}`}
-          listingOwnerId={selectedMentor.user_id}
+          mentorId={selectedMentor.id}
+          mentorName={selectedMentor.display_name}
+          mentorUserId={selectedMentor.user_id}
         />
       )}
     </div>
