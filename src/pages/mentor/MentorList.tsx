@@ -10,6 +10,9 @@ import { Star, MapPin, DollarSign, MessageCircle } from 'lucide-react';
 import MobileHeader from '@/components/layout/MobileHeader';
 import Header from '@/components/Header';
 import { getAppState } from '@/utils/storage';
+import CountryFlag from '@/components/CountryFlag';
+import ImageBox from '@/components/ImageBox';
+import MessageModal from '@/components/MessageModal';
 
 interface Mentor {
   id: string;
@@ -23,6 +26,9 @@ interface Mentor {
   price_cents: number;
   currency: string;
   rating: number;
+  photos: string[];
+  website_url: string;
+  social_links: any;
 }
 
 export default function MentorList() {
@@ -32,6 +38,8 @@ export default function MentorList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [topicFilter, setTopicFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('');
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const appState = getAppState();
 
   useEffect(() => {
@@ -141,9 +149,23 @@ export default function MentorList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMentors.map((mentor) => (
             <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
+              {/* Profile Photo */}
+              {mentor.photos?.[0] && (
+                <ImageBox
+                  src={mentor.photos[0]}
+                  alt={mentor.display_name}
+                  className="rounded-t-lg h-48 w-full object-cover"
+                />
+              )}
+              
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>{mentor.display_name}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{mentor.display_name}</span>
+                    {mentor.country && (
+                      <CountryFlag country={mentor.country} className="w-5 h-3.5" />
+                    )}
+                  </div>
                   {mentor.rating > 0 && (
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -205,7 +227,10 @@ export default function MentorList() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/inbox?mentor=${mentor.id}`)}
+                    onClick={() => {
+                      setSelectedMentor(mentor);
+                      setMessageModalOpen(true);
+                    }}
                   >
                     <MessageCircle className="w-4 h-4" />
                   </Button>
@@ -227,6 +252,20 @@ export default function MentorList() {
           </div>
         )}
       </div>
+
+      {/* Message Modal */}
+      {selectedMentor && (
+        <MessageModal
+          isOpen={messageModalOpen}
+          onClose={() => {
+            setMessageModalOpen(false);
+            setSelectedMentor(null);
+          }}
+          listingId={selectedMentor.id}
+          listingTitle={`Mentorship with ${selectedMentor.display_name}`}
+          listingOwnerId={selectedMentor.user_id}
+        />
+      )}
     </div>
   );
 }

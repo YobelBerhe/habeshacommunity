@@ -13,6 +13,8 @@ import MobileHeader from '@/components/layout/MobileHeader';
 import Header from '@/components/Header';
 import { getAppState } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
+import PhotoUpload from '@/components/PhotoUpload';
+import CountryFlag from '@/components/CountryFlag';
 
 const popularTopics = [
   'Career Development', 'Technical Skills', 'Leadership', 'Entrepreneurship',
@@ -38,7 +40,15 @@ export default function MentorOnboarding() {
     currency: 'USD',
     topics: [] as string[],
     languages: [] as string[],
-    custom_topic: ''
+    custom_topic: '',
+    photos: [] as string[],
+    website_url: '',
+    social_links: {
+      twitter: '',
+      linkedin: '',
+      instagram: '',
+      facebook: ''
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,10 +64,10 @@ export default function MentorOnboarding() {
       return;
     }
 
-    if (!formData.display_name.trim() || !formData.bio.trim() || formData.topics.length === 0) {
+    if (!formData.display_name.trim() || !formData.bio.trim() || formData.topics.length === 0 || formData.photos.length === 0) {
       toast({
         title: 'Missing Information',
-        description: 'Please fill in all required fields',
+        description: 'Please fill in all required fields including at least one photo',
         variant: 'destructive',
       });
       return;
@@ -77,6 +87,9 @@ export default function MentorOnboarding() {
           currency: formData.currency,
           topics: formData.topics,
           languages: formData.languages.length > 0 ? formData.languages : ['English'],
+          photos: formData.photos,
+          website_url: formData.website_url.trim() || null,
+          social_links: formData.social_links,
           rating: 0
         });
 
@@ -162,14 +175,28 @@ export default function MentorOnboarding() {
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
+              {/* Photo Upload */}
+              <PhotoUpload
+                photos={formData.photos}
+                onPhotosChange={(photos) => setFormData(prev => ({ ...prev, photos }))}
+                maxPhotos={6}
+                bucketName="mentor-photos"
+              />
+
+              <div className="relative">
                 <label className="text-sm font-medium">Display Name *</label>
-                <Input
-                  value={formData.display_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
-                  placeholder="How would you like to be known?"
-                  required
-                />
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    value={formData.display_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
+                    placeholder="How would you like to be known?"
+                    required
+                    className="flex-1"
+                  />
+                  {formData.country && (
+                    <CountryFlag country={formData.country} className="w-6 h-4" />
+                  )}
+                </div>
               </div>
 
               <div>
@@ -294,6 +321,59 @@ export default function MentorOnboarding() {
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">Select all languages you can mentor in</p>
+                </div>
+              </div>
+
+              {/* Website & Social Media Links */}
+              <div>
+                <label className="text-sm font-medium">Website & Social Media</label>
+                <div className="space-y-3 mt-2">
+                  <div>
+                    <Input
+                      value={formData.website_url}
+                      onChange={(e) => setFormData(prev => ({ ...prev, website_url: e.target.value }))}
+                      placeholder="Your website URL (optional)"
+                      type="url"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Input
+                      value={formData.social_links.linkedin}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        social_links: { ...prev.social_links, linkedin: e.target.value }
+                      }))}
+                      placeholder="LinkedIn profile URL"
+                      type="url"
+                    />
+                    <Input
+                      value={formData.social_links.twitter}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        social_links: { ...prev.social_links, twitter: e.target.value }
+                      }))}
+                      placeholder="Twitter/X profile URL"
+                      type="url"
+                    />
+                    <Input
+                      value={formData.social_links.instagram}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        social_links: { ...prev.social_links, instagram: e.target.value }
+                      }))}
+                      placeholder="Instagram profile URL"
+                      type="url"
+                    />
+                    <Input
+                      value={formData.social_links.facebook}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        social_links: { ...prev.social_links, facebook: e.target.value }
+                      }))}
+                      placeholder="Facebook profile URL"
+                      type="url"
+                    />
+                  </div>
                 </div>
               </div>
 

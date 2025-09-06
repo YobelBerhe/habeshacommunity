@@ -572,10 +572,13 @@ export type Database = {
           display_name: string | null
           id: string
           languages: string[] | null
+          photos: string[] | null
           price_cents: number | null
           rating: number | null
+          social_links: Json | null
           topics: string[] | null
           user_id: string
+          website_url: string | null
         }
         Insert: {
           bio?: string | null
@@ -586,10 +589,13 @@ export type Database = {
           display_name?: string | null
           id?: string
           languages?: string[] | null
+          photos?: string[] | null
           price_cents?: number | null
           rating?: number | null
+          social_links?: Json | null
           topics?: string[] | null
           user_id: string
+          website_url?: string | null
         }
         Update: {
           bio?: string | null
@@ -600,10 +606,13 @@ export type Database = {
           display_name?: string | null
           id?: string
           languages?: string[] | null
+          photos?: string[] | null
           price_cents?: number | null
           rating?: number | null
+          social_links?: Json | null
           topics?: string[] | null
           user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }
