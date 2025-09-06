@@ -556,17 +556,19 @@ export default function Index() {
         />
       </div>
 
-      {/* Hero section - Always show the world map with live users on homepage */}
-      <WorldActivityHero
-        mode="dark"
-        SearchBar={() => <CitySearchBar 
-          placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
-          onCitySelect={handleCityChange}
-        />}
-        onPrimary={handleHousingClick}
-        onSecondary={handleJobsClick}
-        onCityClick={handleCityClick}
-      />
+      {/* Hero section - moved up directly after header */}
+      <div className="relative">
+        <WorldActivityHero
+          mode="dark"
+          SearchBar={() => <CitySearchBar 
+            placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
+            onCitySelect={handleCityChange}
+          />}
+          onPrimary={handleHousingClick}
+          onSecondary={handleJobsClick}
+          onCityClick={handleCityClick}
+        />
+      </div>
 
       <main className="container mx-auto px-4 py-6">
         {/* Trending Rails Section */}
