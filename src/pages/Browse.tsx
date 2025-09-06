@@ -302,7 +302,7 @@ export default function Browse() {
         </div>
 
         {/* Navigation Line */}
-        <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between py-4">
               {/* Left: All Navigation Items */}
@@ -367,10 +367,28 @@ export default function Browse() {
                   className={`pb-1 border-b-2 font-medium text-sm ${
                     false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                   }`}
-                  onClick={() => window.open('https://donate.stripe.com/your-donation-link', '_blank')}
+                  onClick={() => {
+                    // Create donation dialog similar to DonateButton
+                    const dialog = document.createElement('div');
+                    dialog.innerHTML = `
+                      <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+                          <h3 class="text-lg font-semibold mb-4 dark:text-white">Support HabeshaCommunity</h3>
+                          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Help us maintain and improve our community platform.</p>
+                          <div class="flex gap-2 mb-4">
+                            <button onclick="window.open('https://donate.stripe.com/test_28o4iy2NK41ydTG9AA', '_blank')" class="bg-blue-600 text-white px-4 py-2 rounded flex-1">$5</button>
+                            <button onclick="window.open('https://donate.stripe.com/test_28o4iy2NK41ydTG9AA', '_blank')" class="bg-blue-600 text-white px-4 py-2 rounded flex-1">$10</button>
+                            <button onclick="window.open('https://donate.stripe.com/test_28o4iy2NK41ydTG9AA', '_blank')" class="bg-blue-600 text-white px-4 py-2 rounded flex-1">$20</button>
+                          </div>
+                          <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded">Close</button>
+                        </div>
+                      </div>
+                    `;
+                    document.body.appendChild(dialog);
+                  }}
                 >
                   <Heart className="w-4 h-4 inline mr-1" />
-                  Support
+                  Support HabeshaCommunity
                 </button>
               </div>
             </div>
@@ -378,7 +396,7 @@ export default function Browse() {
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center gap-4">
               {/* Category Toggle */}
@@ -497,12 +515,12 @@ export default function Browse() {
           </div>
 
           {/* Listings Section - Right Side */}
-          <div className="w-1/2 bg-white dark:bg-gray-900 overflow-y-auto">
+          <div className="w-1/2 bg-background overflow-y-auto">
             <div className="p-6">
               {/* Results Header */}
               <div className="mb-6">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     {processedListings.length} listings
                     {filters.city && ` in ${filters.city}`}
                   </div>
@@ -518,7 +536,7 @@ export default function Browse() {
                 {processedListings.map((listing) => (
                   <div
                     key={listing.id}
-                    className="border dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-white dark:bg-gray-800"
+                    className="border dark:border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-card"
                     onClick={() => handleListingSelect(listing)}
                   >
                     {listing.images?.[0] && (
@@ -529,28 +547,28 @@ export default function Browse() {
                       />
                     )}
                     <div className="p-4">
-                      <h3 className="font-medium text-sm mb-2 line-clamp-2 dark:text-white">{listing.title}</h3>
+                      <h3 className="font-medium text-sm mb-2 line-clamp-2 text-card-foreground">{listing.title}</h3>
                       {listing.price && (
                         <p className="text-lg font-semibold text-green-600 dark:text-green-400 mb-1">
                           ${listing.price.toLocaleString()}
                         </p>
                       )}
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                      <p className="text-xs text-muted-foreground mb-2">
                         {listing.city}, {listing.country}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                      <p className="text-xs text-muted-foreground line-clamp-2">
                         {listing.description}
                       </p>
                     </div>
                   </div>
                 ))}
                 {loading && (
-                  <div className="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="col-span-2 text-center py-8 text-muted-foreground">
                     Loading listings...
                   </div>
                 )}
                 {!loading && processedListings.length === 0 && (
-                  <div className="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="col-span-2 text-center py-8 text-muted-foreground">
                     No listings found. Try adjusting your filters.
                   </div>
                 )}
