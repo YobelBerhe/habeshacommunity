@@ -302,7 +302,7 @@ export default function Browse() {
         </div>
 
         {/* Navigation Line */}
-        <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
+        <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between py-4">
               {/* Left: All Navigation Items */}
@@ -396,7 +396,7 @@ export default function Browse() {
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
+        <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center gap-4">
               {/* Category Toggle */}
