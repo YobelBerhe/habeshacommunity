@@ -287,6 +287,14 @@ export default function Browse() {
               <div className="flex space-x-6">
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
+                    filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => setFilters({ ...filters, category: 'community', subcategory: undefined })}
+                >
+                  Community
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
                     filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                   onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
