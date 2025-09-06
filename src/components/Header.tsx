@@ -36,9 +36,9 @@ export default function Header({
   };
   return (
     <header className="w-full border-b bg-background/70 backdrop-blur">
-      <div className="container mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
+      <div className="container mx-auto px-4 py-3 flex items-center gap-3 justify-between">
         <button 
-          className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
+          className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer flex-shrink-0"
           onClick={() => navigate('/')}
           title="Go to Homepage"
         >
@@ -50,14 +50,14 @@ export default function Header({
           <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
         </button>
 
-        <div className="order-2 md:order-none flex-1 min-w-[260px] z-50">
+        <div className="flex-1 max-w-[300px] min-w-[200px] mx-4">
           <CitySearch
             value={currentCity}
             onSelect={(c) => onCityChange(c.name, Number(c.lat), Number(c.lon))}
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <ThemeToggle />
           {rightExtra}
           <DonateButton />
