@@ -396,11 +396,11 @@ export default function Index() {
 
   // Navigation helpers
   const openCat = (category: CategoryKey, sub?: string) => {
-    handleFiltersChange({ ...filters, category, subcategory: sub });
-    // Optionally scroll to results
-    setTimeout(() => {
-      document.getElementById("listing-root")?.scrollIntoView({ behavior: "smooth" });
-    }, 0);
+    const params = new URLSearchParams();
+    params.set('category', category);
+    if (sub) params.set('subcategory', sub);
+    if (appState.city) params.set('city', appState.city);
+    navigate(`/browse?${params.toString()}`);
   };
 
   const handleViewModeChange = (mode: ViewMode) => {
@@ -434,20 +434,15 @@ export default function Index() {
 
   // Hero action handlers
   const handleHousingClick = () => {
-    openCat('housing');
+    navigate('/browse?category=housing');
   };
 
   const handleJobsClick = () => {
-    openCat('jobs');
+    navigate('/browse?category=jobs');
   };
 
   const handleCityClick = (city: string) => {
-    handleCityChange(city);
-    
-    // Update URL with city parameter
-    const params = new URLSearchParams(searchParams);
-    params.set('city', city);
-    setSearchParams(params);
+    navigate(`/browse?city=${encodeURIComponent(city)}`);
     
     // Smooth scroll to results
     setTimeout(() => {
