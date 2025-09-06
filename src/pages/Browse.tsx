@@ -480,14 +480,25 @@ export default function Browse() {
 
               {/* Additional Filters based on category */}
               {filters.category && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-1"
-                >
-                  More Filters
-                  <ChevronDown className="w-3 h-3 text-primary" />
-                </Button>
+                filters.category === 'mentor' ? (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                    onClick={() => navigate('/mentor/onboarding')}
+                  >
+                    Become a Mentor
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                  >
+                    More Filters
+                    <ChevronDown className="w-3 h-3 text-primary" />
+                  </Button>
+                )
               )}
 
               <Button
