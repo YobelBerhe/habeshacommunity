@@ -482,7 +482,6 @@ export default function Browse() {
               {filters.category && (
                 filters.category === 'mentor' ? (
                   <Button 
-                    variant="outline" 
                     size="sm" 
                     className="gap-1"
                     onClick={() => navigate('/mentor/onboarding')}
