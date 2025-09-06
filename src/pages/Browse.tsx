@@ -303,9 +303,9 @@ export default function Browse() {
                 </button>
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
-                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                    filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
-                  onClick={() => navigate('/match')}
+                  onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
                 >
                   Match
                 </button>
