@@ -321,17 +321,6 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </details>
           ))}
 
-          {/* Forums */}
-          <div className="border-b py-2">
-            <Link 
-              to="/forums" 
-              onClick={() => onOpenChange(false)}
-              className="flex items-center gap-3 p-3 rounded hover:bg-muted/50"
-            >
-              <MessageSquare className="w-5 h-5 text-primary" />
-              <span className="font-medium">Forums</span>
-            </Link>
-          </div>
 
           <div className="mt-4 grid gap-2">
             <button 
