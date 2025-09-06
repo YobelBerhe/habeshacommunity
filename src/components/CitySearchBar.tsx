@@ -72,24 +72,27 @@ export default function CitySearchBar({
     setItems([]); // Clear items immediately
     setOpen(false);
     
-    // Call selection handler immediately
+    // Call selection handler if provided
     if (onCitySelect) {
       onCitySelect(cityName, parseFloat(city.lat), parseFloat(city.lon));
-    } else {
-      // Navigate to browse page with city
-      navigate(`/browse?city=${encodeURIComponent(cityName)}`);
     }
+    
+    // Always navigate to browse page with city
+    navigate(`/browse?city=${encodeURIComponent(cityName)}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (q.trim()) {
       const cityName = q.trim();
+      
+      // Call selection handler if provided
       if (onCitySelect) {
         onCitySelect(cityName);
-      } else {
-        navigate(`/browse?city=${encodeURIComponent(cityName)}`);
       }
+      
+      // Always navigate to browse page with city
+      navigate(`/browse?city=${encodeURIComponent(cityName)}`);
       setOpen(false);
     }
   };
