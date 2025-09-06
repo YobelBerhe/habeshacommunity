@@ -108,7 +108,7 @@ export default function MentorList() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Find a Mentor</h1>
-          <Button onClick={() => navigate('/mentor/become')}>Become a Mentor</Button>
+          <Button onClick={() => navigate('/mentor/onboarding')}>Become a Mentor</Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

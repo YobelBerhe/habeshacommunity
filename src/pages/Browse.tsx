@@ -317,17 +317,17 @@ export default function Browse() {
                 </button>
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                   }`}
-                  onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
+                  onClick={() => navigate('/mentor')}
                 >
                   Mentor
                 </button>
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                   }`}
-                  onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
+                  onClick={() => navigate('/match')}
                 >
                   Match
                 </button>

@@ -169,33 +169,22 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=mentor&sub=business');
+                    navigate('/mentor');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Business Mentors</span>
+                  <span className="text-sm text-primary">Browse All Mentors</span>
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=mentor&sub=career');
+                    navigate('/mentor/onboarding');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Career Mentors</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => {
-                    onOpenChange(false);
-                    navigate('/browse?category=mentor&sub=life');
-                  }}
-                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
-                >
-                  <span className="text-sm text-primary">Life Coach</span>
+                  <span className="text-sm text-primary">Become a Mentor</span>
                 </button>
               </li>
             </ul>
