@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { TAXONOMY, LABELS, CategoryKey } from '@/lib/taxonomy';
 import { useLanguage } from '@/store/language';
 
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClear }: Props) {
+  const navigate = useNavigate();
   const [openCat, setOpenCat] = useState(false);
   const [openMore, setOpenMore] = useState(false);
   const { language } = useLanguage();
@@ -34,7 +36,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
           className="flex items-center gap-1 px-3 py-2 rounded-full bg-muted text-sm font-medium"
           onClick={() => {
             if (topCategory === 'mentor') {
-              window.location.href = '/mentor/onboarding';
+              navigate('/mentor/onboarding');
             } else if (topCategory === 'match') {
               setOpenMore(true);
             } else {
@@ -95,7 +97,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
             <button 
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 rounded-lg font-medium"
               onClick={() => {
-                window.location.href = '/match/onboarding';
+                navigate('/match/onboarding');
                 setOpenMore(false);
               }}
             >
@@ -104,7 +106,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
             <button 
               className="w-full border border-border hover:bg-accent px-4 py-3 rounded-lg font-medium"
               onClick={() => {
-                window.location.href = '/match';
+                navigate('/match');
                 setOpenMore(false);
               }}
             >

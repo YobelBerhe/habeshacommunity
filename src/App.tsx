@@ -63,8 +63,8 @@ const App = () => (
           <Route path="/mentor/:id" element={<MentorDetail />} />
           <Route path="/mentor/requests" element={<MentorRequests />} />
           <Route path="/mentor/bookings" element={<MyBookings />} />
-          <Route path="/match" element={<MatchOnboarding />} />
-          <Route path="/match/discover" element={<MatchDiscover />} />
+          <Route path="/match" element={<MatchDiscover />} />
+          <Route path="/match/onboarding" element={<MatchOnboarding />} />
           <Route path="/match/profile/:id" element={<MatchProfile />} />
           <Route path="/market" element={<Marketplace />} />
           <Route path="/market/:id" element={<MarketplaceDetail />} />
