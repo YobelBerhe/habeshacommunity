@@ -4,6 +4,7 @@ import { Menu, User } from 'lucide-react';
 import { DrawerMenu } from '@/components/nav/DrawerMenu';
 import { AccountSheet } from '@/components/nav/AccountSheet';
 import { useAuth } from '@/store/auth';
+import NotifyBell from '@/components/NotifyBell';
 
 export default function MobileHeader() {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -36,15 +37,18 @@ export default function MobileHeader() {
           <span className="font-semibold tracking-tight text-sm hover:text-primary transition-colors">HabeshaCommunity</span>
         </Link>
 
-        {/* Account dropdown */}
-        <AccountSheet>
-          <button
-            aria-label="Account"
-            className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center font-bold text-sm"
-          >
-            {user ? getUserInitial() : <User className="w-4 h-4" />}
-          </button>
-        </AccountSheet>
+        {/* Notifications and Account */}
+        <div className="flex items-center gap-2">
+          <NotifyBell />
+          <AccountSheet>
+            <button
+              aria-label="Account"
+              className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center font-bold text-sm"
+            >
+              {user ? getUserInitial() : <User className="w-4 h-4" />}
+            </button>
+          </AccountSheet>
+        </div>
       </div>
 
       <DrawerMenu open={openDrawer} onOpenChange={setOpenDrawer} />
