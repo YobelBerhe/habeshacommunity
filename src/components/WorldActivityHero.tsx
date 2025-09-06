@@ -144,7 +144,7 @@ export default function WorldActivityHero({
         <div className="mt-6">
           {SearchBar ? (
             <div className="max-w-2xl">
-              <SearchBar />
+              <SearchBar onCitySelect={(city: string) => window.location.href = `/browse?city=${encodeURIComponent(city)}`} />
             </div>
           ) : null}
         </div>

@@ -23,6 +23,28 @@ export default function TrendingRail({ label, category, featured, link }: Props)
         const userCity = await getUserCity();
         setCity(userCity);
         
+        // Special handling for mentor category
+        if (category === 'mentor') {
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { data: mentors } = await supabase
+            .from('mentors')
+            .select('id, display_name, bio, city, country, price_cents, photos, created_at')
+            .limit(12);
+          
+          setItems((mentors || []).map(mentor => ({
+            id: mentor.id,
+            title: mentor.display_name,
+            price_cents: mentor.price_cents,
+            images: mentor.photos || [],
+            city: mentor.city,
+            country: mentor.country,
+            category: 'mentor',
+            created_at: mentor.created_at,
+            views: null
+          })));
+          return;
+        }
+        
         const results = await getTrendingListings({
           category: featured ? undefined : category,
           featuredOnly: !!featured,

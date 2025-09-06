@@ -546,6 +546,7 @@ export default function Index() {
           
           <TrendingRail 
             label="Find a Mentor" 
+            category="mentor"
             link="/mentor"
           />
           

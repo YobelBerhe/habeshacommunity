@@ -35,7 +35,7 @@ export default function Header({
     }
   };
   return (
-    <header className="w-full border-b bg-background/70 backdrop-blur">
+    <header className="w-full border-b bg-background/70 backdrop-blur relative z-[9999]">
       <div className="container mx-auto px-4 py-3 flex items-center gap-3 justify-between">
         <button 
           className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer flex-shrink-0"
