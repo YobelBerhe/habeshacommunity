@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { TAXONOMY, LABELS } from "@/lib/taxonomy";
+import { TAXONOMY, LABELS, CategoryKey } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type Props = {
   lang: Lang;
@@ -9,74 +10,62 @@ type Props = {
   onPickCategory: (slug: string) => void;      // e.g. "jobs"
   onPickSubcategory: (slug: string) => void;   // e.g. "transport"
   onPickTag: (tag: string) => void;
+  selectedCategory?: CategoryKey | null;       // current category to show subcategories for
 };
 
-export default function SearchBox({ lang, value, onChange, onPickCategory, onPickSubcategory, onPickTag }: Props) {
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState(value);
+export default function SearchBox({ lang, value, onChange, onPickCategory, onPickSubcategory, onPickTag, selectedCategory }: Props) {
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
 
-  useEffect(()=>{ setQ(value); }, [value]);
+  const subcategories = useMemo(() => {
+    if (!selectedCategory || !TAXONOMY[selectedCategory]) return [];
+    
+    return TAXONOMY[selectedCategory].sub.map(sub => ({
+      slug: sub,
+      label: LABELS[sub]?.[lang.toLowerCase() as "en"|"ti"] ?? sub.replace(/_/g, " ")
+    }));
+  }, [selectedCategory, lang]);
 
-  const { catHits, subHits, tagHits } = useMemo(() => {
-    const query = (q || "").toLowerCase().trim();
-    if (!query) return { catHits: [], subHits: [], tagHits: [] };
+  const handleSubcategoryToggle = (subcategory: string) => {
+    const newSelected = selectedSubcategories.includes(subcategory)
+      ? selectedSubcategories.filter(s => s !== subcategory)
+      : [...selectedSubcategories, subcategory];
+    
+    setSelectedSubcategories(newSelected);
+    onPickSubcategory(subcategory);
+  };
 
-    // categories
-    const cats = Object.entries(TAXONOMY)
-      .map(([k, v]) => ({ slug: k, label: v.name[lang.toLowerCase() as "en"|"ti"] }))
-      .filter(c => c.label.toLowerCase().includes(query));
-
-    // subcategories
-    const subs: { slug: string; label: string }[] = [];
-    for (const group of Object.values(TAXONOMY)) {
-      for (const s of group.sub) {
-        const label = LABELS[s]?.[lang.toLowerCase() as "en"|"ti"] ?? s.replace(/_/g," ");
-        if (label.toLowerCase().includes(query)) subs.push({ slug: s, label });
-      }
-    }
-
-    // simple tag suggestions
-    const tagsBase = ["rent","room","apartment","driver","nurse","barista","gig","remote","furnished","wifi","parking"];
-    const tags = tagsBase.filter(t => t.includes(query)).slice(0, 6).map(t => ({ tag: t }));
-
-    return { catHits: cats.slice(0,5), subHits: subs.slice(0,8), tagHits: tags };
-  }, [q, lang]);
+  if (!selectedCategory || subcategories.length === 0) {
+    return (
+      <div className="field w-full min-h-[40px] flex items-center text-muted-foreground">
+        Select a category to see subcategories
+      </div>
+    );
+  }
 
   return (
-    <div className="relative">
-      <input
-        className="field w-full"
-        placeholder={t(lang,"search_placeholder")}
-        value={q}
-        onChange={(e)=>{ setQ(e.target.value); onChange(e.target.value); setOpen(true); }}
-        onFocus={()=>setOpen(true)}
-        onBlur={()=>setTimeout(()=>setOpen(false), 120)}
-      />
-      {open && (catHits.length || subHits.length || tagHits.length) ? (
-        <div className="absolute z-30 mt-1 w-full rounded-lg border bg-popover shadow-md overflow-hidden">
-          {catHits.length > 0 && (
-            <Section title={t(lang,"hint_categories")}>
-              {catHits.map(c => (
-                <Item key={c.slug} label={c.label} onClick={()=>onPickCategory(c.slug)} />
-              ))}
-            </Section>
-          )}
-          {subHits.length > 0 && (
-            <Section title={t(lang,"hint_subcategories")}>
-              {subHits.map(s => (
-                <Item key={s.slug} label={s.label} onClick={()=>onPickSubcategory(s.slug)} />
-              ))}
-            </Section>
-          )}
-          {tagHits.length > 0 && (
-            <Section title={t(lang,"hint_tags")}>
-              {tagHits.map(tg => (
-                <Item key={tg.tag} label={`#${tg.tag}`} onClick={()=>onPickTag(tg.tag)} />
-              ))}
-            </Section>
-          )}
-        </div>
-      ) : null}
+    <div className="w-full">
+      <div className="text-sm font-medium mb-2 text-foreground">
+        {TAXONOMY[selectedCategory].name[lang.toLowerCase() as "en"|"ti"]} Subcategories
+      </div>
+      <ToggleGroup 
+        type="multiple" 
+        value={selectedSubcategories}
+        onValueChange={setSelectedSubcategories}
+        className="flex flex-wrap gap-2 justify-start"
+      >
+        {subcategories.map(sub => (
+          <ToggleGroupItem
+            key={sub.slug}
+            value={sub.slug}
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={() => handleSubcategoryToggle(sub.slug)}
+          >
+            {sub.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
     </div>
   );
 }
