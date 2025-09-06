@@ -21,11 +21,14 @@ import { fetchListings } from "@/repo/listings";
 import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
 import { useAuth } from '@/store/auth';
 import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
-import { Grid3X3, Map, ChevronDown } from "lucide-react";
+import { Grid3X3, Map, ChevronDown, MessageCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
 import PostModal from "@/components/PostModal";
 import ViewToggle from "@/components/ViewToggle";
+import ThemeToggle from "@/components/ThemeToggle";
+import NotifyBell from "@/components/NotifyBell";
+import AuthButtons from "@/components/AuthButtons";
 import SortDropdown from "@/components/SortDropdown";
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
@@ -272,8 +275,27 @@ export default function Browse() {
 
               {/* Right: Controls */}
               <div className="flex items-center gap-3">
+                <ThemeToggle />
                 <LanguageToggle value={language} onChange={setLanguage} />
-                {/* Theme, Support, Chat, Post, Account buttons from Header */}
+                <NotifyBell />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => navigate('/chat')}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Chat
+                </Button>
+                <Button
+                  size="sm"
+                  className="gap-2"
+                  onClick={openPost}
+                >
+                  <Plus className="w-4 h-4" />
+                  Post
+                </Button>
+                <AuthButtons />
               </div>
             </div>
           </div>
