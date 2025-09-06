@@ -1,9 +1,10 @@
 // src/components/ListingCardHorizontal.tsx
-import { Heart } from 'lucide-react';
-import { useState } from 'react';
+import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ListingLite } from '@/lib/trending';
 import { fallbackImage } from '@/lib/trending';
+import { timeAgo } from '@/lib/time';
 
 export function ListingCardHorizontal({ item }: { item: ListingLite }) {
   const [saved, setSaved] = useState(false);
@@ -62,11 +63,9 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
             {price != null ? `$${price.toLocaleString()}` : ''}
           </span>
           
-          {item.views && item.views > 0 && (
-            <span className="text-xs text-muted-foreground">
-              {item.views} views
-            </span>
-          )}
+          <span className="text-xs text-muted-foreground">
+            {timeAgo(new Date(item.created_at).getTime())}
+          </span>
         </div>
       </div>
     </div>
@@ -74,13 +73,44 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
 }
 
 export function HorizontalRail({ items }: { items: ListingLite[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const scrollByPage = (dir: -1 | 1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.9 * dir;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
   return (
-    <div className="relative">
-      <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x pb-2">
+    <div className="relative group">
+      {/* Desktop arrow buttons */}
+      <button
+        type="button"
+        onClick={() => scrollByPage(-1)}
+        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full w-9 h-9 items-center justify-center bg-background/80 border shadow hover:bg-background transition opacity-0 group-hover:opacity-100"
+        aria-label="Scroll left"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+
+      <div
+        ref={scrollerRef}
+        className="flex gap-4 overflow-x-auto scrollbar-hide snap-x pb-2"
+      >
         {items.map(item => (
           <ListingCardHorizontal key={item.id} item={item} />
         ))}
       </div>
+
+      <button
+        type="button"
+        onClick={() => scrollByPage(1)}
+        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full w-9 h-9 items-center justify-center bg-background/80 border shadow hover:bg-background transition opacity-0 group-hover:opacity-100"
+        aria-label="Scroll right"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
     </div>
   );
 }
