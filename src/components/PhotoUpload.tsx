@@ -25,11 +25,30 @@ export default function PhotoUpload({
   const { user } = useAuth();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('🔄 Photo upload started');
     const files = Array.from(event.target.files || []);
-    if (!files.length || !user) return;
+    console.log('📁 Files selected:', files.length, files.map(f => f.name));
+    
+    if (!files.length) {
+      console.log('❌ No files selected');
+      return;
+    }
+    
+    if (!user) {
+      console.log('❌ No authenticated user');
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to upload photos',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    console.log('👤 User authenticated:', user.id);
 
     const remainingSlots = maxPhotos - photos.length;
     if (files.length > remainingSlots) {
+      console.log('❌ Too many files:', files.length, 'remaining slots:', remainingSlots);
       toast({
         title: 'Too many photos',
         description: `You can only upload ${remainingSlots} more photo(s)`,
@@ -40,17 +59,19 @@ export default function PhotoUpload({
 
     setUploading(true);
     try {
+      console.log('🚀 Starting upload to bucket:', bucketName);
       const newUrls = await uploadListingImages(files, user.id, bucketName);
+      console.log('✅ Upload successful, URLs:', newUrls);
       onPhotosChange([...photos, ...newUrls]);
       toast({
         title: 'Success',
         description: `${files.length} photo(s) uploaded successfully`,
       });
     } catch (error) {
-      console.error('Error uploading photos:', error);
+      console.error('❌ Error uploading photos:', error);
       toast({
         title: 'Upload failed',
-        description: 'Failed to upload photos. Please try again.',
+        description: `Failed to upload photos: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: 'destructive',
       });
     } finally {
