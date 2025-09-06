@@ -17,7 +17,7 @@ export default function CitySearch({ value, onSelect }:{
   },[]);
 
   useEffect(()=>{
-    if(q.trim().length<2){ setItems([]); return; }
+    if(q.trim().length<2){ setItems([]); setOpen(false); return; }
     const t=setTimeout(async()=>{
       try {
         const url=`https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&accept-language=en&q=${encodeURIComponent(q)}`;
@@ -29,7 +29,8 @@ export default function CitySearch({ value, onSelect }:{
           const country=a.country||"";
           return {name, country, lat:x.lat, lon:x.lon};
         }).filter(Boolean);
-        setItems(list); setOpen(true);
+        setItems(list); 
+        if(list.length > 0) setOpen(true);
       } catch (error) {
         // Allow manual city entry as fallback
         setItems([{name: q, country: "Manual Entry", lat: "0", lon: "0"}]);
@@ -45,7 +46,7 @@ export default function CitySearch({ value, onSelect }:{
         placeholder="Type a city… (e.g., Asmara, Oakland, Frankfurt)"
         value={q}
         onChange={e=>setQ(e.target.value)}
-        onFocus={()=>items.length && setOpen(true)}
+        onFocus={()=>items.length > 0 && q.trim().length >= 2 && setOpen(true)}
         autoComplete="off"
       />
       {open && items.length>0 && (
@@ -57,7 +58,7 @@ export default function CitySearch({ value, onSelect }:{
                setQ(`${c.name}, ${c.country}`); 
                setItems([]);
                setOpen(false); 
-               setTimeout(() => onSelect(c), 100);
+               onSelect(c);
              }}>
               <div className="font-medium">{c.name}</div>
               <div className="text-xs text-slate-500">{c.country}</div>
