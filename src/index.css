@@ -357,3 +357,18 @@
 .btn-primary {
   @apply w-full rounded-md bg-primary text-primary-foreground px-3 py-2 text-sm hover:bg-primary/90;
 }
+
+/* Text truncation utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
