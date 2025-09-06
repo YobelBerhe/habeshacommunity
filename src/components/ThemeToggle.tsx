@@ -7,8 +7,7 @@ const THEME_KEY = "hn.theme";
 export default function ThemeToggle() {
   const { language } = useLanguage();
   const [theme, setTheme] = useState<"light"|"dark">(
-    (localStorage.getItem(THEME_KEY) as "light"|"dark") ||
-    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    (localStorage.getItem(THEME_KEY) as "light"|"dark") || "dark"
   );
 
   useEffect(() => {
