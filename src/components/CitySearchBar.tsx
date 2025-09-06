@@ -37,6 +37,7 @@ export default function CitySearchBar({
   useEffect(() => {
     if (q.trim().length < 2 || justSelected) { 
       setItems([]);
+      setOpen(false);
       if (justSelected) setJustSelected(false);
       return; 
     }
@@ -53,11 +54,11 @@ export default function CitySearchBar({
           return { name, country, lat: x.lat, lon: x.lon };
         }).filter(Boolean);
         setItems(list); 
-        setOpen(true);
+        if (list.length > 0 && !justSelected) setOpen(true);
       } catch (error) {
         // Allow manual city entry as fallback
         setItems([{ name: q, country: "Manual Entry", lat: "0", lon: "0" }]);
-        setOpen(true);
+        if (!justSelected) setOpen(true);
       }
     }, 200); 
     
@@ -71,15 +72,13 @@ export default function CitySearchBar({
     setItems([]); // Clear items immediately
     setOpen(false);
     
-    // Prevent immediate reopening by adding a small delay
-    setTimeout(() => {
-      if (onCitySelect) {
-        onCitySelect(cityName, parseFloat(city.lat), parseFloat(city.lon));
-      } else {
-        // Navigate to browse page with city
-        navigate(`/browse?city=${encodeURIComponent(cityName)}`);
-      }
-    }, 100);
+    // Call selection handler immediately
+    if (onCitySelect) {
+      onCitySelect(cityName, parseFloat(city.lat), parseFloat(city.lon));
+    } else {
+      // Navigate to browse page with city
+      navigate(`/browse?city=${encodeURIComponent(cityName)}`);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,7 +102,7 @@ export default function CitySearchBar({
           placeholder={placeholder}
           value={q}
           onChange={e => setQ(e.target.value)}
-          onFocus={() => items.length && setOpen(true)}
+          onFocus={() => items.length > 0 && q.trim().length >= 2 && !justSelected && setOpen(true)}
           autoComplete="off"
         />
         <button 
@@ -115,7 +114,7 @@ export default function CitySearchBar({
         </button>
       </form>
       
-      {open && items.length > 0 && (
+      {open && items.length > 0 && !justSelected && (
         <div className="absolute left-0 right-0 top-[46px] z-[9999] max-h-72 overflow-auto bg-background border rounded-xl shadow-2xl">
           {items.map((c, i) => (
             <div 
