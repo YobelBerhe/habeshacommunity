@@ -2,9 +2,9 @@
   position: relative;
   width: 10px;
   height: 10px;
-  background: #2dd4bf;
+  background: #7946d5;
   border-radius: 999px;
-  box-shadow: 0 0 8px rgba(45, 212, 191, 0.9);
+  box-shadow: 0 0 8px rgba(121, 70, 213, 0.9);
   transform: translate(-50%, -50%);
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -30,7 +30,7 @@
   border-radius: 999px;
   transform: translate(-50%, -50%);
   animation: hc-pulse 2.4s ease-out infinite;
-  border: 2px solid rgba(45, 212, 191, 0.5);
+  border: 2px solid rgba(121, 70, 213, 0.5);
 }
 
 .hc-dot::after { 

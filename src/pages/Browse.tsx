@@ -257,48 +257,7 @@ export default function Browse() {
           }
         />
 
-        {/* Hero Section - Zillow Style */}
-        <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 min-h-[500px] flex items-center">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-            style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1973&q=80')"
-            }}
-          />
-          <div className="relative z-10 container mx-auto px-4">
-            <div className="max-w-2xl">
-              <h1 className="text-white text-5xl md:text-6xl font-bold mb-4 leading-tight">
-                Find Your Perfect Home
-              </h1>
-              <p className="text-white/90 text-xl mb-8">
-                Discover homes, apartments, and rentals in your area
-              </p>
-              
-              {/* Search Bar */}
-              <div className="bg-white rounded-lg p-2 shadow-xl max-w-xl">
-                <div className="flex">
-                  <CitySearchBar 
-                    value={filters.city}
-                    onCitySelect={handleCityChange}
-                    placeholder="Enter an address, neighborhood, city, or ZIP code"
-                    className="flex-1 border-0 focus:ring-0"
-                  />
-                  <Button 
-                    size="lg" 
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8"
-                    onClick={() => {
-                      // Trigger search
-                    }}
-                  >
-                    Search
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs - Zillow Style */}
+        {/* Navigation Tabs - Similar to Mobile */}
         <div className="bg-white border-b">
           <div className="container mx-auto px-4">
             <div className="flex space-x-8 py-4">
@@ -308,15 +267,7 @@ export default function Browse() {
                 }`}
                 onClick={() => setFilters({ ...filters, category: 'housing' })}
               >
-                For Sale
-              </button>
-              <button 
-                className={`pb-2 border-b-2 font-medium ${
-                  filters.category === 'housing' && filters.subcategory === 'rentals' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => setFilters({ ...filters, category: 'housing', subcategory: 'rentals' })}
-              >
-                Rentals
+                Housing
               </button>
               <button 
                 className={`pb-2 border-b-2 font-medium ${
@@ -334,93 +285,73 @@ export default function Browse() {
               >
                 Services
               </button>
+              <button 
+                className={`pb-2 border-b-2 font-medium ${
+                  filters.category === 'marketplace' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+                onClick={() => setFilters({ ...filters, category: 'marketplace' })}
+              >
+                Marketplace
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Property Listings - Carousel Style */}
-        <div className="container mx-auto px-4 py-8">
-          {filters.city && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Trending in {filters.city}
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Viewed and saved the most in the area over the past 24 hours
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {processedListings.slice(0, 8).map((listing) => (
-                  <div 
-                    key={listing.id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => handleListingSelect(listing)}
-                  >
-                    <div className="aspect-[4/3] relative">
-                      {listing.images?.length > 0 ? (
-                        <img 
-                          src={listing.images[0]} 
-                          alt={listing.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400">No Image</span>
-                        </div>
-                      )}
-                      {/* Price Badge */}
-                      {listing.price && (
-                        <div className="absolute top-3 left-3 bg-white rounded px-2 py-1 shadow-md">
-                          <span className="font-bold text-lg">
-                            ${listing.price.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg mb-1 line-clamp-1">
-                        {listing.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                        {listing.description}
-                      </p>
-                      <p className="text-gray-500 text-xs">
-                        {listing.city}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* All Listings */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                All Listings
-              </h2>
-              
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">
-                  {processedListings.length} results
-                  {filters.city && ` in ${filters.city}`}
-                </div>
-                <div className="flex items-center gap-2">
-                  <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-                  <SortDropdown sortKey={sortKey} onChange={setSortKey} />
-                </div>
-              </div>
-            </div>
-
-            <ListingGrid
+        {/* Split View: Map on Left, Listings on Right */}
+        <div className="flex h-[calc(100vh-200px)]">
+          {/* Map Section - Left Side */}
+          <div className="w-1/2 relative">
+            <InteractiveListingMap
               listings={processedListings}
               onListingClick={handleListingSelect}
-              loading={loading}
-              newlyPostedId={null}
-              viewMode={viewMode}
+              center={filters.city ? undefined : { lat: 51.505, lng: -0.09 }}
+              zoom={filters.city ? 12 : 6}
+              height="100%"
             />
+          </div>
+
+          {/* Listings Section - Right Side */}
+          <div className="w-1/2 bg-white overflow-y-auto">
+            <div className="p-6">
+              {/* Search and Filters Header */}
+              <div className="mb-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <CitySearchBar 
+                    value={filters.city}
+                    onCitySelect={handleCityChange}
+                    placeholder="Enter city or location"
+                    className="flex-1"
+                  />
+                  <Button 
+                    variant="outline"
+                    onClick={handleClearAll}
+                    className="px-4"
+                  >
+                    Clear
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    {processedListings.length} listings
+                    {filters.city && ` in ${filters.city}`}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+                    <SortDropdown sortKey={sortKey} onChange={setSortKey} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Listings Grid */}
+              <ListingGrid
+                listings={processedListings}
+                onListingClick={handleListingSelect}
+                loading={loading}
+                newlyPostedId={null}
+                viewMode="list"
+              />
+            </div>
           </div>
         </div>
       </div>
