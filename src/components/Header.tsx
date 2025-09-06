@@ -39,7 +39,7 @@ export default function Header({
       <div className="container mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
         <button 
           className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
-          onClick={onLogoClick}
+          onClick={() => navigate('/')}
           title="Go to Homepage"
         >
           <img 

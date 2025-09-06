@@ -580,53 +580,6 @@ export default function Browse() {
         </main>
       </div>
 
-        {/* Main Content */}
-        <main className="container mx-auto px-4 py-6 mb-20">
-          {viewMode === "grid" ? (
-            <ListingGrid
-              listings={processedListings}
-              onListingClick={handleListingSelect}
-              loading={loading}
-              newlyPostedId={null}
-            />
-          ) : viewMode === "list" ? (
-            <div className="space-y-4">
-              {processedListings.map((listing) => (
-                <div key={listing.id} className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
-                     onClick={() => handleListingSelect(listing)}>
-                  <h3 className="font-semibold">{listing.title}</h3>
-                  <p className="text-sm text-muted-foreground">{listing.description}</p>
-                  {listing.price && <p className="font-medium">${listing.price}</p>}
-                </div>
-              ))}
-            </div>
-          ) : viewMode === "gallery" ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {processedListings.map((listing) => (
-                <div key={listing.id} className="aspect-square cursor-pointer" onClick={() => handleListingSelect(listing)}>
-                  {listing.images?.length > 0 ? (
-                    <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover rounded-lg" />
-                  ) : (
-                    <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
-                      No image
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <InteractiveListingMap
-              listings={processedListings}
-              onListingClick={handleListingSelect}
-              center={
-                processedListings.length > 0 && processedListings[0].lat && processedListings[0].lng
-                  ? { lat: processedListings[0].lat, lng: processedListings[0].lng }
-                  : { lat: 40.7128, lng: -74.0060 }
-              }
-              height="calc(100vh - 250px)"
-            />
-          )}
-        </main>
       
         <Footer />
         <StickyPostCTA />
