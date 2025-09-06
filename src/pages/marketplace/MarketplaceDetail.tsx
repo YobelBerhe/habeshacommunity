@@ -5,7 +5,7 @@ import { useAuth } from '@/store/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, DollarSign, Clock, MessageCircle, Share2, Heart } from 'lucide-react';
+import { ArrowLeft, MapPin, DollarSign, Clock, MessageCircle, Share2, Heart, MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import MobileHeader from '@/components/layout/MobileHeader';
 import Header from '@/components/Header';
@@ -174,139 +174,141 @@ export default function MarketplaceDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/market')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Marketplace
-        </Button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg overflow-hidden mb-4">
-              {listing.images?.[currentImageIndex] ? (
-                <img 
-                  src={listing.images[currentImageIndex]} 
-                  alt={listing.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-6xl opacity-30">📦</div>
-                </div>
-              )}
+      {/* Image Section with Overlay Controls */}
+      <div className="relative">
+        {listing.images && listing.images.length > 0 && (
+          <div className="relative h-[70vh] bg-muted">
+            <img 
+              src={listing.images[currentImageIndex]} 
+              alt={listing.title}
+              className="w-full h-full object-cover"
+            />
+            
+            {/* Top Overlay Controls */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+              <button
+                onClick={() => navigate('/market')}
+                className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSave}
+                  className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                  disabled={user?.id === listing.user_id}
+                >
+                  <Heart className="w-5 h-5 text-white" />
+                </button>
+                
+                <button 
+                  onClick={handleShare} 
+                  className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                >
+                  <Share2 className="w-5 h-5 text-white" />
+                </button>
+                
+                <button className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors">
+                  <MoreHorizontal className="w-5 h-5 text-white" />
+                </button>
+              </div>
             </div>
             
-            {listing.images && listing.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto">
-                {listing.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded border-2 overflow-hidden ${
-                      index === currentImageIndex ? 'border-primary' : 'border-border'
-                    }`}
-                  >
-                    <img 
-                      src={image} 
-                      alt={`${listing.title} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+            {/* Image Navigation */}
+            {listing.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentImageIndex(currentImageIndex > 0 ? currentImageIndex - 1 : listing.images.length - 1)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => setCurrentImageIndex(currentImageIndex < listing.images.length - 1 ? currentImageIndex + 1 : 0)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                >
+                  <ArrowLeft className="w-6 h-6 rotate-180" />
+                </button>
+                
+                {/* Image Counter */}
+                <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  {currentImageIndex + 1} / {listing.images.length}
+                </div>
+              </>
             )}
           </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-2xl mb-2">{listing.title}</CardTitle>
-                    {listing.subcategory && (
-                      <Badge variant="secondary" className="mb-2">
-                        {LABELS[listing.subcategory]?.en || listing.subcategory}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 text-2xl font-bold text-primary">
-                      <DollarSign className="w-6 h-6" />
-                      {formatPrice(listing.price_cents, listing.currency)}
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
+        )}
+        
+        {/* Main Content */}
+        <div className="bg-background px-4 py-6">
+          {/* Title and Price */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-foreground mb-2">{listing.title}</h1>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="w-4 h-4" />
+                <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-foreground">
+                {formatPrice(listing.price_cents, listing.currency)}
+              </div>
+            </div>
+          </div>
+          
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            <Badge variant="secondary">marketplace</Badge>
+            {listing.subcategory && (
+              <Badge variant="outline">{LABELS[listing.subcategory]?.en || listing.subcategory}</Badge>
+            )}
+          </div>
+          
+          {/* Description */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Description</h3>
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {listing.description}
+            </p>
+          </div>
+          
+          {/* Additional Details */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Category</p>
+              <p className="font-medium">{LABELS[listing.subcategory]?.en || listing.subcategory}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Posted</p>
+              <p className="font-medium">{formatDate(listing.created_at)}</p>
+            </div>
+          </div>
+          
+          {/* Contact Buttons */}
+          <div className="mb-6">
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => navigate(`/inbox?listing=${listing.id}`)}
+                className="w-full"
+                disabled={user?.id === listing.user_id}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Contact Seller
+              </Button>
               
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>Posted {formatDate(listing.created_at)}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => navigate(`/inbox?listing=${listing.id}`)}
-                    className="flex-1"
-                    disabled={user?.id === listing.user_id}
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Contact Seller
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleSave}
-                    disabled={user?.id === listing.user_id}
-                  >
-                    <Heart className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleShare}
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {user?.id === listing.user_id && (
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      This is your listing
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate(`/account/listings`)}
-                      className="w-full"
-                    >
-                      Manage Listing
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              {user?.id === listing.user_id && (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/account/listings`)}
+                  className="w-full"
+                >
+                  Manage Listing
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

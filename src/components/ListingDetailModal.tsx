@@ -141,196 +141,197 @@ export default function ListingDetailModal({ open, listing, onClose, onSavedChan
   const contactButtons = getContactButtons();
 
   const content = (
-    <div className="space-y-6">
-      {/* Images */}
+    <div className="relative">
+      {/* Image with Overlay Controls */}
       {images.length > 0 && (
-        <div className="space-y-4">
-          <div className="relative aspect-[4/3] bg-muted rounded-lg overflow-hidden">
-            <img
-              src={images[activeImageIndex]}
-              alt={listing.title}
-              className="w-full h-full object-cover"
-            />
-            {images.length > 1 && (
-              <>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90"
-                  onClick={() => setActiveImageIndex((prev) => 
-                    prev === 0 ? images.length - 1 : prev - 1
-                  )}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90"
-                  onClick={() => setActiveImageIndex((prev) => 
-                    prev === images.length - 1 ? 0 : prev + 1
-                  )}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-          </div>
+        <div className="relative h-[50vh] bg-muted">
+          <img
+            src={images[activeImageIndex]}
+            alt={listing.title}
+            className="w-full h-full object-cover"
+          />
           
-          {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveImageIndex(index)}
-                  className={`flex-shrink-0 w-16 h-12 rounded border-2 overflow-hidden ${
-                    index === activeImageIndex ? 'border-primary' : 'border-border'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${listing.title} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-semibold">{listing.title}</h2>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {price && (
-              <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
-                {price}
-              </Badge>
-            )}
+          {/* Overlay Controls */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={handleSave}
-              className={isSaved ? "text-red-500 hover:text-red-600" : ""}
+              className={`w-10 h-10 bg-black/50 hover:bg-black/70 ${isSaved ? "text-red-500" : "text-white"}`}
             >
               <Heart className={`h-5 w-5 ${isSaved ? 'fill-current' : ''}`} />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-10 h-10 bg-black/50 text-white hover:bg-black/70"
+            >
+              <ExternalLink className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-10 h-10 bg-black/50 text-white hover:bg-black/70"
+              onClick={() => setShowReportForm(true)}
+            >
+              <Flag className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          {/* Image Navigation */}
+          {images.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 text-white hover:bg-black/70"
+                onClick={() => setActiveImageIndex((prev) => 
+                  prev === 0 ? images.length - 1 : prev - 1
+                )}
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 text-white hover:bg-black/70"
+                onClick={() => setActiveImageIndex((prev) => 
+                  prev === images.length - 1 ? 0 : prev + 1
+                )}
+              >
+                <ChevronRight className="h-6 w-6" />
+              </Button>
+              
+              {/* Image Counter */}
+              <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                {activeImageIndex + 1} / {images.length}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="p-6 space-y-6">
+        {/* Title and Location */}
+        <div className="space-y-3">
+          <div className="flex items-start justify-between">
+            <h2 className="text-2xl font-bold">{listing.title}</h2>
+            {price && (
+              <div className="text-2xl font-bold text-primary">{price}</div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-4 w-4" />
+            <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
           </div>
         </div>
 
-        {/* Category and Tags */}
+        {/* Tags */}
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline">{listing.category}</Badge>
+          <Badge variant="secondary">{listing.category}</Badge>
           {listing.subcategory && (
             <Badge variant="outline">{listing.subcategory}</Badge>
           )}
           {listing.tags?.map((tag) => (
-            <Badge key={tag} variant="secondary">{tag}</Badge>
+            <Badge key={tag} variant="outline">{tag}</Badge>
           ))}
         </div>
-      </div>
 
-      {/* Description */}
-      <div className="space-y-2">
-        <h3 className="font-semibold">Description</h3>
-        <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
-      </div>
-
-      {/* Map */}
-      {listing.lat && listing.lng && (
-        <div className="space-y-2">
-          <h3 className="font-semibold">Location</h3>
-          <Card className="p-0 overflow-hidden">
-            <div className="h-48">
-              <MapMini lat={listing.lat} lng={listing.lng} />
-            </div>
-          </Card>
+        {/* Description */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Description</h3>
+          <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{listing.description}</p>
         </div>
-      )}
 
-      {/* Contact Buttons */}
-      {contactButtons.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="font-semibold">Contact</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {contactButtons.map((button, index) => (
-              <Button
-                key={index}
-                variant={button.variant}
-                className="justify-start gap-2"
-                onClick={() => window.open(button.href, '_blank', 'noopener,noreferrer')}
-              >
-                <button.icon className="h-4 w-4" />
-                {button.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Website Link */}
-      {listing.website_url && (
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2"
-            onClick={handleWebsiteClick}
-          >
-            <ExternalLink className="h-4 w-4" />
-            Visit Website
-          </Button>
-        </div>
-      )}
-
-      {/* Report */}
-      <div className="pt-4 border-t">
-        {!showReportForm ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-            onClick={() => setShowReportForm(true)}
-          >
-            <Flag className="h-4 w-4 mr-2" />
-            Report listing
-          </Button>
-        ) : (
+        {/* Map */}
+        {listing.lat && listing.lng && (
           <div className="space-y-3">
-            <Textarea
-              placeholder="Please describe the issue..."
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
-              className="min-h-[80px]"
-            />
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={handleReport}
-                disabled={!reportReason.trim()}
-              >
-                Submit Report
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowReportForm(false);
-                  setReportReason("");
-                }}
-              >
-                Cancel
-              </Button>
+            <h3 className="text-lg font-semibold">Location</h3>
+            <Card className="p-0 overflow-hidden">
+              <div className="h-48">
+                <MapMini lat={listing.lat} lng={listing.lng} />
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Contact Buttons */}
+        {contactButtons.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold">Contact</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {contactButtons.map((button, index) => (
+                <Button
+                  key={index}
+                  variant={button.variant}
+                  className="justify-start gap-2"
+                  onClick={() => window.open(button.href, '_blank', 'noopener,noreferrer')}
+                >
+                  <button.icon className="h-4 w-4" />
+                  {button.label}
+                </Button>
+              ))}
             </div>
           </div>
         )}
+
+        {/* Website Link */}
+        {listing.website_url && (
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full justify-center gap-2"
+              onClick={handleWebsiteClick}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Visit Website
+            </Button>
+          </div>
+        )}
+
+        {/* Report */}
+        <div className="pt-4 border-t">
+          {!showReportForm ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={() => setShowReportForm(true)}
+            >
+              <Flag className="h-4 w-4 mr-2" />
+              Report listing
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <Textarea
+                placeholder="Please describe the issue..."
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                className="min-h-[80px]"
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleReport}
+                  disabled={!reportReason.trim()}
+                >
+                  Submit Report
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowReportForm(false);
+                    setReportReason("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

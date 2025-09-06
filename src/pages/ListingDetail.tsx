@@ -319,46 +319,48 @@ export default function ListingDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile-first Zillow-style layout */}
+      {/* Image Section with Overlay Controls */}
       <div className="relative">
-        {/* Full-screen Image Gallery */}
         {listing.images && listing.images.length > 0 && (
-          <div className="relative h-[60vh] md:h-[50vh]">
+          <div className="relative h-[70vh] bg-muted">
             <ImageBox
               src={listing.images[activeImageIndex]}
               alt={listing.title}
               className="w-full h-full object-cover"
             />
             
-            {/* Navigation Overlay */}
-            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+            {/* Top Overlay Controls */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
               <button
                 onClick={handleBack}
-                className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+                className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
                 aria-label="Go back"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-800" />
+                <ArrowLeft className="w-5 h-5 text-white" />
               </button>
               
-              <div className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={handleFavoriteToggle}
-                  className={`${isFavorited ? "text-red-500" : "text-gray-700 hover:text-red-500"} transition-colors`}
+                  className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
                 >
-                  <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+                  <Heart className={`w-5 h-5 text-white ${isFavorited ? 'fill-current' : ''}`} />
                 </button>
                 
-                <button onClick={handleShare} className="text-gray-700 hover:text-gray-900 transition-colors">
-                  <Share2 className="w-5 h-5" />
+                <button 
+                  onClick={handleShare} 
+                  className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                >
+                  <Share2 className="w-5 h-5 text-white" />
                 </button>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="text-gray-700 hover:text-gray-900 transition-colors">
-                      <MoreHorizontal className="w-5 h-5" />
+                    <button className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors">
+                      <MoreHorizontal className="w-5 h-5 text-white" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="bg-white">
                     <DropdownMenuItem onClick={() => setReportOpen(true)}>
                       Report
                     </DropdownMenuItem>
@@ -367,14 +369,7 @@ export default function ListingDetail() {
               </div>
             </div>
             
-            {/* Image Counter */}
-            {listing.images.length > 1 && (
-              <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {activeImageIndex + 1} of {listing.images.length}
-              </div>
-            )}
-            
-            {/* Image Navigation Arrows */}
+            {/* Image Navigation */}
             {listing.images.length > 1 && (
               <>
                 <button
@@ -389,201 +384,110 @@ export default function ListingDetail() {
                 >
                   <ArrowLeft className="w-6 h-6 rotate-180" />
                 </button>
+                
+                {/* Image Counter */}
+                <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  {activeImageIndex + 1} / {listing.images.length}
+                </div>
               </>
             )}
           </div>
         )}
         
-        {/* Map and Street View buttons */}
-        <div className="sticky top-0 z-40 bg-white border-b flex">
-          <button className="flex-1 py-3 text-center text-primary font-medium border-b-2 border-primary bg-blue-50">
-            Map
-          </button>
-          <button className="flex-1 py-3 text-center text-gray-600 font-medium hover:bg-gray-50">
-            Street View
-          </button>
-        </div>
-        
-        {/* Content Container */}
-        <div className="bg-white">
-          {/* Property Title and Address */}
-          <div className="px-4 py-6 border-b">
-            <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
-              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
+        {/* Main Content */}
+        <div className="bg-background px-4 py-6">
+          {/* Title and Price */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-foreground mb-2">{listing.title}</h1>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="w-4 h-4" />
+                <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
               </div>
             </div>
-            <p className="text-gray-600">{listing.city}{listing.country && `, ${listing.country}`}</p>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="px-4 py-4 flex gap-3">
-            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3">
-              Tour
-            </Button>
-            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3">
-              Apply
-            </Button>
-            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3">
-              Email
-            </Button>
-          </div>
-          
-          {/* Property Details Grid */}
-          <div className="px-4 py-4 grid grid-cols-2 gap-4 border-b">
-            {/* Building Type */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0v-4a2 2 0 012-2h4a2 2 0 012 2v4z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Building Type</p>
-                <p className="font-medium text-gray-900">{categoryName}</p>
-              </div>
-            </div>
-            
-            {/* Beds */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Bedrooms</p>
-                <p className="font-medium text-gray-900">
-                  {listing.price ? `${Math.floor(listing.price / 1000)} bed` : 'Studio'}
-                </p>
-              </div>
-            </div>
-            
-            {/* Price */}
             {listing.price && (
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Rent</p>
-                  <p className="font-medium text-gray-900">{formatPrice(listing.price, listing.currency)}</p>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-foreground">
+                  {formatPrice(listing.price, listing.currency)}
                 </div>
               </div>
             )}
-            
-            {/* Amenities */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Pet-friendly</p>
-                <p className="font-medium text-gray-900">Yes</p>
-              </div>
-            </div>
           </div>
-          
-          {/* What's Available Section */}
-          <div className="px-4 py-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">What's available</h2>
-            <div className="flex gap-4">
-              <button className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-medium bg-blue-50">
-                Matches
-              </button>
-              <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">
-                2 bd
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mt-4">Price may not include required fees and charges.</p>
-          </div>
-          
-          {/* Description */}
-          {listing.description && (
-            <div className="px-4 py-6 border-t">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{listing.description}</p>
-            </div>
-          )}
           
           {/* Tags */}
-          {listing.tags && listing.tags.length > 0 && (
-            <div className="px-4 py-6 border-t">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Features</h2>
-              <div className="flex flex-wrap gap-2">
-                {listing.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline" className="py-1 px-3">
-                    #{tag}
-                  </Badge>
+          <div className="flex flex-wrap gap-2 mb-6">
+            <Badge variant="secondary">{categoryName}</Badge>
+            {listing.subcategory && (
+              <Badge variant="outline">{listing.subcategory}</Badge>
+            )}
+            {listing.tags?.map((tag) => (
+              <Badge key={tag} variant="outline">{tag}</Badge>
+            ))}
+          </div>
+          {/* Description */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Description</h3>
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {listing.description}
+            </p>
+          </div>
+          
+          {/* Contact Buttons */}
+          {getContactButtons().length > 0 && (
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-3">
+                {getContactButtons().map((button, index) => (
+                  <Button
+                    key={index}
+                    variant={button.variant}
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(button.href, '_blank', 'noopener,noreferrer')}
+                  >
+                    <button.icon className="h-4 w-4" />
+                    {button.label}
+                  </Button>
                 ))}
               </div>
             </div>
           )}
           
-          {/* Map Section */}
+          {/* Website Link */}
+          {listing.website_url && (
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                className="w-full justify-center gap-2"
+                onClick={() => window.open(listing.website_url, '_blank', 'noopener,noreferrer')}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Visit Website
+              </Button>
+            </div>
+          )}
+          {/* Additional Details */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Category</p>
+              <p className="font-medium">{categoryName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Posted</p>
+              <p className="font-medium">{timeAgo(new Date(listing.created_at).getTime())}</p>
+            </div>
+          </div>
+
+          {/* Map */}
           {listing.lat && listing.lng && (
-            <div className="px-4 py-6 border-t">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
-              <div className="h-64 rounded-lg overflow-hidden border">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Location</h3>
+              <div className="h-48 bg-muted rounded-lg overflow-hidden">
                 <MapMini lat={listing.lat} lng={listing.lng} />
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Coordinates: {listing.lat.toFixed(4)}, {listing.lng.toFixed(4)}
-              </p>
             </div>
           )}
-          
-          {/* Similar Listings */}
-          {similarListings.length > 0 && (
-            <div className="px-4 py-6 border-t">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Similar Listings</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {similarListings.slice(0, 4).map((similar) => (
-                  <button
-                    key={similar.id}
-                    onClick={() => navigate(`/l/${similar.id}`)}
-                    className="text-left hover:opacity-80 transition-opacity"
-                  >
-                    <div className="aspect-video rounded-lg overflow-hidden mb-2">
-                      {similar.image ? (
-                        <ImageBox
-                          src={similar.image}
-                          alt={similar.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                          <span className="text-gray-500 text-sm">No image</span>
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="font-medium text-sm mb-1 line-clamp-2">{similar.title}</h3>
-                    {similar.price && (
-                      <p className="text-sm font-semibold text-blue-600">
-                        {formatPrice(similar.price)}
-                      </p>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Costs & Fees Section */}
-          <div className="px-4 py-6 border-t">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Costs & fees breakdown</h2>
-            <p className="text-gray-600">Contact the property for detailed pricing information.</p>
-          </div>
         </div>
       </div>
-
+      
       {/* Report Modal */}
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
         <DialogContent>
@@ -591,23 +495,18 @@ export default function ListingDetail() {
             <DialogTitle>Report Listing</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">
-                Reason for reporting:
-              </label>
-              <Textarea
-                value={reportText}
-                onChange={(e) => setReportText(e.target.value)}
-                placeholder="Please describe why you're reporting this listing..."
-                className="mt-1"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleReport} disabled={!reportText.trim()}>
-                Submit Report
-              </Button>
+            <Textarea
+              placeholder="Please describe the issue..."
+              value={reportText}
+              onChange={(e) => setReportText(e.target.value)}
+              className="min-h-[100px]"
+            />
+            <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setReportOpen(false)}>
                 Cancel
+              </Button>
+              <Button onClick={handleReport} disabled={!reportText.trim()}>
+                Submit Report
               </Button>
             </div>
           </div>
