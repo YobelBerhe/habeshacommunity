@@ -489,59 +489,6 @@ export default function Index() {
         />
       )}
 
-      {!shouldShowCityIndex && (
-        <div className="container mx-auto px-4 pt-4 hidden md:block">
-          <div className="flex flex-col gap-4 mb-4">
-            <div className="flex flex-col md:flex-row gap-3 items-stretch">
-              <select
-                className="field min-w-[160px]"
-                value={filters.category || ""}
-                onChange={(e) => handleFiltersChange({ ...filters, category: e.target.value || undefined, subcategory: undefined })}
-              >
-                <option value="">{t(lang, "all_categories")}</option>
-                {Object.entries(TAXONOMY).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value.name[lang.toLowerCase() as "en" | "ti"]}
-                  </option>
-                ))}
-              </select>
-
-              <SearchBox
-                lang={lang}
-                value={filters.query || ""}
-                onChange={(v) => setFilters({ ...filters, query: v })}
-                onPickCategory={(slug) => setFilters({ ...filters, category: slug, subcategory: undefined })}
-                onPickSubcategory={(slug) => setFilters({ ...filters, subcategory: slug })}
-                onPickTag={(tag) => setFilters({ ...filters, query: `${(filters.query || "").trim()} #${tag}`.trim() })}
-              />
-
-              <div className="flex items-center gap-3">
-                <ViewToggle viewMode={viewMode} onChange={handleViewModeChange} />
-                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
-                <button className="btn text-xs" onClick={() => setFilters({ category: filters.category })}>
-                  {t(lang, "clear_all")}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-3 items-start justify-between">
-              <QuickFilters
-                lang={lang}
-                category={filters.category}
-                minPrice={filters.minPrice}
-                maxPrice={filters.maxPrice}
-                jobKind={filters.jobKind as any}
-                onChange={(next) => setFilters({ ...filters, ...next })}
-              />
-              
-            </div>
-
-            <div className="text-sm text-muted-foreground mb-4">
-              {processedListings.length} {t(lang, "results")}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Background Map */}
       <div id="bg-map" className="fixed inset-0 -z-10 pointer-events-none">
