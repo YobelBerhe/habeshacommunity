@@ -58,9 +58,9 @@ export default function Browse() {
     localStorage.getItem('hn.filter.postedToday') === 'true'
   );
 
-  // Initialize filters from URL params
+  // Initialize filters from URL params (don't pre-select cities)
   const [filters, setFilters] = useState<SearchFilters>(() => ({
-    city: searchParams.get("city") || appState.city || undefined,
+    city: searchParams.get("city") || undefined,
     category: searchParams.get("category") || undefined,
     subcategory: getParam(searchParams, "sub"),
     query: searchParams.get("q") || "",
@@ -225,7 +225,7 @@ export default function Browse() {
 
   const handleClearAll = () => {
     setFilters({
-      city: filters.city, // Keep city
+      city: undefined,
       category: undefined,
       subcategory: undefined,
       query: "",
@@ -430,12 +430,24 @@ export default function Browse() {
         {/* Mobile Header */}
         <MobileHeader />
 
-        {/* Mobile City Search Bar */}
+        {/* Mobile City Search Bar with Clear Button */}
         <div className="px-4 py-2 border-b bg-background">
-          <CitySearchBar 
-            value={filters.city}
-            onCitySelect={handleCityChange}
-          />
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <CitySearchBar 
+                value={filters.city}
+                onCitySelect={handleCityChange}
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAll}
+              className="px-3 py-2 h-auto text-xs"
+            >
+              Clear
+            </Button>
+          </div>
         </div>
 
         {/* Filter Controls - Sticky */}
@@ -568,74 +580,60 @@ export default function Browse() {
         </main>
       </div>
 
-      {/* Background Map for city focusing */}
-      {filters.city && (
-        <div className="fixed inset-0 -z-10 pointer-events-none">
-          <GlobalMap 
-            focusCity={{
-              lat: 0, lng: 0, // Will be updated when we have city coordinates
-              name: filters.city
-            }}
-            modalOpen={false}
-            viewMode="grid"
-          />
-        </div>
-      )}
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 mb-20">
-        {viewMode === "grid" ? (
-          <ListingGrid
-            listings={processedListings}
-            onListingClick={handleListingSelect}
-            loading={loading}
-            newlyPostedId={null}
-          />
-        ) : viewMode === "list" ? (
-          <div className="space-y-4">
-            {processedListings.map((listing) => (
-              <div key={listing.id} className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
-                   onClick={() => handleListingSelect(listing)}>
-                <h3 className="font-semibold">{listing.title}</h3>
-                <p className="text-sm text-muted-foreground">{listing.description}</p>
-                {listing.price && <p className="font-medium">${listing.price}</p>}
-              </div>
-            ))}
-          </div>
-        ) : viewMode === "gallery" ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {processedListings.map((listing) => (
-              <div key={listing.id} className="aspect-square cursor-pointer" onClick={() => handleListingSelect(listing)}>
-                {listing.images?.length > 0 ? (
-                  <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover rounded-lg" />
-                ) : (
-                  <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
-                    No image
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <InteractiveListingMap
-            listings={processedListings}
-            onListingClick={handleListingSelect}
-            center={
-              processedListings.length > 0 && processedListings[0].lat && processedListings[0].lng
-                ? { lat: processedListings[0].lat, lng: processedListings[0].lng }
-                : { lat: 40.7128, lng: -74.0060 }
-            }
-            height="calc(100vh - 250px)"
-          />
-        )}
-      </main>
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-6 mb-20">
+          {viewMode === "grid" ? (
+            <ListingGrid
+              listings={processedListings}
+              onListingClick={handleListingSelect}
+              loading={loading}
+              newlyPostedId={null}
+            />
+          ) : viewMode === "list" ? (
+            <div className="space-y-4">
+              {processedListings.map((listing) => (
+                <div key={listing.id} className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
+                     onClick={() => handleListingSelect(listing)}>
+                  <h3 className="font-semibold">{listing.title}</h3>
+                  <p className="text-sm text-muted-foreground">{listing.description}</p>
+                  {listing.price && <p className="font-medium">${listing.price}</p>}
+                </div>
+              ))}
+            </div>
+          ) : viewMode === "gallery" ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {processedListings.map((listing) => (
+                <div key={listing.id} className="aspect-square cursor-pointer" onClick={() => handleListingSelect(listing)}>
+                  {listing.images?.length > 0 ? (
+                    <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover rounded-lg" />
+                  ) : (
+                    <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
+                      No image
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <InteractiveListingMap
+              listings={processedListings}
+              onListingClick={handleListingSelect}
+              center={
+                processedListings.length > 0 && processedListings[0].lat && processedListings[0].lng
+                  ? { lat: processedListings[0].lat, lng: processedListings[0].lng }
+                  : { lat: 40.7128, lng: -74.0060 }
+              }
+              height="calc(100vh - 250px)"
+            />
+          )}
+        </main>
       
-      <Footer />
-      <StickyPostCTA />
-      
-      {/* Modals */}
-      <AuthModal />
-      <PostModal city={filters.city || "Select a city"} />
+        <Footer />
+        <StickyPostCTA />
+        
+        {/* Modals */}
+        <AuthModal />
+        <PostModal city={filters.city || "Select a city"} />
     </div>
   );
 }
