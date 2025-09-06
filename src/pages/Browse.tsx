@@ -241,58 +241,229 @@ export default function Browse() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop View - Zillow-like Layout */}
+      {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
-        {/* Desktop Header */}
-        <Header
-          currentCity={filters.city || ""}
-          onCityChange={handleCityChange}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate("/")}
-          rightExtra={
-            <LanguageToggle
-              value={language}
-              onChange={setLanguage}
-            />
-          }
-        />
+        {/* Top Bar with Search and Controls */}
+        <div className="border-b bg-background/70 backdrop-blur">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              {/* Left: Logo and City Search */}
+              <div className="flex items-center gap-4">
+                <button 
+                  className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
+                  onClick={() => navigate('/')}
+                  title="Go to Homepage"
+                >
+                  <img 
+                    src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
+                    alt="HabeshaCommunity Logo" 
+                    className="w-8 h-8 rounded-lg"
+                  />
+                  <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
+                </button>
+                
+                <CitySearchBar 
+                  value={filters.city}
+                  onCitySelect={handleCityChange}
+                  placeholder="Enter city or location"
+                  className="w-80"
+                />
+              </div>
 
-        {/* Navigation Tabs - Similar to Mobile */}
+              {/* Right: Controls */}
+              <div className="flex items-center gap-3">
+                <LanguageToggle value={language} onChange={setLanguage} />
+                {/* Theme, Support, Chat, Post, Account buttons from Header */}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Line */}
         <div className="bg-white border-b">
           <div className="container mx-auto px-4">
-            <div className="flex space-x-8 py-4">
-              <button 
-                className={`pb-2 border-b-2 font-medium ${
-                  filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => setFilters({ ...filters, category: 'housing' })}
+            <div className="flex items-center justify-between py-4">
+              {/* Left: All Navigation Items */}
+              <div className="flex space-x-6">
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => navigate('/mentor')}
+                >
+                  Mentor
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => navigate('/match')}
+                >
+                  Match
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => navigate('/market')}
+                >
+                  Market
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => navigate('/forums')}
+                >
+                  Forums
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    !filters.category ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => navigate('/inbox')}
+                >
+                  Inbox
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => setFilters({ ...filters, category: 'housing' })}
+                >
+                  Housing
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => setFilters({ ...filters, category: 'jobs' })}
+                >
+                  Jobs
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => setFilters({ ...filters, category: 'services' })}
+                >
+                  Services
+                </button>
+                <button 
+                  className={`pb-1 border-b-2 font-medium text-sm ${
+                    filters.category === 'marketplace' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                  onClick={() => setFilters({ ...filters, category: 'marketplace' })}
+                >
+                  Marketplace
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Controls Bar */}
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center gap-4">
+              {/* Category Toggle */}
+              <Popover modal={false}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    {filters.category 
+                      ? TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || "Category"
+                      : language === 'EN' ? "All categories" : "ኩሉ ምድብታት"
+                    }
+                    <ChevronDown className="w-3 h-3 text-primary" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="bottom" 
+                  align="start" 
+                  className="w-56 p-1"
+                  collisionPadding={8}
+                >
+                  <div className="space-y-1">
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                      onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
+                    >
+                      All categories
+                    </button>
+                    {Object.entries(TAXONOMY).map(([key, value]) => (
+                      <button
+                        key={key}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                        onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
+                      >
+                        {value.name[language.toLowerCase() as 'en' | 'ti']}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Subcategory Toggle */}
+              <Popover modal={false}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                    disabled={!filters.category}
+                  >
+                    {filters.subcategory 
+                      ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
+                      : filters.category ? (language === 'EN' ? "Subcategory" : "ንኣብ ምድብ") : (language === 'EN' ? "Select category first" : "ቀዳማይ ምድብ ምረጽ")
+                    }
+                    <ChevronDown className="w-3 h-3 text-primary" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="bottom" 
+                  align="start" 
+                  className="w-56 p-1"
+                  collisionPadding={8}
+                >
+                  <div className="space-y-1">
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                      onClick={() => setFilters({ ...filters, subcategory: undefined })}
+                    >
+                      All subcategories
+                    </button>
+                    {filters.category && TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
+                      <button
+                        key={sub}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                        onClick={() => setFilters({ ...filters, subcategory: sub })}
+                      >
+                        {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Additional Filters based on category */}
+              {filters.category && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1"
+                >
+                  More Filters
+                  <ChevronDown className="w-3 h-3 text-primary" />
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearAll}
               >
-                Housing
-              </button>
-              <button 
-                className={`pb-2 border-b-2 font-medium ${
-                  filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => setFilters({ ...filters, category: 'jobs' })}
-              >
-                Jobs
-              </button>
-              <button 
-                className={`pb-2 border-b-2 font-medium ${
-                  filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => setFilters({ ...filters, category: 'services' })}
-              >
-                Services
-              </button>
-              <button 
-                className={`pb-2 border-b-2 font-medium ${
-                  filters.category === 'marketplace' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => setFilters({ ...filters, category: 'marketplace' })}
-              >
-                Marketplace
-              </button>
+                Clear All
+              </Button>
             </div>
           </div>
         </div>
@@ -313,24 +484,8 @@ export default function Browse() {
           {/* Listings Section - Right Side */}
           <div className="w-1/2 bg-white overflow-y-auto">
             <div className="p-6">
-              {/* Search and Filters Header */}
+              {/* Results Header */}
               <div className="mb-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <CitySearchBar 
-                    value={filters.city}
-                    onCitySelect={handleCityChange}
-                    placeholder="Enter city or location"
-                    className="flex-1"
-                  />
-                  <Button 
-                    variant="outline"
-                    onClick={handleClearAll}
-                    className="px-4"
-                  >
-                    Clear
-                  </Button>
-                </div>
-                
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-600">
                     {processedListings.length} listings
@@ -343,14 +498,46 @@ export default function Browse() {
                 </div>
               </div>
 
-              {/* Listings Grid */}
-              <ListingGrid
-                listings={processedListings}
-                onListingClick={handleListingSelect}
-                loading={loading}
-                newlyPostedId={null}
-                viewMode="list"
-              />
+              {/* Two-Column Listings Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {processedListings.map((listing) => (
+                  <div
+                    key={listing.id}
+                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => handleListingSelect(listing)}
+                  >
+                    {listing.images?.[0] && (
+                      <img
+                        src={listing.images[0]}
+                        alt={listing.title}
+                        className="w-full h-32 object-cover rounded mb-3"
+                      />
+                    )}
+                    <h3 className="font-medium text-sm mb-2 line-clamp-2">{listing.title}</h3>
+                    {listing.price && (
+                      <p className="text-lg font-semibold text-green-600 mb-1">
+                        ${listing.price.toLocaleString()}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-600 mb-2">
+                      {listing.city}, {listing.country}
+                    </p>
+                    <p className="text-xs text-gray-500 line-clamp-2">
+                      {listing.description}
+                    </p>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="col-span-2 text-center py-8 text-gray-500">
+                    Loading listings...
+                  </div>
+                )}
+                {!loading && processedListings.length === 0 && (
+                  <div className="col-span-2 text-center py-8 text-gray-500">
+                    No listings found. Try adjusting your filters.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
