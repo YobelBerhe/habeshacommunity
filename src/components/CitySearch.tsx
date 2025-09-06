@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 type City = { name: string; country: string; lat: string; lon: string };
 
 export default function CitySearch({ value, onSelect }:{
@@ -8,6 +9,7 @@ export default function CitySearch({ value, onSelect }:{
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<City[]>([]);
   const boxRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(()=>setQ(value ?? ""),[value]);
 
@@ -59,6 +61,7 @@ export default function CitySearch({ value, onSelect }:{
                setItems([]);
                setOpen(false); 
                onSelect(c);
+               navigate('/browse');
              }}>
               <div className="font-medium">{c.name}</div>
               <div className="text-xs text-slate-500">{c.country}</div>

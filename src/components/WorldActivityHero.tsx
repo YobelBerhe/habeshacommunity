@@ -129,16 +129,16 @@ export default function WorldActivityHero({
 
   return (
     <section className={`relative w-full h-[72vh] md:h-[82vh] overflow-hidden ${mode === "light" ? "bg-white" : "bg-[#0b0c0f]"}`}>
-      <div ref={containerRef} className="absolute inset-0" />
+      <div ref={containerRef} className="absolute inset-0 z-0" />
       
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-black/20 to-black/40 md:from-black/30 md:to-black/30" />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-black/20 to-black/40 md:from-black/30 md:to-black/30 z-[1]" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 pt-14 md:pt-20">
         <h1 className="text-white text-3xl md:text-5xl font-semibold drop-shadow-sm">
-          Connect with the <span className="text-teal-300">Habesha Community</span>
+          Connect with the <span className="text-blue-500">Habesha Community</span>
         </h1>
         <p className="text-white/90 mt-3 md:text-lg">
-          Live now: <b>{totals.totalPeople}</b> people in <b>{totals.totalCities}</b> cities
+          <span className="text-red-500">Live now:</span> <b>{totals.totalPeople}</b> people in <b>{totals.totalCities}</b> cities
         </p>
 
         <div className="mt-6">
