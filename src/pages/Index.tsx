@@ -454,8 +454,8 @@ export default function Index() {
     }, 100);
   };
 
-  const shouldShowCityIndex =
-    !!appState.city && !filters.query && !filters.subcategory;
+  // Always show world map on homepage, only show city index when filtering
+  const shouldShowCityIndex = false; // Disable city index to always show world map
 
   return (
     <div className="min-h-screen bg-background">
@@ -556,50 +556,17 @@ export default function Index() {
         />
       </div>
 
-      {/* Hero section when no city is selected */}
-      {!appState.city && (
-        <WorldActivityHero
-          mode="dark"
-          SearchBar={() => <CitySearchBar 
-            placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
-            onCitySelect={handleCityChange}
-          />}
-          onPrimary={handleHousingClick}
-          onSecondary={handleJobsClick}
-          onCityClick={handleCityClick}
-        />
-      )}
-
-      {/* Trending Rails Section */}
-      {!appState.city && (
-        <div className="space-y-6 mb-12">
-          <TrendingRail 
-            label="Featured Picks" 
-            featured 
-            link="/browse?featured=true" 
-          />
-          <TrendingRail 
-            label="Housing & Rentals" 
-            category="housing" 
-            link="/browse?category=housing" 
-          />
-          <TrendingRail 
-            label="Jobs" 
-            category="jobs" 
-            link="/browse?category=jobs" 
-          />
-          <TrendingRail 
-            label="Services" 
-            category="services" 
-            link="/browse?category=services" 
-          />
-          <TrendingRail 
-            label="Marketplace" 
-            category="marketplace" 
-            link="/browse?category=marketplace" 
-          />
-        </div>
-      )}
+      {/* Hero section - Always show the world map with live users on homepage */}
+      <WorldActivityHero
+        mode="dark"
+        SearchBar={() => <CitySearchBar 
+          placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
+          onCitySelect={handleCityChange}
+        />}
+        onPrimary={handleHousingClick}
+        onSecondary={handleJobsClick}
+        onCityClick={handleCityClick}
+      />
 
       <main className="container mx-auto px-4 py-6">
         {shouldShowCityIndex ? (
