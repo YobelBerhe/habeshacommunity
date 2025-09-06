@@ -131,7 +131,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
             <ImageBox
               src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
               alt={listing.title}
-              className="rounded-t-lg h-48 w-full object-cover"
+              className="rounded-t-lg h-40 w-full object-cover"
             />
             
             {/* Price overlay - top left with dark background */}
@@ -177,95 +177,21 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
             )}
           </div>
 
-          {/* Zillow-style content - compact and efficient */}
-          <div className="p-3 space-y-1.5">
-
-            {/* Title - smaller, more compact */}
+          {/* Compact Craigslist-style content */}
+          <div className="p-2.5 space-y-1">
+            {/* Title - compact */}
             <h3 className="font-medium text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2">
               {listing.title}
             </h3>
 
-            {/* Address/Location - Zillow style */}
-            <div className="text-xs text-muted-foreground line-clamp-1">
-              {(listing as any).street_address ? (listing as any).street_address : listing.city}
-              {listing.country && `, ${listing.country}`}
-            </div>
-
-            {/* Property details like Craigslist/Zillow */}
-            <div className="space-y-1">
-              <div className="flex justify-between items-center text-xs">
-                <Badge variant="outline" className="text-xs px-1.5 py-0.5 h-4 text-[10px]">
-                  {subcategoryName || categoryName}
-                </Badge>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Calendar className="w-2.5 h-2.5" />
-                  <span className="text-[10px]">{formatDate(listing.createdAt || 0)}</span>
-                </div>
-              </div>
-              
-              {/* Additional details like Zillow */}
-              <div className="text-[10px] text-muted-foreground space-y-0.5">
-                {(listing as any).street_address && (
-                  <div className="line-clamp-1">{(listing as any).street_address}</div>
-                )}
-                {listing.description && (
-                  <div className="line-clamp-2">{listing.description}</div>
-                )}
-              </div>
-            </div>
-
-            {/* Zillow-style action buttons */}
-            <div className="flex gap-0.5 pt-1">
-              {/* Contact buttons for accessible contacts */}
-              {hasContactAccess && listing.contact_phone && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1 h-6 text-[10px] px-1.5"
-                  onClick={(e) => handleContactAction(e, 'phone')}
-                >
-                  <Phone className="h-2.5 w-2.5 mr-1" />
-                  Call
-                </Button>
-              )}
-              
-              {hasContactAccess && (listing as any).contact_email && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1 h-6 text-[10px] px-1.5"
-                  onClick={(e) => handleContactAction(e, 'email')}
-                >
-                  <Mail className="h-2.5 w-2.5 mr-1" />
-                  Email
-                </Button>
-              )}
-              
-              {/* Message button - when contacts are hidden or for non-owners */}
-              {(!hasContactAccess || (listing as any).contact_hidden) && user && listing.user_id !== user.id && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1 h-6 text-[10px] px-1.5"
-                  onClick={(e) => handleContactAction(e, 'message')}
-                >
-                  <MessageSquare className="h-2.5 w-2.5 mr-1" />
-                  Message
-                </Button>
-              )}
-              
-              {/* Website button */}
-              {(listing as any).website_url && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1 h-6 text-[10px] px-1.5"
-                  onClick={(e) => handleContactAction(e, 'website')}
-                >
-                  <Globe className="h-2.5 w-2.5 mr-1" />
-                  Visit
-                </Button>
-              )}
+            {/* Location and time - simple line */}
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span className="line-clamp-1">
+                {listing.city}{listing.country && `, ${listing.country}`}
+              </span>
+              <span className="text-[10px] whitespace-nowrap">
+                {formatDate(listing.createdAt || 0)}
+              </span>
             </div>
           </div>
         </CardContent>

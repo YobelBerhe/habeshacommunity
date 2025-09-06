@@ -138,9 +138,9 @@ export default function ListingDetail({ open, listing, onClose, onSavedChange }:
               title="Share listing"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <path d="m9 9 6-6"/>
-                <path d="m15 3 3 3-3 3"/>
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                <path d="M12 2l3 3-3 3"/>
               </svg>
             </button>
             <button
@@ -199,29 +199,6 @@ export default function ListingDetail({ open, listing, onClose, onSavedChange }:
               )}
             </div>
             
-            {/* Property details grid like Zillow */}
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="space-y-1">
-                <span className="text-muted-foreground">Type:</span>
-                <div className="font-medium">{listing.category || 'General'}</div>
-              </div>
-              <div className="space-y-1">
-                <span className="text-muted-foreground">Listed:</span>
-                <div className="font-medium">{new Date(listing.createdAt || 0).toLocaleDateString()}</div>
-              </div>
-              {listing.city && (
-                <div className="space-y-1">
-                  <span className="text-muted-foreground">Location:</span>
-                  <div className="font-medium">{listing.city}</div>
-                </div>
-              )}
-              {(listing as any).street_address && (
-                <div className="space-y-1">
-                  <span className="text-muted-foreground">Address:</span>
-                  <div className="font-medium">{(listing as any).street_address}</div>
-                </div>
-              )}
-            </div>
             
             {/* Tags */}
             {(listing.tags ?? []).length > 0 && (
