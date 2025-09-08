@@ -8,10 +8,17 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
+        // Handle the auth callback with session exchange
+        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
         
         if (error) {
           console.error('Auth callback error:', error);
+          // Try getting existing session as fallback
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData.session) {
+            navigate('/', { replace: true });
+            return;
+          }
           navigate('/auth/login?error=callback_failed');
           return;
         }
@@ -25,7 +32,17 @@ export default function AuthCallback() {
         }
       } catch (error) {
         console.error('Auth callback error:', error);
-        navigate('/auth/login?error=callback_failed');
+        // Fallback to check for existing session
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            navigate('/', { replace: true });
+          } else {
+            navigate('/auth/login?error=callback_failed');
+          }
+        } catch {
+          navigate('/auth/login?error=callback_failed');
+        }
       }
     };
 

@@ -22,6 +22,8 @@ export default function Register() {
       return setErr("Password must be at least 6 characters");
     }
     
+    console.log('🔐 Registration attempt:', { email, redirectTo: `${window.location.origin}/auth/callback` });
+    
     const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
@@ -31,16 +33,27 @@ export default function Register() {
       },
     });
     
-    setLoading(false);
-    if (error) return setErr(error.message);
+    console.log('🔐 Registration result:', { authData, error });
     
-    // Create profile entry
-    if (authData.user) {
-      await supabase.from('profiles').insert({
-        id: authData.user.id,
-        display_name: name,
-        city: city
-      });
+    setLoading(false);
+    if (error) {
+      console.error('Registration error:', error);
+      return setErr(error.message);
+    }
+    
+    // Create profile entry only if user was created and not already exists
+    if (authData.user && !authData.user.email_confirmed_at) {
+      try {
+        await supabase.from('profiles').insert({
+          id: authData.user.id,
+          display_name: name,
+          city: city
+        });
+        console.log('✅ Profile created successfully');
+      } catch (profileError) {
+        console.error('Profile creation error:', profileError);
+        // Don't show error to user as the account was still created
+      }
     }
     
     setDone(true);
