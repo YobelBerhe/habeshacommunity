@@ -75,9 +75,11 @@ export default function CitySearchBar({
     // Call selection handler if provided
     if (onCitySelect) {
       onCitySelect(cityName, parseFloat(city.lat), parseFloat(city.lon));
+      // Don't navigate if onCitySelect is provided (e.g., in registration form)
+      return;
     }
     
-    // Always navigate to browse page with city
+    // Navigate to browse page with city only if no onCitySelect handler
     navigate(`/browse?city=${encodeURIComponent(cityName)}`);
   };
 
@@ -89,9 +91,12 @@ export default function CitySearchBar({
       // Call selection handler if provided
       if (onCitySelect) {
         onCitySelect(cityName);
+        setOpen(false);
+        // Don't navigate if onCitySelect is provided (e.g., in registration form)
+        return;
       }
       
-      // Always navigate to browse page with city
+      // Navigate to browse page with city only if no onCitySelect handler
       navigate(`/browse?city=${encodeURIComponent(cityName)}`);
       setOpen(false);
     }
