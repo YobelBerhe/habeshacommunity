@@ -29,7 +29,7 @@ export default function Register() {
       password,
       options: { 
         data: { display_name: name, city },
-        emailRedirectTo: `${window.location.origin}/auth/callback`
+        emailRedirectTo: "https://habeshacommunity.com/auth/callback"
       },
     });
     

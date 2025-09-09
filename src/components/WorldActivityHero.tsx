@@ -128,13 +128,10 @@ export default function WorldActivityHero({
   }, [points, onCityClick, mode, prefersReduced]);
 
   return (
-    <section className={`relative w-full h-[60vh] md:h-[82vh] overflow-hidden ${mode === "light" ? "bg-white" : "bg-[#0b0c0f]"}`}>
+    <section className={`relative w-full h-[50vh] md:h-[82vh] overflow-hidden ${mode === "light" ? "bg-white" : "bg-[#0b0c0f]"}`}>
       <div ref={containerRef} className="absolute inset-0 z-0" />
       
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-black/20 to-black/40 md:from-black/30 md:to-black/30 z-[1]" />
-      
-      {/* White horizontal line at bottom for mobile */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white md:hidden z-[2]" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 pt-14 md:pt-20">
         <h1 className="text-white text-3xl md:text-5xl font-semibold drop-shadow-sm">
@@ -165,21 +162,22 @@ export default function WorldActivityHero({
           >
             Jobs
           </button>
+          {/* Hide mobile buttons on homepage only */}
           <button 
             onClick={() => window.location.href = '/browse?category=community'} 
-            className="rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
+            className="hidden md:block rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
           >
             Community
           </button>
           <button 
             onClick={() => window.location.href = '/browse?category=services'} 
-            className="rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
+            className="hidden md:block rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
           >
             Services
           </button>
           <button 
             onClick={() => window.location.href = '/browse?category=marketplace'} 
-            className="rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
+            className="hidden md:block rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
           >
             Marketplace
           </button>

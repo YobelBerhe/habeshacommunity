@@ -4,7 +4,7 @@ export async function signInWithEmail(email: string) {
   const { error } = await supabase.auth.signInWithOtp({ 
     email, 
     options: { 
-      emailRedirectTo: `${window.location.origin}/auth/callback`
+      emailRedirectTo: "https://habeshacommunity.com/auth/callback"
     } 
   });
   if (error) throw error;
