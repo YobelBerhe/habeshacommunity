@@ -123,11 +123,11 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           {/* Community first */}
           <details className="group border-b">
             <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-start">
                 <Users2 className="w-4 h-4 text-primary" />
-                <span className="font-medium">{TAXONOMY.community.name[language.toLowerCase() as 'en' | 'ti']}</span>
+                <span className="font-medium text-left">{TAXONOMY.community.name[language.toLowerCase() as 'en' | 'ti']}</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
             </summary>
 
             <ul className="pb-2">
@@ -158,11 +158,11 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           {/* Find a Mentor - Toggleable */}
           <details className="group border-b">
             <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-start">
                 <Users className="w-4 h-4 text-primary" />
-                <span className="font-medium">Find a Mentor</span>
+                <span className="font-medium text-left">Find a Mentor</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
             </summary>
             <ul className="pb-2">
               <li>
@@ -193,11 +193,11 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           {/* Match & Connect - Toggleable */}
           <details className="group border-b">
             <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-start">
                 <Target className="w-4 h-4 text-primary" />
-                <span className="font-medium">Match & Connect</span>
+                <span className="font-medium text-left">Match & Connect</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
             </summary>
             <ul className="pb-2">
               <li>
@@ -228,11 +228,11 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           {/* Marketplace - Toggleable */}
           <details className="group border-b">
             <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-start">
                 <ShoppingBag className="w-4 h-4 text-primary" />
-                <span className="font-medium">Marketplace</span>
+                <span className="font-medium text-left">Marketplace</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
             </summary>
             <ul className="pb-2">
               <li>
@@ -286,13 +286,13 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           {(['housing','jobs','services'] as const).map(section => (
             <details key={section} className="group border-b">
               <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 justify-start">
                   {section === 'housing' && <Home className="w-4 h-4 text-primary" />}
                   {section === 'jobs' && <Briefcase className="w-4 h-4 text-primary" />}
                   {section === 'services' && <Wrench className="w-4 h-4 text-primary" />}
-                  <span className="font-medium">{TAXONOMY[section].name[language.toLowerCase() as 'en' | 'ti']}</span>
+                  <span className="font-medium text-left">{TAXONOMY[section].name[language.toLowerCase() as 'en' | 'ti']}</span>
                 </div>
-                <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
+                <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
               </summary>
 
               <ul className="pb-2">

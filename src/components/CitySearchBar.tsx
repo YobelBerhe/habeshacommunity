@@ -9,13 +9,15 @@ interface CitySearchBarProps {
   onCitySelect?: (city: string, lat?: number, lon?: number) => void;
   placeholder?: string;
   className?: string;
+  disableNavigation?: boolean;
 }
 
 export default function CitySearchBar({ 
   value, 
   onCitySelect, 
   placeholder = "City (e.g. Asmara, Oakland, Frankfurt)",
-  className = ""
+  className = "",
+  disableNavigation = false
 }: CitySearchBarProps) {
   const [q, setQ] = useState(value ?? "");
   const [open, setOpen] = useState(false);
@@ -75,12 +77,14 @@ export default function CitySearchBar({
     // Call selection handler if provided
     if (onCitySelect) {
       onCitySelect(cityName, parseFloat(city.lat), parseFloat(city.lon));
-      // Don't navigate if onCitySelect is provided (e.g., in registration form)
+      // Don't navigate if onCitySelect is provided or navigation is disabled
       return;
     }
     
-    // Navigate to browse page with city only if no onCitySelect handler
-    navigate(`/browse?city=${encodeURIComponent(cityName)}`);
+    // Navigate to browse page with city only if navigation is not disabled
+    if (!disableNavigation) {
+      navigate(`/browse?city=${encodeURIComponent(cityName)}`);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -92,12 +96,14 @@ export default function CitySearchBar({
       if (onCitySelect) {
         onCitySelect(cityName);
         setOpen(false);
-        // Don't navigate if onCitySelect is provided (e.g., in registration form)
+        // Don't navigate if onCitySelect is provided or navigation is disabled
         return;
       }
       
-      // Navigate to browse page with city only if no onCitySelect handler
-      navigate(`/browse?city=${encodeURIComponent(cityName)}`);
+      // Navigate to browse page with city only if navigation is not disabled
+      if (!disableNavigation) {
+        navigate(`/browse?city=${encodeURIComponent(cityName)}`);
+      }
       setOpen(false);
     }
   };

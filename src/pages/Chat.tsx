@@ -160,6 +160,7 @@ export default function Chat() {
               onCitySelect={handleCitySelect}
               placeholder="Choose city..."
               className="w-full"
+              disableNavigation={true}
             />
           </div>
           
