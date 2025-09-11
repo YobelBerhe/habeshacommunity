@@ -446,6 +446,48 @@ export type Database = {
           },
         ]
       }
+      match_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          target_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          target_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          target_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      match_passes: {
+        Row: {
+          created_at: string | null
+          id: string
+          target_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          target_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          target_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       match_profiles: {
         Row: {
           age: number | null
