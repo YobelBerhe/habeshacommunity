@@ -130,18 +130,39 @@ export default function MatchDiscover() {
     return { score, shared: sharedQuestions };
   };
 
-  const handlePass = () => {
-    if (currentIndex < matches.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      // No more matches
-      setCurrentIndex(0);
+  const handlePass = async () => {
+    if (!currentMatch) return;
+    
+    try {
+      const { passUser } = await import('@/utils/matchActions');
+      await passUser(currentMatch.user_id);
+      
+      if (currentIndex < matches.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        // No more matches
+        setCurrentIndex(0);
+      }
+    } catch (error) {
+      console.error('Failed to pass user:', error);
     }
   };
 
-  const handleLike = () => {
-    // In a real app, you'd save the like/match
-    handlePass();
+  const handleLike = async () => {
+    if (!currentMatch) return;
+    
+    try {
+      const { likeUser } = await import('@/utils/matchActions');
+      await likeUser(currentMatch.user_id);
+      
+      if (currentIndex < matches.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        setCurrentIndex(0);
+      }
+    } catch (error) {
+      console.error('Failed to like user:', error);
+    }
   };
 
   const currentMatch = matches[currentIndex];
@@ -256,7 +277,19 @@ export default function MatchDiscover() {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => navigate(`/inbox?match=${currentMatch.user_id}`)}
+                onClick={async () => {
+                  if (!user) {
+                    navigate('/auth/login');
+                    return;
+                  }
+                  try {
+                    const { sendMessage } = await import('@/utils/matchActions');
+                    const res = await sendMessage(currentMatch.user_id, 'Hi! I found your profile interesting.');
+                    navigate(`/inbox?thread=${res.chatId}`);
+                  } catch (error) {
+                    console.error('Failed to send message:', error);
+                  }
+                }}
                 className="w-20 h-20 rounded-full"
               >
                 <MessageCircle className="w-8 h-8" />

@@ -275,7 +275,24 @@ export default function MentorDetail() {
               <CardContent className="pt-6">
                 <Button
                   variant="outline"
-                  onClick={() => navigate(`/inbox?mentor=${mentor.id}`)}
+                  onClick={async () => {
+                    if (!user) {
+                      navigate('/auth/login');
+                      return;
+                    }
+                    try {
+                      const { sendMessage } = await import('@/utils/matchActions');
+                      const res = await sendMessage(mentor.user_id, 'Hello! I\'m interested in your mentoring services.');
+                      navigate(`/inbox?thread=${res.chatId}`);
+                    } catch (error) {
+                      console.error('Failed to send message:', error);
+                      toast({
+                        title: 'Error',
+                        description: 'Failed to send message. Please try again.',
+                        variant: 'destructive',
+                      });
+                    }
+                  }}
                   className="w-full"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />

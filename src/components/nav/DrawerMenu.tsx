@@ -101,12 +101,10 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
         <div className="sticky top-0 z-[1] bg-background/95 backdrop-blur border-b">
           <div className="pt-[env(safe-area-inset-top)] px-4 h-14 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" onClick={() => onOpenChange(false)} title="Go to Homepage">
-              <img 
-                src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
-                alt="HabeshaCommunity" 
-                className="w-6 h-6 rounded"
-              />
-              <h3 className="text-base font-semibold text-primary hover:text-primary/80 transition-colors">HabeshaCommunity</h3>
+              <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+                <span className="text-white font-bold text-sm">H</span>
+              </div>
+              <h3 className="text-lg font-semibold text-primary hover:text-primary/80 transition-colors">HabeshaCommunity</h3>
             </Link>
             <button
               aria-label="Close"
@@ -122,12 +120,12 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
         <div className="overflow-y-auto overscroll-contain px-2 pb-[env(safe-area-inset-bottom)]">
           {/* Community first */}
           <details className="group border-b">
-            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2 justify-start">
-                <Users2 className="w-4 h-4 text-primary" />
-                <span className="font-medium text-left">{TAXONOMY.community.name[language.toLowerCase() as 'en' | 'ti']}</span>
+            <summary className="flex items-center justify-between py-4 cursor-pointer select-none">
+              <div className="flex items-center gap-3">
+                <Users2 className="w-5 h-5 text-primary" />
+                <span className="font-medium">{TAXONOMY.community.name[language.toLowerCase() as 'en' | 'ti']}</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
             </summary>
 
             <ul className="pb-2">
@@ -157,12 +155,12 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
           {/* Find a Mentor - Toggleable */}
           <details className="group border-b">
-            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2 justify-start">
-                <Users className="w-4 h-4 text-primary" />
-                <span className="font-medium text-left">Find a Mentor</span>
+            <summary className="flex items-center justify-between py-4 cursor-pointer select-none">
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-primary" />
+                <span className="font-medium">Find a Mentor</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
             </summary>
             <ul className="pb-2">
               <li>
@@ -192,12 +190,12 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
           {/* Match & Connect - Toggleable */}
           <details className="group border-b">
-            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2 justify-start">
-                <Target className="w-4 h-4 text-primary" />
-                <span className="font-medium text-left">Match & Connect</span>
+            <summary className="flex items-center justify-between py-4 cursor-pointer select-none">
+              <div className="flex items-center gap-3">
+                <Target className="w-5 h-5 text-primary" />
+                <span className="font-medium">Match & Connect</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
             </summary>
             <ul className="pb-2">
               <li>
@@ -227,12 +225,12 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
           {/* Marketplace - Toggleable */}
           <details className="group border-b">
-            <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-              <div className="flex items-center gap-2 justify-start">
-                <ShoppingBag className="w-4 h-4 text-primary" />
-                <span className="font-medium text-left">Marketplace</span>
+            <summary className="flex items-center justify-between py-4 cursor-pointer select-none">
+              <div className="flex items-center gap-3">
+                <ShoppingBag className="w-5 h-5 text-primary" />
+                <span className="font-medium">Marketplace</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
+              <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
             </summary>
             <ul className="pb-2">
               <li>
@@ -285,14 +283,14 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
           {/* Other categories with icons */}
           {(['housing','jobs','services'] as const).map(section => (
             <details key={section} className="group border-b">
-              <summary className="flex items-center justify-between py-3 cursor-pointer select-none">
-                <div className="flex items-center gap-2 justify-start">
-                  {section === 'housing' && <Home className="w-4 h-4 text-primary" />}
-                  {section === 'jobs' && <Briefcase className="w-4 h-4 text-primary" />}
-                  {section === 'services' && <Wrench className="w-4 h-4 text-primary" />}
-                  <span className="font-medium text-left">{TAXONOMY[section].name[language.toLowerCase() as 'en' | 'ti']}</span>
+              <summary className="flex items-center justify-between py-4 cursor-pointer select-none">
+                <div className="flex items-center gap-3">
+                  {section === 'housing' && <Home className="w-5 h-5 text-primary" />}
+                  {section === 'jobs' && <Briefcase className="w-5 h-5 text-primary" />}
+                  {section === 'services' && <Wrench className="w-5 h-5 text-primary" />}
+                  <span className="font-medium">{TAXONOMY[section].name[language.toLowerCase() as 'en' | 'ti']}</span>
                 </div>
-                <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform ml-auto flex-shrink-0" />
+                <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
               </summary>
 
               <ul className="pb-2">
