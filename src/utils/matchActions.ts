@@ -1,25 +1,25 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export async function likeUser(targetUserId: string) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not signed in');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not signed in');
   
-  // Create notification for the liked user
-  const { error: notificationError } = await supabase
-    .from('notifications')
-    .insert({ 
-      user_id: targetUserId,
+  // Send a notification via edge function (bypasses RLS safely)
+  const { error } = await supabase.functions.invoke('create-notification', {
+    body: {
+      userId: targetUserId,
       type: 'match_like',
       title: 'Someone liked you!',
-      body: `You have a new match! Someone is interested in connecting with you.`,
+      body: 'You have a new like in Match & Connect.',
       link: '/match'
-    });
-    
-  if (notificationError) {
-    console.error('Error creating like notification:', notificationError);
-  }
-  
-  console.log('User liked:', targetUserId);
+    },
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (error) console.error('Error creating like notification:', error);
   return { ok: true };
 }
 
