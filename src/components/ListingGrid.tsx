@@ -25,7 +25,7 @@ export default function ListingGrid({
   const getGridClass = () => {
     switch (viewMode) {
       case "list":
-        return "grid grid-cols-1 gap-4";
+        return "flex flex-col gap-4";
       case "gallery":
         return "grid grid-cols-2 gap-3 md:gap-4";
       case "grid":
