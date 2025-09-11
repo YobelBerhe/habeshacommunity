@@ -4,20 +4,22 @@ export async function likeUser(targetUserId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not signed in');
   
-  // For now, we'll store likes in a simple way using notifications
-  // Later we can create proper match_likes table
-  const { error } = await supabase
+  // Create notification for the liked user
+  const { error: notificationError } = await supabase
     .from('notifications')
     .insert({ 
       user_id: targetUserId,
       type: 'match_like',
       title: 'Someone liked you!',
-      body: 'You have a new match'
+      body: `You have a new match! Someone is interested in connecting with you.`,
+      link: '/match'
     });
     
-  if (error && error.code !== '23505') {
-    console.error('Error creating like:', error);
+  if (notificationError) {
+    console.error('Error creating like notification:', notificationError);
   }
+  
+  console.log('User liked:', targetUserId);
   return { ok: true };
 }
 
@@ -96,6 +98,21 @@ export async function sendMessage(toUserId: string, body: string) {
     });
 
   if (messageError) throw messageError;
+
+  // Create notification for the recipient
+  const { error: notificationError } = await supabase
+    .from('notifications')
+    .insert({
+      user_id: toUserId,
+      type: 'match_message',
+      title: 'New Message from Match',
+      body: `You received a message: "${body.length > 50 ? body.substring(0, 50) + '...' : body}"`,
+      link: `/inbox?thread=${threadId}`
+    });
+
+  if (notificationError) {
+    console.error('Error creating message notification:', notificationError);
+  }
 
   return { ok: true, chatId: threadId };
 }

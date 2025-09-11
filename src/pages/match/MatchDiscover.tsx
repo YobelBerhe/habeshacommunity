@@ -137,10 +137,10 @@ export default function MatchDiscover() {
       const { passUser } = await import('@/utils/matchActions');
       await passUser(currentMatch.user_id);
       
+      // Move to next match
       if (currentIndex < matches.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
-        // No more matches
         setCurrentIndex(0);
       }
     } catch (error) {
@@ -155,6 +155,7 @@ export default function MatchDiscover() {
       const { likeUser } = await import('@/utils/matchActions');
       await likeUser(currentMatch.user_id);
       
+      // Move to next match
       if (currentIndex < matches.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
@@ -162,6 +163,21 @@ export default function MatchDiscover() {
       }
     } catch (error) {
       console.error('Failed to like user:', error);
+    }
+  };
+
+  const handleMessage = async () => {
+    if (!currentMatch || !user) {
+      navigate('/auth/login');
+      return;
+    }
+    
+    try {
+      const { sendMessage } = await import('@/utils/matchActions');
+      const res = await sendMessage(currentMatch.user_id, 'Hi! I found your profile interesting and would like to connect.');
+      navigate(`/inbox?thread=${res.chatId}`);
+    } catch (error) {
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -269,38 +285,29 @@ export default function MatchDiscover() {
                 variant="outline"
                 size="lg"
                 onClick={handlePass}
-                className="w-20 h-20 rounded-full"
+                className="w-16 h-16 rounded-full border-2 border-red-200 hover:border-red-400 hover:bg-red-50"
+                aria-label="Pass on this match"
               >
-                <X className="w-8 h-8" />
+                <X className="w-8 h-8 text-red-500" />
               </Button>
               
               <Button
                 variant="outline"
                 size="lg"
-                onClick={async () => {
-                  if (!user) {
-                    navigate('/auth/login');
-                    return;
-                  }
-                  try {
-                    const { sendMessage } = await import('@/utils/matchActions');
-                    const res = await sendMessage(currentMatch.user_id, 'Hi! I found your profile interesting.');
-                    navigate(`/inbox?thread=${res.chatId}`);
-                  } catch (error) {
-                    console.error('Failed to send message:', error);
-                  }
-                }}
-                className="w-20 h-20 rounded-full"
+                onClick={handleMessage}
+                className="w-16 h-16 rounded-full border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50"
+                aria-label="Send message"
               >
-                <MessageCircle className="w-8 h-8" />
+                <MessageCircle className="w-8 h-8 text-blue-500" />
               </Button>
               
               <Button
                 size="lg"
                 onClick={handleLike}
-                className="w-20 h-20 rounded-full bg-primary hover:bg-primary/90"
+                className="w-16 h-16 rounded-full bg-pink-500 hover:bg-pink-600 border-0"
+                aria-label="Like this match"
               >
-                <Heart className="w-8 h-8" />
+                <Heart className="w-8 h-8 text-white" />
               </Button>
             </div>
 
