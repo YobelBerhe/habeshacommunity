@@ -126,72 +126,63 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
         }}
       >
         <CardContent className="p-0">
-          {/* Zillow-style elongated image */}
-          <div className="relative">
-            <ImageBox
-              src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
-              alt={listing.title}
-              className="rounded-t-lg h-40 w-full object-cover"
-            />
-            
-            {/* Price overlay - top left with dark background */}
-            {listing.price && (
+          {/* Horizontal layout similar to reference */}
+          <div className="flex h-28">
+            {/* Image section */}
+            <div className="relative w-32 flex-shrink-0">
+              <ImageBox
+                src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
+                alt={listing.title}
+                className="h-full w-full object-cover rounded-l-lg"
+              />
+              
+              {/* Time badge */}
               <div className="absolute top-2 left-2">
-                <div className="bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-sm font-bold text-white shadow-lg">
-                  {formatPrice(listing.price)}
+                <Badge className="bg-red-500 text-white text-xs px-2 py-1 font-medium">
+                  {formatDate(listing.createdAt || 0)}
+                </Badge>
+              </div>
+            </div>
+            
+            {/* Content section */}
+            <div className="flex-1 p-3 flex flex-col justify-between relative">
+              {/* Top section */}
+              <div className="space-y-1">
+                {/* Price */}
+                {listing.price && (
+                  <div className="text-lg font-bold text-foreground">
+                    {formatPrice(listing.price)}
+                  </div>
+                )}
+                
+                {/* Details */}
+                <div className="text-sm text-muted-foreground">
+                  2 bds | 1 ba | 875 sqft | Active
+                </div>
+                
+                {/* Title/Address */}
+                <h3 className="font-medium text-sm leading-tight text-foreground line-clamp-1">
+                  {listing.title}
+                </h3>
+                
+                {/* Location */}
+                <div className="text-xs text-muted-foreground">
+                  {listing.city}{listing.country && `, ${listing.country}`}
                 </div>
               </div>
-            )}
-            
-            {/* Overlay actions - top right */}
-            <div className="absolute top-2 right-2 flex gap-1">
-              {showJustPosted && (
-                <Badge className="bg-green-500 text-white border-0 animate-pulse text-xs px-2 py-1">
-                  Posted
-                </Badge>
-              )}
+              
+              {/* Big heart in top right corner */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 bg-transparent hover:bg-white/10"
+                className="absolute top-2 right-2 h-8 w-8 bg-transparent hover:bg-muted/50"
                 onClick={handleFavoriteToggle}
                 aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
               >
                 <Heart 
-                  className={`w-7 h-7 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-white/90 hover:text-red-500'}`}
-                  style={{
-                    filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.8)) drop-shadow(0 0 1px rgba(0,0,0,0.9))',
-                    WebkitTextStroke: '0.5px rgba(0,0,0,0.5)'
-                  }}
+                  className={`w-6 h-6 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
                 />
               </Button>
-            </div>
-
-            {/* Photo count - Zillow style */}
-            {((listing as any).photos?.length > 1 || (listing as any).images?.length > 1) && (
-              <div className="absolute bottom-2 right-2">
-                <Badge className="bg-black/70 text-white text-xs px-2 py-1 backdrop-blur-sm">
-                  {(listing as any).photos?.length || (listing as any).images?.length} photos
-                </Badge>
-              </div>
-            )}
-          </div>
-
-          {/* Compact Craigslist-style content */}
-          <div className="p-2.5 space-y-1">
-            {/* Title - compact */}
-            <h3 className="font-medium text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2">
-              {listing.title}
-            </h3>
-
-            {/* Location and time - simple line */}
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
-              <span className="line-clamp-1">
-                {listing.city}{listing.country && `, ${listing.country}`}
-              </span>
-              <span className="text-[10px] whitespace-nowrap">
-                {formatDate(listing.createdAt || 0)}
-              </span>
             </div>
           </div>
         </CardContent>

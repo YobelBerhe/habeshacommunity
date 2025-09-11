@@ -25,47 +25,61 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
   return (
     <div
       onClick={handleCardClick}
-      className="min-w-[260px] max-w-[260px] snap-start rounded-xl overflow-hidden bg-card border hover:shadow-lg transition-all duration-200 cursor-pointer group"
+      className="w-full snap-start rounded-lg overflow-hidden bg-card border hover:shadow-lg transition-all duration-200 cursor-pointer group"
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <img 
-          src={img} 
-          alt={item.title} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" 
-        />
-        <button
-          type="button"
-          onClick={handleSaveClick}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
-        >
-          <Heart className={`w-4 h-4 ${saved ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
-        </button>
-        
-        {/* Category pill */}
-        <div className="absolute bottom-3 left-3">
-          <span className="text-xs px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm text-foreground font-medium">
-            {item.category}
-          </span>
-        </div>
-      </div>
-
-      <div className="p-4 space-y-2">
-        <div className="text-sm font-semibold line-clamp-2 text-foreground min-h-[2.5rem]">
-          {item.title}
-        </div>
-        
-        <div className="text-xs text-muted-foreground">
-          {item.city && item.country ? `${item.city}, ${item.country}` : item.city || item.country || ''}
-        </div>
-        
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-sm font-bold text-foreground">
-            {price != null ? `$${price.toLocaleString()}` : ''}
-          </span>
+      {/* Horizontal layout similar to reference */}
+      <div className="flex h-28">
+        {/* Image section */}
+        <div className="relative w-32 flex-shrink-0">
+          <img 
+            src={img} 
+            alt={item.title} 
+            className="h-full w-full object-cover rounded-l-lg group-hover:scale-105 transition-transform duration-200" 
+          />
           
-          <span className="text-xs text-muted-foreground">
-            {timeAgo(new Date(item.created_at).getTime())}
-          </span>
+          {/* Time badge */}
+          <div className="absolute top-2 left-2">
+            <span className="text-xs px-2 py-1 rounded bg-red-500 text-white font-medium">
+              {timeAgo(new Date(item.created_at).getTime())}
+            </span>
+          </div>
+        </div>
+        
+        {/* Content section */}
+        <div className="flex-1 p-3 flex flex-col justify-between relative">
+          {/* Top section */}
+          <div className="space-y-1">
+            {/* Price */}
+            {price != null && (
+              <div className="text-lg font-bold text-foreground">
+                ${price.toLocaleString()}
+              </div>
+            )}
+            
+            {/* Details */}
+            <div className="text-sm text-muted-foreground">
+              2 bds | 1 ba | 875 sqft | Active
+            </div>
+            
+            {/* Title/Address */}
+            <div className="text-sm font-semibold line-clamp-1 text-foreground">
+              {item.title}
+            </div>
+            
+            {/* Location */}
+            <div className="text-xs text-muted-foreground">
+              {item.city && item.country ? `${item.city}, ${item.country}` : item.city || item.country || ''}
+            </div>
+          </div>
+          
+          {/* Big heart in top right corner */}
+          <button
+            type="button"
+            onClick={handleSaveClick}
+            className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center hover:bg-muted/50 rounded transition-colors"
+          >
+            <Heart className={`w-6 h-6 ${saved ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
+          </button>
         </div>
       </div>
     </div>
