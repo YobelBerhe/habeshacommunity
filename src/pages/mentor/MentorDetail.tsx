@@ -95,38 +95,14 @@ export default function MentorDetail() {
 
     setBooking(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: 'Authentication Required',
-          description: 'Please sign in to request a mentor session',
-          variant: 'destructive',
-        });
-        navigate('/auth/login');
-        return;
-      }
-
-      const response = await supabase.functions.invoke('mentor-book', {
-        body: { 
-          mentor_id: mentor.id, 
-          message: message.trim() 
-        },
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.error) {
-        throw response.error;
-      }
+      const { requestMentorBooking } = await import('@/utils/mentorActions');
+      await requestMentorBooking(mentor.id, message.trim());
 
       toast({
         title: 'Request Sent!',
-        description: 'Your mentoring session request has been sent successfully. Check your bookings for updates.',
+        description: 'Your mentoring session request has been sent successfully.',
       });
       setMessage('');
-      navigate('/mentor/bookings');
     } catch (error) {
       console.error('Error creating booking:', error);
       toast({

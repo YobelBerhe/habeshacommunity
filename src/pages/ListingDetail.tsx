@@ -20,6 +20,7 @@ import { t } from "@/lib/i18n";
 import { TAXONOMY } from "@/lib/taxonomy";
 import MapMini from "@/components/MapMini";
 import ImageBox from "@/components/ImageBox";
+import ContactButton from "@/components/ContactButton";
 import { timeAgo } from "@/lib/time";
 import { bumpListingView } from "@/lib/trending";
 
@@ -92,7 +93,7 @@ export default function ListingDetail() {
         
         // Track view for user analytics
         if (user) {
-          await supabase.rpc('track_listing_view', { listing_id: id });
+          await supabase.rpc('track_listing_view', { p_listing_id: id });
         }
 
         // Load similar listings
@@ -403,6 +404,11 @@ export default function ListingDetail() {
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="w-4 h-4" />
                 <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
+                {/* Add ContactButton here next to address */}
+                <ContactButton 
+                  contact={listing.contact_phone || listing.contact_whatsapp || listing.contact_telegram || listing.contact_email} 
+                  className="ml-2"
+                />
               </div>
             </div>
             {listing.price && (

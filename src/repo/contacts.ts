@@ -7,7 +7,7 @@ export async function trackListingView(listingId: string): Promise<void> {
   if (!data.user) return; // Only track for authenticated users
   
   const { error } = await supabase.rpc('track_listing_view', { 
-    listing_id: listingId 
+    p_listing_id: listingId 
   });
   
   if (error) {

@@ -117,7 +117,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
   return (
     <>
       <Card 
-        className="group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer bg-card border border-border/10 overflow-hidden rounded-2xl w-[320px] min-w-[320px]"
+        className="group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer bg-card border border-border/10 overflow-hidden rounded-2xl"
         onClick={() => {
           // Store current scroll position and URL for back navigation
           sessionStorage.setItem('hn.index.scrollY', String(window.scrollY));

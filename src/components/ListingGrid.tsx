@@ -30,7 +30,7 @@ export default function ListingGrid({
         return "grid grid-cols-2 gap-3 md:grid-cols-3 lg:gap-4";
       case "grid":
       default:
-        return "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4";
+        return "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3";
     }
   };
 

@@ -945,7 +945,7 @@ export type Database = {
         Returns: undefined
       }
       track_listing_view: {
-        Args: { listing_id: string }
+        Args: { p_listing_id: string }
         Returns: undefined
       }
     }
