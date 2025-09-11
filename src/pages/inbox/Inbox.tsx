@@ -65,6 +65,14 @@ export default function Inbox() {
     }
   }, [user, navigate, searchParams]);
 
+  // If a thread id is provided, select it once threads are loaded
+  useEffect(() => {
+    const threadId = searchParams.get('thread');
+    if (threadId) {
+      setSelectedThread(threadId);
+    }
+  }, [searchParams, threads.length]);
+
   useEffect(() => {
     if (selectedThread) {
       fetchMessages(selectedThread);
