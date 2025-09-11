@@ -4,7 +4,7 @@ import AuthButtons from "@/components/AuthButtons";
 import DonateButton from "@/components/DonateButton";
 import NotifyBell from "@/components/NotifyBell";
 import { useAuth } from '@/store/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/store/language';
 import { t } from '@/lib/i18n';
 
@@ -19,10 +19,10 @@ export default function Header({
 }) {
   const { user, openAuth, openPost } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMatchRoute = location.pathname.startsWith('/match');
   const { language: lang } = useLanguage();
   
-  console.log('🎯 Header render - user:', user);
-  console.log('🎯 Header render - user type:', typeof user);
 
   const handlePostClick = () => {
     console.log('📌 Post button clicked, user:', user);
@@ -50,22 +50,26 @@ export default function Header({
           <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
         </button>
 
-        <div className="flex-1 max-w-[300px] min-w-[200px] mx-4">
-          <CitySearch
-            value={currentCity}
-            onSelect={(c) => onCityChange(c.name, Number(c.lat), Number(c.lon))}
-          />
-        </div>
+        {!isMatchRoute && (
+          <div className="flex-1 max-w-[300px] min-w-[200px] mx-4">
+            <CitySearch
+              value={currentCity}
+              onSelect={(c) => onCityChange(c.name, Number(c.lat), Number(c.lon))}
+            />
+          </div>
+        )}
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <ThemeToggle />
-          {rightExtra}
-          <DonateButton />
-          <NotifyBell />
-          <button className="btn" onClick={() => navigate('/chat')}>{t(lang, "chat")}</button>
-          <button className="btn btn-primary" onClick={handlePostClick}>+ {t(lang, "post")}</button>
-          <AuthButtons />
-        </div>
+        {!isMatchRoute && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <ThemeToggle />
+            {rightExtra}
+            <DonateButton />
+            <NotifyBell />
+            <button className="btn" onClick={() => navigate('/chat')}>{t(lang, "chat")}</button>
+            <button className="btn btn-primary" onClick={handlePostClick}>+ {t(lang, "post")}</button>
+            <AuthButtons />
+          </div>
+        )}
       </div>
     </header>
   );

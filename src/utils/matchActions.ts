@@ -34,85 +34,39 @@ export async function passUser(targetUserId: string) {
 }
 
 export async function sendMessage(toUserId: string, body: string) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not signed in');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not signed in');
 
-  // Find or create chat thread
-  const ids = [user.id, toUserId].sort();
-  
-  // Check for existing thread
-  let { data: existing } = await supabase
-    .from('dm_threads')
-    .select(`
-      id,
-      dm_members!inner(user_id)
-    `)
-    .eq('dm_members.user_id', ids[0])
-    .limit(1);
+  // Get or create DM thread via RPC that bypasses RLS safely
+  const { data: threadId, error: rpcError } = await supabase.rpc('get_or_create_dm_thread', { p_other_user: toUserId });
+  if (rpcError) throw rpcError;
 
-  let threadId;
-  
-  if (existing && existing.length > 0) {
-    // Check if the other user is also in this thread
-    const { data: otherMember } = await supabase
-      .from('dm_members')
-      .select('user_id')
-      .eq('thread_id', existing[0].id)
-      .eq('user_id', ids[1])
-      .single();
-      
-    if (otherMember) {
-      threadId = existing[0].id;
-    }
-  }
-  
-  if (!threadId) {
-    // Create new thread
-    const { data: newThread, error: threadError } = await supabase
-      .from('dm_threads')
-      .insert({})
-      .select('id')
-      .single();
-      
-    if (threadError) throw threadError;
-    threadId = newThread.id;
-    
-    // Add both users to the thread
-    const { error: membersError } = await supabase
-      .from('dm_members')
-      .insert([
-        { thread_id: threadId, user_id: user.id },
-        { thread_id: threadId, user_id: toUserId }
-      ]);
-      
-    if (membersError) throw membersError;
-  }
-
-  // Send message
+  // Send message (policy: members can insert)
+  const { data: u } = await supabase.auth.getUser();
   const { error: messageError } = await supabase
     .from('dm_messages')
     .insert({
-      thread_id: threadId,
-      sender_id: user.id,
+      thread_id: threadId as unknown as string,
+      sender_id: u?.user?.id!,
       body
     });
-
   if (messageError) throw messageError;
 
-  // Create notification for the recipient
-  const { error: notificationError } = await supabase
-    .from('notifications')
-    .insert({
-      user_id: toUserId,
+  // Notify recipient via edge function
+  const { error } = await supabase.functions.invoke('create-notification', {
+    body: {
+      userId: toUserId,
       type: 'match_message',
       title: 'New Message from Match',
-      body: `You received a message: "${body.length > 50 ? body.substring(0, 50) + '...' : body}"`,
+      body: body.length > 80 ? body.substring(0, 80) + '…' : body,
       link: `/inbox?thread=${threadId}`
-    });
+    },
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (error) console.error('Error creating message notification:', error);
 
-  if (notificationError) {
-    console.error('Error creating message notification:', notificationError);
-  }
-
-  return { ok: true, chatId: threadId };
+  return { ok: true, chatId: threadId as unknown as string };
 }

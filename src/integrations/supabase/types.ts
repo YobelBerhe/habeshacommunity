@@ -922,6 +922,10 @@ export type Database = {
           total: number
         }[]
       }
+      get_or_create_dm_thread: {
+        Args: { p_other_user: string; p_user?: string }
+        Returns: string
+      }
       get_potential_matches: {
         Args: { p_limit?: number; p_user_id?: string }
         Returns: {
