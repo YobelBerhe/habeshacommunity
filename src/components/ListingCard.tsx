@@ -117,7 +117,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
   return (
     <>
       <Card 
-        className="group hover:shadow-lg transition-all duration-200 cursor-pointer bg-background border border-border/50 overflow-hidden"
+        className="group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer bg-card border border-border/10 overflow-hidden rounded-2xl w-[320px] min-w-[320px]"
         onClick={() => {
           // Store current scroll position and URL for back navigation
           sessionStorage.setItem('hn.index.scrollY', String(window.scrollY));
@@ -126,63 +126,61 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
         }}
       >
         <CardContent className="p-0">
-          {/* Horizontal layout similar to reference */}
-          <div className="flex h-28">
+          {/* Vertical layout with image on top */}
+          <div className="relative">
             {/* Image section */}
-            <div className="relative w-32 flex-shrink-0">
+            <div className="relative h-48 w-full">
               <ImageBox
                 src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
                 alt={listing.title}
-                className="h-full w-full object-cover rounded-l-lg"
+                className="h-full w-full object-cover rounded-t-lg"
               />
               
               {/* Time badge */}
-              <div className="absolute top-2 left-2">
-                <Badge className="bg-red-500 text-white text-xs px-2 py-1 font-medium">
+              <div className="absolute top-3 left-3">
+                <Badge className="bg-orange-500 text-white text-xs px-3 py-1 font-semibold rounded-full">
                   {formatDate(listing.createdAt || 0)}
                 </Badge>
-              </div>
-            </div>
-            
-            {/* Content section */}
-            <div className="flex-1 p-3 flex flex-col justify-between relative">
-              {/* Top section */}
-              <div className="space-y-1">
-                {/* Price */}
-                {listing.price && (
-                  <div className="text-lg font-bold text-foreground">
-                    {formatPrice(listing.price)}
-                  </div>
-                )}
-                
-                {/* Details */}
-                <div className="text-sm text-muted-foreground">
-                  2 bds | 1 ba | 875 sqft | Active
-                </div>
-                
-                {/* Title/Address */}
-                <h3 className="font-medium text-sm leading-tight text-foreground line-clamp-1">
-                  {listing.title}
-                </h3>
-                
-                {/* Location */}
-                <div className="text-xs text-muted-foreground">
-                  {listing.city}{listing.country && `, ${listing.country}`}
-                </div>
               </div>
               
               {/* Big heart in top right corner */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2 h-8 w-8 bg-transparent hover:bg-muted/50"
+                className="absolute top-3 right-3 h-9 w-9 bg-white/90 hover:bg-white rounded-full backdrop-blur"
                 onClick={handleFavoriteToggle}
                 aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
               >
                 <Heart 
-                  className={`w-6 h-6 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+                  className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-black text-black' : 'text-black'}`}
+                  strokeWidth={1.8}
                 />
               </Button>
+            </div>
+            
+            {/* Content section below image */}
+            <div className="p-4 space-y-1">
+              {/* Price */}
+              {listing.price && (
+                <div className="text-2xl font-extrabold tracking-tight text-foreground">
+                  {formatPrice(listing.price)}
+                </div>
+              )}
+              
+              {/* Details */}
+              <div className="text-sm text-muted-foreground">
+                2 bds | 1 ba | 875 sqft | Active
+              </div>
+              
+              {/* Title/Address */}
+              <h3 className="text-[15px] text-foreground line-clamp-1 leading-tight">
+                {listing.title}
+              </h3>
+              
+              {/* Location */}
+              <div className="text-xs text-muted-foreground">
+                {listing.city}{listing.country && `, ${listing.country}`}
+              </div>
             </div>
           </div>
         </CardContent>

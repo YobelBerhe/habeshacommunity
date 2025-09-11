@@ -25,61 +25,58 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
   return (
     <div
       onClick={handleCardClick}
-      className="w-full snap-start rounded-lg overflow-hidden bg-card border hover:shadow-lg transition-all duration-200 cursor-pointer group"
+      className="w-[320px] min-w-[320px] snap-start rounded-2xl overflow-hidden bg-card border border-border/10 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
     >
-      {/* Horizontal layout similar to reference */}
-      <div className="flex h-28">
+      {/* Vertical layout with image on top */}
+      <div className="relative">
         {/* Image section */}
-        <div className="relative w-32 flex-shrink-0">
+        <div className="relative h-48 w-full">
           <img 
             src={img} 
             alt={item.title} 
-            className="h-full w-full object-cover rounded-l-lg group-hover:scale-105 transition-transform duration-200" 
+            className="h-full w-full object-cover rounded-t-2xl" 
           />
           
           {/* Time badge */}
-          <div className="absolute top-2 left-2">
-            <span className="text-xs px-2 py-1 rounded bg-red-500 text-white font-medium">
+          <div className="absolute top-3 left-3">
+            <span className="text-xs px-3 py-1 rounded-full bg-orange-500 text-white font-semibold">
               {timeAgo(new Date(item.created_at).getTime())}
             </span>
-          </div>
-        </div>
-        
-        {/* Content section */}
-        <div className="flex-1 p-3 flex flex-col justify-between relative">
-          {/* Top section */}
-          <div className="space-y-1">
-            {/* Price */}
-            {price != null && (
-              <div className="text-lg font-bold text-foreground">
-                ${price.toLocaleString()}
-              </div>
-            )}
-            
-            {/* Details */}
-            <div className="text-sm text-muted-foreground">
-              2 bds | 1 ba | 875 sqft | Active
-            </div>
-            
-            {/* Title/Address */}
-            <div className="text-sm font-semibold line-clamp-1 text-foreground">
-              {item.title}
-            </div>
-            
-            {/* Location */}
-            <div className="text-xs text-muted-foreground">
-              {item.city && item.country ? `${item.city}, ${item.country}` : item.city || item.country || ''}
-            </div>
           </div>
           
           {/* Big heart in top right corner */}
           <button
             type="button"
             onClick={handleSaveClick}
-            className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center hover:bg-muted/50 rounded transition-colors"
+            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center bg-white/90 hover:bg-white rounded-full backdrop-blur transition-colors"
           >
-            <Heart className={`w-6 h-6 ${saved ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
+            <Heart className={`w-5 h-5 ${saved ? 'fill-black text-black' : 'text-black'}`} strokeWidth={1.8} />
           </button>
+        </div>
+        
+        {/* Content section below image */}
+        <div className="p-4 space-y-1">
+          {/* Price */}
+          {price != null && (
+            <div className="text-2xl font-extrabold tracking-tight text-foreground">
+              ${price.toLocaleString()}
+            </div>
+          )}
+          
+          {/* Details */}
+          <div className="text-sm text-muted-foreground">
+            2 bds | 1 ba | 875 sqft | Active
+          </div>
+          
+          {/* Title/Address */}
+          <div className="text-[15px] text-foreground line-clamp-1 leading-tight">
+            {item.title}
+          </div>
+          
+          {/* Location */}
+          <div className="text-xs text-muted-foreground">
+            {item.city && item.country ? `${item.city}, ${item.country}` : item.city || item.country || ''}
+          </div>
         </div>
       </div>
     </div>
