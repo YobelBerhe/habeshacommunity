@@ -20,7 +20,7 @@ export default function ListingGrid({
   newlyPostedId,
   favorites = [],
   onFavorite,
-  viewMode = "grid",
+  viewMode = "list",
 }: ListingGridProps) {
   const getGridClass = () => {
     switch (viewMode) {

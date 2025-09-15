@@ -86,7 +86,7 @@ export interface AppState {
   cityLat?: string;
   cityLon?: string;
   category?: string;
-  viewMode?: "grid" | "map";
+  viewMode?: "list" | "grid" | "gallery" | "map";
   lang?: "EN" | "TI";
 }
 

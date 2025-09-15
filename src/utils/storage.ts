@@ -52,9 +52,9 @@ export function addListing(city: string, listing: Listing): { ok: boolean; reaso
 export function getAppState(): AppState {
   try {
     const raw = localStorage.getItem("hn.appState");
-    return raw ? JSON.parse(raw) : { city: "", viewMode: "grid", lang: "EN" };
+    return raw ? JSON.parse(raw) : { city: "", viewMode: "list", lang: "EN" };
   } catch {
-    return { city: "", viewMode: "grid", lang: "EN" };
+    return { city: "", viewMode: "list", lang: "EN" };
   }
 }
 

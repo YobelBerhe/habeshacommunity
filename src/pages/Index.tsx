@@ -80,7 +80,7 @@ export default function Index() {
 
   // View and sorting state
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
-    (localStorage.getItem('hn.viewMode') as ViewMode) || 'grid'
+    (localStorage.getItem('hn.viewMode') as ViewMode) || 'list'
   );
   
   const [sortKey, setSortKey] = useState<SortKey>(() =>
@@ -362,7 +362,7 @@ export default function Index() {
 
   const handleLogoClick = () => {
     // Clear city and reset to fresh home state
-    const next = { ...appState, city: "", cityLat: undefined, cityLon: undefined, viewMode: "grid" as const };
+    const next = { ...appState, city: "", cityLat: undefined, cityLon: undefined, viewMode: "list" as const };
     setAppState(next);
     saveAppState(next);
     setFilters({ category: undefined, subcategory: undefined, query: "", minPrice: undefined, maxPrice: undefined, jobKind: undefined });

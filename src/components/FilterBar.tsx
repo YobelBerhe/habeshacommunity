@@ -7,8 +7,8 @@ export default function FilterBar({
 }: {
   filters: SearchFilters;
   onFiltersChange: (f: SearchFilters) => void;
-  viewMode: "grid" | "map" | undefined;
-  onViewModeChange: (m: "grid" | "map") => void;
+  viewMode: "list" | "grid" | "gallery" | "map" | undefined;
+  onViewModeChange: (m: "list" | "grid" | "gallery" | "map") => void;
   resultsCount: number;
 }) {
   return (

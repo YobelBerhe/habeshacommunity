@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 type Props = {
   onMapReady?: (map: L.Map) => void;
   focusCity?: { lat: number; lng: number; name: string } | null;
-  viewMode?: 'grid' | 'map';
+  viewMode?: 'list' | 'grid' | 'gallery' | 'map';
   modalOpen?: boolean;
 };
 

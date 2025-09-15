@@ -45,7 +45,7 @@ export default function Browse() {
   
   // View and sorting state with localStorage persistence
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
-    (localStorage.getItem('hn.viewMode') as ViewMode) || 'grid'
+    (localStorage.getItem('hn.viewMode') as ViewMode) || 'list'
   );
   
   const [sortKey, setSortKey] = useState<SortKey>(() =>
