@@ -167,7 +167,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/mentor');
+                    navigate('/browse?category=mentor');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
