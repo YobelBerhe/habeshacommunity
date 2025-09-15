@@ -577,12 +577,12 @@ export default function Browse() {
                   </div>
                 ))}
                 {loading && (
-                  <div className="col-span-2 text-center py-8 text-muted-foreground">
+                  <div className={`${viewMode === 'list' ? 'col-span-1' : 'col-span-2'} text-center py-8 text-muted-foreground`}>
                     Loading listings...
                   </div>
                 )}
                 {!loading && processedListings.length === 0 && (
-                  <div className="col-span-2 text-center py-8 text-muted-foreground">
+                  <div className={`${viewMode === 'list' ? 'col-span-1' : 'col-span-2'} text-center py-8 text-muted-foreground`}>
                     No listings found. Try adjusting your filters.
                   </div>
                 )}
