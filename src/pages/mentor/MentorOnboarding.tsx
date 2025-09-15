@@ -147,18 +147,10 @@ export default function MentorOnboarding() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
-      
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/mentor')}
+          onClick={() => navigate('/browse?category=mentor')}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
