@@ -330,7 +330,14 @@ export default function Browse() {
   };
 
   const handleListingSelect = (listing: Listing) => {
-    navigate(`/l/${listing.id}`);
+    // Handle different categories with their specific routes
+    if (listing.category === 'mentor') {
+      navigate(`/mentor/${listing.id}`);
+    } else if (listing.category === 'match') {
+      navigate(`/match/profile/${listing.id}`);
+    } else {
+      navigate(`/l/${listing.id}`);
+    }
   };
 
   return (

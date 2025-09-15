@@ -54,37 +54,90 @@ export default function ListingDetail() {
     const loadListing = async () => {
       try {
         setLoading(true);
-        const row = await fetchListingById(id);
-        const contact = user ? await getListingContact(id) : null;
+        
+        // First try to determine the type of listing by checking URL pattern
+        // If the current route contains /mentor/ or /match/, redirect appropriately
+        const currentPath = location.pathname;
+        if (currentPath.includes('/mentor/')) {
+          navigate(`/mentor/${id}`, { replace: true });
+          return;
+        }
+        if (currentPath.includes('/match/')) {
+          navigate(`/match/profile/${id}`, { replace: true });
+          return;
+        }
+        
+        // Try fetching from regular listings table first
+        let listingData: Listing | null = null;
+        
+        try {
+          const row = await fetchListingById(id);
+          const contact = user ? await getListingContact(id) : null;
 
-        const listingData: Listing = {
-          id: row.id,
-          user_id: row.user_id || "",
-          city: row.city,
-          country: row.country,
-          category: row.category as string,
-          subcategory: row.subcategory,
-          title: row.title,
-          description: row.description || "",
-          price: row.price_cents ? row.price_cents / 100 : null,
-          currency: row.currency,
-          contact_phone: (contact?.contact_method === 'phone') ? contact.contact_value : null,
-          contact_whatsapp: (contact?.contact_method === 'whatsapp') ? contact.contact_value : null,
-          contact_telegram: (contact?.contact_method === 'telegram') ? contact.contact_value : null,
-          contact_email: (contact?.contact_method === 'email') ? contact.contact_value : null,
-          website_url: row.website_url,
-          tags: row.tags || [],
-          images: row.images || [],
-          lat: row.location_lat,
-          lng: row.location_lng,
-          created_at: row.created_at,
-          contact: { phone: contact?.contact_value || "" },
-          photos: row.images || [],
-          lon: row.location_lng || undefined,
-          createdAt: new Date(row.created_at).getTime(),
-          updatedAt: new Date(row.updated_at).getTime(),
-          hasImage: !!(row.images?.length),
-        };
+          listingData = {
+            id: row.id,
+            user_id: row.user_id || "",
+            city: row.city,
+            country: row.country,
+            category: row.category as string,
+            subcategory: row.subcategory,
+            title: row.title,
+            description: row.description || "",
+            price: row.price_cents ? row.price_cents / 100 : null,
+            currency: row.currency,
+            contact_phone: (contact?.contact_method === 'phone') ? contact.contact_value : null,
+            contact_whatsapp: (contact?.contact_method === 'whatsapp') ? contact.contact_value : null,
+            contact_telegram: (contact?.contact_method === 'telegram') ? contact.contact_value : null,
+            contact_email: (contact?.contact_method === 'email') ? contact.contact_value : null,
+            website_url: row.website_url,
+            tags: row.tags || [],
+            images: row.images || [],
+            lat: row.location_lat,
+            lng: row.location_lng,
+            created_at: row.created_at,
+            contact: { phone: contact?.contact_value || "" },
+            photos: row.images || [],
+            lon: row.location_lng || undefined,
+            createdAt: new Date(row.created_at).getTime(),
+            updatedAt: new Date(row.updated_at).getTime(),
+            hasImage: !!(row.images?.length),
+          };
+        } catch (listingError) {
+          // If not found in listings table, try mentors table
+          try {
+            const { data: mentorData, error: mentorError } = await supabase
+              .from('mentors')
+              .select('*')
+              .eq('id', id)
+              .single();
+              
+            if (!mentorError && mentorData) {
+              navigate(`/mentor/${id}`, { replace: true });
+              return;
+            }
+          } catch (mentorError) {
+            console.log('Not found in mentors table');
+          }
+          
+          // If not found in mentors, try match_profiles table
+          try {
+            const { data: matchData, error: matchError } = await supabase
+              .from('match_profiles')
+              .select('*')
+              .eq('user_id', id)
+              .single();
+              
+            if (!matchError && matchData) {
+              navigate(`/match/profile/${id}`, { replace: true });
+              return;
+            }
+          } catch (matchError) {
+            console.log('Not found in match_profiles table');
+          }
+          
+          // If not found anywhere, throw the original error
+          throw listingError;
+        }
 
         setListing(listingData);
 
