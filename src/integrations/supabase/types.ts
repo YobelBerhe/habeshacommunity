@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_access_logs: {
+        Row: {
+          booking_id: string | null
+          id: string
+          viewed_at: string | null
+          viewer_id: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          id?: string
+          viewed_at?: string | null
+          viewer_id?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          id?: string
+          viewed_at?: string | null
+          viewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_access_logs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           board: string
@@ -573,26 +602,38 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          join_expires_at: string | null
+          join_url: string | null
           mentee_id: string
           mentor_id: string
           message: string | null
+          payment_status: string | null
           status: string | null
+          stripe_session_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          join_expires_at?: string | null
+          join_url?: string | null
           mentee_id: string
           mentor_id: string
           message?: string | null
+          payment_status?: string | null
           status?: string | null
+          stripe_session_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          join_expires_at?: string | null
+          join_url?: string | null
           mentee_id?: string
           mentor_id?: string
           message?: string | null
+          payment_status?: string | null
           status?: string | null
+          stripe_session_id?: string | null
         }
         Relationships: [
           {
@@ -643,6 +684,8 @@ export type Database = {
           display_name: string | null
           id: string
           languages: string[] | null
+          meeting_base_url: string | null
+          meeting_provider: string | null
           photos: string[] | null
           plan_description: string | null
           price_cents: number | null
@@ -661,6 +704,8 @@ export type Database = {
           display_name?: string | null
           id?: string
           languages?: string[] | null
+          meeting_base_url?: string | null
+          meeting_provider?: string | null
           photos?: string[] | null
           plan_description?: string | null
           price_cents?: number | null
@@ -679,6 +724,8 @@ export type Database = {
           display_name?: string | null
           id?: string
           languages?: string[] | null
+          meeting_base_url?: string | null
+          meeting_provider?: string | null
           photos?: string[] | null
           plan_description?: string | null
           price_cents?: number | null
