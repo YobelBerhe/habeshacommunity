@@ -178,23 +178,18 @@ export default function MentorDetail() {
 
     if (!mentor) return;
 
-    const msg = message.trim() || `Hi ${mentor.display_name}, I'd like to apply for mentorship.`;
-
     setBooking(true);
     try {
-      const { requestMentorBooking } = await import('@/utils/mentorActions');
-      await requestMentorBooking(mentor.id, msg);
-
-      toast({
-        title: 'Request Sent!',
-        description: 'Your mentoring session request has been sent successfully.',
-      });
-      setMessage('');
+      const { bookMentorSession } = await import('@/utils/stripeActions');
+      const result = await bookMentorSession(mentor.id);
+      if (result.redirectUrl) {
+        navigate(result.redirectUrl);
+      }
     } catch (error) {
-      console.error('Error creating booking:', error);
+      console.error('Error booking session:', error);
       toast({
         title: 'Error',
-        description: 'Failed to send request. Please try again.',
+        description: 'Failed to book session. Please try again.',
         variant: 'destructive',
       });
     } finally {
