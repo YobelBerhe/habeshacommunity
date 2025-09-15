@@ -6,15 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, MapPin, DollarSign, MessageCircle, ArrowLeft, Calendar } from 'lucide-react';
+import { Star, MapPin, DollarSign, MessageCircle, ArrowLeft, Calendar, Heart, Linkedin, Globe, Clock, CheckCircle, Phone } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import MobileHeader from '@/components/layout/MobileHeader';
-import Header from '@/components/Header';
 import { getAppState } from '@/utils/storage';
 import CountryFlag from '@/components/CountryFlag';
 import ImageBox from '@/components/ImageBox';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Mentor {
   id: string;
@@ -148,7 +147,7 @@ export default function MentorDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Button 
           variant="ghost" 
           onClick={() => navigate('/browse?category=mentor')}
@@ -158,169 +157,392 @@ export default function MentorDetail() {
           Back to Mentors
         </Button>
 
-        {/* Name, Flag, Location, and Rating */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">{mentor.display_name}</h1>
-            {mentor.country && (
-              <CountryFlag country={mentor.country} className="w-8 h-5" />
-            )}
-          </div>
-          <div className="flex items-center gap-4 text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
-            </div>
-            {mentor.rating > 0 && (
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span>{mentor.rating.toFixed(1)} rating</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            {/* Profile Photo */}
-            <div className="relative mb-6">
+        {/* Desktop Layout */}
+        <div className="hidden lg:grid lg:grid-cols-12 gap-8">
+          {/* Left - Photo */}
+          <div className="lg:col-span-3">
+            <div className="relative">
               {mentor.photos?.[0] ? (
-                <div className="relative">
-                  <ImageBox
-                    src={mentor.photos[0]}
-                    alt={mentor.display_name}
-                    className="w-full h-80 object-cover rounded-lg"
-                  />
-                  {/* Price Overlay */}
-                  <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full border">
-                    <div className="flex items-center gap-1 text-sm font-semibold">
-                      {isFree ? (
-                        <span className="text-green-600">Free</span>
-                      ) : (
-                        <>
-                          <DollarSign className="w-4 h-4" />
-                          {formatPrice(mentor.price_cents, mentor.currency)}/hr
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ImageBox
+                  src={mentor.photos[0]}
+                  alt={mentor.display_name}
+                  className="w-full h-96 object-cover rounded-lg"
+                />
               ) : (
-                <div className="w-full h-80 bg-muted rounded-lg flex items-center justify-center">
+                <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center">
                   <span className="text-muted-foreground">No photo</span>
                 </div>
               )}
             </div>
-
-            {/* About Section */}
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle className="text-lg">About</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">{mentor.bio}</p>
-              </CardContent>
-            </Card>
-
-            {/* Free Toggle */}
-            <Card className="mb-4">
-              <CardContent className="pt-6">
-                <div className="flex items-center space-x-2">
-                  <Switch id="free-mode" checked={isFree} onCheckedChange={setIsFree} />
-                  <Label htmlFor="free-mode">Free Session</Label>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Request Session
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  placeholder="Tell the mentor what you'd like to learn or discuss..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={4}
-                />
-                <Button 
-                  onClick={handleBooking}
-                  disabled={booking}
-                  className="w-full"
-                >
-                  {booking ? 'Sending Request...' : 'Request Mentoring Session'}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="mt-4">
-              <CardContent className="pt-6">
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    if (!user) {
-                      navigate('/auth/login');
-                      return;
-                    }
-                    try {
-                      const { sendMessage } = await import('@/utils/matchActions');
-                      const res = await sendMessage(mentor.user_id, 'Hello! I\'m interested in your mentoring services.');
-                      navigate(`/inbox?thread=${res.chatId}`);
-                    } catch (error) {
-                      console.error('Failed to send message:', error);
-                      toast({
-                        title: 'Error',
-                        description: 'Failed to send message. Please try again.',
-                        variant: 'destructive',
-                      });
-                    }
-                  }}
-                  className="w-full"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Send Message
-                </Button>
-              </CardContent>
-            </Card>
           </div>
 
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Expertise & Languages</CardTitle>
-              </CardHeader>
+          {/* Center - Main Info */}
+          <div className="lg:col-span-6 space-y-6">
+            {/* New Mentor Badge & Name */}
+            <div className="space-y-4">
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                ✨ New Mentor
+              </Badge>
               
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3 text-base">Expertise Areas</h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {mentor.topics?.map((topic) => (
-                      <Badge key={topic} variant="secondary" className="text-xs">
-                        {topic}
-                      </Badge>
-                    ))}
-                  </div>
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-4xl font-bold">{mentor.display_name}</h1>
+                  {mentor.country && (
+                    <CountryFlag country={mentor.country} className="w-8 h-5" />
+                  )}
                 </div>
+                <p className="text-lg text-muted-foreground font-medium">{mentor.bio}</p>
+              </div>
 
-                {mentor.languages?.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-3 text-base">Languages</h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {mentor.languages.map((lang) => (
-                        <Badge key={lang} variant="outline" className="text-xs">
-                          {lang.toUpperCase()}
-                        </Badge>
-                      ))}
+              {/* Save & LinkedIn */}
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm">
+                  <Heart className="w-4 h-4 mr-2" />
+                  Save
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Linkedin className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Professional Title */}
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Career and Life Coach, Sr. Technical Product and Program Manager</h2>
+            </div>
+
+            {/* Location & Details */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Globe className="w-4 h-4" />
+                <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
+              </div>
+              
+              {mentor.languages?.length > 0 && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Speaks {mentor.languages.join(', ')}</span>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="w-4 h-4" />
+                <span>Active last week</span>
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {mentor.topics?.slice(0, 6).map((topic) => (
+                  <Badge key={topic} variant="outline" className="bg-secondary/20 text-sm py-2 px-4">
+                    {topic}
+                  </Badge>
+                ))}
+                {mentor.topics && mentor.topics.length > 6 && (
+                  <Badge variant="outline" className="bg-secondary/20 text-sm py-2 px-4">
+                    + {mentor.topics.length - 6} more
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right - Pricing Card */}
+          <div className="lg:col-span-3">
+            <Card className="sticky top-8">
+              <CardHeader className="pb-2">
+                <Tabs defaultValue="mentorship" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="mentorship">Mentorship plans</TabsTrigger>
+                    <TabsTrigger value="sessions">Sessions</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="mentorship" className="mt-6">
+                    <div className="space-y-6">
+                      <div>
+                        <div className="text-3xl font-bold text-primary">
+                          {formatPrice(mentor.price_cents, mentor.currency)}
+                          <span className="text-lg font-normal text-muted-foreground"> / month</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          The most popular way to get mentored, let's work towards your goals!
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
+                          <span>2 calls per month (30min/call)</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
+                          <span>Unlimited Q&A via chat</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
+                          <span>Expect responses in 2 days</span>
+                        </div>
+                      </div>
+
+                      <Button 
+                        onClick={handleBooking}
+                        disabled={booking}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        size="lg"
+                      >
+                        {booking ? 'Sending Request...' : 'Apply now'}
+                      </Button>
+
+                      <p className="text-xs text-center text-muted-foreground">
+                        7-day free trial, cancel anytime. <span className="underline cursor-pointer">What's included?</span>
+                      </p>
+
+                      <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4" />
+                        <span>Lock in this price now!</span>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="sessions" className="mt-6">
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">Book individual sessions as needed</p>
+                      <div className="text-2xl font-bold">
+                        {formatPrice(mentor.price_cents, mentor.currency)} / session
+                      </div>
+                      <Button 
+                        onClick={handleBooking}
+                        disabled={booking}
+                        className="w-full"
+                        size="lg"
+                      >
+                        Book Session
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden space-y-6">
+          {/* Photo */}
+          <div className="relative">
+            {mentor.photos?.[0] ? (
+              <ImageBox
+                src={mentor.photos[0]}
+                alt={mentor.display_name}
+                className="w-full h-80 object-cover rounded-lg"
+              />
+            ) : (
+              <div className="w-full h-80 bg-muted rounded-lg flex items-center justify-center">
+                <span className="text-muted-foreground">No photo</span>
+              </div>
+            )}
+          </div>
+
+          {/* New Mentor Badge */}
+          <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 border-emerald-200 w-fit">
+            ✨ New Mentor
+          </Badge>
+
+          {/* Name & Title */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">{mentor.display_name}</h1>
+              {mentor.country && (
+                <CountryFlag country={mentor.country} className="w-6 h-4" />
+              )}
+            </div>
+            <p className="text-base text-muted-foreground font-medium">{mentor.bio}</p>
+          </div>
+
+          {/* Save & LinkedIn */}
+          <div className="flex gap-3">
+            <Button variant="outline" size="sm">
+              <Heart className="w-4 h-4 mr-2" />
+              Save
+            </Button>
+            <Button variant="outline" size="sm">
+              <Linkedin className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Professional Title */}
+          <h2 className="text-lg font-semibold">Career and Life Coach, Sr. Technical Product and Program Manager</h2>
+
+          {/* Location & Details */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Globe className="w-4 h-4" />
+              <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
+            </div>
+            
+            {mentor.languages?.length > 0 && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MessageCircle className="w-4 h-4" />
+                <span>Speaks {mentor.languages.join(', ')}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>Active last week</span>
+            </div>
+          </div>
+
+          {/* Skills */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {mentor.topics?.map((topic) => (
+                <Badge key={topic} variant="outline" className="bg-secondary/20 text-sm py-1.5 px-3">
+                  {topic}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Pricing Card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <Tabs defaultValue="mentorship" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="mentorship">Mentorship plans</TabsTrigger>
+                  <TabsTrigger value="sessions">Sessions</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="mentorship" className="mt-6">
+                  <div className="space-y-6">
+                    <div>
+                      <div className="text-3xl font-bold text-primary">
+                        {formatPrice(mentor.price_cents, mentor.currency)}
+                        <span className="text-lg font-normal text-muted-foreground"> / month</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        The most popular way to get mentored, let's work towards your goals!
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                        <span>2 calls per month (30min/call)</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                        <span>Unlimited Q&A via chat</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                        <span>Expect responses in 2 days</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={handleBooking}
+                      disabled={booking}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      size="lg"
+                    >
+                      {booking ? 'Sending Request...' : 'Apply now'}
+                    </Button>
+
+                    <p className="text-xs text-center text-muted-foreground">
+                      7-day free trial, cancel anytime. <span className="underline cursor-pointer">What's included?</span>
+                    </p>
+
+                    <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      <span>Lock in this price now!</span>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                </TabsContent>
+                
+                <TabsContent value="sessions" className="mt-6">
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">Book individual sessions as needed</p>
+                    <div className="text-2xl font-bold">
+                      {formatPrice(mentor.price_cents, mentor.currency)} / session
+                    </div>
+                    <Button 
+                      onClick={handleBooking}
+                      disabled={booking}
+                      className="w-full"
+                      size="lg"
+                    >
+                      Book Session
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Additional Sections */}
+        <div className="mt-12 space-y-8">
+          {/* About Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">About</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-muted-foreground leading-relaxed">Hi All,</p>
+                <p className="text-muted-foreground leading-relaxed">
+                  I'm a Senior Technical Product & Program Manager with 10+ years of experience across leading tech companies - 
+                  including Google, Samsung, e-commerce, and financial companies - as well as a Career, Job Search, and Life
+                </p>
+                <Button variant="link" className="p-0 h-auto text-primary underline">
+                  Read more
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Open to inquiries */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Open to inquiries</h3>
+                  <p className="text-muted-foreground">
+                    You can message {mentor.display_name} to ask questions before booking their services
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={async () => {
+                      if (!user) {
+                        navigate('/auth/login');
+                        return;
+                      }
+                      try {
+                        const { sendMessage } = await import('@/utils/matchActions');
+                        const res = await sendMessage(mentor.user_id, 'Hello! I\'m interested in your mentoring services.');
+                        navigate(`/inbox?thread=${res.chatId}`);
+                      } catch (error) {
+                        console.error('Failed to send message:', error);
+                        toast({
+                          title: 'Error',
+                          description: 'Failed to send message. Please try again.',
+                          variant: 'destructive',
+                        });
+                      }
+                    }}
+                    className="border-primary text-primary hover:bg-primary hover:text-white"
+                  >
+                    Get in touch
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
