@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, MapPin, DollarSign, MessageCircle, ArrowLeft, Calendar, Heart, Linkedin, Globe, Clock, CheckCircle, Phone } from 'lucide-react';
+import { Star, MapPin, DollarSign, MessageCircle, ArrowLeft, Calendar, Heart, Linkedin, Globe, Clock, CheckCircle, Phone, Twitter, Github, Youtube, ExternalLink } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { getAppState } from '@/utils/storage';
 import CountryFlag from '@/components/CountryFlag';
@@ -14,6 +14,8 @@ import ImageBox from '@/components/ImageBox';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toggleFavorite, fetchFavorites } from '@/repo/favorites';
+import { timeAgo } from '@/utils/ui';
 
 interface Mentor {
   id: string;
@@ -28,6 +30,8 @@ interface Mentor {
   currency: string;
   rating: number;
   photos: string[];
+  social_links: any;
+  website_url?: string;
 }
 
 export default function MentorDetail() {
@@ -40,13 +44,24 @@ export default function MentorDetail() {
   const [message, setMessage] = useState('');
   const [booking, setBooking] = useState(false);
   const [isFree, setIsFree] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [lastSeen, setLastSeen] = useState<string | null>(null);
   const appState = getAppState();
 
   useEffect(() => {
     if (id) {
       fetchMentor();
+      if (user) {
+        checkFavoriteStatus();
+      }
     }
-  }, [id]);
+  }, [id, user]);
+
+  useEffect(() => {
+    if (mentor?.user_id) {
+      fetchPresence();
+    }
+  }, [mentor?.user_id]);
 
   const fetchMentor = async () => {
     try {
@@ -67,6 +82,62 @@ export default function MentorDetail() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkFavoriteStatus = async () => {
+    if (!user || !id) return;
+    try {
+      const favorites = await fetchFavorites(user.id);
+      setIsFavorited(favorites.has(id));
+    } catch (error) {
+      console.error('Error checking favorite status:', error);
+    }
+  };
+
+  const fetchPresence = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('presence')
+        .select('last_seen')
+        .eq('user_id', mentor?.user_id)
+        .single();
+
+      if (data) {
+        setLastSeen(data.last_seen);
+      }
+    } catch (error) {
+      console.error('Error fetching presence:', error);
+    }
+  };
+
+  const handleFavoriteToggle = async () => {
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to save mentors',
+        variant: 'destructive',
+      });
+      navigate('/auth/login');
+      return;
+    }
+
+    if (!id) return;
+
+    try {
+      const newFavoriteStatus = await toggleFavorite(id, user.id);
+      setIsFavorited(newFavoriteStatus);
+      toast({
+        title: newFavoriteStatus ? 'Saved!' : 'Removed',
+        description: newFavoriteStatus ? 'Mentor saved to favorites' : 'Mentor removed from favorites',
+      });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update favorites',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -117,6 +188,86 @@ export default function MentorDetail() {
   const formatPrice = (cents: number, currency: string) => {
     const amount = cents / 100;
     return `${currency} ${amount.toFixed(0)}`;
+  };
+
+  const getActivityStatus = () => {
+    if (!lastSeen) return 'Active last week';
+    
+    const lastSeenDate = new Date(lastSeen);
+    const now = new Date();
+    const diffMs = now.getTime() - lastSeenDate.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffMinutes < 5) return 'Active now';
+    if (diffMinutes < 60) return `Active ${diffMinutes}m ago`;
+    
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `Active ${diffHours}h ago`;
+    
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `Active ${diffDays}d ago`;
+    
+    const diffWeeks = Math.floor(diffDays / 7);
+    return `Active ${diffWeeks}w ago`;
+  };
+
+  const getSocialMediaIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'linkedin': return Linkedin;
+      case 'twitter': return Twitter;
+      case 'github': return Github;
+      case 'youtube': return Youtube;
+      default: return ExternalLink;
+    }
+  };
+
+  const renderSocialButtons = () => {
+    const buttons = [];
+    
+    // Add social media buttons
+    if (mentor?.social_links && typeof mentor.social_links === 'object') {
+      Object.entries(mentor.social_links).forEach(([platform, url]) => {
+        if (url && typeof url === 'string' && url.trim()) {
+          const Icon = getSocialMediaIcon(platform);
+          buttons.push(
+            <Button 
+              key={platform}
+              variant="outline" 
+              size="sm"
+              onClick={() => window.open(url, '_blank')}
+            >
+              <Icon className="w-4 h-4" />
+            </Button>
+          );
+        }
+      });
+    }
+    
+    // Add website button if exists
+    if (mentor?.website_url) {
+      buttons.push(
+        <Button 
+          key="website"
+          variant="outline" 
+          size="sm"
+          onClick={() => window.open(mentor.website_url, '_blank')}
+        >
+          <Globe className="w-4 h-4" />
+        </Button>
+      );
+    }
+    
+    return buttons;
+  };
+
+  const getFirstSocialLink = (): string => {
+    if (mentor?.social_links && typeof mentor.social_links === 'object') {
+      const firstLink = Object.values(mentor.social_links).find(url => 
+        url && typeof url === 'string' && url.trim()
+      ) as string;
+      if (firstLink) return firstLink;
+    }
+    return mentor?.website_url || '#';
   };
 
   if (loading) {
@@ -194,15 +345,18 @@ export default function MentorDetail() {
                 <p className="text-lg text-muted-foreground font-medium">{mentor.bio}</p>
               </div>
 
-              {/* Save & LinkedIn */}
+              {/* Save & Social Media */}
               <div className="flex gap-3">
-                <Button variant="outline" size="sm">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Save
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleFavoriteToggle}
+                  className={isFavorited ? 'text-red-500' : ''}
+                >
+                  <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
+                  {isFavorited ? 'Saved' : 'Save'}
                 </Button>
-                <Button variant="outline" size="sm">
-                  <Linkedin className="w-4 h-4" />
-                </Button>
+                {renderSocialButtons()}
               </div>
             </div>
 
@@ -227,7 +381,7 @@ export default function MentorDetail() {
               
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span>Active last week</span>
+                <span>{getActivityStatus()}</span>
               </div>
             </div>
 
@@ -361,15 +515,18 @@ export default function MentorDetail() {
             <p className="text-base text-muted-foreground font-medium">{mentor.bio}</p>
           </div>
 
-          {/* Save & LinkedIn */}
+          {/* Save & Social Media */}
           <div className="flex gap-3">
-            <Button variant="outline" size="sm">
-              <Heart className="w-4 h-4 mr-2" />
-              Save
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleFavoriteToggle}
+              className={isFavorited ? 'text-red-500' : ''}
+            >
+              <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
+              {isFavorited ? 'Saved' : 'Save'}
             </Button>
-            <Button variant="outline" size="sm">
-              <Linkedin className="w-4 h-4" />
-            </Button>
+            {renderSocialButtons()}
           </div>
 
           {/* Professional Title */}
@@ -391,7 +548,7 @@ export default function MentorDetail() {
             
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock className="w-4 h-4" />
-              <span>Active last week</span>
+              <span>{getActivityStatus()}</span>
             </div>
           </div>
 
@@ -498,7 +655,16 @@ export default function MentorDetail() {
                   I'm a Senior Technical Product & Program Manager with 10+ years of experience across leading tech companies - 
                   including Google, Samsung, e-commerce, and financial companies - as well as a Career, Job Search, and Life
                 </p>
-                <Button variant="link" className="p-0 h-auto text-primary underline">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary underline"
+                  onClick={() => {
+                    const link = getFirstSocialLink();
+                    if (link && link !== '#') {
+                      window.open(link, '_blank');
+                    }
+                  }}
+                >
                   Read more
                 </Button>
               </div>
