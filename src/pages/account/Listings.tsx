@@ -158,7 +158,7 @@ export default function MyListings() {
       <MobileHeader />
       
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="relative flex items-center mb-8">
           {/* Back Arrow */}
           <button 
             onClick={() => window.history.back()}
@@ -168,16 +168,16 @@ export default function MyListings() {
           </button>
           
           {/* Centered Title */}
-          <h1 className="text-xl md:text-2xl font-bold text-foreground absolute left-1/2 transform -translate-x-1/2">{t(language, "my_listings")}</h1>
+          <div className="flex-1 flex justify-center">
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">{t(language, "my_listings")}</h1>
+          </div>
           
-          {/* New Post Button */}
+          {/* Small New Post Button */}
           <button 
             onClick={openPost}
-            className="btn-primary flex items-center gap-2 px-3 md:px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+            className="btn-primary flex items-center justify-center w-10 h-10 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm"
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New Post</span>
-            <span className="sm:hidden">Post</span>
+            <Plus className="w-5 h-5" />
           </button>
         </div>
 
