@@ -628,25 +628,25 @@ export default function MentorDetail() {
                     {/* Show Connect Stripe button if this is the mentor's own profile and they haven't connected */}
                     {user?.id === mentor.user_id && !hasStripeConnected && (
                       <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                        <h4 className="font-medium text-orange-800 mb-2">Connect Stripe to Accept Payments</h4>
+                        <h4 className="font-medium text-orange-800 mb-2">Enable Payouts</h4>
                         <p className="text-sm text-orange-700 mb-3">
-                          You need to connect your Stripe account to receive payments from bookings.
+                          You need to connect Stripe before people can book paid sessions.
                         </p>
-                        <ConnectStripeButton />
+                        <ConnectStripeButton className="mt-3" />
                       </div>
                     )}
 
-                    {/* Show booking button only if Stripe is connected or user is not the mentor */}
-                    {(hasStripeConnected || user?.id !== mentor.user_id) && (
-                      <Button 
-                        onClick={handleBooking}
-                        disabled={booking || (!hasStripeConnected && user?.id !== mentor.user_id)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                        size="lg"
-                      >
-                        {booking ? 'Processing...' : 'Apply now'}
-                      </Button>
-                    )}
+                    {/* Show booking button - disable if mentor hasn't connected Stripe */}
+                    <Button 
+                      onClick={handleBooking}
+                      disabled={booking || (!hasStripeConnected && user?.id !== mentor.user_id)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                      size="lg"
+                    >
+                      {booking ? 'Processing...' : 
+                       (!hasStripeConnected && user?.id !== mentor.user_id) ? 'Mentor hasn\'t enabled payouts yet' : 
+                       'Apply now'}
+                    </Button>
 
 
                     <p className="text-xs text-center text-muted-foreground">

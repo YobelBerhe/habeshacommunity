@@ -4,7 +4,12 @@ import { connectStripeAccount } from '@/utils/stripeActions';
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 
-export function ConnectStripeButton() {
+interface ConnectStripeButtonProps {
+  className?: string;
+  cta?: string;
+}
+
+export function ConnectStripeButton({ className, cta = "Connect Stripe for Payouts" }: ConnectStripeButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -13,10 +18,10 @@ export function ConnectStripeButton() {
       setIsLoading(true);
       const result = await connectStripeAccount();
       if (result.url) {
-        window.open(result.url, '_blank');
+        window.location.href = result.url; // Redirect to Stripe onboarding
         toast({
-          title: "Stripe Connect opened",
-          description: "Complete the setup in the new tab to receive payments.",
+          title: "Redirecting to Stripe",
+          description: "Complete the setup to receive payments.",
         });
       }
     } catch (error) {
@@ -32,13 +37,18 @@ export function ConnectStripeButton() {
   };
 
   return (
-    <Button 
-      onClick={handleConnect} 
-      disabled={isLoading}
-      variant="outline"
-    >
-      <ExternalLink className="w-4 h-4 mr-2" />
-      {isLoading ? 'Opening Stripe...' : 'Connect Payouts'}
-    </Button>
+    <div className={className}>
+      <Button 
+        onClick={handleConnect} 
+        disabled={isLoading}
+        className="inline-flex items-center rounded-lg px-4 py-2 bg-black text-white hover:opacity-90 disabled:opacity-50"
+      >
+        <ExternalLink className="w-4 h-4 mr-2" />
+        {isLoading ? 'Connecting…' : cta}
+      </Button>
+      <p className="mt-2 text-xs text-muted-foreground">
+        You'll be redirected to Stripe to finish a quick, secure payout setup. You can return here when done.
+      </p>
+    </div>
   );
 }

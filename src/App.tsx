@@ -13,6 +13,7 @@ import Reset from "./pages/auth/Reset";
 import Saved from "./pages/account/Saved";
 import Listings from "./pages/account/Listings";
 import Settings from "./pages/account/Settings";
+import Payouts from "./pages/account/Payouts";
 import ForumsBoards from "./pages/forums/Boards";
 import BoardTopics from "./pages/forums/BoardTopics";
 import TopicView from "./pages/forums/TopicView";
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/account/saved" element={<Saved />} />
           <Route path="/account/listings" element={<Listings />} />
           <Route path="/account/settings" element={<Settings />} />
+          <Route path="/account/payouts" element={<Payouts />} />
           <Route path="/forums" element={<ForumsBoards />} />
           <Route path="/forums/:boardKey" element={<BoardTopics />} />
           <Route path="/forums/topic/:id" element={<TopicView />} />
