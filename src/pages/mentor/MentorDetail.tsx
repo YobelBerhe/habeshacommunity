@@ -158,6 +158,28 @@ export default function MentorDetail() {
           Back to Mentors
         </Button>
 
+        {/* Name, Flag, Location, and Rating */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold">{mentor.display_name}</h1>
+            {mentor.country && (
+              <CountryFlag country={mentor.country} className="w-8 h-5" />
+            )}
+          </div>
+          <div className="flex items-center gap-4 text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
+            </div>
+            {mentor.rating > 0 && (
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span>{mentor.rating.toFixed(1)} rating</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             {/* Profile Photo */}
@@ -189,6 +211,16 @@ export default function MentorDetail() {
                 </div>
               )}
             </div>
+
+            {/* About Section */}
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-lg">About</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-sm">{mentor.bio}</p>
+              </CardContent>
+            </Card>
 
             {/* Free Toggle */}
             <Card className="mb-4">
@@ -259,38 +291,12 @@ export default function MentorDetail() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <CardTitle className="text-2xl">{mentor.display_name}</CardTitle>
-                      {mentor.country && (
-                        <CountryFlag country={mentor.country} className="w-6 h-4" />
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
-                      </div>
-                      {mentor.rating > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span>{mentor.rating.toFixed(1)} rating</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <CardTitle className="text-xl">Expertise & Languages</CardTitle>
               </CardHeader>
               
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-2 text-base">About</h3>
-                  <p className="text-muted-foreground text-sm">{mentor.bio}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2 text-base">Expertise Areas</h3>
+                  <h3 className="font-semibold mb-3 text-base">Expertise Areas</h3>
                   <div className="flex flex-wrap gap-1.5">
                     {mentor.topics?.map((topic) => (
                       <Badge key={topic} variant="secondary" className="text-xs">
@@ -302,7 +308,7 @@ export default function MentorDetail() {
 
                 {mentor.languages?.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2 text-base">Languages</h3>
+                    <h3 className="font-semibold mb-3 text-base">Languages</h3>
                     <div className="flex flex-wrap gap-1.5">
                       {mentor.languages.map((lang) => (
                         <Badge key={lang} variant="outline" className="text-xs">
