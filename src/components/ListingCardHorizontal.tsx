@@ -8,8 +8,10 @@ import { timeAgo } from '@/lib/time';
 
 export function ListingCardHorizontal({ item }: { item: ListingLite }) {
   const [saved, setSaved] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
-  const img = item.images?.[0] || fallbackImage;
+  const images = item.images || [fallbackImage];
+  const hasMultipleImages = images.length > 1;
   
   const price = item.price_cents ? item.price_cents / 100 : null;
 
@@ -22,6 +24,16 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
     setSaved(!saved);
   };
 
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
   return (
     <div
       onClick={handleCardClick}
@@ -30,12 +42,46 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
       {/* Vertical layout with image on top */}
       <div className="relative">
         {/* Image section */}
-        <div className="relative h-48 w-full">
+        <div className="relative h-48 w-full group/image">
           <img 
-            src={img} 
+            src={images[currentImageIndex]} 
             alt={item.title} 
             className="h-full w-full object-cover rounded-t-2xl" 
           />
+          
+          {/* Navigation arrows for multiple images */}
+          {hasMultipleImages && (
+            <>
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-4 h-4 text-white" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-4 h-4 text-white" />
+              </button>
+              
+              {/* Image dots indicator */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                {images.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                      index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
           
           {/* Time badge */}
           <div className="absolute top-3 left-3">

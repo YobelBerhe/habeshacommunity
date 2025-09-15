@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Heart, MapPin, Calendar, Star, MoreHorizontal, EyeOff, Share2, Phone, Mail, MessageSquare, Globe } from "lucide-react";
+import { Heart, MapPin, Calendar, Star, MoreHorizontal, EyeOff, Share2, Phone, Mail, MessageSquare, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import { Listing } from "@/types";
 import { TAXONOMY, LABELS } from "@/lib/taxonomy";
 import { toggleFavorite, fetchFavorites } from "@/repo/favorites";
@@ -12,6 +12,7 @@ import { useAuth } from "@/store/auth";
 import { useLanguage } from "@/store/language";
 import ImageBox from "./ImageBox";
 import MessageModal from "./MessageModal";
+import { getListingImages } from "@/lib/listing";
 
 interface ListingCardProps {
   listing: Listing;
@@ -22,6 +23,7 @@ interface ListingCardProps {
 const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -114,6 +116,20 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
     }
   };
 
+  // Get all images for this listing
+  const images = getListingImages(listing);
+  const hasMultipleImages = images.length > 1;
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
   return (
     <>
       <Card 
@@ -129,12 +145,48 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
           {/* Vertical layout with image on top */}
           <div className="relative">
             {/* Image section */}
-            <div className="relative h-48 w-full">
+            <div className="relative h-48 w-full group/image">
               <ImageBox
-                src={(listing as any).photos?.[0] || (listing as any).images?.[0]}
+                src={images[currentImageIndex] || images[0]}
                 alt={listing.title}
                 className="h-full w-full object-cover rounded-t-lg"
               />
+              
+              {/* Navigation arrows for multiple images */}
+              {hasMultipleImages && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity"
+                    onClick={handlePrevImage}
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-white" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity"
+                    onClick={handleNextImage}
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="w-4 h-4 text-white" />
+                  </Button>
+                  
+                  {/* Image dots indicator */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                    {images.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                          index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
               
               {/* Time badge */}
               <div className="absolute top-3 left-3">
