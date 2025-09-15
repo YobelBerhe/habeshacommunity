@@ -604,6 +604,35 @@ export type Database = {
           },
         ]
       }
+      mentor_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_favorites_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentors: {
         Row: {
           bio: string | null
@@ -615,6 +644,7 @@ export type Database = {
           id: string
           languages: string[] | null
           photos: string[] | null
+          plan_description: string | null
           price_cents: number | null
           rating: number | null
           social_links: Json | null
@@ -632,6 +662,7 @@ export type Database = {
           id?: string
           languages?: string[] | null
           photos?: string[] | null
+          plan_description?: string | null
           price_cents?: number | null
           rating?: number | null
           social_links?: Json | null
@@ -649,6 +680,7 @@ export type Database = {
           id?: string
           languages?: string[] | null
           photos?: string[] | null
+          plan_description?: string | null
           price_cents?: number | null
           rating?: number | null
           social_links?: Json | null

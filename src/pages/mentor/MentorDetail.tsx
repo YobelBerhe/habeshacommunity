@@ -14,7 +14,7 @@ import ImageBox from '@/components/ImageBox';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toggleFavorite, fetchFavorites } from '@/repo/favorites';
+
 import { timeAgo } from '@/utils/ui';
 
 interface Mentor {
@@ -32,6 +32,7 @@ interface Mentor {
   photos: string[];
   social_links: any;
   website_url?: string;
+  plan_description?: string;
 }
 
 export default function MentorDetail() {
@@ -42,6 +43,7 @@ export default function MentorDetail() {
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
   const [booking, setBooking] = useState(false);
   const [isFree, setIsFree] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -94,8 +96,13 @@ export default function MentorDetail() {
   const checkFavoriteStatus = async () => {
     if (!user || !id) return;
     try {
-      const favorites = await fetchFavorites(user.id);
-      setIsFavorited(favorites.has(id));
+      const { data } = await supabase
+        .from('mentor_favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('mentor_id', id)
+        .maybeSingle();
+      setIsFavorited(!!data);
     } catch (error) {
       console.error('Error checking favorite status:', error);
     }
@@ -131,12 +138,23 @@ export default function MentorDetail() {
     if (!id) return;
 
     try {
-      const newFavoriteStatus = await toggleFavorite(id, user.id);
-      setIsFavorited(newFavoriteStatus);
-      toast({
-        title: newFavoriteStatus ? 'Saved!' : 'Removed',
-        description: newFavoriteStatus ? 'Mentor saved to favorites' : 'Mentor removed from favorites',
-      });
+      if (isFavorited) {
+        const { error } = await supabase
+          .from('mentor_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('mentor_id', id);
+        if (error) throw error;
+        setIsFavorited(false);
+        toast({ title: 'Removed', description: 'Mentor removed from favorites' });
+      } else {
+        const { error } = await supabase
+          .from('mentor_favorites')
+          .insert({ user_id: user.id, mentor_id: id });
+        if (error) throw error;
+        setIsFavorited(true);
+        toast({ title: 'Saved!', description: 'Mentor saved to favorites' });
+      }
     } catch (error) {
       console.error('Error toggling favorite:', error);
       toast({
@@ -427,7 +445,7 @@ export default function MentorDetail() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm">
                           <CheckCircle className="w-4 h-4 text-emerald-500" />
-                          <span>2 calls per month (30min/call)</span>
+                          <span>{mentor.plan_description || '2 calls per month (30min/call)'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -587,7 +605,7 @@ export default function MentorDetail() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-sm">
                         <CheckCircle className="w-4 h-4 text-emerald-500" />
-                        <span>2 calls per month (30min/call)</span>
+                        <span>{mentor.plan_description || '2 calls per month (30min/call)'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -675,36 +693,56 @@ export default function MentorDetail() {
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
                 <div className="w-3 h-3 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg">Open to inquiries</h3>
-                  <p className="text-muted-foreground">
-                    You can message {mentor.display_name} to ask questions before booking their services
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={async () => {
-                      if (!user) {
-                        navigate('/auth/login');
-                        return;
-                      }
-                      try {
-                        const { sendMessage } = await import('@/utils/matchActions');
-                        const res = await sendMessage(mentor.user_id, 'Hello! I\'m interested in your mentoring services.');
-                        navigate(`/inbox?thread=${res.chatId}`);
-                      } catch (error) {
-                        console.error('Failed to send message:', error);
-                        toast({
-                          title: 'Error',
-                          description: 'Failed to send message. Please try again.',
-                          variant: 'destructive',
-                        });
-                      }
-                    }}
-                    className="border-primary text-primary hover:bg-primary hover:text-white"
-                  >
-                    Get in touch
-                  </Button>
-                </div>
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg">Open to inquiries</h3>
+                    <p className="text-muted-foreground">
+                      You can message {mentor.display_name} to ask questions before booking their services
+                    </p>
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder={`Write a message to ${mentor.display_name}...`}
+                        value={contactMessage}
+                        onChange={(e) => setContactMessage(e.target.value)}
+                        rows={3}
+                      />
+                      <div className="flex justify-end">
+                        <Button 
+                          variant="outline" 
+                          onClick={async () => {
+                            if (!user) {
+                              navigate('/auth/login');
+                              return;
+                            }
+                            const body = contactMessage.trim();
+                            if (!body) {
+                              toast({
+                                title: 'Message required',
+                                description: 'Please type a message before sending',
+                                variant: 'destructive',
+                              });
+                              return;
+                            }
+                            try {
+                              const { sendMessage } = await import('@/utils/matchActions');
+                              await sendMessage(mentor.user_id, body);
+                              setContactMessage('');
+                              toast({ title: 'Message sent', description: 'Your message was sent to the mentor.' });
+                            } catch (error) {
+                              console.error('Failed to send message:', error);
+                              toast({
+                                title: 'Error',
+                                description: 'Failed to send message. Please try again.',
+                                variant: 'destructive',
+                              });
+                            }
+                          }}
+                          className="border-primary text-primary hover:bg-primary hover:text-white"
+                        >
+                          Send
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
               </div>
             </CardContent>
           </Card>

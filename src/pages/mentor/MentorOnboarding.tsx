@@ -43,6 +43,7 @@ export default function MentorOnboarding() {
     custom_topic: '',
     photos: [] as string[],
     website_url: '',
+    plan_description: '2 calls per month (30min/call)',
     social_links: {
       twitter: '',
       linkedin: '',
@@ -89,6 +90,7 @@ export default function MentorOnboarding() {
           languages: formData.languages.length > 0 ? formData.languages : ['English'],
           photos: formData.photos,
           website_url: formData.website_url.trim() || null,
+          plan_description: formData.plan_description?.trim() || null,
           social_links: formData.social_links,
           rating: 0
         });
@@ -246,6 +248,16 @@ export default function MentorOnboarding() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Mentorship plan details</label>
+                <Input
+                  value={formData.plan_description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, plan_description: e.target.value }))}
+                  placeholder="e.g., 2 calls per month (30min/call)"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Shown on your mentor page under plans</p>
               </div>
 
               <div>
