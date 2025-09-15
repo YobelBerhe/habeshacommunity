@@ -68,7 +68,7 @@ serve(async (req: Request) => {
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2024-06-20",
+      apiVersion: "2025-08-27.basil",
     });
 
     const unitAmount = Math.max(100, Math.round(Number(mentor.price_cents))); 
@@ -120,10 +120,11 @@ serve(async (req: Request) => {
 
   } catch (error) {
     console.error('Checkout error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
-        status: 400,
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
