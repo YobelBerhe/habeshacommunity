@@ -33,7 +33,17 @@ export default function DonateButton() {
       if (error) throw error;
 
       if (data?.url) {
-        window.location.href = data.url;
+        try {
+          if (window.top && window.top !== window.self) {
+            // Break out of iframe (Stripe Checkout cannot load in iframes)
+            (window.top as Window).location.href = data.url;
+          } else {
+            window.location.href = data.url;
+          }
+        } catch {
+          // Fallback: open in a new tab
+          window.open(data.url, "_blank", "noopener,noreferrer");
+        }
       } else {
         alert("Unable to start checkout");
       }
