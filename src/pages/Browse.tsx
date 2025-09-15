@@ -150,6 +150,47 @@ export default function Browse() {
           
           console.log('✅ Processed mentor listings:', mentorListings.length);
           setListings(mentorListings);
+        } else if (filters.category === 'match') {
+          const { data, error } = await supabase
+            .from('match_profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          if (error) throw error;
+          
+          // Convert match profile data to listing format
+          const matchListings = (data || []).map(profile => ({
+            id: profile.user_id, // Use user_id as the listing ID for match profiles
+            user_id: profile.user_id,
+            city: profile.city,
+            country: profile.country,
+            category: 'match',
+            subcategory: 'networking',
+            title: profile.display_name || 'Anonymous',
+            description: profile.bio || "",
+            price: null,
+            currency: 'USD',
+            contact_phone: null,
+            contact_whatsapp: null,
+            contact_telegram: null,
+            contact_email: null,
+            website_url: null,
+            tags: profile.seeking ? [profile.seeking] : [],
+            images: profile.photos || [],
+            lat: null,
+            lng: null,
+            created_at: profile.created_at,
+            // Legacy compatibility
+            contact: { phone: "" },
+            photos: profile.photos || [],
+            lon: undefined,
+            createdAt: new Date(profile.created_at).getTime(),
+            updatedAt: new Date(profile.created_at).getTime(),
+            hasImage: !!(profile.photos?.length),
+          }));
+          
+          console.log('✅ Processed match listings:', matchListings.length);
+          setListings(matchListings);
         } else {
           // Use contact-aware fetch if user is authenticated, otherwise regular fetch
           const data = user 

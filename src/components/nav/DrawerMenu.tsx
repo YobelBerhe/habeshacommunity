@@ -202,7 +202,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/match');
+                    navigate('/browse?category=match');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
