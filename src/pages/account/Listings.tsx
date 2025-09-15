@@ -169,15 +169,16 @@ export default function MyListings() {
           
           {/* Centered Title */}
           <div className="flex-1 flex justify-center">
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">{t(language, "my_listings")}</h1>
+            <h1 className="text-lg md:text-xl font-bold text-foreground">{t(language, "my_listings")}</h1>
           </div>
           
           {/* Small New Post Button */}
           <button 
             onClick={openPost}
-            className="btn-primary flex items-center justify-center w-10 h-10 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm"
+            className="btn-primary flex items-center gap-1 px-2 py-1 rounded-md shadow-sm hover:shadow-md transition-all duration-200 text-xs ml-2"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-3 h-3" />
+            <span>Post</span>
           </button>
         </div>
 
