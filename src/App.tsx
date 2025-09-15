@@ -22,6 +22,7 @@ import MentorDetail from "./pages/mentor/MentorDetail";
 import MentorRequests from "./pages/mentor/MentorRequests";
 import MyBookings from "./pages/mentor/MyBookings";
 import BookingSuccess from "./pages/mentor/BookingSuccess";
+import MentorPayouts from "./pages/mentor/MentorPayouts";
 import MatchOnboarding from "./pages/match/MatchOnboarding";
 import MatchDiscover from "./pages/match/MatchDiscover";
 import MatchProfile from "./pages/match/MatchProfile";
@@ -65,6 +66,7 @@ const App = () => (
           <Route path="/mentor/requests" element={<MentorRequests />} />
           <Route path="/mentor/bookings" element={<MyBookings />} />
           <Route path="/mentor/booking-success" element={<BookingSuccess />} />
+          <Route path="/mentor/payouts" element={<MentorPayouts />} />
           <Route path="/match" element={<MatchDiscover />} />
           <Route path="/match/onboarding" element={<MatchOnboarding />} />
           <Route path="/match/profile/:id" element={<MatchProfile />} />

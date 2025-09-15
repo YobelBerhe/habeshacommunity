@@ -458,7 +458,7 @@ export default function MentorDetail() {
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                         size="lg"
                       >
-                        {booking ? 'Sending Request...' : 'Apply now'}
+                        {booking ? 'Processing...' : 'Apply now'}
                       </Button>
 
                       <p className="text-xs text-center text-muted-foreground">
@@ -618,7 +618,7 @@ export default function MentorDetail() {
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                       size="lg"
                     >
-                      {booking ? 'Sending Request...' : 'Apply now'}
+                      {booking ? 'Processing...' : 'Apply now'}
                     </Button>
 
                     <p className="text-xs text-center text-muted-foreground">

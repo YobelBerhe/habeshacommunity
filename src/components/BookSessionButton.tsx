@@ -17,7 +17,7 @@ export function BookSessionButton({ mentorId, disabled }: BookSessionButtonProps
       setIsLoading(true);
       const result = await bookMentorSession(mentorId);
       if (result.redirectUrl) {
-        window.location.href = result.redirectUrl;
+        window.open(result.redirectUrl, '_blank');
       }
     } catch (error) {
       console.error('Booking failed:', error);
