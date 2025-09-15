@@ -49,7 +49,7 @@ serve(async (req: Request) => {
       .single();
 
     if (mentorUserError || !mentorUser?.stripe_account_id) {
-      throw new Error('Mentor has not connected payouts yet');
+      throw new Error('Mentor needs to set up payouts first. Please contact support or try connecting your Stripe account.');
     }
 
     // Create booking

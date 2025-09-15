@@ -14,6 +14,7 @@ import ImageBox from '@/components/ImageBox';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ConnectStripeButton } from '@/components/ConnectStripeButton';
 
 import { timeAgo } from '@/utils/ui';
 
@@ -48,6 +49,7 @@ export default function MentorDetail() {
   const [isFree, setIsFree] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [lastSeen, setLastSeen] = useState<string | null>(null);
+  const [hasStripeConnected, setHasStripeConnected] = useState(false);
   const appState = getAppState();
 
   useEffect(() => {
@@ -81,6 +83,17 @@ export default function MentorDetail() {
 
       if (error) throw error;
       setMentor(data);
+      
+      // Check if mentor has connected Stripe
+      if (data.user_id) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('stripe_account_id')
+          .eq('id', data.user_id)
+          .single();
+        
+        setHasStripeConnected(!!userData?.stripe_account_id);
+      }
     } catch (error) {
       console.error('Error fetching mentor:', error);
       toast({
@@ -612,14 +625,29 @@ export default function MentorDetail() {
                       </div>
                     </div>
 
-                    <Button 
-                      onClick={handleBooking}
-                      disabled={booking}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      size="lg"
-                    >
-                      {booking ? 'Processing...' : 'Apply now'}
-                    </Button>
+                    {/* Show Connect Stripe button if this is the mentor's own profile and they haven't connected */}
+                    {user?.id === mentor.user_id && !hasStripeConnected && (
+                      <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                        <h4 className="font-medium text-orange-800 mb-2">Connect Stripe to Accept Payments</h4>
+                        <p className="text-sm text-orange-700 mb-3">
+                          You need to connect your Stripe account to receive payments from bookings.
+                        </p>
+                        <ConnectStripeButton />
+                      </div>
+                    )}
+
+                    {/* Show booking button only if Stripe is connected or user is not the mentor */}
+                    {(hasStripeConnected || user?.id !== mentor.user_id) && (
+                      <Button 
+                        onClick={handleBooking}
+                        disabled={booking || (!hasStripeConnected && user?.id !== mentor.user_id)}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        size="lg"
+                      >
+                        {booking ? 'Processing...' : 'Apply now'}
+                      </Button>
+                    )}
+
 
                     <p className="text-xs text-center text-muted-foreground">
                       7-day free trial, cancel anytime. <span className="underline cursor-pointer">What's included?</span>
