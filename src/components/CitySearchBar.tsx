@@ -22,7 +22,8 @@ export default function CitySearchBar({
   const [q, setQ] = useState(value ?? "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<City[]>([]);
-  const [justSelected, setJustSelected] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -37,10 +38,9 @@ export default function CitySearchBar({
   }, []);
 
   useEffect(() => {
-    if (q.trim().length < 2 || justSelected) { 
+    if (q.trim().length < 2 || locked) { 
       setItems([]);
       setOpen(false);
-      if (justSelected) setJustSelected(false);
       return; 
     }
     
@@ -56,21 +56,23 @@ export default function CitySearchBar({
           return { name, country, lat: x.lat, lon: x.lon };
         }).filter(Boolean);
         setItems(list); 
-        if (list.length > 0 && !justSelected) setOpen(true);
+        if (list.length > 0 && !locked) setOpen(true);
       } catch (error) {
         // Allow manual city entry as fallback
         setItems([{ name: q, country: "Manual Entry", lat: "0", lon: "0" }]);
-        if (!justSelected) setOpen(true);
+        if (!locked) setOpen(true);
       }
     }, 200); 
     
     return () => clearTimeout(t);
-  }, [q, justSelected]);
+  }, [q, locked]);
 
   const handleSelect = (city: City) => {
     const cityName = city.name;
-    setJustSelected(true);
-    setQ(`${cityName}, ${city.country}`);
+    setLocked(true);
+    const sel = `${cityName}, ${city.country}`;
+    setSelectedValue(sel);
+    setQ(sel);
     setItems([]); // Clear items immediately
     setOpen(false);
     
@@ -115,8 +117,8 @@ export default function CitySearchBar({
           className="field w-full pr-10"
           placeholder={placeholder}
           value={q}
-          onChange={e => setQ(e.target.value)}
-          onFocus={() => items.length > 0 && q.trim().length >= 2 && !justSelected && setOpen(true)}
+          onChange={e => { const v = e.target.value; setQ(v); if (locked && v !== selectedValue) setLocked(false); }}
+          onFocus={() => items.length > 0 && q.trim().length >= 2 && !locked && setOpen(true)}
           autoComplete="off"
         />
         <button 
@@ -128,7 +130,7 @@ export default function CitySearchBar({
         </button>
       </form>
       
-      {open && items.length > 0 && !justSelected && (
+      {open && items.length > 0 && !locked && (
         <div className="absolute left-0 right-0 top-[46px] z-[9999] max-h-72 overflow-auto bg-background border rounded-xl shadow-2xl">
           {items.map((c, i) => (
             <div 

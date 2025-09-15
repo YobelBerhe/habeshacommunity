@@ -8,7 +8,8 @@ export default function CitySearch({ value, onSelect }:{
   const [q, setQ] = useState(value ?? "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<City[]>([]);
-  const [justSelected, setJustSelected] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -20,10 +21,9 @@ export default function CitySearch({ value, onSelect }:{
   },[]);
 
   useEffect(()=>{
-    if(q.trim().length<2 || justSelected){ 
+    if(q.trim().length<2 || locked){ 
       setItems([]); 
       setOpen(false); 
-      if (justSelected) setJustSelected(false);
       return; 
     }
     
@@ -39,14 +39,14 @@ export default function CitySearch({ value, onSelect }:{
           return {name, country, lat:x.lat, lon:x.lon};
         }).filter(Boolean);
         setItems(list); 
-        if(list.length > 0 && !justSelected) setOpen(true);
+        if(list.length > 0 && !locked) setOpen(true);
       } catch (error) {
         // Allow manual city entry as fallback
         setItems([{name: q, country: "Manual Entry", lat: "0", lon: "0"}]);
-        if (!justSelected) setOpen(true);
+        if (!locked) setOpen(true);
       }
     },200); return ()=>clearTimeout(t);
-  },[q, justSelected]);
+  },[q, locked]);
 
   return (
     <div ref={boxRef} className="relative">
@@ -54,18 +54,20 @@ export default function CitySearch({ value, onSelect }:{
         className="field w-full"
         placeholder="Type a city… (e.g., Asmara, Oakland, Frankfurt)"
         value={q}
-        onChange={e=>setQ(e.target.value)}
-        onFocus={()=>items.length > 0 && q.trim().length >= 2 && !justSelected && setOpen(true)}
+        onChange={e=>{ const v=e.target.value; setQ(v); if(locked && v !== selectedValue) setLocked(false); }}
+        onFocus={()=>items.length > 0 && q.trim().length >= 2 && !locked && setOpen(true)}
         autoComplete="off"
       />
-      {open && items.length>0 && !justSelected && (
+      {open && items.length>0 && !locked && (
         <div className="absolute left-0 right-0 top-[46px] z-[9999] max-h-72 overflow-auto bg-white border rounded-xl shadow-2xl">
           {items.map((c,i)=>(
             <div key={i}
                  className="px-3 py-2 cursor-pointer hover:bg-slate-50"
              onMouseDown={()=>{ 
-               setJustSelected(true);
-               setQ(`${c.name}, ${c.country}`); 
+               setLocked(true);
+               const sel = `${c.name}, ${c.country}`;
+               setSelectedValue(sel);
+               setQ(sel); 
                setItems([]);
                setOpen(false); 
                onSelect(c);
