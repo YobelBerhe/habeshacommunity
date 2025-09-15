@@ -123,13 +123,6 @@ export default function MentorDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading mentor profile...</div>
         </div>
@@ -140,17 +133,10 @@ export default function MentorDetail() {
   if (!mentor) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <p>Mentor not found</p>
-            <Button onClick={() => navigate('/mentor')} className="mt-4">
+            <Button onClick={() => navigate('/browse?category=mentor')} className="mt-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Mentors
             </Button>
@@ -162,18 +148,10 @@ export default function MentorDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
-      
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/mentor')}
+          onClick={() => navigate('/browse?category=mentor')}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
