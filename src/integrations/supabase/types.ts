@@ -960,6 +960,7 @@ export type Database = {
           last_active: string | null
           name: string | null
           phone: string | null
+          stripe_account_id: string | null
         }
         Insert: {
           city?: string | null
@@ -970,6 +971,7 @@ export type Database = {
           last_active?: string | null
           name?: string | null
           phone?: string | null
+          stripe_account_id?: string | null
         }
         Update: {
           city?: string | null
@@ -980,6 +982,7 @@ export type Database = {
           last_active?: string | null
           name?: string | null
           phone?: string | null
+          stripe_account_id?: string | null
         }
         Relationships: []
       }
