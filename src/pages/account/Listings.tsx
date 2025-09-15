@@ -17,7 +17,10 @@ export default function MyListings() {
   const { language } = useLanguage();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     
     const loadMyListings = async () => {
       try {
@@ -117,6 +120,27 @@ export default function MyListings() {
       toast.error('Failed to delete listing');
     }
   };
+
+  if (!user && !loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MobileHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Sign in required</h2>
+            <p className="text-muted-foreground mb-6">Please sign in to view and edit your listings</p>
+            <a 
+              href="/auth/login" 
+              className="btn-primary inline-block"
+            >
+              Sign In
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

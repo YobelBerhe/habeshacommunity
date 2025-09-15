@@ -15,7 +15,10 @@ export default function SavedListings() {
   const { language } = useLanguage();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     
     const loadFavorites = async () => {
       try {
@@ -100,6 +103,27 @@ export default function SavedListings() {
       console.error('Error removing favorite:', error);
     }
   };
+
+  if (!user && !loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MobileHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <Heart className="w-16 h-16 text-red-500 fill-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Sign in required</h2>
+            <p className="text-muted-foreground mb-6">Please sign in to view your saved listings</p>
+            <a 
+              href="/auth/login" 
+              className="btn-primary inline-block"
+            >
+              Sign In
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
