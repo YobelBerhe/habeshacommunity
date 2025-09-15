@@ -8,6 +8,7 @@ export default function CitySearch({ value, onSelect }:{
   const [q, setQ] = useState(value ?? "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<City[]>([]);
+  const [justSelected, setJustSelected] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -19,7 +20,13 @@ export default function CitySearch({ value, onSelect }:{
   },[]);
 
   useEffect(()=>{
-    if(q.trim().length<2){ setItems([]); setOpen(false); return; }
+    if(q.trim().length<2 || justSelected){ 
+      setItems([]); 
+      setOpen(false); 
+      if (justSelected) setJustSelected(false);
+      return; 
+    }
+    
     const t=setTimeout(async()=>{
       try {
         const url=`https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&accept-language=en&q=${encodeURIComponent(q)}`;
@@ -32,14 +39,14 @@ export default function CitySearch({ value, onSelect }:{
           return {name, country, lat:x.lat, lon:x.lon};
         }).filter(Boolean);
         setItems(list); 
-        if(list.length > 0) setOpen(true);
+        if(list.length > 0 && !justSelected) setOpen(true);
       } catch (error) {
         // Allow manual city entry as fallback
         setItems([{name: q, country: "Manual Entry", lat: "0", lon: "0"}]);
-        setOpen(true);
+        if (!justSelected) setOpen(true);
       }
     },200); return ()=>clearTimeout(t);
-  },[q]);
+  },[q, justSelected]);
 
   return (
     <div ref={boxRef} className="relative">
@@ -48,15 +55,16 @@ export default function CitySearch({ value, onSelect }:{
         placeholder="Type a city… (e.g., Asmara, Oakland, Frankfurt)"
         value={q}
         onChange={e=>setQ(e.target.value)}
-        onFocus={()=>items.length > 0 && q.trim().length >= 2 && setOpen(true)}
+        onFocus={()=>items.length > 0 && q.trim().length >= 2 && !justSelected && setOpen(true)}
         autoComplete="off"
       />
-      {open && items.length>0 && (
+      {open && items.length>0 && !justSelected && (
         <div className="absolute left-0 right-0 top-[46px] z-[9999] max-h-72 overflow-auto bg-white border rounded-xl shadow-2xl">
           {items.map((c,i)=>(
             <div key={i}
                  className="px-3 py-2 cursor-pointer hover:bg-slate-50"
              onMouseDown={()=>{ 
+               setJustSelected(true);
                setQ(`${c.name}, ${c.country}`); 
                setItems([]);
                setOpen(false); 
