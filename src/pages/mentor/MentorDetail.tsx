@@ -63,6 +63,12 @@ export default function MentorDetail() {
     }
   }, [mentor?.user_id]);
 
+  useEffect(() => {
+    if (!mentor?.user_id) return;
+    const interval = setInterval(() => fetchPresence(), 60000);
+    return () => clearInterval(interval);
+  }, [mentor?.user_id]);
+
   const fetchMentor = async () => {
     try {
       const { data, error } = await supabase
@@ -154,19 +160,12 @@ export default function MentorDetail() {
 
     if (!mentor) return;
 
-    if (!message.trim()) {
-      toast({
-        title: 'Message Required',
-        description: 'Please write a message describing what you need help with',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const msg = message.trim() || `Hi ${mentor.display_name}, I'd like to apply for mentorship.`;
 
     setBooking(true);
     try {
       const { requestMentorBooking } = await import('@/utils/mentorActions');
-      await requestMentorBooking(mentor.id, message.trim());
+      await requestMentorBooking(mentor.id, msg);
 
       toast({
         title: 'Request Sent!',
@@ -351,7 +350,7 @@ export default function MentorDetail() {
                   variant="outline" 
                   size="sm"
                   onClick={handleFavoriteToggle}
-                  className={isFavorited ? 'text-red-500' : ''}
+                  className={isFavorited ? 'text-destructive' : ''}
                 >
                   <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
                   {isFavorited ? 'Saved' : 'Save'}
@@ -521,7 +520,7 @@ export default function MentorDetail() {
               variant="outline" 
               size="sm"
               onClick={handleFavoriteToggle}
-              className={isFavorited ? 'text-red-500' : ''}
+              className={isFavorited ? 'text-destructive' : ''}
             >
               <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
               {isFavorited ? 'Saved' : 'Save'}
