@@ -509,7 +509,6 @@ export default function Index() {
           mode="dark"
           SearchBar={() => <CitySearchBar 
             placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
-            onCitySelect={handleCityChange}
           />}
           onPrimary={handleHousingClick}
           onSecondary={handleJobsClick}

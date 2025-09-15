@@ -33,6 +33,7 @@ import SortDropdown from "@/components/SortDropdown";
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";
+import CityIndex from "@/components/CityIndex";
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -515,6 +516,19 @@ export default function Browse() {
           </div>
         </div>
 
+        {/* Show CityIndex when city is selected but no category filters applied */}
+        {filters.city && !filters.category && processedListings.length > 0 && (
+          <div className="px-4 py-6 bg-muted/20">
+            <CityIndex
+              city={filters.city}
+              listings={processedListings}
+              onOpen={({ category, sub }) => {
+                setFilters({ ...filters, category, subcategory: sub });
+              }}
+            />
+          </div>
+        )}
+
         {/* Split View: Map on Left, Listings on Right */}
         <div className="flex h-[calc(100vh-200px)]">
           {/* Map Section - Left Side */}
@@ -734,6 +748,19 @@ export default function Browse() {
             </div>
           </div>
         </div>
+
+        {/* Show CityIndex for mobile when city is selected but no category filters applied */}
+        {filters.city && !filters.category && processedListings.length > 0 && (
+          <div className="px-4 py-6 bg-muted/20">
+            <CityIndex
+              city={filters.city}
+              listings={processedListings}
+              onOpen={({ category, sub }) => {
+                setFilters({ ...filters, category, subcategory: sub });
+              }}
+            />
+          </div>
+        )}
 
         {/* Main Content - Mobile */}
         <main className="px-4 py-6 mb-20">
