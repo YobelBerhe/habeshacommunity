@@ -169,7 +169,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
               
               {/* Details */}
               <div className="text-sm text-muted-foreground">
-                2 bds | 1 ba | 875 sqft | Active
+                {listing.subcategory || 'No category'}
               </div>
               
               {/* Title/Address */}

@@ -65,7 +65,7 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
           
           {/* Details */}
           <div className="text-sm text-muted-foreground">
-            2 bds | 1 ba | 875 sqft | Active
+            {item.subcategory || 'No category'}
           </div>
           
           {/* Title/Address */}
