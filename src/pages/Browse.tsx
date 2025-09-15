@@ -18,6 +18,7 @@ import { useLanguage } from "@/store/language";
 import type { Listing, SearchFilters, AppState } from "@/types";
 import { getAppState, saveAppState } from "@/utils/storage";
 import { fetchListings } from "@/repo/listings";
+import { supabase } from "@/integrations/supabase/client";
 import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
 import { useAuth } from '@/store/auth';
 import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
@@ -107,60 +108,104 @@ export default function Browse() {
       setLoading(true);
       console.log('🔍 Fetching listings with filters:', filters);
       try {
-        // Use contact-aware fetch if user is authenticated, otherwise regular fetch
-        const data = user 
-          ? await fetchListingsWithContacts({
-              city: filters.city,
-              category: filters.category,
-              q: filters.query,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              subcategory: filters.subcategory,
-            })
-          : await fetchListings({
-              city: filters.city,
-              category: filters.category,
-              q: filters.query,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              subcategory: filters.subcategory,
-            });
+        // Handle mentor category specially
+        if (filters.category === 'mentor') {
+          const { data, error } = await supabase
+            .from('mentors')
+            .select('*')
+            .order('created_at', { ascending: false });
             
-        console.log('📦 Raw data from database:', data.length, 'listings');
-        console.log('🏙️ Requested city:', filters.city);
-        
-        const processedListings = data.map(row => ({
-          id: row.id,
-          user_id: row.user_id || "",
-          city: row.city,
-          country: row.country,
-          category: row.category as string,
-          subcategory: row.subcategory,
-          title: row.title,
-          description: row.description || "",
-          price: row.price_cents ? row.price_cents / 100 : null,
-          currency: row.currency,
-          contact_phone: hasContactAccess(user, row) ? getContactValue(row.contact, 'phone') : null,
-          contact_whatsapp: hasContactAccess(user, row) ? getContactValue(row.contact, 'whatsapp') : null,
-          contact_telegram: hasContactAccess(user, row) ? getContactValue(row.contact, 'telegram') : null,
-          contact_email: hasContactAccess(user, row) ? getContactValue(row.contact, 'email') : null,
-          website_url: row.website_url,
-          tags: row.tags || [],
-          images: row.images || [],
-          lat: row.location_lat,
-          lng: row.location_lng,
-          created_at: row.created_at,
-          // Legacy compatibility
-          contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
-          photos: row.images || [],
-          lon: row.location_lng || undefined,
-          createdAt: new Date(row.created_at).getTime(),
-          updatedAt: new Date(row.updated_at).getTime(),
-          hasImage: !!(row.images?.length),
-        }));
-        
-        console.log('✅ Processed listings:', processedListings.length);
-        setListings(processedListings);
+          if (error) throw error;
+          
+          // Convert mentor data to listing format
+          const mentorListings = (data || []).map(mentor => ({
+            id: mentor.id,
+            user_id: mentor.user_id,
+            city: mentor.city,
+            country: mentor.country,
+            category: 'mentor',
+            subcategory: 'mentor',
+            title: mentor.display_name,
+            description: mentor.bio || "",
+            price: mentor.price_cents ? mentor.price_cents / 100 : null,
+            currency: mentor.currency,
+            contact_phone: null,
+            contact_whatsapp: null,
+            contact_telegram: null,
+            contact_email: null,
+            website_url: mentor.website_url,
+            tags: mentor.topics || [],
+            images: mentor.photos || [],
+            lat: null,
+            lng: null,
+            created_at: mentor.created_at,
+            // Legacy compatibility
+            contact: { phone: "" },
+            photos: mentor.photos || [],
+            lon: undefined,
+            createdAt: new Date(mentor.created_at).getTime(),
+            updatedAt: new Date(mentor.created_at).getTime(),
+            hasImage: !!(mentor.photos?.length),
+          }));
+          
+          console.log('✅ Processed mentor listings:', mentorListings.length);
+          setListings(mentorListings);
+        } else {
+          // Use contact-aware fetch if user is authenticated, otherwise regular fetch
+          const data = user 
+            ? await fetchListingsWithContacts({
+                city: filters.city,
+                category: filters.category,
+                q: filters.query,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                subcategory: filters.subcategory,
+              })
+            : await fetchListings({
+                city: filters.city,
+                category: filters.category,
+                q: filters.query,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                subcategory: filters.subcategory,
+              });
+              
+          console.log('📦 Raw data from database:', data.length, 'listings');
+          console.log('🏙️ Requested city:', filters.city);
+          
+          const processedListings = data.map(row => ({
+            id: row.id,
+            user_id: row.user_id || "",
+            city: row.city,
+            country: row.country,
+            category: row.category as string,
+            subcategory: row.subcategory,
+            title: row.title,
+            description: row.description || "",
+            price: row.price_cents ? row.price_cents / 100 : null,
+            currency: row.currency,
+            contact_phone: hasContactAccess(user, row) ? getContactValue(row.contact, 'phone') : null,
+            contact_whatsapp: hasContactAccess(user, row) ? getContactValue(row.contact, 'whatsapp') : null,
+            contact_telegram: hasContactAccess(user, row) ? getContactValue(row.contact, 'telegram') : null,
+            contact_email: hasContactAccess(user, row) ? getContactValue(row.contact, 'email') : null,
+            website_url: row.website_url,
+            tags: row.tags || [],
+            images: row.images || [],
+            lat: row.location_lat,
+            lng: row.location_lng,
+            created_at: row.created_at,
+            // Legacy compatibility
+            contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
+            photos: row.images || [],
+            lon: row.location_lng || undefined,
+            createdAt: new Date(row.created_at).getTime(),
+            updatedAt: new Date(row.updated_at).getTime(),
+            hasImage: !!(row.images?.length),
+          }));
+          
+          console.log('✅ Processed listings:', processedListings.length);
+          setListings(processedListings);
+        }
       } catch (error) {
         console.error("Failed to load listings:", error);
         toast("Failed to load listings");
