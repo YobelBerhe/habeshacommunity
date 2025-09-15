@@ -404,11 +404,6 @@ export default function ListingDetail() {
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="w-4 h-4" />
                 <span>{listing.city}{listing.country && `, ${listing.country}`}</span>
-                {/* Add ContactButton here next to address */}
-                <ContactButton 
-                  contact={listing.contact_phone || listing.contact_whatsapp || listing.contact_telegram || listing.contact_email} 
-                  className="ml-2"
-                />
               </div>
             </div>
             {listing.price && (
