@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import ListingCard from '@/components/ListingCard';
@@ -159,13 +159,25 @@ export default function MyListings() {
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-foreground">{t(language, "my_listings")}</h1>
+          {/* Back Arrow */}
+          <button 
+            onClick={() => window.history.back()}
+            className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-foreground" />
+          </button>
+          
+          {/* Centered Title */}
+          <h1 className="text-xl md:text-2xl font-bold text-foreground absolute left-1/2 transform -translate-x-1/2">{t(language, "my_listings")}</h1>
+          
+          {/* New Post Button */}
           <button 
             onClick={openPost}
-            className="btn-primary flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+            className="btn-primary flex items-center gap-2 px-3 md:px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
           >
             <Plus className="w-4 h-4" />
-            New Post
+            <span className="hidden sm:inline">New Post</span>
+            <span className="sm:hidden">Post</span>
           </button>
         </div>
 
