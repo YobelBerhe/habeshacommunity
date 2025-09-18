@@ -133,11 +133,8 @@ export default function WorldActivityHero({
       
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-black/20 to-black/40 md:from-black/30 md:to-black/30 z-[1]" />
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 pt-14 md:pt-20">
-        <h1 className="text-white text-3xl md:text-5xl font-semibold drop-shadow-sm">
-          Connect with the <span className="text-blue-500">Habesha Community</span>
-        </h1>
-        <p className="text-white/90 mt-3 md:text-lg">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 pt-20 md:pt-32">
+        <p className="text-white/90 md:text-xl text-center mb-8">
           <span className="text-red-500">Live now:</span> <b>{totals.totalPeople}</b> people in <b>{totals.totalCities}</b> cities
         </p>
 
