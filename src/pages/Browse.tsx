@@ -641,51 +641,13 @@ export default function Browse() {
               </div>
 
               {/* Full-Width Listings Grid */}
-              <div className={
-                viewMode === 'list' ? 'grid grid-cols-1 gap-4' : 
-                viewMode === 'gallery' ? 'grid grid-cols-1 md:grid-cols-3 gap-4' :
-                'grid grid-cols-2 gap-4'
-              }>
-                {processedListings.map((listing) => (
-                  <div
-                    key={listing.id}
-                    className="border dark:border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-card"
-                    onClick={() => handleListingSelect(listing)}
-                  >
-                    {listing.images?.[0] && (
-                      <img
-                        src={listing.images[0]}
-                        alt={listing.title}
-                        className="w-full h-48 object-cover"
-                      />
-                    )}
-                    <div className="p-4">
-                      <h3 className="font-medium text-sm mb-2 line-clamp-2 text-card-foreground">{listing.title}</h3>
-                      {listing.price && (
-                        <p className="text-lg font-semibold text-green-600 dark:text-green-400 mb-1">
-                          ${listing.price.toLocaleString()}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {listing.city}, {listing.country}
-                      </p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {listing.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {loading && (
-                  <div className={`${viewMode === 'list' ? 'col-span-1' : 'col-span-2'} text-center py-8 text-muted-foreground`}>
-                    Loading listings...
-                  </div>
-                )}
-                {!loading && processedListings.length === 0 && (
-                  <div className={`${viewMode === 'list' ? 'col-span-1' : 'col-span-2'} text-center py-8 text-muted-foreground`}>
-                    No listings found. Try adjusting your filters.
-                  </div>
-                )}
-              </div>
+              <ListingGrid
+                listings={processedListings}
+                onListingClick={handleListingSelect}
+                loading={loading}
+                newlyPostedId={null}
+                viewMode={viewMode}
+              />
             </div>
           </div>
         </div>
