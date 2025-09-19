@@ -243,38 +243,45 @@ export default function InteractiveListingMap({
         icon: blueIcon 
       });
 
-      // Create popup content similar to Zillow
+      // Create popup content similar to Zillow (mobile-aware)
       const popupContent = document.createElement('div');
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+      const popupWidth = isMobile ? 220 : 280;
+      const imgHeight = isMobile ? 90 : 120;
+      const priceFont = isMobile ? 16 : 18;
+      const titleFont = isMobile ? 13 : 14;
+      const metaFont = isMobile ? 11 : 12;
+
       popupContent.className = 'listing-popup';
       popupContent.innerHTML = `
-        <div style="min-width: 280px; padding: 0; border-radius: 8px; overflow: hidden; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="min-width: ${popupWidth}px; padding: 0; border-radius: 8px; overflow: hidden; font-family: system-ui, -apple-system, sans-serif;">
           <div style="position: relative;">
             ${listing.images && listing.images.length > 0 ? 
               `<img src="${listing.images[0]}" alt="${listing.title}" style="
                 width: 100%; 
-                height: 120px; 
+                height: ${imgHeight}px; 
                 object-fit: cover;
               " />` : 
               `<div style="
                 width: 100%; 
-                height: 120px; 
+                height: ${imgHeight}px; 
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 color: white;
-                font-size: 14px;
+                font-size: ${metaFont}px;
               ">No Photo Available</div>`
             }
             ${listing.images && listing.images.length > 1 ? 
-              `<div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
+              `<div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: ${metaFont - 1}px;">
                 1/${listing.images.length}
               </div>` : ''
             }
           </div>
           <div style="padding: 12px;">
             ${listing.price ? 
-              `<div style="font-weight: 700; color: #1a1a1a; font-size: 18px; margin-bottom: 4px;">
+              `<div style="font-weight: 700; color: #1a1a1a; font-size: ${priceFont}px; margin-bottom: 4px;">
                 ${new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: 'USD',
@@ -282,18 +289,18 @@ export default function InteractiveListingMap({
                 }).format(listing.price)}${listing.category === 'housing' ? '/mo' : ''}
               </div>` : ''
             }
-            <div style="font-size: 14px; color: #1a1a1a; line-height: 1.4; margin-bottom: 6px; font-weight: 500;">
+            <div style="font-size: ${titleFont}px; color: #1a1a1a; line-height: 1.4; margin-bottom: 6px; font-weight: 500;">
               ${listing.title}
             </div>
-            <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+            <div style="font-size: ${metaFont}px; color: #6b7280; margin-bottom: 8px;">
               ${(listing as any).street_address || listing.city}
             </div>
             ${listing.category === 'housing' ? 
-              `<div style="display: flex; gap: 12px; font-size: 12px; color: #6b7280;">
+              `<div style="display: flex; gap: 12px; font-size: ${metaFont}px; color: #6b7280;">
                 <span>• Available now</span>
                 <span>• ${listing.subcategory || 'Housing'}</span>
               </div>` : 
-              `<div style="font-size: 12px; color: #6b7280;">
+              `<div style="font-size: ${metaFont}px; color: #6b7280;">
                 ${listing.category || 'Item'} • ${listing.subcategory || 'General'}
               </div>`
             }
@@ -322,7 +329,7 @@ export default function InteractiveListingMap({
       });
 
       marker.bindPopup(popupContent, {
-        maxWidth: 280,
+        maxWidth: popupWidth,
         className: 'listing-popup-container',
         closeButton: true,
         autoPan: false,
@@ -421,7 +428,7 @@ export default function InteractiveListingMap({
         addBoundary(searchCountry, 'country');
       }
     }
-  }, [showBorders]);
+  }, [showBorders, searchCity, searchCountry]);
 
   return (
     <div className="relative w-full" style={{ height }}>
@@ -452,19 +459,18 @@ export default function InteractiveListingMap({
               />
               <span className="text-xs">Satellite</span>
             </label>
-            {(searchCity || searchCountry) && (
-              <div className="border-t border-border/20 pt-2 mt-2">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showBorders}
-                    onChange={(e) => setShowBorders(e.target.checked)}
-                    className="w-3 h-3 text-primary rounded"
-                  />
-                  <span className="text-xs">Show Borders</span>
-                </label>
-              </div>
-            )}
+            <div className="border-t border-border/20 pt-2 mt-2">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showBorders}
+                  onChange={(e) => setShowBorders(e.target.checked)}
+                  className="w-3 h-3 text-primary rounded"
+                  disabled={!searchCity && !searchCountry}
+                />
+                <span className="text-xs">Show Borders{(!searchCity && !searchCountry) ? ' (select a city or country)' : ''}</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
