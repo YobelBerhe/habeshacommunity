@@ -18,7 +18,7 @@ interface ListingCardProps {
   listing: Listing;
   onSelect: (listing: Listing) => void;
   showJustPosted?: boolean;
-  viewMode?: "list" | "grid" | "gallery" | "map";
+  viewMode?: "list" | "grid" | "gallery" | "map" | "compact";
 }
 
 const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: ListingCardProps) => {
@@ -146,7 +146,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
           {/* Vertical layout with image on top */}
           <div className="relative">
             {/* Image section */}
-            <div className={`relative w-full group/image ${viewMode === "gallery" ? "h-56" : viewMode === "grid" ? "h-32" : viewMode === "list" ? "h-72 md:h-96 md:aspect-square" : "h-48"}`}>
+            <div className={`relative w-full group/image ${viewMode === "gallery" ? "h-56" : viewMode === "grid" ? "h-32" : viewMode === "list" ? "h-72 md:h-96 md:aspect-square" : viewMode === "compact" ? "h-36 md:h-48" : "h-48"}`}>
               <ImageBox
                 src={images[currentImageIndex] || images[0]}
                 alt={listing.title}

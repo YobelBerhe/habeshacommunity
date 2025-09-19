@@ -9,7 +9,7 @@ export interface ListingGridProps {
   newlyPostedId?: string | null;
   favorites?: string[];
   onFavorite?: (listingId: string) => void;
-  viewMode?: "list" | "grid" | "gallery" | "map";
+  viewMode?: "list" | "grid" | "gallery" | "map" | "compact";
 }
 
 export default function ListingGrid({
@@ -27,6 +27,8 @@ export default function ListingGrid({
       case "gallery":
         return "grid grid-cols-1 md:grid-cols-3 gap-4";
       case "list":
+        return "grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-1";
+      case "compact":
         return "grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-1";
       case "grid":
         return "grid grid-cols-2 gap-3";

@@ -1,7 +1,7 @@
 import { Grid3X3, List, Map, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export type ViewMode = "list" | "grid" | "gallery" | "map";
+export type ViewMode = "list" | "grid" | "gallery" | "map" | "compact";
 export type SortKey = "relevance" | "newest" | "oldest" | "price_asc" | "price_desc" | "upcoming" | "has_image";
 
 interface ViewToggleProps {
@@ -14,6 +14,7 @@ export default function ViewToggle({ viewMode, onChange }: ViewToggleProps) {
     { mode: "gallery" as const, icon: Image, label: "Gallery" },
     { mode: "grid" as const, icon: Grid3X3, label: "Grid" },
     { mode: "map" as const, icon: Map, label: "Map" },
+    { mode: "compact" as const, icon: List, label: "Compact" },
     { mode: "list" as const, icon: List, label: "List" },
   ];
 
