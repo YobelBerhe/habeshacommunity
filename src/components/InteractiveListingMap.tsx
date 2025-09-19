@@ -78,7 +78,6 @@ export default function InteractiveListingMap({
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const [listingsWithCoords, setListingsWithCoords] = useState<(Listing & { lat: number; lng: number })[]>([]);
   const [currentZoom, setCurrentZoom] = useState(zoom);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
   const [boundaryLayer, setBoundaryLayer] = useState<L.GeoJSON | null>(null);
   const [showBorders, setShowBorders] = useState(true);
@@ -302,13 +301,7 @@ export default function InteractiveListingMap({
         </div>
       `;
 
-      // Add click handler to show preview first
-      marker.on('click', function(e) {
-        e.originalEvent?.stopPropagation();
-        setSelectedListing(listing);
-      });
-
-      // Add click handler to popup content as backup
+      // Add click handler to popup content for navigation
       popupContent.addEventListener('click', (e) => {
         e.stopPropagation();
         if (onListingClick) {
@@ -415,17 +408,20 @@ export default function InteractiveListingMap({
 
   // Effect to handle border toggle changes
   useEffect(() => {
-    if (!showBorders && boundaryLayer && mapInstanceRef.current) {
+    if (!mapInstanceRef.current) return;
+    
+    if (!showBorders && boundaryLayer) {
       mapInstanceRef.current.removeLayer(boundaryLayer);
       setBoundaryLayer(null);
     } else if (showBorders && (searchCity || searchCountry)) {
+      // Re-add boundary when toggle is turned on
       if (searchCity) {
         addBoundary(searchCity, 'city');
       } else if (searchCountry) {
         addBoundary(searchCountry, 'country');
       }
     }
-  }, [showBorders, searchCity, searchCountry]);
+  }, [showBorders]);
 
   return (
     <div className="relative w-full" style={{ height }}>
@@ -474,50 +470,6 @@ export default function InteractiveListingMap({
       </div>
 
       <div ref={mapRef} className="w-full h-full rounded-lg" />
-      
-      {/* Listing Preview Popup */}
-      {selectedListing && (
-        <div className="absolute top-4 left-4 right-4 z-[1000] bg-white rounded-lg shadow-lg p-4 cursor-pointer"
-             onClick={() => {
-               if (onListingClick) {
-                 onListingClick(selectedListing);
-               }
-             }}>
-          <div className="flex gap-3">
-            {selectedListing.images && selectedListing.images.length > 0 ? (
-              <img 
-                src={selectedListing.images[0]} 
-                alt={selectedListing.title}
-                className="w-16 h-16 object-cover rounded"
-              />
-            ) : (
-              <div className="w-16 h-16 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                No Photo
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm truncate">{selectedListing.title}</h3>
-              <p className="text-xs text-muted-foreground truncate">
-                {selectedListing.city}, {selectedListing.country}
-              </p>
-              {selectedListing.price && (
-                <p className="text-sm font-bold text-primary">
-                  ${selectedListing.price.toLocaleString()}
-                </p>
-              )}
-            </div>
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedListing(null);
-              }}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
       
       {listingsWithCoords.length === 0 && listings.length > 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
