@@ -386,27 +386,66 @@ export default function InteractiveListingMap({
     }
 
     try {
-      // Use Nominatim to get boundary data
-      const query = type === 'country' ? locationName : `${locationName}, city`;
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1&q=${encodeURIComponent(query)}`
-      );
-      const data = await response.json();
+      // Fetch multiple candidates and prefer administrative boundaries
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=10&polygon_geojson=1&addressdetails=1&q=${encodeURIComponent(locationName)}`;
+      const response = await fetch(url);
+      const results = await response.json();
 
-      if (data.features && data.features.length > 0) {
-        const feature = data.features[0];
-        const boundary = L.geoJSON(feature, {
+      let chosen: any | null = null;
+      if (Array.isArray(results)) {
+        // Prefer boundary/administrative with polygon
+        const isAdmin = (r: any) => r.class === 'boundary' && (r.type === 'administrative' || r.addresstype === 'country');
+        const hasPoly = (r: any) => !!r.geojson;
+
+        if (type === 'country') {
+          chosen = results.find((r: any) => (r.addresstype === 'country' || isAdmin(r)) && hasPoly(r))
+            || results.find((r: any) => hasPoly(r));
+        } else {
+          chosen = results.find((r: any) => isAdmin(r) && (r.addresstype === 'city' || r.type === 'city') && hasPoly(r))
+            || results.find((r: any) => (r.addresstype === 'city' || r.type === 'city') && hasPoly(r))
+            || results.find((r: any) => hasPoly(r));
+        }
+      }
+
+      let layer: L.GeoJSON | null = null;
+
+      if (chosen && chosen.geojson) {
+        layer = L.geoJSON(chosen.geojson, {
           style: {
-            color: 'hsl(215, 94%, 50%)', // Blue color
+            color: 'hsl(215, 94%, 50%)',
             weight: 3,
-            opacity: 0.8,
-            fillOpacity: 0.1,
+            opacity: 0.9,
+            fillOpacity: 0.08,
             fillColor: 'hsl(215, 94%, 50%)'
           }
         });
+      } else if (chosen && chosen.boundingbox) {
+        // Fallback: draw rectangle from bounding box
+        const [south, north, west, east] = chosen.boundingbox.map((v: string) => parseFloat(v));
+        const polygon = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [west, south], [east, south], [east, north], [west, north], [west, south]
+            ]]
+          },
+          properties: {}
+        } as any;
+        layer = L.geoJSON(polygon, {
+          style: {
+            color: 'hsl(215, 94%, 50%)',
+            weight: 3,
+            opacity: 0.9,
+            fillOpacity: 0.08,
+            fillColor: 'hsl(215, 94%, 50%)'
+          }
+        });
+      }
 
-        boundary.addTo(mapInstanceRef.current);
-        setBoundaryLayer(boundary);
+      if (layer) {
+        layer.addTo(mapInstanceRef.current);
+        setBoundaryLayer(layer);
       }
     } catch (error) {
       console.error('Failed to load boundary:', error);
