@@ -75,19 +75,28 @@ export default function InteractiveListingMap({
   const markersRef = useRef<L.Marker[]>([]);
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const [listingsWithCoords, setListingsWithCoords] = useState<(Listing & { lat: number; lng: number })[]>([]);
+  const [currentZoom, setCurrentZoom] = useState(zoom);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Create map with increased zoom levels
+    // Create map with world view when no specific search
+    const initialZoom = searchCity ? Math.min(zoom + 2, 12) : 2;
     const map = L.map(mapRef.current, {
-      center: [center.lat, center.lng],
-      zoom: Math.min(zoom + 2, 12),
+      center: searchCityCoords ? [searchCityCoords.lat, searchCityCoords.lng] : [20, 0],
+      zoom: initialZoom,
       zoomControl: true,
-      maxZoom: 12,
+      maxZoom: 18,
     });
 
     mapInstanceRef.current = map;
+    setCurrentZoom(initialZoom);
+
+    // Track zoom changes
+    map.on('zoomend', () => {
+      setCurrentZoom(map.getZoom());
+    });
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -154,61 +163,65 @@ export default function InteractiveListingMap({
       zoomToBoundsOnClick: true,
       iconCreateFunction: function(cluster) {
         const count = cluster.getChildCount();
+        const size = currentZoom < 8 ? 24 : 40;
+        const fontSize = currentZoom < 8 ? '10px' : (count < 10 ? '14px' : count < 100 ? '12px' : '10px');
         return L.divIcon({
           html: `<div style="
             background: hsl(215, 94%, 50%);
-            width: 40px;
-            height: 40px;
+            width: ${size}px;
+            height: ${size}px;
             border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(0, 133, 255, 0.4);
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0, 133, 255, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: ${count < 10 ? '14px' : count < 100 ? '12px' : '10px'};
+            font-size: ${fontSize};
             cursor: pointer;
           ">${count}</div>`,
           className: 'custom-cluster-icon',
-          iconSize: [40, 40],
-          iconAnchor: [20, 20]
+          iconSize: [size, size],
+          iconAnchor: [size/2, size/2]
         });
       }
     });
 
     listingsWithCoords.forEach(listing => {
-      // Format price correctly - ensure we're displaying the actual listing price
-      const priceDisplay = listing.price 
+      // Show price only when zoomed in, otherwise show dot
+      const showPrice = currentZoom >= 10;
+      const priceDisplay = showPrice && listing.price 
         ? (listing.price >= 1000 
           ? `$${Math.round(listing.price/1000)}k` 
           : `$${listing.price}`)
-        : '•';
+        : '';
 
-      // Create custom blue circular marker similar to Zillow
+      // Create custom blue circular marker - smaller when zoomed out
+      const size = showPrice ? 28 : 8;
       const blueIcon = L.divIcon({
         className: 'custom-blue-marker',
         html: `<div style="
           background-color: hsl(215, 94%, 50%);
-          width: 28px;
-          height: 28px;
+          width: ${size}px;
+          height: ${size}px;
           border-radius: 50%;
-          border: 2px solid white;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          border: ${showPrice ? '2px' : '1px'} solid white;
+          box-shadow: 0 ${showPrice ? '4px 8px' : '2px 4px'} rgba(0,0,0,0.3);
           display: flex;
           align-items: center;
           justify-content: center;
           color: white;
           font-weight: bold;
-          font-size: 11px;
+          font-size: ${showPrice ? '11px' : '6px'};
           cursor: pointer;
           transition: all 0.2s ease;
           position: relative;
           z-index: 1000;
         ">${priceDisplay}</div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        popupAnchor: [0, -14]
+        iconSize: [size, size],
+        iconAnchor: [size/2, size/2],
+        popupAnchor: [0, -size/2]
       });
 
       const marker = L.marker([listing.lat!, listing.lng!], { 
@@ -273,12 +286,10 @@ export default function InteractiveListingMap({
         </div>
       `;
 
-      // Add click handler directly to marker
+      // Add click handler to show preview first
       marker.on('click', function(e) {
         e.originalEvent?.stopPropagation();
-        if (onListingClick) {
-          onListingClick(listing);
-        }
+        setSelectedListing(listing);
       });
 
       // Add click handler to popup content as backup
@@ -338,6 +349,51 @@ export default function InteractiveListingMap({
   return (
     <div className="relative w-full" style={{ height }}>
       <div ref={mapRef} className="w-full h-full rounded-lg" />
+      
+      {/* Listing Preview Popup */}
+      {selectedListing && (
+        <div className="absolute top-4 left-4 right-4 z-[1000] bg-white rounded-lg shadow-lg p-4 cursor-pointer"
+             onClick={() => {
+               if (onListingClick) {
+                 onListingClick(selectedListing);
+               }
+             }}>
+          <div className="flex gap-3">
+            {selectedListing.images && selectedListing.images.length > 0 ? (
+              <img 
+                src={selectedListing.images[0]} 
+                alt={selectedListing.title}
+                className="w-16 h-16 object-cover rounded"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                No Photo
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm truncate">{selectedListing.title}</h3>
+              <p className="text-xs text-muted-foreground truncate">
+                {selectedListing.city}, {selectedListing.country}
+              </p>
+              {selectedListing.price && (
+                <p className="text-sm font-bold text-primary">
+                  ${selectedListing.price.toLocaleString()}
+                </p>
+              )}
+            </div>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedListing(null);
+              }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      
       {listingsWithCoords.length === 0 && listings.length > 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
           <div className="text-center">

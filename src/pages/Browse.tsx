@@ -624,8 +624,8 @@ export default function Browse() {
             <InteractiveListingMap
               listings={processedListings}
               onListingClick={handleListingSelect}
-              center={filters.city ? undefined : { lat: 51.505, lng: -0.09 }}
-              zoom={filters.city ? 12 : 6}
+              center={filters.city ? undefined : { lat: 20, lng: 0 }}
+              zoom={filters.city ? 12 : 2}
               height="100%"
               searchCity={filters.city}
               searchCityCoords={cityCoords}
@@ -813,8 +813,8 @@ export default function Browse() {
               <InteractiveListingMap
                 listings={processedListings}
                 onListingClick={handleListingSelect}
-                center={filters.city ? undefined : { lat: 51.505, lng: -0.09 }}
-                zoom={filters.city ? 12 : 6}
+                center={filters.city ? undefined : { lat: 20, lng: 0 }}
+                zoom={filters.city ? 12 : 2}
                 height="100%"
                 searchCity={filters.city}
                 searchCityCoords={cityCoords}
