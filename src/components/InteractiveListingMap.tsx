@@ -12,6 +12,33 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Geocoding function to get coordinates from address or city
+async function geocodeLocation(listing: Listing): Promise<{ lat: number; lng: number } | null> {
+  try {
+    // Try street address first if available
+    const streetAddress = (listing as any).street_address;
+    const query = streetAddress 
+      ? `${streetAddress}, ${listing.city}, ${listing.country}`
+      : `${listing.city}, ${listing.country}`;
+    
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
+    );
+    const results = await response.json();
+    
+    if (results && results.length > 0) {
+      return {
+        lat: parseFloat(results[0].lat),
+        lng: parseFloat(results[0].lon)
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Geocoding failed:', error);
+    return null;
+  }
+}
+
 interface Props {
   listings: Listing[];
   onListingClick?: (listing: Listing) => void;
@@ -30,6 +57,7 @@ export default function InteractiveListingMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const [listingsWithCoords, setListingsWithCoords] = useState<(Listing & { lat: number; lng: number })[]>([]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -54,11 +82,41 @@ export default function InteractiveListingMap({
     };
   }, [center.lat, center.lng, zoom]);
 
+  // Geocode listings without coordinates
+  useEffect(() => {
+    const geocodeListings = async () => {
+      const listingsWithValidCoords: (Listing & { lat: number; lng: number })[] = [];
+      
+      for (const listing of listings) {
+        // Check if listing already has coordinates
+        if (listing.lat && listing.lng && 
+            typeof listing.lat === 'number' && 
+            typeof listing.lng === 'number') {
+          listingsWithValidCoords.push({ ...listing, lat: listing.lat, lng: listing.lng });
+          continue;
+        }
+        
+        // Try to geocode using street address or city
+        const coords = await geocodeLocation(listing);
+        if (coords) {
+          listingsWithValidCoords.push({ ...listing, lat: coords.lat, lng: coords.lng });
+        }
+      }
+      
+      setListingsWithCoords(listingsWithValidCoords);
+    };
+
+    if (listings.length > 0) {
+      geocodeListings();
+    }
+  }, [listings]);
+
   // Debug logging
   useEffect(() => {
     console.log('InteractiveListingMap received listings:', listings.length);
-    console.log('Listings with coordinates:', listings.filter(l => l.lat && l.lng).length);
-  }, [listings]);
+    console.log('Listings with coordinates:', listingsWithCoords.length);
+    console.log('Valid listings for map:', listingsWithCoords.length);
+  }, [listings, listingsWithCoords]);
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -69,18 +127,9 @@ export default function InteractiveListingMap({
     });
     markersRef.current = [];
 
-    // Add new markers for listings
-    const validListings = listings.filter(listing => 
-      listing.lat && listing.lng && 
-      typeof listing.lat === 'number' && 
-      typeof listing.lng === 'number'
-    );
+    if (listingsWithCoords.length === 0) return;
 
-    console.log('Valid listings for map:', validListings.length);
-
-    if (validListings.length === 0) return;
-
-    validListings.forEach(listing => {
+    listingsWithCoords.forEach(listing => {
       // Create custom purple marker similar to Zillow
       const purpleIcon = L.divIcon({
         className: 'custom-purple-marker',
@@ -200,96 +249,29 @@ export default function InteractiveListingMap({
       markersRef.current.push(marker);
     });
 
-    // Fit map to show all markers if there are any
-    if (validListings.length > 0) {
+    // If we have listings with coordinates, adjust map view to fit them
+    if (listingsWithCoords.length > 0) {
       const group = new L.FeatureGroup(markersRef.current);
-      mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
+      if (listingsWithCoords.length === 1) {
+        // For single listing, center on it with reasonable zoom
+        mapInstanceRef.current.setView([listingsWithCoords[0].lat, listingsWithCoords[0].lng], Math.min(zoom, 8));
+      } else {
+        // For multiple listings, fit all markers
+        mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [20, 20] });
+      }
     }
-
-  }, [listings, onListingClick]);
-
-  // Calculate validListings for the notice
-  const validListings = listings.filter(listing => 
-    listing.lat && listing.lng && 
-    typeof listing.lat === 'number' && 
-    typeof listing.lng === 'number'
-  );
+  }, [listingsWithCoords, onListingClick, zoom]);
 
   return (
-    <div className="relative">
-      <div 
-        ref={mapRef} 
-        style={{ height }}
-        className="w-full rounded-lg overflow-hidden border border-border/50"
-      />
-      
-      {/* Show notice if no listings have coordinates */}
-      {listings.length > 0 && validListings.length === 0 && (
-        <div className="absolute top-4 left-4 right-4 bg-background/90 backdrop-blur-sm rounded-lg p-4 border border-border/50">
-          <h3 className="font-semibold text-sm mb-2">No map locations available</h3>
-          <p className="text-xs text-muted-foreground">
-            The current listings don't have location coordinates set. When posting a listing, add latitude/longitude or a street address to show it on the map.
-          </p>
+    <div className="relative w-full" style={{ height }}>
+      <div ref={mapRef} className="w-full h-full rounded-lg" />
+      {listingsWithCoords.length === 0 && listings.length > 0 && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
+          <div className="text-center">
+            <p className="text-muted-foreground">Loading map locations...</p>
+          </div>
         </div>
       )}
-      
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .listing-popup-container {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-          }
-          .listing-popup-container .leaflet-popup-content-wrapper {
-            border-radius: 12px;
-            padding: 0;
-            box-shadow: none;
-          }
-          .listing-popup-container .leaflet-popup-content {
-            margin: 0;
-            border-radius: 12px;
-            overflow: hidden;
-          }
-          .listing-popup-container .leaflet-popup-tip {
-            background: white;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-          }
-          .custom-purple-marker {
-            background: transparent !important;
-            border: none !important;
-          }
-          .custom-purple-marker > div:hover {
-            transform: scale(1.1) !important;
-            background-color: #6366f1 !important;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4) !important;
-          }
-          .leaflet-popup-close-button {
-            top: 8px !important;
-            right: 8px !important;
-            background: rgba(0,0,0,0.5) !important;
-            color: white !important;
-            border-radius: 50% !important;
-            width: 24px !important;
-            height: 24px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-size: 16px !important;
-            line-height: 1 !important;
-          }
-          .leaflet-popup-close-button:hover {
-            background: rgba(0,0,0,0.7) !important;
-          }
-        `
-      }} />
     </div>
   );
-}
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(price);
 }
