@@ -799,13 +799,25 @@ export default function Browse() {
 
         {/* Main Content - Mobile */}
         <main className="px-4 py-6 mb-20">
-          <ListingGrid
-            listings={processedListings}
-            onListingClick={handleListingSelect}
-            loading={loading}
-            newlyPostedId={null}
-            viewMode={viewMode}
-          />
+          {viewMode === "map" ? (
+            <div className="h-[70vh] w-full">
+              <InteractiveListingMap
+                listings={processedListings}
+                onListingClick={handleListingSelect}
+                center={filters.city ? undefined : { lat: 51.505, lng: -0.09 }}
+                zoom={filters.city ? 12 : 6}
+                height="100%"
+              />
+            </div>
+          ) : (
+            <ListingGrid
+              listings={processedListings}
+              onListingClick={handleListingSelect}
+              loading={loading}
+              newlyPostedId={null}
+              viewMode={viewMode}
+            />
+          )}
         </main>
       </div>
 
