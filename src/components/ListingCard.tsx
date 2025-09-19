@@ -237,7 +237,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                     {listing.city}{listing.country && `, ${listing.country}`}
                   </span>
                   <span className="ml-2 flex-shrink-0">
-                    {formatDate(listing.createdAt || 0)}
+                    {formatDate(listing.createdAt || new Date(listing.created_at).getTime())}
                   </span>
                 </div>
               </div>
@@ -258,7 +258,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                         {listing.city}{listing.country && `, ${listing.country}`}
                       </span>
                       <span className="ml-2 flex-shrink-0">
-                        {formatDate(listing.createdAt || 0)}
+                        {formatDate(listing.createdAt || new Date(listing.created_at).getTime())}
                       </span>
                     </div>
                   </>
