@@ -189,9 +189,9 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                 </>
               )}
               
-              {/* Price overlay on top left for grid and gallery views */}
-              {(viewMode === "grid" || viewMode === "gallery") && listing.price && (
-                <div className="absolute top-2 left-2">
+              {/* Price overlay on top left for desktop only */}
+              {listing.price && (
+                <div className="hidden md:block absolute top-2 left-2">
                   <Badge className="bg-black/70 text-white text-sm px-2 py-1 font-bold">
                     {formatPrice(listing.price)}
                   </Badge>
@@ -224,50 +224,71 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
             
             {/* Content section below image */}
             <div className={`space-y-1 ${(viewMode === "grid" || viewMode === "gallery") ? "p-2" : "p-4"}`}>
-              {(viewMode === "grid" || viewMode === "gallery") ? (
-                // Grid view layout matching reference
-                <>
-                  {/* Title in one line with truncation */}
-                  <h3 className="text-sm font-medium text-foreground line-clamp-1 leading-tight">
-                    {listing.title}
-                  </h3>
-                  
-                  {/* City/Country and time on same line */}
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <span className="truncate">
-                      {listing.city}{listing.country && `, ${listing.country}`}
-                    </span>
-                    <span className="ml-2 flex-shrink-0">
-                      {formatDate(listing.createdAt || 0)}
-                    </span>
-                  </div>
-                </>
-              ) : (
-                // Original layout for other views
-                <>
-                  {/* Price */}
-                  {listing.price && (
-                    <div className="text-2xl font-extrabold tracking-tight text-foreground">
-                      {formatPrice(listing.price)}
-                    </div>
-                  )}
-                  
-                  {/* Details */}
-                  <div className="text-sm text-muted-foreground">
-                    {listing.subcategory || "No category"}
-                  </div>
-                  
-                  {/* Title/Address */}
-                  <h3 className="text-[15px] text-foreground line-clamp-1 leading-tight">
-                    {listing.title}
-                  </h3>
-                  
-                  {/* Location */}
-                  <div className="text-xs text-muted-foreground">
+              {/* Desktop layout - clean and minimal */}
+              <div className="hidden md:block">
+                {/* Title in one line with truncation */}
+                <h3 className="text-sm font-medium text-foreground line-clamp-1 leading-tight">
+                  {listing.title}
+                </h3>
+                
+                {/* City/Country and time on same line */}
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                  <span className="truncate">
                     {listing.city}{listing.country && `, ${listing.country}`}
-                  </div>
-                </>
-              )}
+                  </span>
+                  <span className="ml-2 flex-shrink-0">
+                    {formatDate(listing.createdAt || 0)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Mobile layout - original design */}
+              <div className="md:hidden">
+                {(viewMode === "grid" || viewMode === "gallery") ? (
+                  // Grid view layout for mobile
+                  <>
+                    {/* Title in one line with truncation */}
+                    <h3 className="text-sm font-medium text-foreground line-clamp-1 leading-tight">
+                      {listing.title}
+                    </h3>
+                    
+                    {/* City/Country and time on same line */}
+                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                      <span className="truncate">
+                        {listing.city}{listing.country && `, ${listing.country}`}
+                      </span>
+                      <span className="ml-2 flex-shrink-0">
+                        {formatDate(listing.createdAt || 0)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  // Original layout for other views
+                  <>
+                    {/* Price */}
+                    {listing.price && (
+                      <div className="text-2xl font-extrabold tracking-tight text-foreground">
+                        {formatPrice(listing.price)}
+                      </div>
+                    )}
+                    
+                    {/* Details */}
+                    <div className="text-sm text-muted-foreground">
+                      {listing.subcategory || "No category"}
+                    </div>
+                    
+                    {/* Title/Address */}
+                    <h3 className="text-[15px] text-foreground line-clamp-1 leading-tight">
+                      {listing.title}
+                    </h3>
+                    
+                    {/* Location */}
+                    <div className="text-xs text-muted-foreground">
+                      {listing.city}{listing.country && `, ${listing.country}`}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
