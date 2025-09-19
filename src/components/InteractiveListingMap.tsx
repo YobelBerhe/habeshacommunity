@@ -384,7 +384,7 @@ export default function InteractiveListingMap({
           if (bounds) {
             mapInstanceRef.current.fitBounds(bounds, { padding: [30, 30] });
           } else if (searchCityCoords) {
-            mapInstanceRef.current.setView([searchCityCoords.lat, searchCityCoords.lng], 11);
+            mapInstanceRef.current.setView([searchCityCoords.lat, searchCityCoords.lng], 10);
           }
         } else if (searchCountry) {
           // Prefer fitting to country boundary
