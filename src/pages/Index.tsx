@@ -516,9 +516,9 @@ export default function Index() {
         />
       </div>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-4">
         {/* Trending Rails Section */}
-        <div className="space-y-8 mb-12">
+        <div className="space-y-4 mb-8">
           <TrendingRail 
             label="Featured Picks" 
             featured={true}

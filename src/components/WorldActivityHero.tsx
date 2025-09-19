@@ -134,51 +134,19 @@ export default function WorldActivityHero({
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-black/20 to-black/40 md:from-black/30 md:to-black/30 z-[1]" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 pt-20 md:pt-32">
-        <p className="text-white/90 md:text-xl text-center mb-8">
-          <span className="text-red-500">Live now:</span> <b>{totals.totalPeople}</b> people in <b>{totals.totalCities}</b> cities
-        </p>
-
         <div className="mt-6">
           {SearchBar ? (
-            <div className="max-w-2xl">
+            <div className="max-w-4xl mx-auto">
               <SearchBar onCitySelect={(city: string) => window.location.href = `/browse?city=${encodeURIComponent(city)}`} />
             </div>
           ) : null}
         </div>
 
-        <div className="mt-5 flex gap-3 flex-wrap">
-          <button 
-            onClick={onPrimary} 
-            className="rounded-2xl px-5 py-3 bg-white/90 hover:bg-white text-gray-900 font-medium transition-colors"
-          >
-            Housing / Rentals
-          </button>
-          <button 
-            onClick={onSecondary} 
-            className="rounded-2xl px-5 py-3 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors"
-          >
-            Jobs
-          </button>
-          {/* Hide mobile buttons on homepage only */}
-          <button 
-            onClick={() => window.location.href = '/browse?category=community'} 
-            className="hidden md:block rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
-          >
-            Community
-          </button>
-          <button 
-            onClick={() => window.location.href = '/browse?category=services'} 
-            className="hidden md:block rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
-          >
-            Services
-          </button>
-          <button 
-            onClick={() => window.location.href = '/browse?category=marketplace'} 
-            className="hidden md:block rounded-2xl px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium transition-colors text-sm"
-          >
-            Marketplace
-          </button>
-        </div>
+        <p className="text-white/90 md:text-xl text-center mt-6 mb-8">
+          <span className="text-red-500">Live now:</span> <b>{totals.totalPeople}</b> people in <b>{totals.totalCities}</b> cities
+        </p>
+
+        {/* Removed housing/jobs buttons */}
 
         <p className="text-white/60 text-xs mt-6">Dots show approximate city-level activity.</p>
       </div>
