@@ -25,7 +25,7 @@ export default function ViewToggle({ viewMode, onChange }: ViewToggleProps) {
           variant={viewMode === mode ? "default" : "ghost"}
           size="sm"
           onClick={() => onChange(mode)}
-          className="h-8 px-2 md:px-2 md:h-8 px-1.5 h-7 w-7 md:w-auto"
+          className={`h-8 px-2 md:px-2 md:h-8 px-1.5 h-7 w-7 md:w-auto ${mode === 'map' ? 'md:hidden' : ''}`}
           aria-label={label}
         >
           <Icon className="w-4 h-4 md:w-4 md:h-4 w-3.5 h-3.5" />
