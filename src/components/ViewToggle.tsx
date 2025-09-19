@@ -11,8 +11,8 @@ interface ViewToggleProps {
 
 export default function ViewToggle({ viewMode, onChange }: ViewToggleProps) {
   const views = [
-    { mode: "grid" as const, icon: Grid3X3, label: "Grid" },
     { mode: "map" as const, icon: Map, label: "Map" },
+    { mode: "grid" as const, icon: Grid3X3, label: "Grid" },
     { mode: "compact" as const, icon: List, label: "Compact" },
     { mode: "list" as const, icon: List, label: "List" },
     { mode: "gallery" as const, icon: Images, label: "Gallery" },
