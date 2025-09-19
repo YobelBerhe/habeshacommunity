@@ -298,8 +298,15 @@ export default function Browse() {
     return sortListings(filtered, sortKey);
   }, [listings, filters, hasImageFilter, postedTodayFilter, sortKey]);
 
+  const [cityCoords, setCityCoords] = useState<{ lat: number; lng: number } | undefined>();
+
   const handleCityChange = (city: string, lat?: number, lon?: number) => {
     setFilters({ ...filters, city });
+    if (lat && lon) {
+      setCityCoords({ lat, lng: lon });
+    } else {
+      setCityCoords(undefined);
+    }
   };
 
   const handleFiltersChange = (newFilters: SearchFilters) => {
@@ -620,6 +627,8 @@ export default function Browse() {
               center={filters.city ? undefined : { lat: 51.505, lng: -0.09 }}
               zoom={filters.city ? 12 : 6}
               height="100%"
+              searchCity={filters.city}
+              searchCityCoords={cityCoords}
             />
           </div>
 
@@ -807,6 +816,8 @@ export default function Browse() {
                 center={filters.city ? undefined : { lat: 51.505, lng: -0.09 }}
                 zoom={filters.city ? 12 : 6}
                 height="100%"
+                searchCity={filters.city}
+                searchCityCoords={cityCoords}
               />
             </div>
           ) : (

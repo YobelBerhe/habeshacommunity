@@ -57,6 +57,8 @@ interface Props {
   center?: { lat: number; lng: number };
   zoom?: number;
   height?: string;
+  searchCity?: string;
+  searchCityCoords?: { lat: number; lng: number };
 }
 
 export default function InteractiveListingMap({ 
@@ -64,7 +66,9 @@ export default function InteractiveListingMap({
   onListingClick, 
   center = { lat: 40.7128, lng: -74.0060 }, 
   zoom = 10,
-  height = "500px"
+  height = "500px",
+  searchCity,
+  searchCityCoords
 }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -152,12 +156,12 @@ export default function InteractiveListingMap({
         const count = cluster.getChildCount();
         return L.divIcon({
           html: `<div style="
-            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            background: hsl(215, 94%, 50%);
             width: 40px;
             height: 40px;
             border-radius: 50%;
             border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 133, 255, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -181,14 +185,14 @@ export default function InteractiveListingMap({
           : `$${listing.price}`)
         : '•';
 
-      // Create custom purple marker similar to Zillow
-      const purpleIcon = L.divIcon({
-        className: 'custom-purple-marker',
+      // Create custom blue circular marker similar to Zillow
+      const blueIcon = L.divIcon({
+        className: 'custom-blue-marker',
         html: `<div style="
-          background-color: #7c3aed;
+          background-color: hsl(215, 94%, 50%);
           width: 28px;
           height: 28px;
-          border-radius: 6px;
+          border-radius: 50%;
           border: 2px solid white;
           box-shadow: 0 4px 8px rgba(0,0,0,0.3);
           display: flex;
@@ -208,7 +212,7 @@ export default function InteractiveListingMap({
       });
 
       const marker = L.marker([listing.lat!, listing.lng!], { 
-        icon: purpleIcon 
+        icon: blueIcon 
       });
 
       // Create popup content similar to Zillow
@@ -315,8 +319,11 @@ export default function InteractiveListingMap({
     // Add the cluster group to the map
     mapInstanceRef.current.addLayer(markerClusterRef.current);
 
-    // If we have listings with coordinates, adjust map view to fit them
-    if (listingsWithCoords.length > 0) {
+    // Handle city search zoom functionality
+    if (searchCityCoords && searchCity) {
+      // Zoom to searched city
+      mapInstanceRef.current.setView([searchCityCoords.lat, searchCityCoords.lng], 11);
+    } else if (listingsWithCoords.length > 0) {
       if (listingsWithCoords.length === 1) {
         // For single listing, center on it with increased zoom
         mapInstanceRef.current.setView([listingsWithCoords[0].lat, listingsWithCoords[0].lng], Math.min(zoom + 2, 12));
@@ -326,7 +333,7 @@ export default function InteractiveListingMap({
         mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [30, 30] });
       }
     }
-  }, [listingsWithCoords, onListingClick, zoom]);
+  }, [listingsWithCoords, onListingClick, zoom, searchCity, searchCityCoords]);
 
   return (
     <div className="relative w-full" style={{ height }}>
