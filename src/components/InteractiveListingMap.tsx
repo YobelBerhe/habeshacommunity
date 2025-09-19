@@ -346,38 +346,51 @@ export default function InteractiveListingMap({
     // Add the cluster group to the map
     mapInstanceRef.current.addLayer(markerClusterRef.current);
 
-    // Handle city/country search zoom functionality
-    if (searchCityCoords && searchCity) {
-      // Zoom to searched city
-      mapInstanceRef.current.setView([searchCityCoords.lat, searchCityCoords.lng], 11);
-      addBoundary(searchCity, 'city');
-    } else if (searchCountry) {
-      // Handle country search - zoom to show entire country
-      const countryListings = listingsWithCoords.filter(listing => 
-        listing.country?.toLowerCase() === searchCountry.toLowerCase()
-      );
-      if (countryListings.length > 0) {
-        const group = new L.FeatureGroup(countryListings.map(listing => 
-          L.marker([listing.lat, listing.lng])
-        ));
-        mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [50, 50] });
-        addBoundary(searchCountry, 'country');
-      }
-    } else if (listingsWithCoords.length > 0) {
-      if (listingsWithCoords.length === 1) {
-        // For single listing, center on it with increased zoom
-        mapInstanceRef.current.setView([listingsWithCoords[0].lat, listingsWithCoords[0].lng], Math.min(zoom + 2, 12));
-      } else {
-        // For multiple listings, fit all markers with padding
-        const group = new L.FeatureGroup(markersRef.current);
-        mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [30, 30] });
-      }
-    }
+      // Handle city/country search zoom functionality
+      (async () => {
+        if (!mapInstanceRef.current) return;
+
+        if (searchCity) {
+          // Prefer fitting to city boundary
+          const bounds = await addBoundary(searchCity, 'city');
+          if (bounds) {
+            mapInstanceRef.current.fitBounds(bounds, { padding: [30, 30] });
+          } else if (searchCityCoords) {
+            mapInstanceRef.current.setView([searchCityCoords.lat, searchCityCoords.lng], 11);
+          }
+        } else if (searchCountry) {
+          // Prefer fitting to country boundary
+          const bounds = await addBoundary(searchCountry, 'country');
+          if (bounds) {
+            mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50] });
+          } else {
+            // Fallback: fit to country listings
+            const countryListings = listingsWithCoords.filter(listing => 
+              listing.country?.toLowerCase() === searchCountry.toLowerCase()
+            );
+            if (countryListings.length > 0) {
+              const group = new L.FeatureGroup(countryListings.map(listing => 
+                L.marker([listing.lat, listing.lng])
+              ));
+              mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [50, 50] });
+            }
+          }
+        } else if (listingsWithCoords.length > 0) {
+          if (listingsWithCoords.length === 1) {
+            // For single listing, center on it with increased zoom
+            mapInstanceRef.current.setView([listingsWithCoords[0].lat, listingsWithCoords[0].lng], Math.min(zoom + 2, 12));
+          } else {
+            // For multiple listings, fit all markers with padding
+            const group = new L.FeatureGroup(markersRef.current);
+            mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [30, 30] });
+          }
+        }
+      })();
   }, [listingsWithCoords, onListingClick, zoom, searchCity, searchCityCoords, searchCountry]);
 
   // Function to add boundary highlighting
-  const addBoundary = async (locationName: string, type: 'city' | 'country') => {
-    if (!mapInstanceRef.current || !showBorders) return;
+  const addBoundary = async (locationName: string, type: 'city' | 'country'): Promise<L.LatLngBounds | null> => {
+    if (!mapInstanceRef.current) return null;
 
     // Remove existing boundary
     if (boundaryLayer) {
@@ -444,11 +457,17 @@ export default function InteractiveListingMap({
       }
 
       if (layer) {
-        layer.addTo(mapInstanceRef.current);
-        setBoundaryLayer(layer);
+        if (showBorders) {
+          layer.addTo(mapInstanceRef.current);
+          setBoundaryLayer(layer);
+        }
+        return layer.getBounds();
       }
+
+      return null;
     } catch (error) {
       console.error('Failed to load boundary:', error);
+      return null;
     }
   };
 
@@ -472,7 +491,7 @@ export default function InteractiveListingMap({
   return (
     <div className="relative w-full" style={{ height }}>
       {/* Map View Toggle */}
-      <div className="absolute top-4 right-4 z-[1000] bg-white rounded-lg shadow-lg border border-border/20">
+      <div className="absolute top-4 right-4 z-[1000] bg-background/40 backdrop-blur-md rounded-lg shadow-lg border border-border/30">
         <div className="p-2">
           <div className="text-xs font-medium text-muted-foreground mb-2">Map Options</div>
           <div className="space-y-2">
