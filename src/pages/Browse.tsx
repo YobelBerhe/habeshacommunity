@@ -641,7 +641,11 @@ export default function Browse() {
               </div>
 
               {/* Full-Width Listings Grid */}
-              <div className={viewMode === 'list' ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-2 gap-4'}>
+              <div className={
+                viewMode === 'list' ? 'grid grid-cols-1 gap-4' : 
+                viewMode === 'gallery' ? 'grid grid-cols-1 md:grid-cols-3 gap-4' :
+                'grid grid-cols-2 gap-4'
+              }>
                 {processedListings.map((listing) => (
                   <div
                     key={listing.id}
