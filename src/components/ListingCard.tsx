@@ -198,11 +198,10 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                 </div>
               )}
               
-              {/* Time badge for non-grid/gallery views */}
               {viewMode !== "grid" && viewMode !== "gallery" && (
-                <div className="absolute top-3 left-3">
+                <div className="absolute top-3 left-3 md:hidden">
                   <Badge className="bg-orange-500 text-white text-xs px-3 py-1 font-semibold rounded-full">
-                    {formatDate(listing.createdAt || 0)}
+                    {formatDate(listing.createdAt || new Date(listing.created_at).getTime())}
                   </Badge>
                 </div>
               )}
