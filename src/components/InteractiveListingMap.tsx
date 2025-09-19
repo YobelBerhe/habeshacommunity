@@ -81,6 +81,7 @@ export default function InteractiveListingMap({
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
   const [boundaryLayer, setBoundaryLayer] = useState<L.GeoJSON | null>(null);
   const [showBorders, setShowBorders] = useState(true);
+  const [optionsCollapsed, setOptionsCollapsed] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -121,7 +122,34 @@ export default function InteractiveListingMap({
     return () => {
       map.remove();
     };
-  }, [center.lat, center.lng, zoom, mapStyle]);
+  }, [center.lat, center.lng, zoom, searchCity, searchCountry]);
+
+  // Update tile layer when style changes
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    
+    // Remove all tile layers
+    mapInstanceRef.current.eachLayer((layer) => {
+      if (layer instanceof L.TileLayer) {
+        mapInstanceRef.current!.removeLayer(layer);
+      }
+    });
+
+    // Add new tile layer
+    const getTileLayer = () => {
+      if (mapStyle === 'satellite') {
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '© Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+      } else {
+        return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        });
+      }
+    };
+
+    getTileLayer().addTo(mapInstanceRef.current);
+  }, [mapStyle]);
 
   // Geocode listings without coordinates
   useEffect(() => {
@@ -491,45 +519,55 @@ export default function InteractiveListingMap({
   return (
     <div className="relative w-full" style={{ height }}>
       {/* Map View Toggle */}
-      <div className="absolute top-4 right-4 z-[1000] bg-background/40 backdrop-blur-md rounded-lg shadow-lg border border-border/30">
+      <div className="absolute top-4 right-4 z-[1000] bg-background/20 backdrop-blur-md rounded-lg shadow-lg border border-border/30">
         <div className="p-2">
-          <div className="text-xs font-medium text-muted-foreground mb-2">Map Options</div>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                name="mapStyle"
-                value="street"
-                checked={mapStyle === 'street'}
-                onChange={(e) => setMapStyle(e.target.value as 'street' | 'satellite')}
-                className="w-3 h-3 text-primary"
-              />
-              <span className="text-xs">Automatic</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                name="mapStyle"
-                value="satellite"
-                checked={mapStyle === 'satellite'}
-                onChange={(e) => setMapStyle(e.target.value as 'street' | 'satellite')}
-                className="w-3 h-3 text-primary"
-              />
-              <span className="text-xs">Satellite</span>
-            </label>
-            <div className="border-t border-border/20 pt-2 mt-2">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showBorders}
-                  onChange={(e) => setShowBorders(e.target.checked)}
-                  className="w-3 h-3 text-primary rounded"
-                  disabled={!searchCity && !searchCountry}
-                />
-                <span className="text-xs">Show Borders{(!searchCity && !searchCountry) ? ' (select a city or country)' : ''}</span>
-              </label>
+          <div 
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => setOptionsCollapsed(!optionsCollapsed)}
+          >
+            <div className="text-xs font-medium text-muted-foreground">Map Options</div>
+            <div className="text-xs text-muted-foreground">
+              {optionsCollapsed ? '▼' : '▲'}
             </div>
           </div>
+          {!optionsCollapsed && (
+            <div className="space-y-2 mt-2">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="mapStyle"
+                  value="street"
+                  checked={mapStyle === 'street'}
+                  onChange={(e) => setMapStyle(e.target.value as 'street' | 'satellite')}
+                  className="w-3 h-3 text-primary"
+                />
+                <span className="text-xs">Automatic</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="mapStyle"
+                  value="satellite"
+                  checked={mapStyle === 'satellite'}
+                  onChange={(e) => setMapStyle(e.target.value as 'street' | 'satellite')}
+                  className="w-3 h-3 text-primary"
+                />
+                <span className="text-xs">Satellite</span>
+              </label>
+              <div className="border-t border-border/20 pt-2 mt-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showBorders}
+                    onChange={(e) => setShowBorders(e.target.checked)}
+                    className="w-3 h-3 text-primary rounded"
+                    disabled={!searchCity && !searchCountry}
+                  />
+                  <span className="text-xs">Show Borders{(!searchCity && !searchCountry) ? ' (select a city or country)' : ''}</span>
+                </label>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
