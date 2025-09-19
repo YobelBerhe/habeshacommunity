@@ -146,7 +146,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
           {/* Vertical layout with image on top */}
           <div className="relative">
             {/* Image section */}
-            <div className={`relative w-full group/image ${viewMode === "gallery" ? "h-56" : viewMode === "grid" ? "h-32" : viewMode === "list" ? "h-72 md:h-96 md:aspect-square" : "h-48"}`}>
+            <div className={`relative w-full group/image ${viewMode === "gallery" ? "h-56" : viewMode === "grid" ? "h-32" : viewMode === "list" ? "h-72 md:h-80 md:aspect-square" : "h-48"}`}>
               <ImageBox
                 src={images[currentImageIndex] || images[0]}
                 alt={listing.title}
