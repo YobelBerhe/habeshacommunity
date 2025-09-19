@@ -146,7 +146,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
           {/* Vertical layout with image on top */}
           <div className="relative">
             {/* Image section */}
-            <div className={`relative w-full group/image ${viewMode === "grid" ? "h-32" : "h-48"}`}>
+            <div className={`relative w-full group/image ${(viewMode === "grid" || viewMode === "gallery") ? "h-32" : "h-48"}`}>
               <ImageBox
                 src={images[currentImageIndex] || images[0]}
                 alt={listing.title}
@@ -189,8 +189,8 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                 </>
               )}
               
-              {/* Price overlay on top left for grid view */}
-              {viewMode === "grid" && listing.price && (
+              {/* Price overlay on top left for grid and gallery views */}
+              {(viewMode === "grid" || viewMode === "gallery") && listing.price && (
                 <div className="absolute top-2 left-2">
                   <Badge className="bg-black/70 text-white text-sm px-2 py-1 font-bold">
                     {formatPrice(listing.price)}
@@ -198,8 +198,8 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                 </div>
               )}
               
-              {/* Time badge for non-grid views */}
-              {viewMode !== "grid" && (
+              {/* Time badge for non-grid/gallery views */}
+              {viewMode !== "grid" && viewMode !== "gallery" && (
                 <div className="absolute top-3 left-3">
                   <Badge className="bg-orange-500 text-white text-xs px-3 py-1 font-semibold rounded-full">
                     {formatDate(listing.createdAt || 0)}
@@ -223,8 +223,8 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
             </div>
             
             {/* Content section below image */}
-            <div className={`space-y-1 ${viewMode === "grid" ? "p-2" : "p-4"}`}>
-              {viewMode === "grid" ? (
+            <div className={`space-y-1 ${(viewMode === "grid" || viewMode === "gallery") ? "p-2" : "p-4"}`}>
+              {(viewMode === "grid" || viewMode === "gallery") ? (
                 // Grid view layout matching reference
                 <>
                   {/* Title in one line with truncation */}
