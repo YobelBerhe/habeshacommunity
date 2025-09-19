@@ -190,7 +190,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
               )}
               
               {listing.price && (
-                <div className="hidden md:block absolute top-2 left-2 z-10">
+                <div className={`absolute top-2 left-2 z-10 ${viewMode === "grid" ? "block" : "hidden md:block"}`}>
                   <Badge className="bg-black/70 text-white text-sm px-2 py-1 font-bold">
                     {formatPrice(listing.price)}
                   </Badge>
