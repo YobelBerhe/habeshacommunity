@@ -629,6 +629,7 @@ export default function Browse() {
               height="100%"
               searchCity={filters.city}
               searchCityCoords={cityCoords}
+              searchCountry={filters.city}
             />
           </div>
 
@@ -818,6 +819,7 @@ export default function Browse() {
                 height="100%"
                 searchCity={filters.city}
                 searchCityCoords={cityCoords}
+                searchCountry={filters.city}
               />
             </div>
           ) : (

@@ -59,6 +59,7 @@ interface Props {
   height?: string;
   searchCity?: string;
   searchCityCoords?: { lat: number; lng: number };
+  searchCountry?: string;
 }
 
 export default function InteractiveListingMap({ 
@@ -68,7 +69,8 @@ export default function InteractiveListingMap({
   zoom = 10,
   height = "500px",
   searchCity,
-  searchCityCoords
+  searchCityCoords,
+  searchCountry
 }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -77,6 +79,8 @@ export default function InteractiveListingMap({
   const [listingsWithCoords, setListingsWithCoords] = useState<(Listing & { lat: number; lng: number })[]>([]);
   const [currentZoom, setCurrentZoom] = useState(zoom);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
+  const [boundaryLayer, setBoundaryLayer] = useState<L.GeoJSON | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -98,15 +102,26 @@ export default function InteractiveListingMap({
       setCurrentZoom(map.getZoom());
     });
 
-    // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // Add tile layer based on style
+    const getTileLayer = () => {
+      if (mapStyle === 'satellite') {
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '© Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+      } else {
+        return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        });
+      }
+    };
+
+    const tileLayer = getTileLayer();
+    tileLayer.addTo(map);
 
     return () => {
       map.remove();
     };
-  }, [center.lat, center.lng, zoom]);
+  }, [center.lat, center.lng, zoom, mapStyle]);
 
   // Geocode listings without coordinates
   useEffect(() => {
@@ -330,10 +345,23 @@ export default function InteractiveListingMap({
     // Add the cluster group to the map
     mapInstanceRef.current.addLayer(markerClusterRef.current);
 
-    // Handle city search zoom functionality
+    // Handle city/country search zoom functionality
     if (searchCityCoords && searchCity) {
       // Zoom to searched city
       mapInstanceRef.current.setView([searchCityCoords.lat, searchCityCoords.lng], 11);
+      addBoundary(searchCity, 'city');
+    } else if (searchCountry) {
+      // Handle country search - zoom to show entire country
+      const countryListings = listingsWithCoords.filter(listing => 
+        listing.country?.toLowerCase() === searchCountry.toLowerCase()
+      );
+      if (countryListings.length > 0) {
+        const group = new L.FeatureGroup(countryListings.map(listing => 
+          L.marker([listing.lat, listing.lng])
+        ));
+        mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [50, 50] });
+        addBoundary(searchCountry, 'country');
+      }
     } else if (listingsWithCoords.length > 0) {
       if (listingsWithCoords.length === 1) {
         // For single listing, center on it with increased zoom
@@ -344,10 +372,79 @@ export default function InteractiveListingMap({
         mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [30, 30] });
       }
     }
-  }, [listingsWithCoords, onListingClick, zoom, searchCity, searchCityCoords]);
+  }, [listingsWithCoords, onListingClick, zoom, searchCity, searchCityCoords, searchCountry]);
+
+  // Function to add boundary highlighting
+  const addBoundary = async (locationName: string, type: 'city' | 'country') => {
+    if (!mapInstanceRef.current) return;
+
+    // Remove existing boundary
+    if (boundaryLayer) {
+      mapInstanceRef.current.removeLayer(boundaryLayer);
+      setBoundaryLayer(null);
+    }
+
+    try {
+      // Use Nominatim to get boundary data
+      const query = type === 'country' ? locationName : `${locationName}, city`;
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1&q=${encodeURIComponent(query)}`
+      );
+      const data = await response.json();
+
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const boundary = L.geoJSON(feature, {
+          style: {
+            color: 'hsl(215, 94%, 50%)', // Blue color
+            weight: 3,
+            opacity: 0.8,
+            fillOpacity: 0.1,
+            fillColor: 'hsl(215, 94%, 50%)'
+          }
+        });
+
+        boundary.addTo(mapInstanceRef.current);
+        setBoundaryLayer(boundary);
+      }
+    } catch (error) {
+      console.error('Failed to load boundary:', error);
+    }
+  };
 
   return (
     <div className="relative w-full" style={{ height }}>
+      {/* Map View Toggle */}
+      <div className="absolute top-4 right-4 z-[1000] bg-white rounded-lg shadow-lg border border-border/20">
+        <div className="p-2">
+          <div className="text-xs font-medium text-muted-foreground mb-2">Map Options</div>
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="mapStyle"
+                value="street"
+                checked={mapStyle === 'street'}
+                onChange={(e) => setMapStyle(e.target.value as 'street' | 'satellite')}
+                className="w-3 h-3 text-primary"
+              />
+              <span className="text-xs">Automatic</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="mapStyle"
+                value="satellite"
+                checked={mapStyle === 'satellite'}
+                onChange={(e) => setMapStyle(e.target.value as 'street' | 'satellite')}
+                className="w-3 h-3 text-primary"
+              />
+              <span className="text-xs">Satellite</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div ref={mapRef} className="w-full h-full rounded-lg" />
       
       {/* Listing Preview Popup */}
