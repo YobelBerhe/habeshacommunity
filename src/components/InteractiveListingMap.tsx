@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
 import { Listing } from '@/types';
 import { Badge } from "@/components/ui/badge";
 
@@ -66,17 +69,18 @@ export default function InteractiveListingMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const [listingsWithCoords, setListingsWithCoords] = useState<(Listing & { lat: number; lng: number })[]>([]);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Create map with limited zoom for security
+    // Create map with increased zoom levels
     const map = L.map(mapRef.current, {
       center: [center.lat, center.lng],
-      zoom: Math.min(zoom, 8),
+      zoom: Math.min(zoom + 2, 12),
       zoomControl: true,
-      maxZoom: 8,
+      maxZoom: 12,
     });
 
     mapInstanceRef.current = map;
@@ -130,15 +134,53 @@ export default function InteractiveListingMap({
   useEffect(() => {
     if (!mapInstanceRef.current) return;
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => {
-      mapInstanceRef.current?.removeLayer(marker);
-    });
+    // Clear existing markers and cluster group
+    if (markerClusterRef.current) {
+      mapInstanceRef.current.removeLayer(markerClusterRef.current);
+    }
     markersRef.current = [];
 
     if (listingsWithCoords.length === 0) return;
 
+    // Create a new marker cluster group with custom styling
+    markerClusterRef.current = L.markerClusterGroup({
+      maxClusterRadius: 80,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      iconCreateFunction: function(cluster) {
+        const count = cluster.getChildCount();
+        return L.divIcon({
+          html: `<div style="
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: ${count < 10 ? '14px' : count < 100 ? '12px' : '10px'};
+            cursor: pointer;
+          ">${count}</div>`,
+          className: 'custom-cluster-icon',
+          iconSize: [40, 40],
+          iconAnchor: [20, 20]
+        });
+      }
+    });
+
     listingsWithCoords.forEach(listing => {
+      // Format price correctly - ensure we're displaying the actual listing price
+      const priceDisplay = listing.price 
+        ? (listing.price >= 1000 
+          ? `$${Math.round(listing.price/1000)}k` 
+          : `$${listing.price}`)
+        : '•';
+
       // Create custom purple marker similar to Zillow
       const purpleIcon = L.divIcon({
         className: 'custom-purple-marker',
@@ -159,7 +201,7 @@ export default function InteractiveListingMap({
           transition: all 0.2s ease;
           position: relative;
           z-index: 1000;
-        ">${listing.price ? `$${Math.round(listing.price/1000)}k` : '•'}</div>`,
+        ">${priceDisplay}</div>`,
         iconSize: [28, 28],
         iconAnchor: [14, 14],
         popupAnchor: [0, -14]
@@ -167,7 +209,7 @@ export default function InteractiveListingMap({
 
       const marker = L.marker([listing.lat!, listing.lng!], { 
         icon: purpleIcon 
-      }).addTo(mapInstanceRef.current!);
+      });
 
       // Create popup content similar to Zillow
       const popupContent = document.createElement('div');
@@ -265,18 +307,23 @@ export default function InteractiveListingMap({
         closeOnClick: false
       });
 
+      // Add marker to cluster group instead of directly to map
+      markerClusterRef.current!.addLayer(marker);
       markersRef.current.push(marker);
     });
 
+    // Add the cluster group to the map
+    mapInstanceRef.current.addLayer(markerClusterRef.current);
+
     // If we have listings with coordinates, adjust map view to fit them
     if (listingsWithCoords.length > 0) {
-      const group = new L.FeatureGroup(markersRef.current);
       if (listingsWithCoords.length === 1) {
-        // For single listing, center on it with reasonable zoom
-        mapInstanceRef.current.setView([listingsWithCoords[0].lat, listingsWithCoords[0].lng], Math.min(zoom, 8));
+        // For single listing, center on it with increased zoom
+        mapInstanceRef.current.setView([listingsWithCoords[0].lat, listingsWithCoords[0].lng], Math.min(zoom + 2, 12));
       } else {
-        // For multiple listings, fit all markers
-        mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [20, 20] });
+        // For multiple listings, fit all markers with padding
+        const group = new L.FeatureGroup(markersRef.current);
+        mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [30, 30] });
       }
     }
   }, [listingsWithCoords, onListingClick, zoom]);
