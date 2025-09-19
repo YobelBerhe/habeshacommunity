@@ -501,117 +501,129 @@ export default function Browse() {
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="bg-background border-b border-border">
+        <div className="bg-background border-b border-border sticky top-0 z-10 hidden md:block">
           <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center gap-4">
-              {/* Category Toggle */}
-              <Popover modal={false}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    {filters.category 
-                      ? TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || "Category"
-                      : language === 'EN' ? "All categories" : "ኩሉ ምድብታት"
-                    }
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  side="bottom" 
-                  align="start" 
-                  className="w-56 p-1"
-                  collisionPadding={8}
-                >
-                  <div className="space-y-1">
-                    <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                      onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
-                    >
-                      All categories
-                    </button>
-                    {Object.entries(TAXONOMY).map(([key, value]) => (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {/* Category Toggle */}
+                <Popover modal={false}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      {filters.category 
+                        ? TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || "Category"
+                        : language === 'EN' ? "All categories" : "ኩሉ ምድብታት"
+                      }
+                      <ChevronDown className="w-3 h-3 text-primary" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    side="bottom" 
+                    align="start" 
+                    className="w-56 p-1"
+                    collisionPadding={8}
+                  >
+                    <div className="space-y-1">
                       <button
-                        key={key}
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
+                        onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
                       >
-                        {value.name[language.toLowerCase() as 'en' | 'ti']}
+                        All categories
                       </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+                      {Object.entries(TAXONOMY).map(([key, value]) => (
+                        <button
+                          key={key}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                          onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
+                        >
+                          {value.name[language.toLowerCase() as 'en' | 'ti']}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
 
-              {/* Subcategory Toggle */}
-              <Popover modal={false}>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1"
-                    disabled={!filters.category}
-                  >
-                    {filters.subcategory 
-                      ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
-                      : filters.category ? (language === 'EN' ? "Subcategory" : "ንኣብ ምድብ") : (language === 'EN' ? "Select category first" : "ቀዳማይ ምድብ ምረጽ")
-                    }
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  side="bottom" 
-                  align="start" 
-                  className="w-56 p-1"
-                  collisionPadding={8}
-                >
-                  <div className="space-y-1">
-                    <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                      onClick={() => setFilters({ ...filters, subcategory: undefined })}
+                {/* Subcategory Toggle */}
+                <Popover modal={false}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1"
+                      disabled={!filters.category}
                     >
-                      All subcategories
-                    </button>
-                    {filters.category && TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
+                      {filters.subcategory 
+                        ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
+                        : filters.category ? (language === 'EN' ? "Subcategory" : "ንኣብ ምድብ") : (language === 'EN' ? "Select category first" : "ቀዳማይ ምድብ ምረጽ")
+                      }
+                      <ChevronDown className="w-3 h-3 text-primary" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    side="bottom" 
+                    align="start" 
+                    className="w-56 p-1"
+                    collisionPadding={8}
+                  >
+                    <div className="space-y-1">
                       <button
-                        key={sub}
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, subcategory: sub })}
+                        onClick={() => setFilters({ ...filters, subcategory: undefined })}
                       >
-                        {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
+                        All subcategories
                       </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+                      {filters.category && TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
+                        <button
+                          key={sub}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                          onClick={() => setFilters({ ...filters, subcategory: sub })}
+                        >
+                          {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
 
-              {/* Additional Filters based on category */}
-              {filters.category && (
-                filters.category === 'mentor' ? (
-                  <Button 
-                    size="sm" 
-                    className="gap-1"
-                    onClick={() => navigate('/mentor/onboarding')}
-                  >
-                    Become a Mentor
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1"
-                  >
-                    More Filters
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
-                )
-              )}
+                {/* Additional Filters based on category */}
+                {filters.category && (
+                  filters.category === 'mentor' ? (
+                    <Button 
+                      size="sm" 
+                      className="gap-1"
+                      onClick={() => navigate('/mentor/onboarding')}
+                    >
+                      Become a Mentor
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1"
+                    >
+                      More Filters
+                      <ChevronDown className="w-3 h-3 text-primary" />
+                    </Button>
+                  )
+                )}
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearAll}
-              >
-                Clear All
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearAll}
+                >
+                  Clear All
+                </Button>
+              </div>
+
+              {/* View and Sort Controls - Right Side */}
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-muted-foreground">
+                  {processedListings.length} listings
+                  {filters.city && ` in ${filters.city}`}
+                </div>
+                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
+              </div>
             </div>
           </div>
         </div>
@@ -636,19 +648,6 @@ export default function Browse() {
           {/* Listings Section - Right Side */}
           <div className="w-1/2 bg-background overflow-y-auto">
             <div className="p-6">
-              {/* Results Header */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {processedListings.length} listings
-                    {filters.city && ` in ${filters.city}`}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-                    <SortDropdown sortKey={sortKey} onChange={setSortKey} />
-                  </div>
-                </div>
-              </div>
 
               {/* Full-Width Listings Grid */}
               <ListingGrid
