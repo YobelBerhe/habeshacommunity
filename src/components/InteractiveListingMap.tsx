@@ -246,15 +246,13 @@ export default function InteractiveListingMap({
       // Make popup content clickable
       popupContent.style.cursor = 'pointer';
 
-      // Add hover effect to marker
-      marker.on('mouseover', function() {
-        this.getElement()?.style.setProperty('transform', 'scale(1.1)');
-        this.getElement()?.style.setProperty('z-index', '1000');
+      // Improve clickability without altering Leaflet positioning transform
+      marker.on('mouseover', () => {
+        marker.setZIndexOffset(1000);
       });
       
-      marker.on('mouseout', function() {
-        this.getElement()?.style.setProperty('transform', 'scale(1.0)');
-        this.getElement()?.style.setProperty('z-index', '999');
+      marker.on('mouseout', () => {
+        marker.setZIndexOffset(0);
       });
 
       marker.bindPopup(popupContent, {
