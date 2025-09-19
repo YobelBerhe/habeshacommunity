@@ -15,6 +15,12 @@ L.Icon.Default.mergeOptions({
 // Geocoding function to get coordinates from address or city
 async function geocodeLocation(listing: Listing): Promise<{ lat: number; lng: number } | null> {
   try {
+    // Skip invalid cities
+    if (!listing.city || listing.city === 'Select a city' || listing.city === 'Unknown') {
+      // Use a default city center (San Francisco) for listings without valid city
+      return { lat: 37.7749, lng: -122.4194 };
+    }
+    
     // Try street address first if available
     const streetAddress = (listing as any).street_address;
     const query = streetAddress 
@@ -32,10 +38,13 @@ async function geocodeLocation(listing: Listing): Promise<{ lat: number; lng: nu
         lng: parseFloat(results[0].lon)
       };
     }
-    return null;
+    
+    // Fallback to default location if geocoding fails
+    return { lat: 37.7749, lng: -122.4194 };
   } catch (error) {
     console.error('Geocoding failed:', error);
-    return null;
+    // Fallback to default location
+    return { lat: 37.7749, lng: -122.4194 };
   }
 }
 
@@ -148,6 +157,8 @@ export default function InteractiveListingMap({
           font-size: 11px;
           cursor: pointer;
           transition: all 0.2s ease;
+          position: relative;
+          z-index: 1000;
         ">${listing.price ? `$${Math.round(listing.price/1000)}k` : '•'}</div>`,
         iconSize: [28, 28],
         iconAnchor: [14, 14],
@@ -216,7 +227,15 @@ export default function InteractiveListingMap({
         </div>
       `;
 
-      // Add click handler to popup content
+      // Add click handler directly to marker
+      marker.on('click', function(e) {
+        e.originalEvent?.stopPropagation();
+        if (onListingClick) {
+          onListingClick(listing);
+        }
+      });
+
+      // Add click handler to popup content as backup
       popupContent.addEventListener('click', (e) => {
         e.stopPropagation();
         if (onListingClick) {
@@ -235,15 +254,17 @@ export default function InteractiveListingMap({
       
       marker.on('mouseout', function() {
         this.getElement()?.style.setProperty('transform', 'scale(1.0)');
-        this.getElement()?.style.setProperty('z-index', '');
+        this.getElement()?.style.setProperty('z-index', '999');
       });
 
       marker.bindPopup(popupContent, {
         maxWidth: 280,
         className: 'listing-popup-container',
         closeButton: true,
-        autoPan: true,
-        keepInView: true
+        autoPan: false,
+        keepInView: false,
+        autoClose: false,
+        closeOnClick: false
       });
 
       markersRef.current.push(marker);
