@@ -50,6 +50,7 @@ export default function ListingGrid({
               listing={listing}
               onSelect={onListingClick}
               showJustPosted={listing.id === newlyPostedId}
+              viewMode={viewMode}
             />
           ))}
           {loading && (

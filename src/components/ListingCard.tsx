@@ -18,9 +18,10 @@ interface ListingCardProps {
   listing: Listing;
   onSelect: (listing: Listing) => void;
   showJustPosted?: boolean;
+  viewMode?: "list" | "grid" | "gallery" | "map";
 }
 
-const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) => {
+const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: ListingCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -145,7 +146,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
           {/* Vertical layout with image on top */}
           <div className="relative">
             {/* Image section */}
-            <div className="relative h-48 w-full group/image">
+            <div className={`relative w-full group/image ${viewMode === "grid" ? "h-32" : "h-48"}`}>
               <ImageBox
                 src={images[currentImageIndex] || images[0]}
                 alt={listing.title}
@@ -211,7 +212,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted }: ListingCardProps) =>
             </div>
             
             {/* Content section below image */}
-            <div className="p-4 space-y-1">
+            <div className={`space-y-1 ${viewMode === "grid" ? "p-2" : "p-4"}`}>
               {/* Price */}
               {listing.price && (
                 <div className="text-2xl font-extrabold tracking-tight text-foreground">
