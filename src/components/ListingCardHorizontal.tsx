@@ -94,9 +94,9 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
           <button
             type="button"
             onClick={handleSaveClick}
-            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center bg-white/90 hover:bg-white rounded-full backdrop-blur transition-colors"
+            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center transition-colors"
           >
-            <Heart className={`w-5 h-5 ${saved ? 'fill-black text-black' : 'text-black'}`} strokeWidth={1.8} />
+            <Heart className={`w-5 h-5 ${saved ? 'fill-gray-800 text-white' : 'text-white'}`} strokeWidth={2.5} />
           </button>
         </div>
         
