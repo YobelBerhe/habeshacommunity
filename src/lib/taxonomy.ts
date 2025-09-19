@@ -50,9 +50,9 @@ export const TAXONOMY: Record<
   community: {
     name: { en: "Community", ti: "ማሕበራዊ" },
     sub: [
-      "activities","artists","childcare","classes","events","general","groups",
-      "local_news","lost_found","missed_connections","musicians","pets",
-      "politics","rants_raves","rideshare","volunteers",
+      "activities","artists","childcare","churches","classes","events","festivals",
+      "general","groups","local_news","lost_found","missed_connections","musicians",
+      "pets","politics","rants_raves","rideshare","volunteers",
     ],
   },
   mentor: {
@@ -98,6 +98,8 @@ export const LABELS: Record<string, { en: string; ti: string }> = {
   legal: { en: "legal", ti: "ሕጋዊ" },
 
   // community examples
+  churches: { en: "churches", ti: "ቤተ ክርስትያናት" },
+  festivals: { en: "festivals", ti: "በዓላት" },
   volunteers: { en: "volunteers", ti: "በዓል ዘይኮርኦ" },
   events: { en: "events", ti: "ክስተታት" },
 
