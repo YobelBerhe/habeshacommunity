@@ -81,6 +81,7 @@ export default function InteractiveListingMap({
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
   const [boundaryLayer, setBoundaryLayer] = useState<L.GeoJSON | null>(null);
+  const [showBorders, setShowBorders] = useState(true);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -376,7 +377,7 @@ export default function InteractiveListingMap({
 
   // Function to add boundary highlighting
   const addBoundary = async (locationName: string, type: 'city' | 'country') => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current || !showBorders) return;
 
     // Remove existing boundary
     if (boundaryLayer) {
@@ -412,6 +413,20 @@ export default function InteractiveListingMap({
     }
   };
 
+  // Effect to handle border toggle changes
+  useEffect(() => {
+    if (!showBorders && boundaryLayer && mapInstanceRef.current) {
+      mapInstanceRef.current.removeLayer(boundaryLayer);
+      setBoundaryLayer(null);
+    } else if (showBorders && (searchCity || searchCountry)) {
+      if (searchCity) {
+        addBoundary(searchCity, 'city');
+      } else if (searchCountry) {
+        addBoundary(searchCountry, 'country');
+      }
+    }
+  }, [showBorders, searchCity, searchCountry]);
+
   return (
     <div className="relative w-full" style={{ height }}>
       {/* Map View Toggle */}
@@ -441,6 +456,19 @@ export default function InteractiveListingMap({
               />
               <span className="text-xs">Satellite</span>
             </label>
+            {(searchCity || searchCountry) && (
+              <div className="border-t border-border/20 pt-2 mt-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showBorders}
+                    onChange={(e) => setShowBorders(e.target.checked)}
+                    className="w-3 h-3 text-primary rounded"
+                  />
+                  <span className="text-xs">Show Borders</span>
+                </label>
+              </div>
+            )}
           </div>
         </div>
       </div>
