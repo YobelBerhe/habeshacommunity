@@ -23,12 +23,13 @@ export default function StarFieldLayer({ map, points }: Props) {
 
     const createStarIcon = () => {
       const isDark = document.documentElement.classList.contains("dark");
-      const color = isDark ? "#fbbf24" : "#f59e0b"; // amber colors
+      const color = isDark ? "#fbbf24" : "hsl(215, 94%, 50%)"; // amber in dark, primary blue in light
+      const glowColor = isDark ? "rgba(251, 191, 36, 0.4)" : "rgba(33, 138, 238, 0.5)"; // matching glow
       
       return L.divIcon({
         html: `
           <div class="star-marker">
-            <div class="star-dot" style="background-color: ${color}; box-shadow: 0 0 6px ${color}40;"></div>
+            <div class="star-dot breathing-dot" style="background-color: ${color}; box-shadow: 0 0 10px ${glowColor}, 0 0 20px ${glowColor};"></div>
           </div>
         `,
         className: 'star-container',
@@ -58,8 +59,22 @@ export default function StarFieldLayer({ map, points }: Props) {
       markers.push(marker);
     });
 
+    // Listen for theme changes and update marker colors
+    const updateMarkerColors = () => {
+      markers.forEach(marker => {
+        marker.setIcon(createStarIcon());
+      });
+    };
+
+    const observer = new MutationObserver(updateMarkerColors);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
     // Cleanup function
     return () => {
+      observer.disconnect();
       markers.forEach(marker => {
         map.removeLayer(marker);
       });

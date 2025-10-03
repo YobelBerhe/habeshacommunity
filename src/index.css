@@ -242,12 +242,22 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  animation: starTwinkle 2s ease-in-out infinite;
+  animation: starBreathing 2.5s ease-in-out infinite;
 }
 
-@keyframes starTwinkle {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
+.breathing-dot {
+  animation: starBreathing 2.5s ease-in-out infinite;
+}
+
+@keyframes starBreathing {
+  0%, 100% { 
+    opacity: 0.5; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.6);
+  }
 }
 
 /* Star colors for theme-aware map */
