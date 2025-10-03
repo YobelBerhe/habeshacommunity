@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Send, Smile, Mic, Image as ImageIcon, Camera } from 'lucide-react';
+import { ArrowLeft, Send, Smile, Image as ImageIcon, Camera } from 'lucide-react';
 import CitySearchBar from '@/components/CitySearchBar';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,13 +46,10 @@ export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const { user, openAuth } = useAuth();
   const listRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
 
   const isGlobal = useMemo(() => !selectedCity, [selectedCity]);
 
@@ -60,7 +57,7 @@ export default function Chat() {
     setSelectedCity(city);
   };
 
-  const handleSend = async (messageType: 'text' | 'voice' | 'image' = 'text', mediaUrl?: string) => {
+  const handleSend = async (messageType: 'text' | 'image' = 'text', mediaUrl?: string) => {
     console.log('🔵 Send button clicked', { message, messageType, mediaUrl, user: !!user, selectedCity, activeBoard });
     
     if (messageType === 'text' && !message.trim()) {
@@ -87,7 +84,7 @@ export default function Chat() {
     
     try {
       const insertData: any = {
-        content: messageType === 'text' ? message.trim() : (messageType === 'voice' ? 'Voice message' : 'Photo'),
+        content: messageType === 'text' ? message.trim() : 'Photo',
         user_id: user.id,
         city: selectedCity,
         board: activeBoard === 'all' ? 'general' : activeBoard,
@@ -125,61 +122,6 @@ export default function Chat() {
     }
   };
 
-  const startRecording = async () => {
-    if (!user) {
-      toast.error('Please sign in to send voice messages');
-      openAuth();
-      return;
-    }
-
-    if (!selectedCity) {
-      toast.error('Please select a city to post');
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      
-      audioChunksRef.current = [];
-      
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
-      };
-
-      recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const audioFile = new File([audioBlob], `voice_${Date.now()}.webm`, { type: 'audio/webm' });
-        
-        toast.info('Uploading voice message...');
-        const urls = await uploadListingImages([audioFile], user!.id, 'chat-media');
-        
-        if (urls.length > 0) {
-          await handleSend('voice', urls[0]);
-        }
-        
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-      toast.success('Recording started');
-    } catch (error) {
-      console.error('Error starting recording:', error);
-      toast.error('Could not access microphone');
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      setMediaRecorder(null);
-    }
-  };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!user) {
@@ -413,11 +355,6 @@ export default function Chat() {
                             alt="Shared photo" 
                             className="max-w-xs rounded-lg mt-1"
                           />
-                        ) : msg.message_type === 'voice' && msg.media_url ? (
-                          <audio controls className="mt-1">
-                            <source src={msg.media_url} type="audio/webm" />
-                            Your browser does not support audio playback.
-                          </audio>
                         ) : (
                           <p className="text-sm break-words whitespace-pre-wrap mt-0.5">
                             {msg.content}
@@ -434,21 +371,6 @@ export default function Chat() {
           {/* Composer */}
           <div className="force-input-light border-t p-4 bg-background">
             <div className="relative flex items-center gap-2">
-              {/* Voice recording button */}
-              <button
-                type="button"
-                onClick={isRecording ? stopRecording : startRecording}
-                className={`p-3 rounded-full transition-colors flex-shrink-0 ${
-                  isRecording 
-                    ? 'bg-red-500 text-white animate-pulse' 
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                }`}
-                aria-label={isRecording ? 'Stop recording' : 'Start voice recording'}
-                disabled={loading || isGlobal}
-              >
-                <Mic className="w-5 h-5" />
-              </button>
-
               {/* Text input area */}
               <div className="flex-1 relative flex items-center gap-1">
                 <button
@@ -472,7 +394,7 @@ export default function Chat() {
                   }}
                   placeholder={isGlobal ? 'Select a city to post' : 'Type your message...'}
                   className="flex-1 px-3 py-2 border rounded-lg bg-white text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-primary"
-                  disabled={loading || isGlobal || isRecording}
+                  disabled={loading || isGlobal}
                 />
 
                 <button
@@ -481,7 +403,7 @@ export default function Chat() {
                     e.preventDefault();
                     handleSend();
                   }}
-                  disabled={loading || !message.trim() || isGlobal || isRecording}
+                  disabled={loading || !message.trim() || isGlobal}
                   className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
                   title={isGlobal ? 'Select a city to send messages' : loading ? 'Sending...' : 'Send message'}
                 >
@@ -520,7 +442,7 @@ export default function Chat() {
                 onClick={() => fileInputRef.current?.click()}
                 className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
                 aria-label="Upload photo"
-                disabled={loading || isGlobal || isRecording}
+                disabled={loading || isGlobal}
               >
                 <ImageIcon className="w-5 h-5" />
               </button>
@@ -538,7 +460,7 @@ export default function Chat() {
                 onClick={() => cameraInputRef.current?.click()}
                 className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
                 aria-label="Take photo"
-                disabled={loading || isGlobal || isRecording}
+                disabled={loading || isGlobal}
               >
                 <Camera className="w-5 h-5" />
               </button>
