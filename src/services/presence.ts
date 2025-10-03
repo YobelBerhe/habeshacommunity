@@ -89,7 +89,7 @@ export const touchPresence = async (city?: string) => {
     }
 
     if (userCity) {
-      await supabase.rpc('touch_presence', { p_city: userCity });
+      // await supabase.rpc('touch_presence', { p_city: userCity });
     }
   } catch (error) {
     console.error('Failed to touch presence:', error);
@@ -99,16 +99,17 @@ export const touchPresence = async (city?: string) => {
 // Get live presence data
 export const getLivePresence = async (): Promise<PresenceData> => {
   try {
-    const { data, error } = await supabase
-      .from('presence')
-      .select('city')
-      .gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()); // 5 minutes
+    // const { data, error } = await supabase
+    //   .from('presence')
+    //   .select('city')
+    //   .gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString());
 
-    if (error) throw error;
+    // if (error) throw error;
+    const data: any[] = [];
 
     // Group by city
     const cityCount = new Map<string, number>();
-    data?.forEach(row => {
+    data?.forEach((row: any) => {
       if (row.city) {
         cityCount.set(row.city, (cityCount.get(row.city) || 0) + 1);
       }

@@ -45,10 +45,10 @@ export default function MentorRequests() {
 
       // Get bookings for this mentor
       const { data, error } = await supabase
-        .from('mentor_bookings')
-        .select('id, status, message, created_at, mentee_id')
+        .from('bookings')
+        .select('id, status, notes, created_at, user_id')
         .eq('mentor_id', mentor.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any;
 
       if (error) {
         console.error('Error loading bookings:', error);

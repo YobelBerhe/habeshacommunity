@@ -36,15 +36,15 @@ export default function MyBookings() {
         }
 
         const { data, error } = await supabase
-          .from('mentor_bookings')
+          .from('bookings')
           .select(`
-            id, status, message, created_at, mentor_id,
+            id, status, notes, created_at, mentor_id,
             mentors (
               display_name, city, country
             )
           `)
-          .eq('mentee_id', currentUser.id)
-          .order('created_at', { ascending: false });
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false }) as any;
 
         if (error) {
           console.error('Error loading bookings:', error);

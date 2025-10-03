@@ -5,13 +5,13 @@ export async function requestMentorBooking(mentorId: string, message: string) {
   if (!user) throw new Error('Not signed in');
   
   const { error } = await supabase
-    .from('mentor_bookings')
-    .insert({
+    .from('bookings')
+    .insert([{
       mentor_id: mentorId,
-      mentee_id: user.id,
-      message: message.trim(),
-      status: 'requested'
-    });
+      user_id: user.id,
+      notes: message.trim(),
+      status: 'pending'
+    }] as any);
     
   if (error) throw error;
   return { ok: true };
@@ -19,7 +19,7 @@ export async function requestMentorBooking(mentorId: string, message: string) {
 
 export async function updateBookingStatus(bookingId: string, status: 'accepted' | 'declined' | 'cancelled' | 'completed') {
   const { error } = await supabase
-    .from('mentor_bookings')
+    .from('bookings')
     .update({ status })
     .eq('id', bookingId);
     

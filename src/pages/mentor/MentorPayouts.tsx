@@ -31,10 +31,10 @@ export default function MentorPayouts() {
       if (user) {
         // Direct query since types may not be updated yet
         const { data } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single();
+          .from('mentors')
+          .select('stripe_account_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
         
         setConnected(!!(data as any)?.stripe_account_id);
       }

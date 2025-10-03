@@ -23,7 +23,7 @@ export async function fetchListingsWithContacts(filters: {
   `).eq('status', 'active');
 
   if (filters.city) query = query.eq('city', filters.city);
-  if (filters.category) query = query.eq('category', filters.category);
+  if (filters.category) query = query.eq('category', filters.category as any);
   if (filters.subcategory) query = query.eq('subcategory', filters.subcategory);
   if (filters.minPrice != null) query = query.gte('price_cents', Math.round(filters.minPrice * 100));
   if (filters.maxPrice != null) query = query.lte('price_cents', Math.round(filters.maxPrice * 100));
@@ -58,7 +58,7 @@ export async function createListingWithContact(
   
   const { data: listingData, error: listingError } = await supabase
     .from('listings')
-    .insert(payload)
+    .insert([payload] as any)
     .select('*')
     .single();
   

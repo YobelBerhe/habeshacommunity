@@ -1,12 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export async function saveSearch(userId: string, name: string, params: any) {
-  const { data, error } = await supabase.from('saved_searches').insert({
+  const { data, error } = await supabase.from('saved_searches').insert([{
     user_id: userId,
     name,
     params,
     last_seen: new Date().toISOString(),
-  }).select('id').single();
+  }] as any).select('id').single();
   if (error) throw error;
   return data!.id as string;
 }

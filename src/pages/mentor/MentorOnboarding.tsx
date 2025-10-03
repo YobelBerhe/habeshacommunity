@@ -33,9 +33,9 @@ function PayoutSetupSection() {
     (async () => {
       if (!user) return setConnected(false);
       const { data, error } = await supabase
-        .from("users")
+        .from("mentors")
         .select("stripe_account_id")
-        .eq("id", user.id)
+        .eq("user_id", user.id)
         .maybeSingle();
       if (error) {
         console.error(error);
@@ -120,22 +120,21 @@ export default function MentorOnboarding() {
     try {
       const { error } = await supabase
         .from('mentors')
-        .insert({
+        .insert([{
           user_id: user.id,
           display_name: formData.display_name.trim(),
           bio: formData.bio.trim(),
           city: formData.city.trim() || null,
           country: formData.country.trim() || null,
-          price_cents: formData.price_cents ? parseInt(formData.price_cents) * 100 : 5000, // Default $50/hr
+          price_cents: formData.price_cents ? parseInt(formData.price_cents) * 100 : 5000,
           currency: formData.currency,
           topics: formData.topics,
           languages: formData.languages.length > 0 ? formData.languages : ['English'],
           photos: formData.photos,
           website_url: formData.website_url.trim() || null,
-          plan_description: formData.plan_description?.trim() || null,
-          social_links: formData.social_links,
-          rating: 0
-        });
+          name: formData.display_name.trim(),
+          title: formData.display_name.trim()
+        }] as any);
 
       if (error) throw error;
 

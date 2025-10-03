@@ -25,10 +25,10 @@ interface Mentor {
   country: string;
   price_cents: number;
   currency: string;
-  rating: number;
+  rating?: number;
   photos: string[];
   website_url: string;
-  social_links: any;
+  social_links?: any;
 }
 
 export default function MentorList() {
@@ -179,10 +179,10 @@ export default function MentorList() {
                       <CountryFlag country={mentor.country} className="w-5 h-4" />
                     )}
                   </div>
-                  {mentor.rating > 0 && (
+                  {(mentor.rating ?? 0) > 0 && (
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm">{mentor.rating.toFixed(1)}</span>
+                      <span className="text-sm">{mentor.rating?.toFixed(1)}</span>
                     </div>
                   )}
                 </CardTitle>
