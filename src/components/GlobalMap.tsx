@@ -43,15 +43,12 @@ export default function GlobalMap({ onMapReady, focusCity, viewMode, modalOpen }
         attribution: '© OpenStreetMap, © Carto',
       });
 
-      // Add the appropriate layer based on current theme (default to dark)
+      // Add the appropriate layer based on current theme
       const isDark = document.documentElement.classList.contains("dark");
-      const isLight = document.documentElement.classList.contains("light");
-      
-      // Default to dark theme if no explicit theme is set
-      if (isLight && !isDark) {
-        lightTileLayer.addTo(map);
-      } else {
+      if (isDark) {
         darkTileLayer.addTo(map);
+      } else {
+        lightTileLayer.addTo(map);
       }
 
       // Fit the whole world in view
@@ -67,22 +64,20 @@ export default function GlobalMap({ onMapReady, focusCity, viewMode, modalOpen }
         if (!map) return;
         
         const isNowDark = document.documentElement.classList.contains("dark");
-        const isNowLight = document.documentElement.classList.contains("light");
         
-        // Remove current layer and add new one (default to dark)
-        if (isNowLight && !isNowDark) {
-          if (darkTileLayer && map.hasLayer(darkTileLayer)) {
-            map.removeLayer(darkTileLayer);
-          }
-          if (lightTileLayer && !map.hasLayer(lightTileLayer)) {
-            lightTileLayer.addTo(map);
-          }
-        } else {
+        if (isNowDark) {
           if (lightTileLayer && map.hasLayer(lightTileLayer)) {
             map.removeLayer(lightTileLayer);
           }
           if (darkTileLayer && !map.hasLayer(darkTileLayer)) {
             darkTileLayer.addTo(map);
+          }
+        } else {
+          if (darkTileLayer && map.hasLayer(darkTileLayer)) {
+            map.removeLayer(darkTileLayer);
+          }
+          if (lightTileLayer && !map.hasLayer(lightTileLayer)) {
+            lightTileLayer.addTo(map);
           }
         }
       });
