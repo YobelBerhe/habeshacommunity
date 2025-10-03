@@ -224,6 +224,27 @@ export type Database = {
         }
         Relationships: []
       }
+      likes: {
+        Row: {
+          created_at: string
+          id: string
+          liked_id: string
+          liker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          liked_id: string
+          liker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          liked_id?: string
+          liker_id?: string
+        }
+        Relationships: []
+      }
       listing_contacts: {
         Row: {
           contact_method: Database["public"]["Enums"]["contact_method"] | null
@@ -433,6 +454,57 @@ export type Database = {
           seeking?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      match_questions: {
+        Row: {
+          choices: Json
+          created_at: string
+          id: string
+          is_required: boolean
+          question_text: string
+          section: string
+          weight: number
+        }
+        Insert: {
+          choices?: Json
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          question_text: string
+          section: string
+          weight?: number
+        }
+        Update: {
+          choices?: Json
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          question_text?: string
+          section?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      matches: {
+        Row: {
+          created_at: string
+          id: string
+          user1_id: string
+          user2_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user1_id: string
+          user2_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user1_id?: string
+          user2_id?: string
         }
         Relationships: []
       }
@@ -671,6 +743,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "match_questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

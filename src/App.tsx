@@ -27,6 +27,7 @@ import MentorPayouts from "./pages/mentor/MentorPayouts";
 import MatchOnboarding from "./pages/match/MatchOnboarding";
 import MatchDiscover from "./pages/match/MatchDiscover";
 import MatchProfile from "./pages/match/MatchProfile";
+import MatchList from "./pages/match/MatchList";
 import Marketplace from "./pages/marketplace/Marketplace";
 import MarketplaceDetail from "./pages/marketplace/MarketplaceDetail";
 import Inbox from "./pages/inbox/Inbox";
@@ -70,8 +71,10 @@ const App = () => (
           <Route path="/mentor/booking-success" element={<BookingSuccess />} />
           <Route path="/mentor/payouts" element={<MentorPayouts />} />
           <Route path="/match" element={<MatchDiscover />} />
+          <Route path="/match/discover" element={<MatchDiscover />} />
           <Route path="/match/onboarding" element={<MatchOnboarding />} />
           <Route path="/match/profile/:id" element={<MatchProfile />} />
+          <Route path="/match/matches" element={<MatchList />} />
           <Route path="/market" element={<Marketplace />} />
           <Route path="/market/:id" element={<MarketplaceDetail />} />
           <Route path="/inbox" element={<Inbox />} />
