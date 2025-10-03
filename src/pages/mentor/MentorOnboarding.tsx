@@ -15,8 +15,6 @@ import { getAppState } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
 import PhotoUpload from '@/components/PhotoUpload';
 import CountryFlag from '@/components/CountryFlag';
-import { ConnectStripeButton } from '@/components/ConnectStripeButton';
-
 const popularTopics = [
   'Career Development', 'Technical Skills', 'Leadership', 'Entrepreneurship',
   'Software Engineering', 'Data Science', 'Product Management', 'Marketing',
@@ -24,47 +22,6 @@ const popularTopics = [
 ];
 
 const languages = ['English', 'Amharic', 'Tigrinya', 'Oromo', 'Arabic', 'Spanish', 'French', 'German'];
-
-function PayoutSetupSection() {
-  const [connected, setConnected] = useState<boolean | null>(null);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    (async () => {
-      if (!user) return setConnected(false);
-      const { data, error } = await supabase
-        .from("mentors")
-        .select("stripe_account_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (error) {
-        console.error(error);
-        setConnected(false);
-      } else {
-        setConnected(!!(data as any)?.stripe_account_id);
-      }
-    })();
-  }, [user]);
-
-  return (
-    <section className="mt-8 rounded-2xl border p-4">
-      <h3 className="text-lg font-semibold">Payouts</h3>
-      <p className="text-sm text-muted-foreground">
-        Receive payments for sessions. Connect your Stripe account (takes ~2 minutes).
-      </p>
-
-      {connected === null ? (
-        <div className="mt-3 text-sm">Checking…</div>
-      ) : connected ? (
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-green-700">
-          <span className="h-2 w-2 rounded-full bg-green-600" /> Stripe Connected
-        </div>
-      ) : (
-        <ConnectStripeButton className="mt-4" />
-      )}
-    </section>
-  );
-}
 
 export default function MentorOnboarding() {
   const navigate = useNavigate();
@@ -140,7 +97,7 @@ export default function MentorOnboarding() {
 
       toast({
         title: 'Success!',
-        description: 'Your mentor profile has been created successfully. Get verified to increase trust!',
+        description: 'Your mentor profile has been created! Next: Get verified, then set up payouts.',
       });
       
       navigate('/mentor/verify');
@@ -422,10 +379,16 @@ export default function MentorOnboarding() {
                 </div>
               </div>
 
-              {/* Payout Setup Section */}
-              <PayoutSetupSection />
+              <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+                <p>After creating your profile, you'll be able to:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Get verified to increase trust with mentees</li>
+                  <li>Connect Stripe to receive payments for sessions</li>
+                  <li>Start accepting mentoring requests</li>
+                </ul>
+              </div>
 
-              <Button 
+              <Button
                 type="submit" 
                 disabled={loading}
                 className="w-full"
