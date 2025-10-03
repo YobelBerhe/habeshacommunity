@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useAuth } from '@/store/auth';
 import { useLanguage } from '@/store/language';
 import { t } from '@/lib/i18n';
+import { supabase } from '@/integrations/supabase/client';
 
 type Props = {
   city: string;
@@ -79,9 +80,13 @@ export default function PostModal({ city, onPosted }: Props) {
   const [topics, setTopics] = useState<string>("");
   const [languages, setLanguages] = useState<string>("");
   const [priceCents, setPriceCents] = useState<number|undefined>(undefined);
-  const [yearsExperience, setYearsExperience] = useState<number|undefined>(undefined);
-  const [certifications, setCertifications] = useState<string>("");
-  const [sessionDuration, setSessionDuration] = useState<number>(60);
+  const [planDescription, setPlanDescription] = useState<string>("2 calls per month (30min/call)");
+  const [socialLinks, setSocialLinks] = useState({
+    twitter: '',
+    linkedin: '',
+    instagram: '',
+    facebook: ''
+  });
 
   // Marketplace fields  
   const [condition, setCondition] = useState<"new"|"like-new"|"good"|"fair"|undefined>(undefined);
@@ -93,14 +98,32 @@ export default function PostModal({ city, onPosted }: Props) {
   const [shippingAvailable, setShippingAvailable] = useState<boolean>(false);
 
   // Match fields
-  const [age, setAge] = useState<number|undefined>(undefined);
-  const [gender, setGender] = useState<"male"|"female"|"other"|undefined>(undefined);
-  const [seeking, setSeeking] = useState<"male"|"female"|"other"|undefined>(undefined);
-  const [height, setHeight] = useState<string>("");
-  const [education_level, setEducationLevel] = useState<string>("");
-  const [occupation, setOccupation] = useState<string>("");
-  const [interests, setInterests] = useState<string>("");
-  const [relationshipGoal, setRelationshipGoal] = useState<"serious"|"casual"|"friendship"|undefined>(undefined);
+  const [matchName, setMatchName] = useState<string>("");
+  const [matchBio, setMatchBio] = useState<string>("");
+  const [matchPhotos, setMatchPhotos] = useState<string[]>([]);
+  const [matchQuestions, setMatchQuestions] = useState<any[]>([]);
+  const [matchAnswers, setMatchAnswers] = useState<Record<string, string>>({});
+
+  // Load match questions when match category is selected
+  useEffect(() => {
+    if (category === "match" && matchQuestions.length === 0) {
+      const loadQuestions = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('match_questions')
+            .select('*')
+            .order('section', { ascending: true })
+            .order('is_required', { ascending: false });
+
+          if (error) throw error;
+          setMatchQuestions(data || []);
+        } catch (error) {
+          console.error('Error loading match questions:', error);
+        }
+      };
+      loadQuestions();
+    }
+  }, [category]);
 
   // Load listing data when editing
   useEffect(() => {
@@ -274,9 +297,14 @@ export default function PostModal({ city, onPosted }: Props) {
     }
     
     if (category === "match") {
-      if (!age) newErrors.age = "Age is required";
-      if (!gender) newErrors.gender = "Gender is required";
-      if (!seeking) newErrors.seeking = "Seeking preference is required";
+      if (!matchName.trim()) newErrors.matchName = "Name is required";
+      if (!matchBio.trim()) newErrors.matchBio = "Bio is required";
+      // Check required questions
+      const requiredQuestions = matchQuestions.filter(q => q.is_required);
+      const missingAnswers = requiredQuestions.filter(q => !matchAnswers[q.id]);
+      if (missingAnswers.length > 0) {
+        newErrors.matchAnswers = "Please answer all required questions";
+      }
     }
     
     // At least one contact method required
@@ -329,7 +357,13 @@ export default function PostModal({ city, onPosted }: Props) {
           topics: topics.split(',').map(t => t.trim()).filter(Boolean),
           languages: languages.split(',').map(l => l.trim()).filter(Boolean),
           price: priceCents ? `$${priceCents/100}/session` : undefined,
-          yearsExperience, certifications, sessionDuration: `${sessionDuration} min`
+          planDescription,
+          socialLinks: [
+            socialLinks.linkedin && `LinkedIn: ${socialLinks.linkedin}`,
+            socialLinks.twitter && `Twitter: ${socialLinks.twitter}`,
+            socialLinks.instagram && `Instagram: ${socialLinks.instagram}`,
+            socialLinks.facebook && `Facebook: ${socialLinks.facebook}`,
+          ].filter(Boolean)
         });
       }
       if (category === "marketplace") {
@@ -339,11 +373,13 @@ export default function PostModal({ city, onPosted }: Props) {
         });
       }
       if (category === "match") {
-        finalDescription += formatAttrs({
-          age, gender, seeking, height, education: education_level,
-          occupation, interests: interests.split(',').map(i => i.trim()).filter(Boolean),
-          relationshipGoal
-        });
+        // Store match profile data and answers in description as JSON
+        const matchData = {
+          name: matchName,
+          bio: matchBio,
+          answers: matchAnswers
+        };
+        finalDescription += `\n\n---\nMatch Profile Data: ${JSON.stringify(matchData)}`;
       }
 
       // Create or update the listing in database
@@ -518,26 +554,28 @@ export default function PostModal({ city, onPosted }: Props) {
           onChange={(e)=>setDescription(e.target.value)}
         />
 
-        {/* Price Field */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <input 
-            type="number" 
-            placeholder="Price (optional)" 
-            className="border rounded-md px-3 py-2 bg-background text-foreground"
-            value={price ?? ""} 
-            onChange={(e)=>setPrice(num(e.target.value))}
-          />
-          <select 
-            className="border rounded-md px-3 py-2 bg-background text-foreground"
-            value={currency}
-            onChange={(e)=>setCurrency(e.target.value)}
-          >
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="ETB">ETB</option>
-            <option value="CAD">CAD</option>
-          </select>
-        </div>
+        {/* Price Field - Hide for Match category */}
+        {category !== "match" && (
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <input 
+              type="number" 
+              placeholder="Price (optional)" 
+              className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={price ?? ""} 
+              onChange={(e)=>setPrice(num(e.target.value))}
+            />
+            <select 
+              className="border rounded-md px-3 py-2 bg-background text-foreground"
+              value={currency}
+              onChange={(e)=>setCurrency(e.target.value)}
+            >
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="ETB">ETB</option>
+              <option value="CAD">CAD</option>
+            </select>
+          </div>
+        )}
 
         {/* Tags Field */}
         <label className="block text-sm font-medium mb-1">Tags</label>
@@ -669,20 +707,33 @@ export default function PostModal({ city, onPosted }: Props) {
               />
               {errors.bio && <p className="text-red-500 text-xs mt-1">{errors.bio}</p>}
             </div>
-            <input placeholder="Topics/Expertise (e.g., Language, Career, Health)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+            <input placeholder="Topics/Expertise (comma-separated)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
               value={topics} onChange={(e)=>setTopics(e.target.value)} />
-            <input placeholder="Languages Spoken (e.g., English, Tigrinya, Amharic)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+            <input placeholder="Languages Spoken (comma-separated)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
               value={languages} onChange={(e)=>setLanguages(e.target.value)} />
             <div className="grid grid-cols-2 gap-3">
-              <input type="number" min={0} placeholder="Years of Experience" className="border rounded-md px-3 py-2 bg-background text-foreground"
-                value={yearsExperience ?? ""} onChange={(e)=>setYearsExperience(num(e.target.value))} />
-              <input type="number" min={15} max={180} step={15} placeholder="Session Duration (min)" className="border rounded-md px-3 py-2 bg-background text-foreground"
-                value={sessionDuration} onChange={(e)=>setSessionDuration(parseInt(e.target.value) || 60)} />
+              <input type="number" placeholder="Hourly Rate (USD)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={priceCents ? priceCents/100 : ""} onChange={(e)=>setPriceCents(e.target.value ? parseFloat(e.target.value) * 100 : undefined)} />
+              <select className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={currency} onChange={(e)=>setCurrency(e.target.value)}>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="ETB">ETB</option>
+              </select>
             </div>
-            <input placeholder="Certifications (if any)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
-              value={certifications} onChange={(e)=>setCertifications(e.target.value)} />
-            <input type="number" placeholder="Price per session (USD)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
-              value={priceCents ? priceCents/100 : ""} onChange={(e)=>setPriceCents(e.target.value ? parseFloat(e.target.value) * 100 : undefined)} />
+            <input placeholder="Mentorship plan details (e.g., 2 calls per month)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+              value={planDescription} onChange={(e)=>setPlanDescription(e.target.value)} />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">Social Media Links (optional)</label>
+              <input placeholder="LinkedIn profile URL" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+                value={socialLinks.linkedin} onChange={(e)=>setSocialLinks({...socialLinks, linkedin: e.target.value})} />
+              <input placeholder="Twitter/X profile URL" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+                value={socialLinks.twitter} onChange={(e)=>setSocialLinks({...socialLinks, twitter: e.target.value})} />
+              <input placeholder="Instagram profile URL" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+                value={socialLinks.instagram} onChange={(e)=>setSocialLinks({...socialLinks, instagram: e.target.value})} />
+              <input placeholder="Facebook profile URL" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+                value={socialLinks.facebook} onChange={(e)=>setSocialLinks({...socialLinks, facebook: e.target.value})} />
+            </div>
           </div>
         )}
 
@@ -727,71 +778,63 @@ export default function PostModal({ city, onPosted }: Props) {
 
         {category === "match" && (
           <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/30">
-            <h3 className="text-sm font-semibold mb-2">💝 Profile Details</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">Age *</label>
-                <input 
-                  type="number" 
-                  placeholder="Age" 
-                  className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.age ? 'border-red-500' : ''}`}
-                  value={age ?? ""} 
-                  onChange={(e)=>{setAge(num(e.target.value)); setErrors({...errors, age: ""});}}
-                />
-                {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">My Gender *</label>
-                <select 
-                  className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.gender ? 'border-red-500' : ''}`}
-                  value={gender ?? ""} 
-                  onChange={(e)=>{setGender((e.target.value || undefined) as any); setErrors({...errors, gender: ""});}}
-                >
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-                {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
-              </div>
+            <h3 className="text-sm font-semibold mb-2">💝 Match Profile</h3>
+            <div>
+              <label className="block text-sm font-medium mb-1">Your Name *</label>
+              <input 
+                placeholder="Your name" 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.matchName ? 'border-red-500' : ''}`}
+                value={matchName} 
+                onChange={(e)=>{setMatchName(e.target.value); setErrors({...errors, matchName: ""});}}
+              />
+              {errors.matchName && <p className="text-red-500 text-xs mt-1">{errors.matchName}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Seeking *</label>
-              <select 
-                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.seeking ? 'border-red-500' : ''}`}
-                value={seeking ?? ""} 
-                onChange={(e)=>{setSeeking((e.target.value || undefined) as any); setErrors({...errors, seeking: ""});}}
-              >
-                <option value="">Select preference</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Anyone</option>
-              </select>
-              {errors.seeking && <p className="text-red-500 text-xs mt-1">{errors.seeking}</p>}
+              <label className="block text-sm font-medium mb-1">About You *</label>
+              <textarea 
+                placeholder="Tell us about yourself..." 
+                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground min-h-20 ${errors.matchBio ? 'border-red-500' : ''}`}
+                value={matchBio} 
+                onChange={(e)=>{setMatchBio(e.target.value); setErrors({...errors, matchBio: ""});}}
+                rows={4}
+              />
+              {errors.matchBio && <p className="text-red-500 text-xs mt-1">{errors.matchBio}</p>}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Relationship Goal</label>
-              <select 
-                className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
-                value={relationshipGoal ?? ""} 
-                onChange={(e)=>setRelationshipGoal((e.target.value || undefined) as any)}
-              >
-                <option value="">Select</option>
-                <option value="serious">Serious Relationship</option>
-                <option value="casual">Casual Dating</option>
-                <option value="friendship">Friendship</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <input placeholder="Height (e.g., 5'10&quot;)" className="border rounded-md px-3 py-2 bg-background text-foreground"
-                value={height} onChange={(e)=>setHeight(e.target.value)} />
-              <input placeholder="Education Level" className="border rounded-md px-3 py-2 bg-background text-foreground"
-                value={education_level} onChange={(e)=>setEducationLevel(e.target.value)} />
-            </div>
-            <input placeholder="Occupation" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
-              value={occupation} onChange={(e)=>setOccupation(e.target.value)} />
-            <input placeholder="Interests (e.g., hiking, cooking, reading)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
-              value={interests} onChange={(e)=>setInterests(e.target.value)} />
+
+            {/* Dynamically render all match questions */}
+            {matchQuestions.length > 0 && (
+              <div className="space-y-3 pt-3 border-t">
+                <h4 className="text-sm font-semibold">Answer Questions for Better Matching</h4>
+                {matchQuestions.map((q) => (
+                  <div key={q.id}>
+                    <label className="block text-sm font-medium mb-1">
+                      {q.question_text} {q.is_required && '*'}
+                    </label>
+                    {q.choices && (q.choices as any).length > 0 ? (
+                      <select
+                        className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${q.is_required && !matchAnswers[q.id] ? 'border-amber-300' : ''}`}
+                        value={matchAnswers[q.id] || ''}
+                        onChange={(e) => setMatchAnswers({ ...matchAnswers, [q.id]: e.target.value })}
+                      >
+                        <option value="">Select...</option>
+                        {((q.choices as any) || []).map((choice: string) => (
+                          <option key={choice} value={choice}>
+                            {choice}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${q.is_required && !matchAnswers[q.id] ? 'border-amber-300' : ''}`}
+                        value={matchAnswers[q.id] || ''}
+                        onChange={(e) => setMatchAnswers({ ...matchAnswers, [q.id]: e.target.value })}
+                        placeholder="Your answer..."
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
