@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Send, Smile, Image as ImageIcon, Camera } from 'lucide-react';
+import { ArrowLeft, Send, Smile, Image as ImageIcon } from 'lucide-react';
 import CitySearchBar from '@/components/CitySearchBar';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,7 +49,6 @@ export default function Chat() {
   const { user, openAuth } = useAuth();
   const listRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const isGlobal = useMemo(() => !selectedCity, [selectedCity]);
 
@@ -397,6 +396,24 @@ export default function Chat() {
                   disabled={loading || isGlobal}
                 />
 
+                {/* Photo upload button */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
+                  aria-label="Upload photo"
+                  disabled={loading || isGlobal}
+                >
+                  <ImageIcon className="w-5 h-5" />
+                </button>
+
                 <button
                   type="button"
                   onClick={(e) => {
@@ -428,42 +445,6 @@ export default function Chat() {
                   </div>
                 )}
               </div>
-
-              {/* Photo upload and camera buttons */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
-                aria-label="Upload photo"
-                disabled={loading || isGlobal}
-              >
-                <ImageIcon className="w-5 h-5" />
-              </button>
-
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handlePhotoUpload}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => cameraInputRef.current?.click()}
-                className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
-                aria-label="Take photo"
-                disabled={loading || isGlobal}
-              >
-                <Camera className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
