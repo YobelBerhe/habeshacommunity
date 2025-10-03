@@ -52,38 +52,55 @@ export default function Chat() {
   };
 
   const handleSend = async () => {
-    if (!message.trim()) return;
+    console.log('🔵 Send button clicked', { message, user: !!user, selectedCity, activeBoard });
+    
+    if (!message.trim()) {
+      console.log('❌ Empty message, returning');
+      toast.error('Please type a message');
+      return;
+    }
 
     if (!user) {
+      console.log('❌ No user, opening auth');
+      toast.error('Please sign in to send messages');
       openAuth();
       return;
     }
 
     if (!selectedCity) {
+      console.log('❌ No city selected');
       toast.error('Please select a city to post');
       return;
     }
 
+    console.log('✅ All checks passed, sending message...');
     setLoading(true);
+    
     try {
       const insertData = {
         content: message.trim(),
         user_id: user.id,
         city: selectedCity,
-        board: activeBoard === 'all' ? 'general' : activeBoard, // default to general when on "All Boards"
+        board: activeBoard === 'all' ? 'general' : activeBoard,
       };
+
+      console.log('📤 Inserting message:', insertData);
 
       const { data, error } = await supabase
         .from('chat_messages')
         .insert(insertData)
         .select('*');
 
+      console.log('📥 Response:', { data, error });
+
       if (error) {
+        console.error('❌ Database error:', error);
         toast.error(`Database error: ${error.message}`);
         throw error;
       }
 
       if (data && data.length > 0) {
+        console.log('✅ Message sent successfully');
         const username =
           user.user_metadata?.display_name ||
           user.user_metadata?.name ||
@@ -99,12 +116,14 @@ export default function Chat() {
         ]);
         setMessage('');
         setShowEmoji(false);
+        toast.success('Message sent!');
       }
     } catch (e) {
-      console.error('Error sending message:', e);
+      console.error('💥 Error sending message:', e);
       toast.error('Failed to send message');
     } finally {
       setLoading(false);
+      console.log('🔵 Send complete, loading:', false);
     }
   };
 
@@ -303,12 +322,18 @@ export default function Chat() {
               />
 
               <button
-                onClick={handleSend}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log('🖱️ Button clicked directly');
+                  handleSend();
+                }}
                 disabled={loading || !message.trim() || isGlobal}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+                title={isGlobal ? 'Select a city to send messages' : loading ? 'Sending...' : 'Send message'}
               >
                 <Send className="w-4 h-4" />
-                Send
+                {loading ? 'Sending...' : 'Send'}
               </button>
 
               {showEmoji && (
