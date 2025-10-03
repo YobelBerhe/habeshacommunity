@@ -508,6 +508,59 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_bookings: {
+        Row: {
+          created_at: string
+          id: string
+          join_expires_at: string | null
+          join_url: string | null
+          mentor_id: string
+          message: string | null
+          notes: string | null
+          payment_status: string | null
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          join_expires_at?: string | null
+          join_url?: string | null
+          mentor_id: string
+          message?: string | null
+          notes?: string | null
+          payment_status?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          join_expires_at?: string | null
+          join_url?: string | null
+          mentor_id?: string
+          message?: string | null
+          notes?: string | null
+          payment_status?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_bookings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentors: {
         Row: {
           available: boolean | null
