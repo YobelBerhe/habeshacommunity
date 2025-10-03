@@ -55,12 +55,23 @@ export default function PostModal({ city, onPosted }: Props) {
   const [bathrooms, setBathrooms] = useState<number|undefined>(undefined);
   const [furnished, setFurnished] = useState<boolean>(false);
   const [availableFrom, setAvailableFrom] = useState<string>("");
+  const [squareFeet, setSquareFeet] = useState<number|undefined>(undefined);
+  const [leaseDuration, setLeaseDuration] = useState<string>("");
+  const [utilitiesIncluded, setUtilitiesIncluded] = useState<boolean>(false);
+  const [petPolicy, setPetPolicy] = useState<"allowed"|"not-allowed"|"negotiable"|undefined>(undefined);
+  const [parkingAvailable, setParkingAvailable] = useState<boolean>(false);
+  const [securityDeposit, setSecurityDeposit] = useState<number|undefined>(undefined);
+  const [amenities, setAmenities] = useState<string>("");
 
   // Jobs fields
   const [employment, setEmployment] = useState<"full"|"part"|"contract"|"temp"|"intern"|undefined>(undefined);
   const [pay, setPay] = useState<string>(""); // e.g. "$20/hr" or "3000 ETB/mo"
   const [remoteOk, setRemoteOk] = useState<boolean>(false);
   const [employer, setEmployer] = useState<string>("");
+  const [benefits, setBenefits] = useState<string>("");
+  const [experienceLevel, setExperienceLevel] = useState<"entry"|"mid"|"senior"|undefined>(undefined);
+  const [education, setEducation] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
 
   // Mentor fields
   const [displayName, setDisplayName] = useState<string>("");
@@ -68,16 +79,28 @@ export default function PostModal({ city, onPosted }: Props) {
   const [topics, setTopics] = useState<string>("");
   const [languages, setLanguages] = useState<string>("");
   const [priceCents, setPriceCents] = useState<number|undefined>(undefined);
+  const [yearsExperience, setYearsExperience] = useState<number|undefined>(undefined);
+  const [certifications, setCertifications] = useState<string>("");
+  const [sessionDuration, setSessionDuration] = useState<number>(60);
 
   // Marketplace fields  
   const [condition, setCondition] = useState<"new"|"like-new"|"good"|"fair"|undefined>(undefined);
   const [brand, setBrand] = useState<string>("");
   const [model, setModel] = useState<string>("");
+  const [purchaseDate, setPurchaseDate] = useState<string>("");
+  const [warranty, setWarranty] = useState<boolean>(false);
+  const [reasonForSelling, setReasonForSelling] = useState<string>("");
+  const [shippingAvailable, setShippingAvailable] = useState<boolean>(false);
 
   // Match fields
   const [age, setAge] = useState<number|undefined>(undefined);
   const [gender, setGender] = useState<"male"|"female"|"other"|undefined>(undefined);
   const [seeking, setSeeking] = useState<"male"|"female"|"other"|undefined>(undefined);
+  const [height, setHeight] = useState<string>("");
+  const [education_level, setEducationLevel] = useState<string>("");
+  const [occupation, setOccupation] = useState<string>("");
+  const [interests, setInterests] = useState<string>("");
+  const [relationshipGoal, setRelationshipGoal] = useState<"serious"|"casual"|"friendship"|undefined>(undefined);
 
   // Load listing data when editing
   useEffect(() => {
@@ -288,29 +311,38 @@ export default function PostModal({ city, onPosted }: Props) {
       let finalDescription = description.trim();
       if (category === "housing") {
         finalDescription += formatAttrs({
-          bedrooms, bathrooms, furnished, availableFrom
+          bedrooms, bathrooms, squareFeet: squareFeet ? `${squareFeet} sq ft` : undefined,
+          furnished, availableFrom, leaseDuration, utilitiesIncluded,
+          petPolicy, parkingAvailable, 
+          securityDeposit: securityDeposit ? `$${securityDeposit}` : undefined,
+          amenities: amenities.split(',').map(a => a.trim()).filter(Boolean)
         });
       }
       if (category === "jobs") {
         finalDescription += formatAttrs({
-          jobKind, employer, employment, pay, remoteOk
+          jobKind, employer, employment, pay, remoteOk, benefits,
+          experienceLevel, education, startDate
         });
       }
       if (category === "mentor") {
         finalDescription += formatAttrs({
           topics: topics.split(',').map(t => t.trim()).filter(Boolean),
           languages: languages.split(',').map(l => l.trim()).filter(Boolean),
-          price: priceCents ? `$${priceCents/100}/session` : undefined
+          price: priceCents ? `$${priceCents/100}/session` : undefined,
+          yearsExperience, certifications, sessionDuration: `${sessionDuration} min`
         });
       }
       if (category === "marketplace") {
         finalDescription += formatAttrs({
-          condition, brand, model
+          condition, brand, model, purchaseDate, warranty,
+          reasonForSelling, shippingAvailable
         });
       }
       if (category === "match") {
         finalDescription += formatAttrs({
-          age, gender, seeking
+          age, gender, seeking, height, education: education_level,
+          occupation, interests: interests.split(',').map(i => i.trim()).filter(Boolean),
+          relationshipGoal
         });
       }
 
@@ -527,46 +559,96 @@ export default function PostModal({ city, onPosted }: Props) {
 
         {/* Dynamic fields */}
         {category === "housing" && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <input type="number" min={0} placeholder="Bedrooms"
-              className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={bedrooms ?? ""} onChange={(e)=>setBedrooms(num(e.target.value))}/>
-            <input type="number" min={0} placeholder="Bathrooms"
-              className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={bathrooms ?? ""} onChange={(e)=>setBathrooms(num(e.target.value))}/>
-            <label className="col-span-2 flex items-center gap-2 text-sm">
+          <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/30">
+            <h3 className="text-sm font-semibold mb-2">🏠 Rental Details</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <input type="number" min={0} placeholder="Bedrooms *"
+                className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={bedrooms ?? ""} onChange={(e)=>setBedrooms(num(e.target.value))}/>
+              <input type="number" min={0} placeholder="Bathrooms *"
+                className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={bathrooms ?? ""} onChange={(e)=>setBathrooms(num(e.target.value))}/>
+              <input type="number" min={0} placeholder="Square Feet"
+                className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={squareFeet ?? ""} onChange={(e)=>setSquareFeet(num(e.target.value))}/>
+              <input type="text" placeholder="Lease Duration (e.g., 12 months)"
+                className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={leaseDuration} onChange={(e)=>setLeaseDuration(e.target.value)}/>
+              <input type="number" min={0} placeholder="Security Deposit ($)"
+                className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={securityDeposit ?? ""} onChange={(e)=>setSecurityDeposit(num(e.target.value))}/>
+              <select className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={petPolicy ?? ""} onChange={(e)=>setPetPolicy((e.target.value || undefined) as any)}>
+                <option value="">Pet Policy</option>
+                <option value="allowed">Pets Allowed</option>
+                <option value="not-allowed">No Pets</option>
+                <option value="negotiable">Negotiable</option>
+              </select>
+            </div>
+            <input type="text" placeholder="Amenities (pool, gym, laundry, etc.)"
+              className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+              value={amenities} onChange={(e)=>setAmenities(e.target.value)}/>
+            <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={furnished} onChange={(e)=>setFurnished(e.target.checked)} />
               Furnished
             </label>
-            <input type="date" className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
-              value={availableFrom} onChange={(e)=>setAvailableFrom(e.target.value)} />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={utilitiesIncluded} onChange={(e)=>setUtilitiesIncluded(e.target.checked)} />
+              Utilities Included
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={parkingAvailable} onChange={(e)=>setParkingAvailable(e.target.checked)} />
+              Parking Available
+            </label>
+            <div>
+              <label className="block text-xs font-medium mb-1">Available From</label>
+              <input type="date" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+                value={availableFrom} onChange={(e)=>setAvailableFrom(e.target.value)} />
+            </div>
           </div>
         )}
 
         {category === "jobs" && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <input placeholder="Employer (optional)" className="border rounded-md px-3 py-2 col-span-2 bg-background text-foreground"
+          <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/30">
+            <h3 className="text-sm font-semibold mb-2">💼 Job Details</h3>
+            <input placeholder="Employer/Company Name" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
               value={employer} onChange={(e)=>setEmployer(e.target.value)} />
-            <select className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={employment ?? ""} onChange={(e)=>setEmployment((e.target.value || undefined) as any)}>
-              <option value="">Employment type</option>
-              <option value="full">Full-time</option>
-              <option value="part">Part-time</option>
-              <option value="contract">Contract</option>
-              <option value="temp">Temporary</option>
-              <option value="intern">Internship</option>
-            </select>
-            <input placeholder="Pay (e.g., $20/hr)" className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={pay} onChange={(e)=>setPay(e.target.value)} />
-            <label className="col-span-2 flex items-center gap-2 text-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <select className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={employment ?? ""} onChange={(e)=>setEmployment((e.target.value || undefined) as any)}>
+                <option value="">Employment Type *</option>
+                <option value="full">Full-time</option>
+                <option value="part">Part-time</option>
+                <option value="contract">Contract</option>
+                <option value="temp">Temporary</option>
+                <option value="intern">Internship</option>
+              </select>
+              <select className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={experienceLevel ?? ""} onChange={(e)=>setExperienceLevel((e.target.value || undefined) as any)}>
+                <option value="">Experience Level</option>
+                <option value="entry">Entry Level</option>
+                <option value="mid">Mid Level</option>
+                <option value="senior">Senior Level</option>
+              </select>
+              <input placeholder="Pay (e.g., $20/hr)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={pay} onChange={(e)=>setPay(e.target.value)} />
+              <input type="date" placeholder="Start Date" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={startDate} onChange={(e)=>setStartDate(e.target.value)} />
+            </div>
+            <input placeholder="Education Required (e.g., Bachelor's in CS)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+              value={education} onChange={(e)=>setEducation(e.target.value)} />
+            <input placeholder="Benefits (health insurance, 401k, PTO, etc.)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+              value={benefits} onChange={(e)=>setBenefits(e.target.value)} />
+            <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={remoteOk} onChange={(e)=>setRemoteOk(e.target.checked)} />
-              Remote OK
+              Remote Work Available
             </label>
           </div>
         )}
 
         {category === "mentor" && (
-          <div className="grid grid-cols-1 gap-3 mb-4">
+          <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/30">
+            <h3 className="text-sm font-semibold mb-2">👨‍🏫 Mentor Profile</h3>
             <div>
               <label className="block text-sm font-medium mb-1">Display Name *</label>
               <input 
@@ -580,25 +662,34 @@ export default function PostModal({ city, onPosted }: Props) {
             <div>
               <label className="block text-sm font-medium mb-1">Bio *</label>
               <textarea 
-                placeholder="Bio - Tell people about your expertise" 
+                placeholder="Tell people about your expertise and experience" 
                 className={`w-full border rounded-md px-3 py-2 bg-background text-foreground min-h-20 ${errors.bio ? 'border-red-500' : ''}`}
                 value={bio} 
                 onChange={(e)=>{setBio(e.target.value); setErrors({...errors, bio: ""});}}
               />
               {errors.bio && <p className="text-red-500 text-xs mt-1">{errors.bio}</p>}
             </div>
-            <input placeholder="Topics (comma separated: language, career, health)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+            <input placeholder="Topics/Expertise (e.g., Language, Career, Health)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
               value={topics} onChange={(e)=>setTopics(e.target.value)} />
-            <input placeholder="Languages (comma separated: English, Tigrinya, Amharic)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+            <input placeholder="Languages Spoken (e.g., English, Tigrinya, Amharic)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
               value={languages} onChange={(e)=>setLanguages(e.target.value)} />
-            <input type="number" placeholder="Price per session (USD)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+            <div className="grid grid-cols-2 gap-3">
+              <input type="number" min={0} placeholder="Years of Experience" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={yearsExperience ?? ""} onChange={(e)=>setYearsExperience(num(e.target.value))} />
+              <input type="number" min={15} max={180} step={15} placeholder="Session Duration (min)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={sessionDuration} onChange={(e)=>setSessionDuration(parseInt(e.target.value) || 60)} />
+            </div>
+            <input placeholder="Certifications (if any)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+              value={certifications} onChange={(e)=>setCertifications(e.target.value)} />
+            <input type="number" placeholder="Price per session (USD)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
               value={priceCents ? priceCents/100 : ""} onChange={(e)=>setPriceCents(e.target.value ? parseFloat(e.target.value) * 100 : undefined)} />
           </div>
         )}
 
         {category === "marketplace" && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="col-span-2">
+          <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/30">
+            <h3 className="text-sm font-semibold mb-2">🛍️ Item Details</h3>
+            <div>
               <label className="block text-sm font-medium mb-1">Condition *</label>
               <select 
                 className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.condition ? 'border-red-500' : ''}`}
@@ -606,48 +697,65 @@ export default function PostModal({ city, onPosted }: Props) {
                 onChange={(e)=>{setCondition((e.target.value || undefined) as any); setErrors({...errors, condition: ""});}}
               >
                 <option value="">Select condition</option>
-                <option value="new">New</option>
+                <option value="new">Brand New</option>
                 <option value="like-new">Like New</option>
                 <option value="good">Good</option>
                 <option value="fair">Fair</option>
               </select>
               {errors.condition && <p className="text-red-500 text-xs mt-1">{errors.condition}</p>}
             </div>
-            <input placeholder="Brand" className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={brand} onChange={(e)=>setBrand(e.target.value)} />
-            <input placeholder="Model" className="border rounded-md px-3 py-2 bg-background text-foreground"
-              value={model} onChange={(e)=>setModel(e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Brand" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={brand} onChange={(e)=>setBrand(e.target.value)} />
+              <input placeholder="Model" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={model} onChange={(e)=>setModel(e.target.value)} />
+              <input type="date" placeholder="Original Purchase Date" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={purchaseDate} onChange={(e)=>setPurchaseDate(e.target.value)} />
+            </div>
+            <textarea placeholder="Reason for Selling (optional)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground min-h-16"
+              value={reasonForSelling} onChange={(e)=>setReasonForSelling(e.target.value)} />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={warranty} onChange={(e)=>setWarranty(e.target.checked)} />
+              Still Under Warranty
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={shippingAvailable} onChange={(e)=>setShippingAvailable(e.target.checked)} />
+              Shipping Available
+            </label>
           </div>
         )}
 
         {category === "match" && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Age *</label>
-              <input 
-                type="number" 
-                placeholder="Age" 
-                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.age ? 'border-red-500' : ''}`}
-                value={age ?? ""} 
-                onChange={(e)=>{setAge(num(e.target.value)); setErrors({...errors, age: ""});}}
-              />
-              {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
+          <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/30">
+            <h3 className="text-sm font-semibold mb-2">💝 Profile Details</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Age *</label>
+                <input 
+                  type="number" 
+                  placeholder="Age" 
+                  className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.age ? 'border-red-500' : ''}`}
+                  value={age ?? ""} 
+                  onChange={(e)=>{setAge(num(e.target.value)); setErrors({...errors, age: ""});}}
+                />
+                {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">My Gender *</label>
+                <select 
+                  className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.gender ? 'border-red-500' : ''}`}
+                  value={gender ?? ""} 
+                  onChange={(e)=>{setGender((e.target.value || undefined) as any); setErrors({...errors, gender: ""});}}
+                >
+                  <option value="">Select</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+                {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
+              </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">My Gender *</label>
-              <select 
-                className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.gender ? 'border-red-500' : ''}`}
-                value={gender ?? ""} 
-                onChange={(e)=>{setGender((e.target.value || undefined) as any); setErrors({...errors, gender: ""});}}
-              >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-              {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
-            </div>
-            <div className="col-span-2">
               <label className="block text-sm font-medium mb-1">Seeking *</label>
               <select 
                 className={`w-full border rounded-md px-3 py-2 bg-background text-foreground ${errors.seeking ? 'border-red-500' : ''}`}
@@ -657,10 +765,33 @@ export default function PostModal({ city, onPosted }: Props) {
                 <option value="">Select preference</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
-                <option value="other">Any</option>
+                <option value="other">Anyone</option>
               </select>
               {errors.seeking && <p className="text-red-500 text-xs mt-1">{errors.seeking}</p>}
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Relationship Goal</label>
+              <select 
+                className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+                value={relationshipGoal ?? ""} 
+                onChange={(e)=>setRelationshipGoal((e.target.value || undefined) as any)}
+              >
+                <option value="">Select</option>
+                <option value="serious">Serious Relationship</option>
+                <option value="casual">Casual Dating</option>
+                <option value="friendship">Friendship</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Height (e.g., 5'10&quot;)" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={height} onChange={(e)=>setHeight(e.target.value)} />
+              <input placeholder="Education Level" className="border rounded-md px-3 py-2 bg-background text-foreground"
+                value={education_level} onChange={(e)=>setEducationLevel(e.target.value)} />
+            </div>
+            <input placeholder="Occupation" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+              value={occupation} onChange={(e)=>setOccupation(e.target.value)} />
+            <input placeholder="Interests (e.g., hiking, cooking, reading)" className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
+              value={interests} onChange={(e)=>setInterests(e.target.value)} />
           </div>
         )}
 
