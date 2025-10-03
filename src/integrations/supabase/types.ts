@@ -70,6 +70,33 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          board: string
+          city: string
+          content: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          board: string
+          city: string
+          content: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          board?: string
+          city?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -234,6 +261,7 @@ export type Database = {
           description: string
           id: string
           images: string[] | null
+          is_featured: boolean | null
           location_lat: number | null
           location_lng: number | null
           price_cents: number | null
@@ -243,6 +271,7 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          views: number | null
           website_url: string | null
         }
         Insert: {
@@ -255,6 +284,7 @@ export type Database = {
           description: string
           id: string
           images?: string[] | null
+          is_featured?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
           price_cents?: number | null
@@ -264,6 +294,7 @@ export type Database = {
           title: string
           updated_at?: string
           user_id: string
+          views?: number | null
           website_url?: string | null
         }
         Update: {
@@ -276,6 +307,7 @@ export type Database = {
           description?: string
           id?: string
           images?: string[] | null
+          is_featured?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
           price_cents?: number | null
@@ -285,6 +317,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          views?: number | null
           website_url?: string | null
         }
         Relationships: []
@@ -348,12 +381,14 @@ export type Database = {
           city: string
           country: string | null
           created_at: string
+          display_name: string | null
           gender: string | null
           id: string
           interests: string[] | null
           looking_for: string | null
           name: string
           photos: string[] | null
+          seeking: string | null
           updated_at: string
           user_id: string
         }
@@ -364,12 +399,14 @@ export type Database = {
           city: string
           country?: string | null
           created_at?: string
+          display_name?: string | null
           gender?: string | null
           id: string
           interests?: string[] | null
           looking_for?: string | null
           name: string
           photos?: string[] | null
+          seeking?: string | null
           updated_at?: string
           user_id: string
         }
@@ -380,12 +417,14 @@ export type Database = {
           city?: string
           country?: string | null
           created_at?: string
+          display_name?: string | null
           gender?: string | null
           id?: string
           interests?: string[] | null
           looking_for?: string | null
           name?: string
           photos?: string[] | null
+          seeking?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -400,16 +439,21 @@ export type Database = {
           country: string | null
           created_at: string
           currency: string | null
+          display_name: string | null
           expertise: string[] | null
           hourly_rate_cents: number | null
           id: string
           languages: string[] | null
           name: string
+          photos: string[] | null
+          price_cents: number | null
           stripe_account_id: string | null
           timezone: string | null
           title: string
+          topics: string[] | null
           updated_at: string
           user_id: string
+          website_url: string | null
         }
         Insert: {
           available?: boolean | null
@@ -419,16 +463,21 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          display_name?: string | null
           expertise?: string[] | null
           hourly_rate_cents?: number | null
           id: string
           languages?: string[] | null
           name: string
+          photos?: string[] | null
+          price_cents?: number | null
           stripe_account_id?: string | null
           timezone?: string | null
           title: string
+          topics?: string[] | null
           updated_at?: string
           user_id: string
+          website_url?: string | null
         }
         Update: {
           available?: boolean | null
@@ -438,16 +487,21 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          display_name?: string | null
           expertise?: string[] | null
           hourly_rate_cents?: number | null
           id?: string
           languages?: string[] | null
           name?: string
+          photos?: string[] | null
+          price_cents?: number | null
           stripe_account_id?: string | null
           timezone?: string | null
           title?: string
+          topics?: string[] | null
           updated_at?: string
           user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -552,6 +606,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string | null
+          details: string | null
+          id: string
+          listing_id: string
+          reason: string
+          reporter_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          listing_id: string
+          reason: string
+          reporter_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          listing_id?: string
+          reason?: string
+          reporter_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       saved_searches: {
         Row: {
           created_at: string
@@ -584,7 +671,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_listing_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          count: number
+        }[]
+      }
+      increment_views: {
+        Args: { listing_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       contact_method: "phone" | "whatsapp" | "telegram" | "email"
