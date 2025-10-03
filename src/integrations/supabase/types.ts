@@ -781,6 +781,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_match_score: {
+        Args: { profile_user_id: string; viewer_id: string }
+        Returns: {
+          match_percent: number
+          matched_questions: number
+          total_questions: number
+        }[]
+      }
       get_listing_counts: {
         Args: Record<PropertyKey, never>
         Returns: {

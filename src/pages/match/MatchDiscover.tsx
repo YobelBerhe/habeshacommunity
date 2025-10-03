@@ -19,6 +19,7 @@ interface MatchProfile {
   city: string;
   photos: string[];
   interests: string[];
+  match_percent?: number;
 }
 
 export default function MatchDiscover() {
@@ -98,7 +99,24 @@ export default function MatchDiscover() {
       const { data, error } = await query.limit(20);
 
       if (error) throw error;
-      setProfiles(data || []);
+      
+      // Calculate match percentages for each profile
+      const profilesWithScores = await Promise.all(
+        (data || []).map(async (profile) => {
+          const { data: scoreData } = await supabase
+            .rpc('calculate_match_score', {
+              viewer_id: user.id,
+              profile_user_id: profile.user_id,
+            });
+          
+          return {
+            ...profile,
+            match_percent: scoreData?.[0]?.match_percent || 0,
+          };
+        })
+      );
+      
+      setProfiles(profilesWithScores);
     } catch (error) {
       console.error('Error loading profiles:', error);
       toast({
@@ -205,13 +223,22 @@ export default function MatchDiscover() {
           <div className="space-y-4">
             <Card>
               <CardContent className="p-0">
-                {currentProfile.photos[0] && (
-                  <img
-                    src={currentProfile.photos[0]}
-                    alt={currentProfile.name}
-                    className="w-full h-96 object-cover rounded-t-lg"
-                  />
-                )}
+                <div className="relative">
+                  {currentProfile.photos[0] && (
+                    <img
+                      src={currentProfile.photos[0]}
+                      alt={currentProfile.name}
+                      className="w-full h-96 object-cover rounded-t-lg"
+                    />
+                  )}
+                  
+                  {/* Match Percentage Badge */}
+                  {currentProfile.match_percent !== undefined && currentProfile.match_percent > 0 && (
+                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-full font-bold text-lg shadow-lg">
+                      {currentProfile.match_percent}% Match
+                    </div>
+                  )}
+                </div>
                 
                 <div className="p-6 space-y-4">
                   <div>
