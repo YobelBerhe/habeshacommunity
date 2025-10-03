@@ -19,6 +19,12 @@ export default function SearchWithHints({
     setItems(list); setOpen(list.length>0);
   }
 
+  function handleSelect(s:string){
+    onChange(s);
+    setItems([]);
+    setOpen(false);
+  }
+
   return (
     <div ref={ref} className="relative flex-1 min-w-[200px]">
       <input className="field w-full" placeholder="Search listings…" value={value}
@@ -27,7 +33,7 @@ export default function SearchWithHints({
         <div className="absolute left-0 right-0 top-[46px] z-40 bg-background border rounded-xl shadow-xl">
           {items.map((s,i)=>(
             <div key={i} className="px-3 py-2 cursor-pointer hover:bg-muted/50"
-                 onMouseDown={()=>{ onChange(s); setOpen(false); }}>{s}</div>
+                 onMouseDown={()=>handleSelect(s)}>{s}</div>
           ))}
         </div>
       )}
