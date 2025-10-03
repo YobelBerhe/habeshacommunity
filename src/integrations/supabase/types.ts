@@ -659,7 +659,7 @@ export type Database = {
           display_name?: string | null
           expertise?: string[] | null
           hourly_rate_cents?: number | null
-          id: string
+          id?: string
           is_verified?: boolean | null
           languages?: string[] | null
           name: string
