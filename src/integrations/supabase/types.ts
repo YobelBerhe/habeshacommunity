@@ -35,7 +35,7 @@ export type Database = {
           created_at?: string
           currency?: string
           duration_minutes?: number
-          id?: string
+          id: string
           meeting_url?: string | null
           mentor_id: string
           notes?: string | null
@@ -80,7 +80,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: string
+          id: string
           last_message_at?: string | null
           participant1_id: string
           participant2_id: string
@@ -134,7 +134,7 @@ export type Database = {
           author_name?: string | null
           body: string
           created_at?: string
-          id?: string
+          id: string
           topic_id: string
         }
         Update: {
@@ -173,7 +173,7 @@ export type Database = {
           board: Database["public"]["Enums"]["forum_board"]
           city: string
           created_at?: string
-          id?: string
+          id: string
           replies_count?: number | null
           title: string
           updated_at?: string
@@ -203,7 +203,7 @@ export type Database = {
           contact_method?: Database["public"]["Enums"]["contact_method"] | null
           contact_value?: string | null
           created_at?: string
-          id?: string
+          id: string
           listing_id: string
         }
         Update: {
@@ -253,7 +253,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description: string
-          id?: string
+          id: string
           images?: string[] | null
           location_lat?: number | null
           location_lng?: number | null
@@ -314,7 +314,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description: string
-          id?: string
+          id: string
           images?: string[] | null
           price_cents: number
           status?: string | null
@@ -365,7 +365,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           gender?: string | null
-          id?: string
+          id: string
           interests?: string[] | null
           looking_for?: string | null
           name: string
@@ -421,7 +421,7 @@ export type Database = {
           currency?: string | null
           expertise?: string[] | null
           hourly_rate_cents?: number | null
-          id?: string
+          id: string
           languages?: string[] | null
           name: string
           stripe_account_id?: string | null
@@ -464,7 +464,7 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
-          id?: string
+          id: string
           read?: boolean | null
           sender_id: string
         }
@@ -499,7 +499,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: string
+          id: string
           link?: string | null
           message?: string | null
           read?: boolean | null
@@ -563,7 +563,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: string
+          id: string
           last_seen?: string | null
           name?: string | null
           params: Json
@@ -584,38 +584,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      gtrgm_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_options: {
-        Args: { "": unknown }
-        Returns: undefined
-      }
-      gtrgm_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      set_limit: {
-        Args: { "": number }
-        Returns: number
-      }
-      show_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      show_trgm: {
-        Args: { "": string }
-        Returns: string[]
-      }
+      [_ in never]: never
     }
     Enums: {
       contact_method: "phone" | "whatsapp" | "telegram" | "email"
