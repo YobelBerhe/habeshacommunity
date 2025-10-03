@@ -21,6 +21,7 @@ interface ChatMessage {
   content: string;
   user_id: string;
   username?: string;
+  avatar_url?: string | null;
   city: string;
   board: string;
   created_at: string;
@@ -101,19 +102,8 @@ export default function Chat() {
 
       if (data && data.length > 0) {
         console.log('✅ Message sent successfully');
-        const username =
-          user.user_metadata?.display_name ||
-          user.user_metadata?.name ||
-          user.email?.split('@')[0] ||
-          'Member';
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...data[0],
-            username,
-          },
-        ]);
+        // Don't add the message here - let the realtime subscription handle it
+        // to prevent duplicates
         setMessage('');
         setShowEmoji(false);
         toast.success('Message sent!');
@@ -131,7 +121,12 @@ export default function Chat() {
   useEffect(() => {
     const load = async () => {
       try {
-        let query = supabase.from('chat_messages').select('*');
+        let query = supabase
+          .from('chat_messages')
+          .select(`
+            *,
+            profiles(display_name, avatar_url)
+          `);
         if (!isGlobal) query = query.eq('city', selectedCity);
         if (activeBoard !== 'all') query = query.eq('board', activeBoard);
         query = query.order('created_at', { ascending: true });
@@ -139,9 +134,10 @@ export default function Chat() {
         const { data, error } = await query;
         if (error) throw error;
 
-        const withNames = (data || []).map((m) => ({
+        const withNames = (data || []).map((m: any) => ({
           ...m,
-          username: 'Member', // We don’t store usernames in chat_messages; keep it simple for now
+          username: m.profiles?.display_name || 'Member',
+          avatar_url: m.profiles?.avatar_url || null,
         }));
 
         setMessages(withNames);
@@ -161,7 +157,7 @@ export default function Chat() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-        (payload) => {
+        async (payload) => {
           const msg = payload.new as ChatMessage;
 
           // Filter on the client according to current view
@@ -169,10 +165,19 @@ export default function Chat() {
           if (!isGlobal && msg.city !== selectedCity) return;
           if (activeBoard !== 'all' && msg.board !== activeBoard) return;
 
-          setMessages((prev) => [
-            ...prev,
-            { ...msg, username: prev.find((p) => p.user_id === msg.user_id)?.username || 'Member' },
-          ]);
+          // Check if message already exists to prevent duplicates
+          setMessages((prev) => {
+            if (prev.some((p) => p.id === msg.id)) return prev;
+            
+            return [
+              ...prev,
+              { 
+                ...msg, 
+                username: prev.find((p) => p.user_id === msg.user_id)?.username || 'Member',
+                avatar_url: prev.find((p) => p.user_id === msg.user_id)?.avatar_url || null,
+              },
+            ];
+          });
         }
       )
       .subscribe();
@@ -259,34 +264,44 @@ export default function Chat() {
                 <div className="text-sm text-muted-foreground">Be the first to start the conversation!</div>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {messages.map((msg) => {
                   const color = colorForUser(msg.user_id);
                   return (
-                    <div
-                      key={msg.id}
-                      className="bg-card rounded-lg p-3 border"
-                      style={{ borderLeft: `4px solid ${color}` }}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className="inline-flex items-center gap-2 font-medium text-sm"
-                          title={msg.user_id}
-                        >
-                          <span
-                            className="inline-block w-2.5 h-2.5 rounded-full"
-                            style={{ backgroundColor: color }}
+                    <div key={msg.id} className="flex items-start gap-2 py-1">
+                      <div
+                        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
+                        style={{ backgroundColor: color }}
+                      >
+                        {msg.avatar_url ? (
+                          <img
+                            src={msg.avatar_url}
+                            alt={msg.username || 'User'}
+                            className="w-full h-full rounded-full object-cover"
                           />
-                          {msg.username || 'Member'}
-                          <span className="text-xs text-muted-foreground">
-                            • {msg.board}{!isGlobal ? ` • ${msg.city}` : ''}
-                          </span>
-                        </span>
-                        <span className="ml-auto text-xs text-muted-foreground">
-                          {new Date(msg.created_at).toLocaleTimeString()}
-                        </span>
+                        ) : (
+                          (msg.username || 'M')[0].toUpperCase()
+                        )}
                       </div>
-                      <p className="text-sm break-words whitespace-pre-wrap">{msg.content}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <span
+                            className="font-medium text-sm"
+                            style={{ color }}
+                          >
+                            {msg.username || 'Member'}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(msg.created_at).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-sm break-words whitespace-pre-wrap mt-0.5">
+                          {msg.content}
+                        </p>
+                      </div>
                     </div>
                   );
                 })}
