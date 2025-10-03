@@ -18,11 +18,7 @@ export function ConnectStripeButton({ className, cta = "Connect Stripe for Payou
       setIsLoading(true);
       const result = await connectStripeAccount();
       if (result.url) {
-        window.location.href = result.url; // Redirect to Stripe onboarding
-        toast({
-          title: "Redirecting to Stripe",
-          description: "Complete the setup to receive payments.",
-        });
+        window.location.href = result.url;
       }
     } catch (error) {
       console.error('Connect failed:', error);
@@ -47,7 +43,7 @@ export function ConnectStripeButton({ className, cta = "Connect Stripe for Payou
         {isLoading ? 'Connecting…' : cta}
       </Button>
       <p className="mt-2 text-xs text-muted-foreground">
-        You'll be redirected to Stripe to finish a quick, secure payout setup. You can return here when done.
+        You'll connect your own Stripe Standard account. The platform takes 15% commission; you receive 85% directly to your bank.
       </p>
     </div>
   );

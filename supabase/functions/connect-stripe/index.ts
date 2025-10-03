@@ -1,8 +1,5 @@
-// Deno Deploy / Supabase Edge
-// File: supabase/functions/connect-stripe/index.ts
-
-import Stripe from "https://esm.sh/stripe@16.6.0?target=deno";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 // ---- Env (make sure these are set in Supabase → Project Settings → Secrets)
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
@@ -13,7 +10,7 @@ if (!STRIPE_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error("Missing required env secrets.");
 }
 
-const stripe = new Stripe(STRIPE_SECRET_KEY!, { apiVersion: "2024-12-18.acacia" });
+const stripe = new Stripe(STRIPE_SECRET_KEY!, { apiVersion: "2025-08-27.basil" });
 
 // CORS helper
 function corsHeaders(origin: string | null) {
@@ -58,37 +55,49 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch existing stripe_account_id if any
-    const { data: row, error: selErr } = await supabase
-      .from("users")
-      .select("stripe_account_id, email, name")
-      .eq("id", user.id)
+    // Fetch mentor profile
+    const { data: mentor, error: selErr } = await supabase
+      .from("mentors")
+      .select("stripe_account_id, user_id")
+      .eq("user_id", user.id)
       .maybeSingle();
 
     if (selErr) {
       console.error(selErr);
-      return new Response(JSON.stringify({ error: "Failed to fetch user row." }), {
+      return new Response(JSON.stringify({ error: "Failed to fetch mentor profile." }), {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders(origin) },
       });
     }
 
-    let stripeAccountId = row?.stripe_account_id as string | null;
+    if (!mentor) {
+      return new Response(JSON.stringify({ error: "No mentor profile found. Please create a mentor profile first." }), {
+        status: 404,
+        headers: { "Content-Type": "application/json", ...corsHeaders(origin) },
+      });
+    }
 
-    // Create Stripe account if missing
+    let stripeAccountId = mentor.stripe_account_id as string | null;
+
+    // Create Stripe Connect Standard account if missing
     if (!stripeAccountId) {
       const acct = await stripe.accounts.create({
-        type: "express",
-        email: row?.email || user.email || undefined,
+        type: "standard",
+        country: "US",
+        email: user.email || undefined,
         business_type: "individual",
-        capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
+        capabilities: { transfers: { requested: true } },
       });
       stripeAccountId = acct.id;
 
       const { error: updErr } = await supabase
-        .from("users")
-        .update({ stripe_account_id: stripeAccountId })
-        .eq("id", user.id);
+        .from("mentors")
+        .update({ 
+          stripe_account_id: stripeAccountId,
+          onboarding_required: true,
+          payouts_enabled: false
+        })
+        .eq("user_id", user.id);
       if (updErr) {
         console.error(updErr);
         return new Response(JSON.stringify({ error: "Failed to save Stripe account ID." }), {
@@ -104,11 +113,23 @@ Deno.serve(async (req) => {
     const returnUrl = `${appOrigin}/mentor/payouts?onboarding=done`;
     const refreshUrl = `${appOrigin}/mentor/payouts?onboarding=retry=1`;
 
-    // If account still needs onboarding, create an onboarding link; otherwise create a dashboard link
+    // Check account status and update database
     const acct = await stripe.accounts.retrieve(stripeAccountId);
+    const payoutsEnabled = acct.charges_enabled && acct.payouts_enabled;
+    const onboardingRequired = !acct.details_submitted || acct.requirements?.currently_due?.length > 0;
+
+    // Update mentor record with current status
+    await supabase
+      .from("mentors")
+      .update({ 
+        payouts_enabled: payoutsEnabled,
+        onboarding_required: onboardingRequired
+      })
+      .eq("user_id", user.id);
+
     let url: string;
 
-    if (!acct.details_submitted) {
+    if (onboardingRequired) {
       const link = await stripe.accountLinks.create({
         account: stripeAccountId,
         type: "account_onboarding",
@@ -117,7 +138,7 @@ Deno.serve(async (req) => {
       });
       url = link.url;
     } else {
-      // Already completed onboarding — send them to Express dashboard
+      // Already completed onboarding — send to Express dashboard
       const loginLink = await stripe.accounts.createLoginLink(stripeAccountId);
       url = loginLink.url;
     }

@@ -510,44 +510,56 @@ export type Database = {
       }
       mentor_bookings: {
         Row: {
+          application_fee_cents: number | null
+          charge_id: string | null
           created_at: string
           id: string
           join_expires_at: string | null
           join_url: string | null
           mentor_id: string
           message: string | null
+          net_to_mentor_cents: number | null
           notes: string | null
           payment_status: string | null
           status: string
           stripe_session_id: string | null
+          transfer_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          application_fee_cents?: number | null
+          charge_id?: string | null
           created_at?: string
           id?: string
           join_expires_at?: string | null
           join_url?: string | null
           mentor_id: string
           message?: string | null
+          net_to_mentor_cents?: number | null
           notes?: string | null
           payment_status?: string | null
           status?: string
           stripe_session_id?: string | null
+          transfer_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          application_fee_cents?: number | null
+          charge_id?: string | null
           created_at?: string
           id?: string
           join_expires_at?: string | null
           join_url?: string | null
           mentor_id?: string
           message?: string | null
+          net_to_mentor_cents?: number | null
           notes?: string | null
           payment_status?: string | null
           status?: string
           stripe_session_id?: string | null
+          transfer_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -576,6 +588,8 @@ export type Database = {
           id: string
           languages: string[] | null
           name: string
+          onboarding_required: boolean | null
+          payouts_enabled: boolean | null
           photos: string[] | null
           price_cents: number | null
           stripe_account_id: string | null
@@ -600,6 +614,8 @@ export type Database = {
           id: string
           languages?: string[] | null
           name: string
+          onboarding_required?: boolean | null
+          payouts_enabled?: boolean | null
           photos?: string[] | null
           price_cents?: number | null
           stripe_account_id?: string | null
@@ -624,6 +640,8 @@ export type Database = {
           id?: string
           languages?: string[] | null
           name?: string
+          onboarding_required?: boolean | null
+          payouts_enabled?: boolean | null
           photos?: string[] | null
           price_cents?: number | null
           stripe_account_id?: string | null

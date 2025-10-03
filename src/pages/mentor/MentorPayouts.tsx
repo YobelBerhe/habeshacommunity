@@ -29,14 +29,13 @@ export default function MentorPayouts() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Direct query since types may not be updated yet
         const { data } = await supabase
           .from('mentors')
-          .select('stripe_account_id')
+          .select('stripe_account_id, payouts_enabled, onboarding_required')
           .eq('user_id', user.id)
           .maybeSingle();
         
-        setConnected(!!(data as any)?.stripe_account_id);
+        setConnected(!!(data as any)?.stripe_account_id && (data as any)?.payouts_enabled);
       }
     } catch (error) {
       console.error('Error checking connection:', error);

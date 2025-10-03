@@ -32,7 +32,7 @@ serve(async (req: Request) => {
     const { mentorId } = await req.json();
     if (!mentorId) throw new Error("Mentor ID required");
 
-    // Get mentor details
+    // Get mentor details including Stripe account
     const { data: mentor, error: mentorError } = await supabase
       .from('mentors')
       .select('*')
@@ -41,15 +41,12 @@ serve(async (req: Request) => {
 
     if (mentorError || !mentor) throw new Error('Mentor not found');
 
-    // Get mentor's Stripe account
-    const { data: mentorUser, error: mentorUserError } = await supabase
-      .from('users')
-      .select('stripe_account_id')
-      .eq('id', mentor.user_id)
-      .single();
+    if (!mentor.stripe_account_id) {
+      throw new Error('Mentor has not connected their payout account yet.');
+    }
 
-    if (mentorUserError || !mentorUser?.stripe_account_id) {
-      throw new Error('Mentor needs to set up payouts first. Please contact support or try connecting your Stripe account.');
+    if (!mentor.payouts_enabled) {
+      throw new Error('Mentor is still completing payout setup. Please try again later.');
     }
 
     // Create booking
@@ -57,7 +54,7 @@ serve(async (req: Request) => {
       .from('mentor_bookings')
       .insert({
         mentor_id: mentorId,
-        mentee_id: user.id,
+        user_id: user.id,
         status: 'pending',
         payment_status: 'pending',
       })
@@ -102,7 +99,7 @@ serve(async (req: Request) => {
       payment_intent_data: {
         application_fee_amount: feeAmount,
         transfer_data: { 
-          destination: mentorUser.stripe_account_id 
+          destination: mentor.stripe_account_id 
         },
       },
     });

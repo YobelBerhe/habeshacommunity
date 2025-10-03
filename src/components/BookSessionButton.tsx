@@ -21,9 +21,10 @@ export function BookSessionButton({ mentorId, disabled }: BookSessionButtonProps
       }
     } catch (error) {
       console.error('Booking failed:', error);
+      const errorMsg = error instanceof Error ? error.message : "Please try again";
       toast({
         title: "Booking failed",
-        description: error instanceof Error ? error.message : "Please try again",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {

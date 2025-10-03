@@ -17,7 +17,7 @@ serve(async (req: Request) => {
 
   try {
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2024-06-20",
+      apiVersion: "2025-08-27.basil",
     });
 
     const body = await req.text();
@@ -28,6 +28,29 @@ serve(async (req: Request) => {
     );
 
     console.log('Webhook event type:', event.type);
+
+    // Handle Stripe Connect account updates
+    if (event.type === 'account.updated') {
+      const account = event.data.object as Stripe.Account;
+      
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+
+      const payoutsEnabled = account.charges_enabled && account.payouts_enabled;
+      const onboardingRequired = !account.details_submitted || (account.requirements?.currently_due?.length ?? 0) > 0;
+
+      await supabase
+        .from('mentors')
+        .update({
+          payouts_enabled: payoutsEnabled,
+          onboarding_required: onboardingRequired
+        })
+        .eq('stripe_account_id', account.id);
+
+      console.log('Updated mentor account status:', account.id);
+    }
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
@@ -61,7 +84,11 @@ serve(async (req: Request) => {
             bookingId
           );
 
-          // Update booking status
+          // Get payment intent details for fee tracking
+          const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent as string);
+          const charge = paymentIntent.charges?.data[0];
+
+          // Update booking status with fee details
           await supabase
             .from('mentor_bookings')
             .update({
@@ -69,10 +96,14 @@ serve(async (req: Request) => {
               payment_status: 'paid',
               join_url: joinUrl,
               join_expires_at: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+              charge_id: charge?.id,
+              transfer_id: charge?.transfer as string,
+              application_fee_cents: paymentIntent.application_fee_amount,
+              net_to_mentor_cents: paymentIntent.amount - (paymentIntent.application_fee_amount ?? 0),
             })
             .eq('id', bookingId);
 
-          console.log('Booking confirmed:', bookingId);
+          console.log('Booking confirmed with fee tracking:', bookingId);
         }
       }
     }
