@@ -48,7 +48,7 @@ export default function MarketplaceDetail() {
         .from('listings')
         .select('*')
         .eq('id', id)
-        .eq('category', 'marketplace')
+        .eq('category', 'forsale' as any)
         .single();
 
       if (error) throw error;

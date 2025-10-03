@@ -6,13 +6,10 @@ export async function trackListingView(listingId: string): Promise<void> {
   const { data } = await supabase.auth.getUser();
   if (!data.user) return; // Only track for authenticated users
   
-  const { error } = await supabase.rpc('track_listing_view', { 
-    p_listing_id: listingId 
-  });
-  
-  if (error) {
-    console.warn('Failed to track listing view:', error);
-  }
+  // RPC function not yet implemented
+  // const { error } = await supabase.rpc('track_listing_view', { 
+  //   p_listing_id: listingId 
+  // });
 }
 
 export async function createListingContact(contact: {
@@ -22,7 +19,7 @@ export async function createListingContact(contact: {
 }): Promise<ListingContactRow> {
   const { data, error } = await supabase
     .from('listing_contacts')
-    .insert([contact])
+    .insert([contact as any])
     .select()
     .single();
 

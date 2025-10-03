@@ -57,10 +57,10 @@ export default function AccountSettings() {
 
       if (error) throw error;
       
-      // Update presence with new city
-      if (city.trim()) {
-        await supabase.rpc('touch_presence', { p_city: city.trim() });
-      }
+      // Update presence with new city (commented out - RPC function not implemented)
+      // if (city.trim()) {
+      //   await supabase.rpc('touch_presence', { p_city: city.trim() });
+      // }
       
       toast.success('Profile updated successfully');
     } catch (error) {

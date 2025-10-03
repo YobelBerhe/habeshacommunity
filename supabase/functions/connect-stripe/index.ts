@@ -128,7 +128,8 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("connect-stripe error:", e);
-    return new Response(JSON.stringify({ error: String(e?.message ?? e) }), {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 400,
       headers: { "Content-Type": "application/json", ...corsHeaders(req.headers.get("Origin")) },
     });

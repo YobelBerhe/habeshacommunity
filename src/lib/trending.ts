@@ -48,7 +48,7 @@ export async function getTrendingListings(opts: GetTrendingOpts = {}): Promise<L
     .eq('status', 'active');
 
   if (category) {
-    query = query.eq('category', category);
+    query = query.eq('category', category as any);
   }
   
   if (featuredOnly) {

@@ -56,7 +56,7 @@ export default function Marketplace() {
       const { data, error } = await supabase
         .from('listings')
         .select('*')
-        .eq('category', 'marketplace')
+        .eq('category', 'forsale' as any)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 

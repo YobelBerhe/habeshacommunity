@@ -153,10 +153,10 @@ serve(async (req: Request) => {
 
       // Load booking with mentor info
       const { data: booking, error: bookingError } = await supabase
-        .from('mentor_bookings')
+        .from('bookings')
         .select(`
           id, mentor_id, mentee_id, status,
-          mentors!inner(user_id)
+          mentors:mentor_id(user_id)
         `)
         .eq('id', bookingId)
         .single();
@@ -168,7 +168,8 @@ serve(async (req: Request) => {
         );
       }
 
-      const isMentor = booking.mentors?.user_id === user.id;
+      const mentorData = (booking.mentors as unknown) as { user_id: string } | null;
+      const isMentor = mentorData?.user_id === user.id;
       const isMentee = booking.mentee_id === user.id;
 
       // Determine next status based on action and permissions
@@ -206,7 +207,7 @@ serve(async (req: Request) => {
       }
 
       // Create notifications for status updates
-      const targetUserId = isMentor ? booking.mentee_id : booking.mentors.user_id;
+      const targetUserId = isMentor ? booking.mentee_id : mentorData?.user_id;
       const statusMessages: Record<string, { title: string; body: string; link: string }> = {
         accepted: { title: 'Request accepted', body: 'Your mentor accepted your session request.', link: '/inbox' },
         declined: { title: 'Request declined', body: 'Your mentor declined the request.', link: '/mentor' },

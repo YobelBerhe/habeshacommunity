@@ -144,10 +144,10 @@ export default function ListingDetail() {
         // Track view for trending algorithm
         await bumpListingView(id);
         
-        // Track view for user analytics
-        if (user) {
-          await supabase.rpc('track_listing_view', { p_listing_id: id });
-        }
+        // Track view for user analytics (commented out - RPC function not implemented)
+        // if (user) {
+        //   await supabase.rpc('track_listing_view', { p_listing_id: id });
+        // }
 
         // Load similar listings
         await loadSimilarListings(listingData);
@@ -188,7 +188,7 @@ export default function ListingDetail() {
         .select('id, title, price_cents, images, city')
         .eq('status', 'active')
         .eq('city', currentListing.city)
-        .eq('category', currentListing.category)
+        .eq('category', currentListing.category as any)
         .neq('id', currentListing.id)
         .limit(6);
 
