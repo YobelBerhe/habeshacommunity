@@ -66,6 +66,23 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [demo, setDemo] = useState(false);
+  
+  // Track theme mode from the <html> class and pass to map hero
+  const [themeMode, setThemeMode] = useState<'dark' | 'light'>(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    const el = document.documentElement;
+    const update = () => setThemeMode(el.classList.contains('dark') ? 'dark' : 'light');
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
     const initialAppState = getAppState();
@@ -507,7 +524,7 @@ export default function Index() {
       {/* Hero section - moved up directly after header */}
       <div className="relative">
         <WorldActivityHero
-          mode="dark"
+          mode={themeMode}
           SearchBar={() => <CitySearchBar 
             placeholder="City (e.g. Asmara, Oakland, Frankfurt)" 
           />}
