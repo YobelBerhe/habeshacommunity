@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useTheme } from 'next-themes';
 import L from 'leaflet';
 import StarFieldLayer from '@/components/StarFieldLayer';
 import { getStarPoints } from '@/services/activeUsers';
@@ -17,20 +16,19 @@ export default function WorldMapHero({
   onBrowseHousing,
   onFindJobs 
 }: Props) {
-  const { theme } = useTheme();
   const mapRef = useRef<L.Map | null>(null);
-  const lightTileLayerRef = useRef<L.TileLayer | null>(null);
-  const darkTileLayerRef = useRef<L.TileLayer | null>(null);
   const [points, setPoints] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [demo, setDemo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize map once
   useEffect(() => {
     let mounted = true;
     let handleResize: (() => void) | null = null;
+    let lightTileLayer: L.TileLayer | null = null;
+    let darkTileLayer: L.TileLayer | null = null;
 
+    // init map once
     if (!mapRef.current) {
       const map = L.map("worldmap", {
         center: [15, 30],
@@ -42,20 +40,20 @@ export default function WorldMapHero({
       mapRef.current = map;
 
       // Create both tile layers
-      lightTileLayerRef.current = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      lightTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '© OpenStreetMap',
       });
       
-      darkTileLayerRef.current = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      darkTileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
         attribution: '© OpenStreetMap, © Carto',
       });
 
       // Add the appropriate layer based on current theme
-      const isDark = theme === 'dark';
+      const isDark = document.documentElement.classList.contains("dark");
       if (isDark) {
-        darkTileLayerRef.current.addTo(map);
+        darkTileLayer.addTo(map);
       } else {
-        lightTileLayerRef.current.addTo(map);
+        lightTileLayer.addTo(map);
       }
 
       // Fit the whole world in view
@@ -65,6 +63,38 @@ export default function WorldMapHero({
       // Handle resize to maintain world view
       handleResize = () => map.invalidateSize();
       window.addEventListener("resize", handleResize);
+
+      // Listen for theme changes
+      const observer = new MutationObserver(() => {
+        if (!mapRef.current || !lightTileLayer || !darkTileLayer) return;
+        
+        const isNowDark = document.documentElement.classList.contains("dark");
+        
+        // Remove current layer and add new one
+        if (isNowDark) {
+          if (mapRef.current.hasLayer(lightTileLayer)) {
+            mapRef.current.removeLayer(lightTileLayer);
+          }
+          if (!mapRef.current.hasLayer(darkTileLayer)) {
+            darkTileLayer.addTo(mapRef.current);
+          }
+        } else {
+          if (mapRef.current.hasLayer(darkTileLayer)) {
+            mapRef.current.removeLayer(darkTileLayer);
+          }
+          if (!mapRef.current.hasLayer(lightTileLayer)) {
+            lightTileLayer.addTo(mapRef.current);
+          }
+        }
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+
+      // Store observer for cleanup
+      (map as any)._themeObserver = observer;
     }
 
     // load points
@@ -92,38 +122,16 @@ export default function WorldMapHero({
         window.removeEventListener("resize", handleResize);
       }
       if (mapRef.current) {
+        // Cleanup theme observer
+        const observer = (mapRef.current as any)._themeObserver;
+        if (observer) {
+          observer.disconnect();
+        }
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
   }, []);
-
-  // Handle theme changes
-  useEffect(() => {
-    const map = mapRef.current;
-    const lightTileLayer = lightTileLayerRef.current;
-    const darkTileLayer = darkTileLayerRef.current;
-    
-    if (!map || !lightTileLayer || !darkTileLayer) return;
-
-    const isDark = theme === 'dark';
-    
-    if (isDark) {
-      if (map.hasLayer(lightTileLayer)) {
-        map.removeLayer(lightTileLayer);
-      }
-      if (!map.hasLayer(darkTileLayer)) {
-        darkTileLayer.addTo(map);
-      }
-    } else {
-      if (map.hasLayer(darkTileLayer)) {
-        map.removeLayer(darkTileLayer);
-      }
-      if (!map.hasLayer(lightTileLayer)) {
-        lightTileLayer.addTo(map);
-      }
-    }
-  }, [theme]);
 
   // Zoom to city helper (can be called from CitySearch)
   (window as any).zoomToCity = (lat: number, lon: number) => {
