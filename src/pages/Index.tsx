@@ -28,6 +28,7 @@ import DonationButton from "@/components/DonationButton";
 import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
+import AiAssistant from "@/components/AiAssistant";
 import { getStarPoints } from "@/services/activeUsers";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
@@ -655,6 +656,8 @@ export default function Index() {
           }
         }}
       />
+
+      <AiAssistant />
     </div>
   );
 }
