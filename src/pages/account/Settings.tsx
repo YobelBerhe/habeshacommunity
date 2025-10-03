@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react';
-import { Settings, User, Save } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Settings, User, Save, Camera, X } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import MobileHeader from '@/components/layout/MobileHeader';
 import { toast } from 'sonner';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import imageCompression from 'browser-image-compression';
 
 export default function AccountSettings() {
   const [displayName, setDisplayName] = useState('');
   const [city, setCity] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -30,6 +35,7 @@ export default function AccountSettings() {
         if (data) {
           setDisplayName(data.display_name || '');
           setCity(data.city || '');
+          setAvatarUrl(data.avatar_url || '');
         }
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -40,6 +46,79 @@ export default function AccountSettings() {
 
     loadProfile();
   }, [user]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    setUploading(true);
+    
+    try {
+      // Compress image
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 400,
+        useWebWorker: true
+      });
+      
+      // Upload to storage
+      const fileExt = compressed.type.split('/')[1] || 'jpg';
+      const filePath = `${user.id}/avatar.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, compressed, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          avatar_url: data.publicUrl,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (updateError) throw updateError;
+      
+      setAvatarUrl(data.publicUrl);
+      toast.success('Profile photo updated');
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (!user) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          avatar_url: null,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (error) throw error;
+      
+      setAvatarUrl('');
+      toast.success('Profile photo removed');
+    } catch (error) {
+      console.error('Error removing photo:', error);
+      toast.error('Failed to remove photo');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -56,11 +135,6 @@ export default function AccountSettings() {
         });
 
       if (error) throw error;
-      
-      // Update presence with new city (commented out - RPC function not implemented)
-      // if (city.trim()) {
-      //   await supabase.rpc('touch_presence', { p_city: city.trim() });
-      // }
       
       toast.success('Profile updated successfully');
     } catch (error) {
@@ -100,6 +174,47 @@ export default function AccountSettings() {
             </h2>
             
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Profile Photo</label>
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-20 h-20">
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                      {user?.email?.charAt(0).toUpperCase() || 'A'}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex flex-col gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="btn-secondary flex items-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" />
+                      {uploading ? 'Uploading...' : 'Upload Photo'}
+                    </button>
+                    {avatarUrl && (
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        disabled={saving}
+                        className="btn-secondary flex items-center gap-2 text-destructive hover:text-destructive"
+                      >
+                        <X className="w-4 h-4" />
+                        Remove Photo
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <input 

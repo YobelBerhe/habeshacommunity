@@ -1,14 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, User } from 'lucide-react';
 import { DrawerMenu } from '@/components/nav/DrawerMenu';
 import { AccountSheet } from '@/components/nav/AccountSheet';
 import { useAuth } from '@/store/auth';
 import NotifyBell from '@/components/NotifyBell';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function MobileHeader() {
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.avatar_url) {
+        setAvatarUrl(data.avatar_url);
+      }
+    };
+    
+    loadProfile();
+  }, [user]);
 
   const getUserInitial = () => {
     if (!user?.email) return 'A';
@@ -41,11 +62,13 @@ export default function MobileHeader() {
         <div className="flex items-center gap-2">
           <NotifyBell />
           <AccountSheet>
-            <button
-              aria-label="Account"
-              className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center font-bold text-sm"
-            >
-              {user ? getUserInitial() : <User className="w-4 h-4" />}
+            <button aria-label="Account">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={avatarUrl || undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground font-bold text-sm">
+                  {user ? getUserInitial() : <User className="w-4 h-4" />}
+                </AvatarFallback>
+              </Avatar>
             </button>
           </AccountSheet>
         </div>
