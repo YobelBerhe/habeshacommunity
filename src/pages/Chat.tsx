@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Send, Smile } from 'lucide-react';
+import { ArrowLeft, Send, Smile, Mic, Image as ImageIcon, Camera } from 'lucide-react';
 import CitySearchBar from '@/components/CitySearchBar';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { uploadListingImages } from '@/utils/upload';
 
 // Boards, including an "All" view that aggregates every board
 const CHAT_BOARDS = [
@@ -25,6 +26,8 @@ interface ChatMessage {
   city: string;
   board: string;
   created_at: string;
+  message_type?: 'text' | 'voice' | 'image';
+  media_url?: string | null;
 }
 
 // Deterministic user color generator (stable across sessions)
@@ -43,8 +46,13 @@ export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const { user, openAuth } = useAuth();
   const listRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const isGlobal = useMemo(() => !selectedCity, [selectedCity]);
 
@@ -52,10 +60,10 @@ export default function Chat() {
     setSelectedCity(city);
   };
 
-  const handleSend = async () => {
-    console.log('🔵 Send button clicked', { message, user: !!user, selectedCity, activeBoard });
+  const handleSend = async (messageType: 'text' | 'voice' | 'image' = 'text', mediaUrl?: string) => {
+    console.log('🔵 Send button clicked', { message, messageType, mediaUrl, user: !!user, selectedCity, activeBoard });
     
-    if (!message.trim()) {
+    if (messageType === 'text' && !message.trim()) {
       console.log('❌ Empty message, returning');
       toast.error('Please type a message');
       return;
@@ -78,11 +86,13 @@ export default function Chat() {
     setLoading(true);
     
     try {
-      const insertData = {
-        content: message.trim(),
+      const insertData: any = {
+        content: messageType === 'text' ? message.trim() : (messageType === 'voice' ? 'Voice message' : 'Photo'),
         user_id: user.id,
         city: selectedCity,
         board: activeBoard === 'all' ? 'general' : activeBoard,
+        message_type: messageType,
+        media_url: mediaUrl || null,
       };
 
       console.log('📤 Inserting message:', insertData);
@@ -102,8 +112,6 @@ export default function Chat() {
 
       if (data && data.length > 0) {
         console.log('✅ Message sent successfully');
-        // Don't add the message here - let the realtime subscription handle it
-        // to prevent duplicates
         setMessage('');
         setShowEmoji(false);
         toast.success('Message sent!');
@@ -117,30 +125,124 @@ export default function Chat() {
     }
   };
 
+  const startRecording = async () => {
+    if (!user) {
+      toast.error('Please sign in to send voice messages');
+      openAuth();
+      return;
+    }
+
+    if (!selectedCity) {
+      toast.error('Please select a city to post');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      
+      audioChunksRef.current = [];
+      
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], `voice_${Date.now()}.webm`, { type: 'audio/webm' });
+        
+        toast.info('Uploading voice message...');
+        const urls = await uploadListingImages([audioFile], user!.id, 'chat-media');
+        
+        if (urls.length > 0) {
+          await handleSend('voice', urls[0]);
+        }
+        
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      toast.success('Recording started');
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast.error('Could not access microphone');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setMediaRecorder(null);
+    }
+  };
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) {
+      toast.error('Please sign in to send photos');
+      openAuth();
+      return;
+    }
+
+    if (!selectedCity) {
+      toast.error('Please select a city to post');
+      return;
+    }
+
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      toast.info('Uploading photo...');
+      const urls = await uploadListingImages(Array.from(files), user.id, 'chat-media');
+      
+      if (urls.length > 0) {
+        await handleSend('image', urls[0]);
+      }
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast.error('Failed to upload photo');
+    }
+  };
+
   // Load messages whenever filters change (supports global and per-city views)
   useEffect(() => {
     const load = async () => {
       try {
         let query = supabase
           .from('chat_messages')
-          .select(`
-            *,
-            profiles(display_name, avatar_url)
-          `);
+          .select('*');
         if (!isGlobal) query = query.eq('city', selectedCity);
         if (activeBoard !== 'all') query = query.eq('board', activeBoard);
         query = query.order('created_at', { ascending: true });
 
-        const { data, error } = await query;
+        const { data: messages, error } = await query;
         if (error) throw error;
 
-        const withNames = (data || []).map((m: any) => ({
-          ...m,
-          username: m.profiles?.display_name || 'Member',
-          avatar_url: m.profiles?.avatar_url || null,
-        }));
+        // Fetch profiles separately
+        if (messages && messages.length > 0) {
+          const userIds = [...new Set(messages.map(m => m.user_id))];
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, display_name, avatar_url')
+            .in('id', userIds);
 
-        setMessages(withNames);
+          const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+          const withNames = messages.map((m: any) => ({
+            ...m,
+            username: profileMap.get(m.user_id)?.display_name || 'Member',
+            avatar_url: profileMap.get(m.user_id)?.avatar_url || null,
+          }));
+
+          setMessages(withNames);
+        } else {
+          setMessages([]);
+        }
       } catch (e) {
         console.error('Error loading messages:', e);
         setMessages([]);
@@ -165,6 +267,13 @@ export default function Chat() {
           if (!isGlobal && msg.city !== selectedCity) return;
           if (activeBoard !== 'all' && msg.board !== activeBoard) return;
 
+          // Fetch user profile for the new message
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, avatar_url')
+            .eq('id', msg.user_id)
+            .single();
+
           // Check if message already exists to prevent duplicates
           setMessages((prev) => {
             if (prev.some((p) => p.id === msg.id)) return prev;
@@ -173,8 +282,8 @@ export default function Chat() {
               ...prev,
               { 
                 ...msg, 
-                username: prev.find((p) => p.user_id === msg.user_id)?.username || 'Member',
-                avatar_url: prev.find((p) => p.user_id === msg.user_id)?.avatar_url || null,
+                username: profile?.display_name || 'Member',
+                avatar_url: profile?.avatar_url || null,
               },
             ];
           });
@@ -298,9 +407,22 @@ export default function Chat() {
                             })}
                           </span>
                         </div>
-                        <p className="text-sm break-words whitespace-pre-wrap mt-0.5">
-                          {msg.content}
-                        </p>
+                        {msg.message_type === 'image' && msg.media_url ? (
+                          <img 
+                            src={msg.media_url} 
+                            alt="Shared photo" 
+                            className="max-w-xs rounded-lg mt-1"
+                          />
+                        ) : msg.message_type === 'voice' && msg.media_url ? (
+                          <audio controls className="mt-1">
+                            <source src={msg.media_url} type="audio/webm" />
+                            Your browser does not support audio playback.
+                          </audio>
+                        ) : (
+                          <p className="text-sm break-words whitespace-pre-wrap mt-0.5">
+                            {msg.content}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
@@ -310,64 +432,116 @@ export default function Chat() {
           </div>
 
           {/* Composer */}
-          <div className="force-input-light border-t p-4">
+          <div className="force-input-light border-t p-4 bg-background">
             <div className="relative flex items-center gap-2">
+              {/* Voice recording button */}
               <button
                 type="button"
-                onClick={() => setShowEmoji((v) => !v)}
-                className="p-2 rounded-md hover:bg-muted text-muted-foreground"
-                aria-label="Toggle emoji picker"
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`p-3 rounded-full transition-colors flex-shrink-0 ${
+                  isRecording 
+                    ? 'bg-red-500 text-white animate-pulse' 
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                }`}
+                aria-label={isRecording ? 'Stop recording' : 'Start voice recording'}
+                disabled={loading || isGlobal}
               >
-                <Smile className="w-5 h-5" />
+                <Mic className="w-5 h-5" />
+              </button>
+
+              {/* Text input area */}
+              <div className="flex-1 relative flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setShowEmoji((v) => !v)}
+                  className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
+                  aria-label="Toggle emoji picker"
+                >
+                  <Smile className="w-5 h-5" />
+                </button>
+
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  placeholder={isGlobal ? 'Select a city to post' : 'Type your message...'}
+                  className="flex-1 px-3 py-2 border rounded-lg bg-white text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-primary"
+                  disabled={loading || isGlobal || isRecording}
+                />
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSend();
+                  }}
+                  disabled={loading || !message.trim() || isGlobal || isRecording}
+                  className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
+                  title={isGlobal ? 'Select a city to send messages' : loading ? 'Sending...' : 'Send message'}
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+
+                {showEmoji && (
+                  <div className="absolute bottom-14 left-0 z-20 p-2 rounded-md border bg-popover text-popover-foreground shadow-md w-[280px]">
+                    <div className="grid grid-cols-8 gap-1 text-lg">
+                      {commonEmojis.map((e) => (
+                        <button
+                          key={e}
+                          type="button"
+                          className="hover:bg-muted rounded"
+                          onClick={() => setMessage((m) => m + e)}
+                          aria-label={`Insert ${e}`}
+                        >
+                          {e}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Photo upload and camera buttons */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
+                aria-label="Upload photo"
+                disabled={loading || isGlobal || isRecording}
+              >
+                <ImageIcon className="w-5 h-5" />
               </button>
 
               <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                placeholder={isGlobal ? 'Select a city to post • You can still read the global feed' : 'Type your message...'}
-                className="flex-1 px-3 py-2 border rounded-lg bg-white text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-primary"
-                disabled={loading || isGlobal}
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handlePhotoUpload}
+                className="hidden"
               />
-
               <button
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log('🖱️ Button clicked directly');
-                  handleSend();
-                }}
-                disabled={loading || !message.trim() || isGlobal}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
-                title={isGlobal ? 'Select a city to send messages' : loading ? 'Sending...' : 'Send message'}
+                onClick={() => cameraInputRef.current?.click()}
+                className="p-2 rounded-md hover:bg-muted text-muted-foreground flex-shrink-0"
+                aria-label="Take photo"
+                disabled={loading || isGlobal || isRecording}
               >
-                <Send className="w-4 h-4" />
-                {loading ? 'Sending...' : 'Send'}
+                <Camera className="w-5 h-5" />
               </button>
-
-              {showEmoji && (
-                <div className="absolute bottom-14 left-0 z-20 p-2 rounded-md border bg-popover text-popover-foreground shadow-md w-[280px]">
-                  <div className="grid grid-cols-8 gap-1 text-lg">
-                    {commonEmojis.map((e) => (
-                      <button
-                        key={e}
-                        type="button"
-                        className="hover:bg-muted rounded"
-                        onClick={() => setMessage((m) => m + e)}
-                        aria-label={`Insert ${e}`}
-                      >
-                        {e}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
