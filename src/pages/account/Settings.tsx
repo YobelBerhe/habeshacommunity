@@ -6,6 +6,7 @@ import MobileHeader from '@/components/layout/MobileHeader';
 import { toast } from 'sonner';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import imageCompression from 'browser-image-compression';
+import { ImageCropper } from '@/components/ImageCropper';
 
 export default function AccountSettings() {
   const [displayName, setDisplayName] = useState('');
@@ -14,6 +15,7 @@ export default function AccountSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [cropperImage, setCropperImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
 
@@ -47,33 +49,41 @@ export default function AccountSettings() {
     loadProfile();
   }, [user]);
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !e.target.files || e.target.files.length === 0) return;
-    
-    const file = e.target.files[0];
-    setUploading(true);
-    
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCropperImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!user) return;
+
     try {
-      // Compress image
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 0.5,
-        maxWidthOrHeight: 400,
-        useWebWorker: true
-      });
-      
+      setUploading(true);
+      setCropperImage(null);
+
+      const filePath = `${user.id}/avatar.jpg`;
+
       // Upload to storage
-      const fileExt = compressed.type.split('/')[1] || 'jpg';
-      const filePath = `${user.id}/avatar.${fileExt}`;
-      
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, compressed, { upsert: true });
-      
+        .upload(filePath, croppedBlob, { 
+          upsert: true,
+          contentType: 'image/jpeg'
+        });
+
       if (uploadError) throw uploadError;
-      
+
       // Get public URL
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
       // Update profile
       const { error: updateError } = await supabase
         .from('profiles')
@@ -82,9 +92,9 @@ export default function AccountSettings() {
           avatar_url: data.publicUrl,
           updated_at: new Date().toISOString()
         });
-      
+
       if (updateError) throw updateError;
-      
+
       setAvatarUrl(data.publicUrl);
       toast.success('Profile photo updated');
     } catch (error) {
@@ -92,6 +102,16 @@ export default function AccountSettings() {
       toast.error('Failed to upload photo');
     } finally {
       setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropperImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -189,9 +209,16 @@ export default function AccountSettings() {
                       ref={fileInputRef}
                       type="file"
                       accept="image/*"
-                      onChange={handlePhotoUpload}
+                      onChange={handleFileSelect}
                       className="hidden"
                     />
+                    {cropperImage && (
+                      <ImageCropper
+                        imageUrl={cropperImage}
+                        onCropComplete={handleCropComplete}
+                        onCancel={handleCropCancel}
+                      />
+                    )}
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
