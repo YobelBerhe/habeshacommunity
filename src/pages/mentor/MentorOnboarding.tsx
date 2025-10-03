@@ -140,10 +140,10 @@ export default function MentorOnboarding() {
 
       toast({
         title: 'Success!',
-        description: 'Your mentor profile has been created successfully.',
+        description: 'Your mentor profile has been created successfully. Get verified to increase trust!',
       });
       
-      navigate('/mentor');
+      navigate('/mentor/verify');
     } catch (error) {
       console.error('Error creating mentor profile:', error);
       toast({

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, DollarSign, ArrowLeft, Calendar } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { getAppState } from '@/utils/storage';
+import { VerificationBadge } from '@/components/VerificationBadge';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -86,7 +87,10 @@ export default function MentorDetail() {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl">{mentor.display_name || mentor.name}</CardTitle>
+                  <div className="flex items-center gap-2 mb-1">
+                    <CardTitle className="text-2xl">{mentor.display_name || mentor.name}</CardTitle>
+                    {mentor.is_verified && <VerificationBadge isVerified={true} showText />}
+                  </div>
                   {mentor.title && (
                     <p className="text-muted-foreground mt-1">{mentor.title}</p>
                   )}

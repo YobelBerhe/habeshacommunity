@@ -573,6 +573,53 @@ export type Database = {
           },
         ]
       }
+      mentor_verifications: {
+        Row: {
+          admin_notes: string | null
+          bio_statement: string | null
+          created_at: string
+          documents_url: string[] | null
+          id: string
+          mentor_id: string
+          reviewed_at: string | null
+          social_links: string[] | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          bio_statement?: string | null
+          created_at?: string
+          documents_url?: string[] | null
+          id?: string
+          mentor_id: string
+          reviewed_at?: string | null
+          social_links?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          bio_statement?: string | null
+          created_at?: string
+          documents_url?: string[] | null
+          id?: string
+          mentor_id?: string
+          reviewed_at?: string | null
+          social_links?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_verifications_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentors: {
         Row: {
           available: boolean | null
@@ -586,6 +633,7 @@ export type Database = {
           expertise: string[] | null
           hourly_rate_cents: number | null
           id: string
+          is_verified: boolean | null
           languages: string[] | null
           name: string
           onboarding_required: boolean | null
@@ -612,6 +660,7 @@ export type Database = {
           expertise?: string[] | null
           hourly_rate_cents?: number | null
           id: string
+          is_verified?: boolean | null
           languages?: string[] | null
           name: string
           onboarding_required?: boolean | null
@@ -638,6 +687,7 @@ export type Database = {
           expertise?: string[] | null
           hourly_rate_cents?: number | null
           id?: string
+          is_verified?: boolean | null
           languages?: string[] | null
           name?: string
           onboarding_required?: boolean | null
@@ -847,6 +897,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -867,12 +938,20 @@ export type Database = {
           count: number
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_views: {
         Args: { listing_id: string }
         Returns: undefined
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       contact_method: "phone" | "whatsapp" | "telegram" | "email"
       forum_board:
         | "general"
@@ -1019,6 +1098,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       contact_method: ["phone", "whatsapp", "telegram", "email"],
       forum_board: [
         "general",

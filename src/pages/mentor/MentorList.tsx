@@ -13,6 +13,7 @@ import { getAppState } from '@/utils/storage';
 import CountryFlag from '@/components/CountryFlag';
 import ImageBox from '@/components/ImageBox';
 import MessageMentorModal from '@/components/MessageMentorModal';
+import { VerificationBadge } from '@/components/VerificationBadge';
 
 interface Mentor {
   id: string;
@@ -29,6 +30,7 @@ interface Mentor {
   photos: string[];
   website_url: string;
   social_links?: any;
+  is_verified: boolean;
 }
 
 export default function MentorList() {
@@ -175,6 +177,7 @@ export default function MentorList() {
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span>{mentor.display_name}</span>
+                    {mentor.is_verified && <VerificationBadge isVerified={true} />}
                     {mentor.country && (
                       <CountryFlag country={mentor.country} className="w-5 h-4" />
                     )}
