@@ -10,7 +10,7 @@ export async function uploadListingImages(files: File[], userId: string, bucketN
     const compressed = await imageCompression(file, { maxSizeMB: 0.2, maxWidthOrHeight: 1920, useWebWorker: true });
     console.log('✅ File compressed:', { original: file.size, compressed: compressed.size });
     
-    const key = `u_${userId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${compressed.type.split('/')[1] || 'jpg'}`;
+    const key = `${userId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${compressed.type.split('/')[1] || 'jpg'}`;
     console.log('🔑 Upload key:', key);
     
     const { error } = await supabase.storage.from(bucketName).upload(key, compressed, { upsert: false, contentType: compressed.type });
