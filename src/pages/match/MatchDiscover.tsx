@@ -85,13 +85,17 @@ export default function MatchDiscover() {
 
       const likedIds = alreadyLiked?.map(l => l.liked_id) || [];
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('match_profiles')
         .select('*')
         .eq('active', true)
-        .neq('user_id', user.id)
-        .not('user_id', 'in', `(${likedIds.length > 0 ? likedIds.join(',') : 'null'})`)
-        .limit(20);
+        .neq('user_id', user.id);
+
+      if (likedIds.length > 0) {
+        query = query.not('user_id', 'in', `(${likedIds.join(',')})`);
+      }
+
+      const { data, error } = await query.limit(20);
 
       if (error) throw error;
       setProfiles(data || []);
