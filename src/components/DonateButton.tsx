@@ -23,6 +23,13 @@ export default function DonateButton() {
     return amount;
   }, [custom, amount]);
 
+  const isValidAmount = displayAmount >= 200 && displayAmount <= 50000;
+  const amountError = custom.trim() && !isValidAmount 
+    ? displayAmount < 200 
+      ? "Minimum donation is $2" 
+      : "Maximum donation is $500"
+    : "";
+
   const startCheckout = async () => {
     try {
       setLoading(true);
@@ -81,7 +88,7 @@ export default function DonateButton() {
           </DialogHeader>
 
           <p className="text-sm text-muted-foreground mb-4">
-            Choose an amount or enter a custom donation.
+            Choose an amount or enter a custom donation ($2 - $500).
           </p>
 
           <div className="flex gap-2 mb-4">
@@ -106,7 +113,11 @@ export default function DonateButton() {
                 placeholder="e.g. 7.50"
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
+                className={amountError ? "border-destructive" : ""}
               />
+              {amountError && (
+                <p className="text-xs text-destructive mt-1">{amountError}</p>
+              )}
             </div>
 
             <div>
@@ -122,7 +133,7 @@ export default function DonateButton() {
 
             <Button
               onClick={startCheckout}
-              disabled={loading}
+              disabled={loading || !isValidAmount}
               className="w-full"
             >
               {loading ? "Processing..." : `Donate $${(displayAmount / 100).toFixed(2)}`}
