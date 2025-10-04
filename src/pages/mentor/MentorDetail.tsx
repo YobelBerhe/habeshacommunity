@@ -26,15 +26,75 @@ export default function MentorDetail() {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [availableCredits, setAvailableCredits] = useState({ hasCredits: false, totalCredits: 0 });
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchMentor();
       if (user) {
         loadCredits();
+        checkFavoriteStatus();
       }
     }
   }, [id, user]);
+
+  const checkFavoriteStatus = async () => {
+    if (!id || !user) return;
+    
+    const { data } = await supabase
+      .from('mentor_favorites')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('mentor_id', id)
+      .maybeSingle();
+    
+    setIsFavorite(!!data);
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      navigate('/auth/login');
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        await supabase
+          .from('mentor_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('mentor_id', id!);
+        
+        setIsFavorite(false);
+        toast({
+          title: "Removed from favorites",
+          description: "Mentor removed from your favorites",
+        });
+      } else {
+        // Add to favorites
+        await supabase
+          .from('mentor_favorites')
+          .insert({
+            user_id: user.id,
+            mentor_id: id!,
+          });
+        
+        setIsFavorite(true);
+        toast({
+          title: "Added to favorites",
+          description: "Mentor saved to your favorites",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorites",
+        variant: "destructive",
+      });
+    }
+  };
 
   const loadCredits = async () => {
     if (!id) return;
@@ -232,10 +292,11 @@ export default function MentorDetail() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={handleToggleFavorite}
                   className="absolute top-4 right-4 z-10"
-                  title="Save mentor"
+                  title={isFavorite ? "Remove from favorites" : "Add to favorites"}
                 >
-                  <Heart className="w-5 h-5" />
+                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
 
                 <div className="flex items-start gap-4">
@@ -250,7 +311,7 @@ export default function MentorDetail() {
                   </Avatar>
                   
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
                       {mentor.is_verified && (
                         <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
                           ✓ Quick Responder
@@ -267,7 +328,6 @@ export default function MentorDetail() {
                       </Button>
                     </div>
                     
-                    <h1 className="text-3xl font-bold mb-1">{mentor.display_name || mentor.name}</h1>
                     {mentor.title && (
                       <p className="text-lg text-emerald-600 dark:text-emerald-400 mb-3">{mentor.title}</p>
                     )}

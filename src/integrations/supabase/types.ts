@@ -672,6 +672,32 @@ export type Database = {
           },
         ]
       }
+      mentor_favorites: {
+        Row: {
+          created_at: string
+          mentor_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          mentor_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          mentor_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_favorites_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_reviews: {
         Row: {
           booking_id: string | null
