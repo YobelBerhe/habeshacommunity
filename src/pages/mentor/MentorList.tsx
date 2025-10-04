@@ -35,6 +35,7 @@ interface Mentor {
 export default function MentorList() {
   const navigate = useNavigate();
   const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [mentorBadges, setMentorBadges] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [topicFilter, setTopicFilter] = useState('all');
@@ -61,6 +62,8 @@ export default function MentorList() {
           mentor_skills(skill)
         `).eq('available', true).order('is_featured', {
         ascending: false
+      }).order('badges_count', {
+        ascending: false
       }).order('is_verified', {
         ascending: false
       }).order('rating_avg', {
@@ -70,6 +73,25 @@ export default function MentorList() {
       });
       if (error) throw error;
       setMentors(data || []);
+
+      // Fetch badges for all mentors
+      if (data && data.length > 0) {
+        const mentorIds = data.map(m => m.id);
+        const { data: badgesData } = await supabase
+          .from('mentor_badges')
+          .select('*')
+          .in('mentor_id', mentorIds)
+          .order('earned_at', { ascending: false });
+
+        if (badgesData) {
+          const badgesByMentor = badgesData.reduce((acc, badge) => {
+            if (!acc[badge.mentor_id]) acc[badge.mentor_id] = [];
+            acc[badge.mentor_id].push(badge);
+            return acc;
+          }, {} as Record<string, any[]>);
+          setMentorBadges(badgesByMentor);
+        }
+      }
     } catch (error) {
       console.error('Error fetching mentors:', error);
       toast.error('Failed to load mentors');
@@ -288,10 +310,15 @@ export default function MentorList() {
               
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span>{mentor.display_name}</span>
                     {mentor.is_verified && <VerificationBadge isVerified={true} />}
                     {mentor.country && <CountryFlag country={mentor.country} className="w-5 h-4" />}
+                    {mentorBadges[mentor.id] && mentorBadges[mentor.id].length > 0 && (
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
+                        {mentorBadges[mentor.id].length}
+                      </Badge>
+                    )}
                   </div>
                   {(mentor.rating_avg ?? 0) > 0 && <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -299,6 +326,24 @@ export default function MentorList() {
                       <span className="text-xs text-muted-foreground">({mentor.rating_count})</span>
                     </div>}
                 </CardTitle>
+                {mentorBadges[mentor.id] && mentorBadges[mentor.id].length > 0 && (
+                  <div className="flex gap-1.5 mb-2">
+                    {mentorBadges[mentor.id].slice(0, 3).map((badge) => (
+                      <span 
+                        key={badge.id}
+                        title={badge.label}
+                        className="text-lg"
+                      >
+                        {badge.icon}
+                      </span>
+                    ))}
+                    {mentorBadges[mentor.id].length > 3 && (
+                      <span className="text-xs text-muted-foreground self-center">
+                        +{mentorBadges[mentor.id].length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4" />
                   <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>

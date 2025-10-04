@@ -20,6 +20,7 @@ export default function MentorDetail() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [mentor, setMentor] = useState<any>(null);
+  const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [availableCredits, setAvailableCredits] = useState({ hasCredits: false, totalCredits: 0 });
@@ -102,6 +103,17 @@ export default function MentorDetail() {
 
       if (error) throw error;
       setMentor(data);
+
+      // Fetch badges
+      const { data: badgesData } = await supabase
+        .from('mentor_badges')
+        .select('*')
+        .eq('mentor_id', id)
+        .order('earned_at', { ascending: false });
+
+      if (badgesData) {
+        setBadges(badgesData);
+      }
     } catch (error) {
       console.error('Error fetching mentor:', error);
       toast({
@@ -156,9 +168,27 @@ export default function MentorDetail() {
                   <div className="flex items-center gap-2 mb-1">
                     <CardTitle className="text-2xl">{mentor.display_name || mentor.name}</CardTitle>
                     {mentor.is_verified && <VerificationBadge isVerified={true} showText />}
+                    {badges.length > 0 && (
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+                        {badges.length} Badge{badges.length > 1 ? 's' : ''}
+                      </Badge>
+                    )}
                   </div>
                   {mentor.title && (
                     <p className="text-muted-foreground mt-1">{mentor.title}</p>
+                  )}
+                  {badges.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {badges.map((badge) => (
+                        <span 
+                          key={badge.id}
+                          className="px-3 py-1 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 text-yellow-800 rounded-full text-sm flex items-center gap-1.5 font-medium"
+                        >
+                          <span className="text-base">{badge.icon}</span>
+                          {badge.label}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
                 {mentor.price_cents && (

@@ -126,6 +126,18 @@ serve(async (req: Request) => {
             .eq('id', bookingId);
 
           console.log('Booking confirmed with fee tracking:', bookingId);
+
+          // Award badges after booking confirmation
+          if (booking.mentor_id) {
+            const { error: badgeError } = await supabase.rpc('award_badges', { 
+              mentor_id: booking.mentor_id 
+            });
+            if (badgeError) {
+              console.error('Error awarding badges:', badgeError);
+            } else {
+              console.log('Badges checked for mentor:', booking.mentor_id);
+            }
+          }
         }
       }
     }

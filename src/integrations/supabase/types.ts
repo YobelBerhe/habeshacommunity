@@ -525,6 +525,41 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_badges: {
+        Row: {
+          badge_type: string
+          earned_at: string | null
+          icon: string | null
+          id: string
+          label: string
+          mentor_id: string
+        }
+        Insert: {
+          badge_type: string
+          earned_at?: string | null
+          icon?: string | null
+          id?: string
+          label: string
+          mentor_id: string
+        }
+        Update: {
+          badge_type?: string
+          earned_at?: string | null
+          icon?: string | null
+          id?: string
+          label?: string
+          mentor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_badges_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_bookings: {
         Row: {
           application_fee_cents: number | null
@@ -762,6 +797,7 @@ export type Database = {
         Row: {
           available: boolean | null
           avatar_url: string | null
+          badges_count: number | null
           bio: string | null
           city: string | null
           country: string | null
@@ -795,6 +831,7 @@ export type Database = {
         Insert: {
           available?: boolean | null
           avatar_url?: string | null
+          badges_count?: number | null
           bio?: string | null
           city?: string | null
           country?: string | null
@@ -828,6 +865,7 @@ export type Database = {
         Update: {
           available?: boolean | null
           avatar_url?: string | null
+          badges_count?: number | null
           bio?: string | null
           city?: string | null
           country?: string | null
@@ -1082,6 +1120,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_badges: {
+        Args: { mentor_id: string }
+        Returns: undefined
+      }
       calculate_match_score: {
         Args: { profile_user_id: string; viewer_id: string }
         Returns: {
