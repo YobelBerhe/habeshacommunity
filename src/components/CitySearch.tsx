@@ -57,10 +57,10 @@ export default function CitySearch({ value, onSelect }:{
         autoComplete="off"
       />
       {open && items.length>0 && !locked && (
-        <div className="absolute left-0 right-0 top-[46px] z-[9999] max-h-72 overflow-auto bg-white border rounded-xl shadow-2xl">
+        <div className="absolute left-0 right-0 top-[46px] z-[9999] max-h-72 overflow-auto bg-background text-foreground border border-input rounded-xl shadow-2xl">
           {items.map((c,i)=>(
             <div key={i}
-                 className="px-3 py-2 cursor-pointer hover:bg-slate-50"
+                 className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
              onMouseDown={()=>{ 
                setLocked(true);
                const sel = `${c.name}, ${c.country}`;
@@ -72,7 +72,7 @@ export default function CitySearch({ value, onSelect }:{
                navigate('/browse');
              }}>
               <div className="font-medium">{c.name}</div>
-              <div className="text-xs text-slate-500">{c.country}</div>
+              <div className="text-xs text-muted-foreground">{c.country}</div>
             </div>
           ))}
         </div>
