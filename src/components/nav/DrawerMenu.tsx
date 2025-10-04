@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Heart, MessageCircle, Plus, ChevronDown, Edit3, Bookmark, Users, Target, ShoppingBag, MessageSquare, Inbox, Home, Briefcase, Wrench, Users2 } from 'lucide-react';
+import { X, Heart, MessageCircle, Plus, ChevronDown, Edit3, Bookmark, Users, Target, ShoppingBag, MessageSquare, Inbox, Home, Briefcase, Wrench, Users2, BarChart3 } from 'lucide-react';
 import { TAXONOMY, LABELS } from '@/lib/taxonomy';
 import { useAuth } from '@/store/auth';
 import { useLockBody } from '@/hooks/useLockBody';
@@ -20,6 +20,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
   const [mentorOpen, setMentorOpen] = useState(false);
   const [matchOpen, setMatchOpen] = useState(false);
   const [marketplaceOpen, setMarketplaceOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { language, setLanguage } = useLanguage();
   const { user, openAuth, openPost } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +29,23 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (!open) return;
+    
+    // Check admin status
+    const checkAdmin = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .single();
+      
+      setIsAdmin(!!data);
+    };
     
     // Fetch real counts from Supabase
     const fetchCounts = async () => {
@@ -56,8 +74,9 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
       }
     };
     
+    checkAdmin();
     fetchCounts();
-  }, [open]);
+  }, [open, user]);
 
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => {
@@ -372,6 +391,17 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
               <Inbox className="w-4 h-4" />
               Inbox
             </Link>
+
+            {isAdmin && (
+              <Link 
+                className="btn-secondary flex items-center gap-3 bg-primary/10 hover:bg-primary/20" 
+                to="/admin/metrics" 
+                onClick={() => onOpenChange(false)}
+              >
+                <BarChart3 className="w-4 h-4" />
+                Admin Dashboard
+              </Link>
+            )}
             
             <DonateButton />
 
