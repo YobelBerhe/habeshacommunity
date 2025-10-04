@@ -299,73 +299,73 @@ export default function Chat() {
           </div>
         </div>
 
-        {/* Chat content */}
-        <div className="flex-1 flex flex-col">
-          <div ref={listRef} className="flex-1 chat-container p-4 space-y-4 overflow-y-auto">
-            {messages.length === 0 ? (
-              <div className="text-center py-8">
-                <h3 className="text-lg font-semibold mb-2">
-                  {CHAT_BOARDS.find((b) => b.id === activeBoard)?.name}
-                  {!isGlobal ? ` • ${selectedCity}` : ''}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {CHAT_BOARDS.find((b) => b.id === activeBoard)?.description}
-                </p>
-                <div className="text-sm text-muted-foreground">Be the first to start the conversation!</div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {messages.map((msg) => {
-                  const color = colorForUser(msg.user_id);
-                  return (
-                    <div key={msg.id} className="flex items-start gap-2 py-1">
-                      <div
-                        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
-                        style={{ backgroundColor: color }}
-                      >
-                        {msg.avatar_url ? (
-                          <img
-                            src={msg.avatar_url}
-                            alt={msg.username || 'User'}
-                            className="w-full h-full rounded-full object-cover"
-                          />
-                        ) : (
-                          (msg.username || 'M')[0].toUpperCase()
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2 flex-wrap">
-                          <span
-                            className="font-medium text-sm"
-                            style={{ color }}
-                          >
-                            {msg.username || 'Member'}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(msg.created_at).toLocaleTimeString([], { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </span>
+          {/* Chat content */}
+          <div className="flex-1 flex flex-col">
+            <div ref={listRef} className="flex-1 chat-container p-4 space-y-4 overflow-y-auto">
+              {messages.length === 0 ? (
+                <div className="text-center py-8 px-4">
+                  <h3 className="text-lg font-semibold mb-2">
+                    {CHAT_BOARDS.find((b) => b.id === activeBoard)?.name}
+                    {!isGlobal ? ` • ${selectedCity}` : ''}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {CHAT_BOARDS.find((b) => b.id === activeBoard)?.description}
+                  </p>
+                  <div className="text-sm text-muted-foreground">Be the first to start the conversation!</div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {messages.map((msg) => {
+                    const color = colorForUser(msg.user_id);
+                    return (
+                      <div key={msg.id} className="flex items-start gap-2 sm:gap-3 py-1">
+                        <div
+                          className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
+                          style={{ backgroundColor: color }}
+                        >
+                          {msg.avatar_url ? (
+                            <img
+                              src={msg.avatar_url}
+                              alt={msg.username || 'User'}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            (msg.username || 'M')[0].toUpperCase()
+                          )}
                         </div>
-                        {msg.message_type === 'image' && msg.media_url ? (
-                          <img 
-                            src={msg.media_url} 
-                            alt="Shared photo" 
-                            className="max-w-xs rounded-lg mt-1"
-                          />
-                        ) : (
-                          <p className="text-sm break-words whitespace-pre-wrap mt-0.5">
-                            {msg.content}
-                          </p>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            <span
+                              className="font-medium text-sm"
+                              style={{ color }}
+                            >
+                              {msg.username || 'Member'}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(msg.created_at).toLocaleTimeString([], { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </span>
+                          </div>
+                          {msg.message_type === 'image' && msg.media_url ? (
+                            <img 
+                              src={msg.media_url} 
+                              alt="Shared photo" 
+                              className="max-w-[250px] sm:max-w-xs rounded-lg mt-1"
+                            />
+                          ) : (
+                            <p className="text-sm break-words whitespace-pre-wrap mt-0.5">
+                              {msg.content}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
           {/* Composer */}
           <div className="force-input-light border-t p-4 bg-background">

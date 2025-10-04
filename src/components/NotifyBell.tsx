@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell } from 'lucide-react';
+import { Bell, MessageCircle, Calendar, Star, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
 
 type Notification = {
   id: string;
@@ -134,6 +135,19 @@ export default function NotifyBell() {
     }
   };
 
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'message':
+        return <MessageCircle className="h-4 w-4 text-blue-500" />;
+      case 'booking':
+        return <Calendar className="h-4 w-4 text-green-500" />;
+      case 'review':
+        return <Star className="h-4 w-4 text-yellow-500" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.read_at) {
       markOneAsRead(notification.id);
@@ -164,13 +178,13 @@ export default function NotifyBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-auto rounded-lg border bg-popover shadow-lg z-[100]">
-          <div className="px-3 py-2 flex items-center justify-between border-b">
-            <div className="font-medium">Notifications</div>
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[70vh] overflow-auto rounded-lg border bg-popover shadow-lg z-[100]">
+          <div className="px-4 py-3 flex items-center justify-between border-b bg-background sticky top-0">
+            <div className="font-semibold text-sm">Notifications</div>
             {unread > 0 && (
               <button 
                 onClick={markAllAsRead} 
-                className="text-xs text-muted-foreground hover:text-foreground underline"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
               >
                 Mark all read
               </button>
@@ -179,43 +193,56 @@ export default function NotifyBell() {
           
           <div className="divide-y">
             {items.length === 0 && (
-              <div className="p-4 text-sm text-muted-foreground text-center">
-                No notifications yet.
+              <div className="p-8 text-sm text-muted-foreground text-center">
+                <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p className="font-medium">No notifications yet</p>
+                <p className="text-xs mt-1">We'll notify you when something happens</p>
               </div>
             )}
             
             {items.map(notification => (
               <div 
                 key={notification.id} 
-                className={`p-3 hover:bg-muted/50 cursor-pointer transition-colors ${
-                  !notification.read_at ? 'bg-accent/30' : ''
+                className={`p-3 hover:bg-muted/50 cursor-pointer transition-colors relative ${
+                  !notification.read_at ? 'bg-accent/20' : ''
                 }`}
                 onClick={() => handleNotificationClick(notification)}
               >
-                <div className="text-sm font-medium">{notification.title}</div>
-                {notification.body && (
-                  <div className="text-xs mt-0.5 text-muted-foreground line-clamp-2">
-                    {notification.body}
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex-shrink-0">
+                    {getNotificationIcon(notification.type)}
                   </div>
-                )}
-                <div className="text-[11px] mt-1 text-muted-foreground">
-                  {new Date(notification.created_at).toLocaleString()}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-medium line-clamp-1">{notification.title}</p>
+                      {!notification.read_at && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
+                      )}
+                    </div>
+                    {notification.body && (
+                      <p className="text-xs mt-0.5 text-muted-foreground line-clamp-2">
+                        {notification.body}
+                      </p>
+                    )}
+                    <p className="text-[11px] mt-1 text-muted-foreground">
+                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                    </p>
+                  </div>
                 </div>
-                {!notification.read_at && (
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full"></div>
-                )}
               </div>
             ))}
           </div>
           
-          <div className="px-3 py-2 text-center border-t">
-            <a 
-              href="/notifications" 
-              className="text-xs text-muted-foreground hover:text-foreground underline"
-              onClick={() => setOpen(false)}
+          <div className="px-4 py-3 text-center border-t bg-background sticky bottom-0">
+            <button 
+              onClick={() => {
+                navigate('/notifications');
+                setOpen(false);
+              }}
+              className="text-xs text-primary hover:underline font-medium"
             >
               View all notifications
-            </a>
+            </button>
           </div>
         </div>
       )}
