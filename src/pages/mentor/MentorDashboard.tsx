@@ -5,9 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, DollarSign, MessageSquare, Settings, CheckCircle2, Clock, Users } from 'lucide-react';
-import Header from '@/components/Header';
-import MobileHeader from '@/components/layout/MobileHeader';
-import { getAppState } from '@/utils/storage';
+import MentorHeader from '@/components/MentorHeader';
 import VerificationCelebration from '@/components/VerificationCelebration';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import MentorSkillsEditor from '@/components/MentorSkillsEditor';
@@ -41,7 +39,6 @@ export default function MentorDashboard() {
     completed: 0
   });
   const [loading, setLoading] = useState(true);
-  const appState = getAppState();
 
   useEffect(() => {
     fetchMentorData();
@@ -102,13 +99,7 @@ export default function MentorDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
+        <MentorHeader title="Mentor Dashboard" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your dashboard...</div>
         </div>
@@ -118,14 +109,8 @@ export default function MentorDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
-
+      <MentorHeader title="Mentor Dashboard" backPath="/" />
+      
       {/* Verification Celebration Component */}
       <VerificationCelebration />
 
@@ -318,9 +303,9 @@ export default function MentorDashboard() {
             <Button 
               variant="outline" 
               className="w-full"
-              onClick={() => navigate('/account/settings')}
+              onClick={() => navigate('/mentor/onboarding')}
             >
-              Edit Profile
+              Edit Mentor Profile
             </Button>
           </CardContent>
         </Card>

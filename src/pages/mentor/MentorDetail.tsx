@@ -5,11 +5,11 @@ import { useAuth } from '@/store/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, DollarSign, ArrowLeft, Calendar, Star } from 'lucide-react';
+import { MapPin, DollarSign, Calendar } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { getAppState } from '@/utils/storage';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import MentorReviews from '@/components/MentorReviews';
+import MentorHeader from '@/components/MentorHeader';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +18,6 @@ export default function MentorDetail() {
   const { toast } = useToast();
   const [mentor, setMentor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const appState = getAppState();
 
   useEffect(() => {
     if (id) {
@@ -50,39 +49,38 @@ export default function MentorDetail() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading mentor details...</div>
+      <div className="min-h-screen bg-background">
+        <MentorHeader title="Mentor Profile" backPath="/mentor" />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading mentor details...</div>
+        </div>
       </div>
     );
   }
 
   if (!mentor) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Mentor not found</p>
-            <Button onClick={() => navigate('/mentor')}>
-              Back to Mentors
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-background">
+        <MentorHeader title="Mentor Profile" backPath="/mentor" />
+        <div className="container mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-muted-foreground mb-4">Mentor not found</p>
+              <Button onClick={() => navigate('/mentor')}>
+                Back to Mentors
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
+      <MentorHeader title={mentor.display_name || mentor.name} backPath="/mentor" />
+      
       <div className="container mx-auto px-4 py-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/mentor')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Mentors
-        </Button>
-
         <div className="max-w-4xl mx-auto space-y-6">
           <Card>
             <CardHeader>

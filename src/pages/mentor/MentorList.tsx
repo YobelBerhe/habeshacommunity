@@ -8,9 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Star, MapPin, DollarSign, MessageCircle, CheckCircle2 } from 'lucide-react';
-import MobileHeader from '@/components/layout/MobileHeader';
-import Header from '@/components/Header';
-import { getAppState } from '@/utils/storage';
+import MentorHeader from '@/components/MentorHeader';
 import CountryFlag from '@/components/CountryFlag';
 import ImageBox from '@/components/ImageBox';
 import MessageMentorModal from '@/components/MessageMentorModal';
@@ -48,7 +46,6 @@ export default function MentorList() {
   const [sortBy, setSortBy] = useState('verified');
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
-  const appState = getAppState();
 
   useEffect(() => {
     fetchMentors();
@@ -127,13 +124,7 @@ export default function MentorList() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
+        <MentorHeader title="Find a Mentor" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading mentors...</div>
         </div>
@@ -143,13 +134,7 @@ export default function MentorList() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
+      <MentorHeader title="Find a Mentor" backPath="/" />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
