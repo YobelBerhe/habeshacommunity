@@ -47,11 +47,21 @@ serve(async (req: Request) => {
     }
 
     if (!mentor.stripe_account_id) {
-      throw new Error('Mentor has not connected Stripe account');
+      return new Response(JSON.stringify({ 
+        error: 'This mentor has not connected their Stripe account yet. Please contact them to set up payments.' 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
     }
 
     if (!mentor.payouts_enabled) {
-      throw new Error('Mentor payouts not enabled yet');
+      return new Response(JSON.stringify({ 
+        error: 'Mentor payouts are being set up. Please try again in a few minutes.' 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {

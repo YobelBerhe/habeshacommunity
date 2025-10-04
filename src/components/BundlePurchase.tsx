@@ -40,16 +40,36 @@ export function BundlePurchase({ mentorId, singleSessionPrice, currency = 'USD' 
         body: { mentorId, bundleSize },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error from edge function
+        const errorMessage = error.message || 'An error occurred';
+        toast({
+          title: 'Unable to purchase',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      if (data.url) {
+      if (data?.error) {
+        // Handle error returned in response data
+        toast({
+          title: 'Unable to purchase',
+          description: data.error,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (data?.url) {
         window.open(data.url, '_blank');
       }
     } catch (error) {
       console.error('Bundle purchase error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Please try again later';
       toast({
         title: 'Purchase failed',
-        description: error instanceof Error ? error.message : 'Please try again',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
