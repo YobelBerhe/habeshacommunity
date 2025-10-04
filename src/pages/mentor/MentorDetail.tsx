@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/store/auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, DollarSign, Calendar, Ticket } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { VerificationBadge } from '@/components/VerificationBadge';
-import MentorReviews from '@/components/MentorReviews';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
+import { VerificationBadge } from '@/components/VerificationBadge';
 import { BundlePurchase } from '@/components/BundlePurchase';
 import { CreditsDisplay } from '@/components/CreditsDisplay';
+import MentorReviews from '@/components/MentorReviews';
 import { bookSessionWithCredit, checkAvailableCredits } from '@/utils/bundleActions';
+import { useAuth } from '@/store/auth';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +37,59 @@ export default function MentorDetail() {
     if (!id) return;
     const credits = await checkAvailableCredits(id);
     setAvailableCredits(credits);
+  };
+
+  const handleMessageMentor = async () => {
+    if (!user) {
+      navigate('/auth/login');
+      return;
+    }
+
+    if (!mentor.is_verified) {
+      toast({
+        title: "Cannot message mentor",
+        description: "You can only message verified mentors",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Check if conversation already exists
+      const { data: existingConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`and(participant1_id.eq.${user.id},participant2_id.eq.${mentor.user_id}),and(participant1_id.eq.${mentor.user_id},participant2_id.eq.${user.id})`)
+        .limit(1)
+        .single();
+
+      if (existingConv) {
+        navigate('/inbox');
+        return;
+      }
+
+      // Create new conversation
+      const participants = [user.id, mentor.user_id].sort();
+      const { error } = await supabase.from('conversations').insert({
+        participant1_id: participants[0],
+        participant2_id: participants[1],
+      } as any);
+
+      if (error) throw error;
+
+      toast({
+        title: "Conversation started",
+        description: "You can now message this mentor",
+      });
+      navigate('/inbox');
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      toast({
+        title: "Failed to start conversation",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   const fetchMentor = async () => {
@@ -166,47 +219,61 @@ export default function MentorDetail() {
                   </div>
                 )}
                 
-                <Button 
-                  onClick={async () => {
-                    if (!user) {
-                      navigate('/auth/login');
-                      return;
-                    }
-                    
-                    setBookingLoading(true);
-                    try {
-                      const result = await bookSessionWithCredit(id!);
-                      
-                      if (result.needsPurchase) {
-                        toast({
-                          title: "No credits available",
-                          description: "Purchase a bundle or book a single session below",
-                        });
-                      } else if (result.success) {
-                        toast({
-                          title: "Session booked!",
-                          description: `You have ${result.creditsLeft} credits remaining`,
-                        });
-                        loadCredits();
-                        navigate('/mentor/bookings');
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Button 
+                    onClick={async () => {
+                      if (!user) {
+                        navigate('/auth/login');
+                        return;
                       }
-                    } catch (error) {
-                      toast({
-                        title: "Booking failed",
-                        description: error instanceof Error ? error.message : "Please try again",
-                        variant: "destructive",
-                      });
-                    } finally {
-                      setBookingLoading(false);
-                    }
-                  }}
-                  className="w-full"
-                  size="lg"
-                  disabled={bookingLoading}
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {bookingLoading ? 'Processing...' : availableCredits.hasCredits ? 'Book with Credit' : 'Book a Session'}
-                </Button>
+                      
+                      setBookingLoading(true);
+                      try {
+                        const result = await bookSessionWithCredit(id!);
+                        
+                        if (result.needsPurchase) {
+                          toast({
+                            title: "No credits available",
+                            description: "Purchase a bundle or book a single session below",
+                          });
+                        } else if (result.success) {
+                          toast({
+                            title: "Session booked!",
+                            description: `You have ${result.creditsLeft} credits remaining`,
+                          });
+                          loadCredits();
+                          navigate('/mentor/bookings');
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "Booking failed",
+                          description: error instanceof Error ? error.message : "Please try again",
+                          variant: "destructive",
+                        });
+                      } finally {
+                        setBookingLoading(false);
+                      }
+                    }}
+                    className="w-full"
+                    size="lg"
+                    disabled={bookingLoading}
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {bookingLoading ? 'Processing...' : availableCredits.hasCredits ? 'Book with Credit' : 'Book a Session'}
+                  </Button>
+
+                  {mentor.is_verified && (
+                    <Button
+                      onClick={handleMessageMentor}
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Message Mentor
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
