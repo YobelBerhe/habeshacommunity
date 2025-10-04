@@ -121,7 +121,7 @@ export type Database = {
         Insert: {
           booking_id?: string | null
           created_at?: string
-          id: string
+          id?: string
           last_message_at?: string | null
           participant1_id: string
           participant2_id: string
