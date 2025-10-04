@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, MapPin, DollarSign, MessageCircle } from 'lucide-react';
+import { Star, MapPin, DollarSign, MessageCircle, CheckCircle2 } from 'lucide-react';
 import MobileHeader from '@/components/layout/MobileHeader';
 import Header from '@/components/Header';
 import { getAppState } from '@/utils/storage';
@@ -40,6 +40,7 @@ export default function MentorList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [topicFilter, setTopicFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const appState = getAppState();
@@ -53,6 +54,7 @@ export default function MentorList() {
       const { data, error } = await supabase
         .from('mentors')
         .select('*')
+        .order('is_verified', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -71,8 +73,9 @@ export default function MentorList() {
     
     const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
     const matchesCity = !cityFilter || mentor.city?.toLowerCase().includes(cityFilter.toLowerCase());
+    const matchesVerified = !verifiedOnly || mentor.is_verified === true;
     
-    return matchesSearch && matchesTopic && matchesCity;
+    return matchesSearch && matchesTopic && matchesCity && matchesVerified;
   });
 
   const formatPrice = (cents: number, currency: string) => {
@@ -113,6 +116,20 @@ export default function MentorList() {
           <Button onClick={() => navigate('/mentor/onboarding')}>Become a Mentor</Button>
         </div>
 
+        {/* Verified Only Toggle */}
+        <div className="mb-4">
+          <label className="flex items-center gap-2 cursor-pointer w-fit">
+            <input 
+              type="checkbox" 
+              checked={verifiedOnly} 
+              onChange={(e) => setVerifiedOnly(e.target.checked)}
+              className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <CheckCircle2 className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium">Show only verified mentors</span>
+          </label>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Input
             placeholder="Search mentors..."
@@ -143,6 +160,7 @@ export default function MentorList() {
             setSearchTerm('');
             setTopicFilter('all');
             setCityFilter('');
+            setVerifiedOnly(false);
           }}>
             Clear Filters
           </Button>
