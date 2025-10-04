@@ -937,7 +937,7 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
-          id: string
+          id?: string
           read?: boolean | null
           sender_id: string
         }
