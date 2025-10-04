@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Heart, Upload } from 'lucide-react';
-import MobileHeader from '@/components/layout/MobileHeader';
-import Header from '@/components/Header';
+import { Heart, Upload } from 'lucide-react';
+import MentorHeader from '@/components/MentorHeader';
 import { getAppState } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -120,7 +119,7 @@ export default function MatchOnboarding() {
           name,
           bio,
           photos,
-          city: appState.city || 'Unknown',
+          city: appState.city || '',
           active: true,
         }]);
 
@@ -165,23 +164,21 @@ export default function MatchOnboarding() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
+      <MentorHeader 
+        title={`Create Profile - Step ${step}/3`}
+        backPath={step > 1 ? '/' : '/'}
       />
       
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => step > 1 ? setStep(step - 1) : navigate('/')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+      <div className="container mx-auto px-4 py-4 max-w-2xl">
+        {step > 1 && (
+          <Button 
+            variant="ghost" 
+            onClick={() => setStep(step - 1)}
+            className="mb-4"
+          >
+            ← Previous Step
+          </Button>
+        )}
 
         <Card>
           <CardHeader>

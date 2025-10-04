@@ -52,14 +52,19 @@ export default function MatchProfile() {
     try {
       setLoading(true);
 
-      // Load profile
+      // Load profile by user_id (passed from Browse page)
       const { data: profileData, error: profileError } = await supabase
         .from('match_profiles')
         .select('*')
-        .eq('id', id)
-        .single();
+        .eq('user_id', id)
+        .maybeSingle();
 
       if (profileError) throw profileError;
+      if (!profileData) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
       setProfile(profileData);
 
       // Calculate match score

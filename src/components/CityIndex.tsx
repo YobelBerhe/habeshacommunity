@@ -14,6 +14,7 @@ const COLUMNS: CategoryKey[] = ["community", "housing", "jobs", "services"];
 
 export default function CityIndex({ city, lang = "en", listings, onOpen }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | "">("");
+  const [showSubcategories, setShowSubcategories] = useState(false);
 
   const count = (cat: CategoryKey, sub?: string) => {
     if (!sub) return listings.filter(l => l.category === cat).length;
@@ -23,9 +24,16 @@ export default function CityIndex({ city, lang = "en", listings, onOpen }: Props
   const handleCategorySelect = (category: string) => {
     if (category === selectedCategory) {
       setSelectedCategory("");
+      setShowSubcategories(false);
     } else {
       setSelectedCategory(category as CategoryKey);
+      setShowSubcategories(true);
     }
+  };
+
+  const handleSubcategoryClick = (sub: string) => {
+    onOpen({ category: selectedCategory as CategoryKey, sub });
+    setShowSubcategories(false);
   };
 
   return (
@@ -59,8 +67,8 @@ export default function CityIndex({ city, lang = "en", listings, onOpen }: Props
         </ToggleGroup>
       </div>
 
-      {/* Subcategory Grid - only show when category is selected */}
-      {selectedCategory && (
+      {/* Subcategory Grid - only show when category is selected and not yet clicked */}
+      {selectedCategory && showSubcategories && (
         <div className="mb-6">
           <h2 className="text-lg font-semibold mb-4 text-center">
             {TAXONOMY[selectedCategory].name[lang]} {lang === "ti" ? "ንኣብ ምድብታት" : "Subcategories"}
@@ -72,7 +80,7 @@ export default function CityIndex({ city, lang = "en", listings, onOpen }: Props
               return (
                 <button
                   key={sub}
-                  onClick={() => onOpen({ category: selectedCategory, sub })}
+                  onClick={() => handleSubcategoryClick(sub)}
                   className="flex items-center justify-between rounded-lg px-4 py-3 border border-border/50 bg-card hover:bg-accent transition-colors"
                 >
                   <span className="text-left font-medium">{label}</span>
