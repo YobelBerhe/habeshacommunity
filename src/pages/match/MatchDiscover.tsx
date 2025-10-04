@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, X, MessageCircle, ArrowLeft } from 'lucide-react';
-import MobileHeader from '@/components/layout/MobileHeader';
-import Header from '@/components/Header';
-import { getAppState } from '@/utils/storage';
+import { Heart, X, MessageCircle } from 'lucide-react';
+import MentorHeader from '@/components/MentorHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,7 +23,6 @@ interface MatchProfile {
 export default function MatchDiscover() {
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
-  const appState = getAppState();
   const { toast } = useToast();
 
   const [profiles, setProfiles] = useState<MatchProfile[]>([]);
@@ -175,24 +172,10 @@ export default function MatchDiscover() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
+      <MentorHeader title="Discover" backPath="/" />
       
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="flex justify-between items-center mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/')}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          
+        <div className="flex justify-end mb-6">
           <Button
             variant="outline"
             onClick={() => navigate('/match/matches')}

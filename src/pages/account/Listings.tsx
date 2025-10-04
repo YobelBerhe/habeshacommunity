@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Package, ArrowLeft } from 'lucide-react';
+import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import ListingCard from '@/components/ListingCard';
-import MobileHeader from '@/components/layout/MobileHeader';
+import MentorHeader from '@/components/MentorHeader';
 import PostModal from '@/components/PostModal';
 import { toast } from 'sonner';
 import { useLanguage } from '@/store/language';
@@ -124,7 +124,7 @@ export default function MyListings() {
   if (!user && !loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
+        <MentorHeader title="My Listings" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -145,7 +145,7 @@ export default function MyListings() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
+        <MentorHeader title="My Listings" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your listings...</div>
         </div>
@@ -155,29 +155,15 @@ export default function MyListings() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
+      <MentorHeader title={t(language, "my_listings")} backPath="/" />
       
       <div className="container mx-auto px-4 py-6">
-        <div className="relative flex items-center mb-8">
-          {/* Back Arrow */}
-          <button 
-            onClick={() => window.history.back()}
-            className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-foreground" />
-          </button>
-          
-          {/* Centered Title */}
-          <div className="flex-1 flex justify-center">
-            <h1 className="text-lg md:text-xl font-bold text-foreground">{t(language, "my_listings")}</h1>
-          </div>
-          
-          {/* Small New Post Button */}
+        <div className="flex justify-end mb-4">
           <button 
             onClick={openPost}
-            className="btn-primary flex items-center gap-1 px-2 py-1 rounded-md shadow-sm hover:shadow-md transition-all duration-200 text-xs ml-2"
+            className="btn-primary flex items-center gap-2"
           >
-            <Plus className="w-3 h-3" />
+            <Plus className="w-4 h-4" />
             <span>Post</span>
           </button>
         </div>

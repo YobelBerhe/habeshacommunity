@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import { Settings, User, Save, Camera, X } from 'lucide-react';
+import { User, Save, Camera, X } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
-import MobileHeader from '@/components/layout/MobileHeader';
+import MentorHeader from '@/components/MentorHeader';
 import { toast } from 'sonner';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import imageCompression from 'browser-image-compression';
@@ -168,7 +168,7 @@ export default function AccountSettings() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
+        <MentorHeader title="Account Settings" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your settings...</div>
         </div>
@@ -178,13 +178,9 @@ export default function AccountSettings() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
+      <MentorHeader title="Account Settings" backPath="/" />
       
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Settings className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold">Account Settings</h1>
-        </div>
 
         <div className="space-y-6">
           <div className="bg-card rounded-lg border p-6">

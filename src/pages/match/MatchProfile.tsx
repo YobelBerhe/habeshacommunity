@@ -4,10 +4,8 @@ import { useAuth } from '@/store/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, X, ArrowLeft, MessageCircle } from 'lucide-react';
-import MobileHeader from '@/components/layout/MobileHeader';
-import Header from '@/components/Header';
-import { getAppState } from '@/utils/storage';
+import { Heart, X, MessageCircle } from 'lucide-react';
+import MentorHeader from '@/components/MentorHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,7 +30,6 @@ export default function MatchProfile() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { user, openAuth } = useAuth();
-  const appState = getAppState();
   const { toast } = useToast();
 
   const [profile, setProfile] = useState<MatchProfile | null>(null);
@@ -120,13 +117,7 @@ export default function MatchProfile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
+        <MentorHeader title="Profile" backPath="/match/discover" />
         <div className="container mx-auto px-4 py-8 max-w-2xl">
           <Card>
             <CardContent className="py-12 text-center">
@@ -141,13 +132,7 @@ export default function MatchProfile() {
   if (!profile) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
+        <MentorHeader title="Profile" backPath="/match/discover" />
         <div className="container mx-auto px-4 py-8 max-w-2xl">
           <Card>
             <CardContent className="py-12 text-center">
@@ -164,23 +149,9 @@ export default function MatchProfile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
+      <MentorHeader title="Profile" backPath="/match/discover" />
       
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/match/discover')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Discover
-        </Button>
 
         <div className="space-y-4">
           {/* Match Score Card */}

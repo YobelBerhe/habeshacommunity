@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MessageCircle, ArrowLeft } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
+import MentorHeader from '@/components/MentorHeader';
 import { useEffect } from 'react';
 
 export default function Inbox() {
@@ -19,17 +19,8 @@ export default function Inbox() {
 
   return (
     <div className="min-h-screen bg-background">
+      <MentorHeader title="Messages" backPath="/" />
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/')}
-            size="icon"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <h1 className="text-3xl font-bold">Messages</h1>
-        </div>
 
         <Card>
           <CardHeader>
