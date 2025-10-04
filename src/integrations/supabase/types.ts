@@ -973,9 +973,11 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          credits_balance: number | null
           display_name: string | null
           email_notifications_enabled: boolean | null
           id: string
+          referral_code: string | null
           updated_at: string
         }
         Insert: {
@@ -984,9 +986,11 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          credits_balance?: number | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
           id: string
+          referral_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -995,12 +999,56 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          credits_balance?: number | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
           id?: string
+          referral_code?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string | null
+          id: string
+          referee_id: string | null
+          referral_code: string
+          referrer_id: string | null
+          reward_applied: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referee_id?: string | null
+          referral_code: string
+          referrer_id?: string | null
+          reward_applied?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referee_id?: string | null
+          referral_code?: string
+          referrer_id?: string | null
+          reward_applied?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referee_id_fkey"
+            columns: ["referee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reports: {
         Row: {
@@ -1149,6 +1197,17 @@ export type Database = {
       increment_views: {
         Args: { listing_id: string }
         Returns: undefined
+      }
+      top_referrers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          display_name: string
+          email: string
+          successful_referrals: number
+          total_credits_earned: number
+          total_referrals: number
+          user_id: string
+        }[]
       }
     }
     Enums: {

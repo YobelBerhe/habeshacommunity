@@ -15,6 +15,7 @@ import MentorSkillsEditor from '@/components/MentorSkillsEditor';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ShareMentorProfile } from '@/components/ShareMentorProfile';
 
 type DateRange = {
   from: Date;
@@ -30,6 +31,7 @@ interface MentorData {
   price_cents: number;
   currency: string;
   topics: string[];
+  referral_code?: string;
 }
 
 interface BookingStat {
@@ -95,12 +97,17 @@ export default function MentorDashboard() {
         return;
       }
 
-      // Fetch mentor profile
+      // Fetch mentor profile with referral code from profiles
       const { data: mentorData, error: mentorError } = await supabase
         .from('mentors')
-        .select('*')
+        .select('*, referral_code:user_id(referral_code)')
         .eq('user_id', user.id)
         .maybeSingle();
+
+      // Flatten referral_code if nested
+      if (mentorData && mentorData.referral_code && typeof mentorData.referral_code === 'object') {
+        mentorData.referral_code = (mentorData.referral_code as any).referral_code;
+      }
 
       if (mentorError) throw mentorError;
 
@@ -240,6 +247,16 @@ export default function MentorDashboard() {
             </Badge>
           </div>
         </div>
+
+        {/* Share Profile Section */}
+        {mentor?.referral_code && (
+          <div className="mb-6">
+            <ShareMentorProfile 
+              mentorId={mentor.id} 
+              referralCode={mentor.referral_code} 
+            />
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="mb-6">
