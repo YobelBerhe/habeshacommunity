@@ -40,9 +40,9 @@ export default function MentorList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [topicFilter, setTopicFilter] = useState('all');
-  const [skillFilter, setSkillFilter] = useState('');
-  const [industryFilter, setIndustryFilter] = useState('');
-  const [languageFilter, setLanguageFilter] = useState('');
+  const [skillFilter, setSkillFilter] = useState('all');
+  const [industryFilter, setIndustryFilter] = useState('all');
+  const [languageFilter, setLanguageFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [minRating, setMinRating] = useState('0');
@@ -96,9 +96,9 @@ export default function MentorList() {
       mentorSkills.some((s: string) => s.toLowerCase().includes(lowerQuery));
 
     const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
-    const matchesSkill = !skillFilter || mentorSkills.some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase()));
-    const matchesIndustry = !industryFilter || mentorIndustries.some((i: string) => i.toLowerCase().includes(industryFilter.toLowerCase()));
-    const matchesLanguage = !languageFilter || mentorLanguages.some((l: string) => l.toLowerCase().includes(languageFilter.toLowerCase()));
+    const matchesSkill = !skillFilter || skillFilter === 'all' || mentorSkills.some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase()));
+    const matchesIndustry = !industryFilter || industryFilter === 'all' || mentorIndustries.some((i: string) => i.toLowerCase().includes(industryFilter.toLowerCase()));
+    const matchesLanguage = !languageFilter || languageFilter === 'all' || mentorLanguages.some((l: string) => l.toLowerCase().includes(languageFilter.toLowerCase()));
     const matchesCity = !cityFilter || mentor.city?.toLowerCase() === cityFilter.toLowerCase();
     const matchesVerified = !verifiedOnly || mentor.is_verified;
     const matchesRating = mentor.rating_avg >= parseFloat(minRating);
@@ -193,7 +193,7 @@ export default function MentorList() {
                 <SelectValue placeholder="Skill" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
-                <SelectItem value="">All Skills</SelectItem>
+                <SelectItem value="all">All Skills</SelectItem>
                 <SelectItem value="React">React</SelectItem>
                 <SelectItem value="AI">AI</SelectItem>
                 <SelectItem value="Career">Career</SelectItem>
@@ -207,7 +207,7 @@ export default function MentorList() {
                 <SelectValue placeholder="Industry" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
-                <SelectItem value="">All Industries</SelectItem>
+                <SelectItem value="all">All Industries</SelectItem>
                 <SelectItem value="Tech">Tech</SelectItem>
                 <SelectItem value="Healthcare">Healthcare</SelectItem>
                 <SelectItem value="Finance">Finance</SelectItem>
@@ -221,7 +221,7 @@ export default function MentorList() {
                 <SelectValue placeholder="Language" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
-                <SelectItem value="">All Languages</SelectItem>
+                <SelectItem value="all">All Languages</SelectItem>
                 <SelectItem value="English">English</SelectItem>
                 <SelectItem value="Spanish">Spanish</SelectItem>
                 <SelectItem value="French">French</SelectItem>
@@ -286,9 +286,9 @@ export default function MentorList() {
               size="sm"
               onClick={() => {
                 setSearchTerm('');
-                setSkillFilter('');
-                setIndustryFilter('');
-                setLanguageFilter('');
+                setSkillFilter('all');
+                setIndustryFilter('all');
+                setLanguageFilter('all');
                 setTopicFilter('all');
                 setCityFilter('');
                 setVerifiedOnly(false);
