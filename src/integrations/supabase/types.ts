@@ -24,6 +24,8 @@ export type Database = {
           meeting_url: string | null
           mentor_id: string
           notes: string | null
+          reminder_1h_sent: boolean | null
+          reminder_5m_sent: boolean | null
           session_date: string
           status: string | null
           stripe_payment_intent_id: string | null
@@ -39,6 +41,8 @@ export type Database = {
           meeting_url?: string | null
           mentor_id: string
           notes?: string | null
+          reminder_1h_sent?: boolean | null
+          reminder_5m_sent?: boolean | null
           session_date: string
           status?: string | null
           stripe_payment_intent_id?: string | null
@@ -54,6 +58,8 @@ export type Database = {
           meeting_url?: string | null
           mentor_id?: string
           notes?: string | null
+          reminder_1h_sent?: boolean | null
+          reminder_5m_sent?: boolean | null
           session_date?: string
           status?: string | null
           stripe_payment_intent_id?: string | null

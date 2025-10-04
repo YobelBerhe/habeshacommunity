@@ -18,20 +18,29 @@ serve(async (req: Request): Promise<Response> => {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Query bookings starting in 55-65 minutes
     const now = new Date();
-    const hourFromNow = new Date(now.getTime() + 55 * 60000); // 55 minutes
-    const hourFromNowPlus = new Date(now.getTime() + 65 * 60000); // 65 minutes
     
-    console.log('Checking for sessions between:', hourFromNow, 'and', hourFromNowPlus);
+    // 1-hour reminder window: 55-65 minutes
+    const in55min = new Date(now.getTime() + 55 * 60000);
+    const in65min = new Date(now.getTime() + 65 * 60000);
     
-    const { data: upcomingSessions, error: queryError } = await supabase
+    // 5-minute reminder window: 4-6 minutes
+    const in4min = new Date(now.getTime() + 4 * 60000);
+    const in6min = new Date(now.getTime() + 6 * 60000);
+    
+    console.log('Checking for 1-hour reminders:', in55min, 'to', in65min);
+    console.log('Checking for 5-minute reminders:', in4min, 'to', in6min);
+    
+    // Fetch 1-hour reminders not yet sent
+    const { data: sessions1h, error: error1h } = await supabase
       .from('bookings')
       .select(`
         id,
         session_date,
         user_id,
         mentor_id,
+        reminder_1h_sent,
+        reminder_5m_sent,
         mentors (
           name,
           user_id,
@@ -42,71 +51,105 @@ serve(async (req: Request): Promise<Response> => {
         )
       `)
       .eq('status', 'confirmed')
-      .gte('session_date', hourFromNow.toISOString())
-      .lte('session_date', hourFromNowPlus.toISOString());
+      .eq('reminder_1h_sent', false)
+      .gte('session_date', in55min.toISOString())
+      .lte('session_date', in65min.toISOString());
 
-    if (queryError) {
-      console.error('Query error:', queryError);
-      throw queryError;
+    if (error1h) {
+      console.error('Query error (1h):', error1h);
+      throw error1h;
     }
 
-    console.log(`Found ${upcomingSessions?.length || 0} upcoming sessions`);
+    // Fetch 5-minute reminders not yet sent
+    const { data: sessions5m, error: error5m } = await supabase
+      .from('bookings')
+      .select(`
+        id,
+        session_date,
+        user_id,
+        mentor_id,
+        reminder_1h_sent,
+        reminder_5m_sent,
+        mentors (
+          name,
+          user_id,
+          display_name
+        ),
+        profiles!bookings_user_id_fkey (
+          display_name
+        )
+      `)
+      .eq('status', 'confirmed')
+      .eq('reminder_5m_sent', false)
+      .gte('session_date', in4min.toISOString())
+      .lte('session_date', in6min.toISOString());
 
-    // Process each session
-    for (const session of upcomingSessions || []) {
-      const mentor = Array.isArray(session.mentors) ? session.mentors[0] : session.mentors;
-      const profile = Array.isArray(session.profiles) ? session.profiles[0] : session.profiles;
-      
-      const mentorName = mentor?.display_name || mentor?.name || 'Your mentor';
-      const menteeName = profile?.display_name || 'Your mentee';
-      const sessionTime = new Date(session.session_date).toLocaleString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZoneName: 'short'
-      });
-      
-      // Get emails for both users
-      const { data: menteeUser } = await supabase.auth.admin.getUserById(session.user_id);
-      const { data: mentorUser } = await supabase.auth.admin.getUserById(mentor.user_id);
+    if (error5m) {
+      console.error('Query error (5m):', error5m);
+      throw error5m;
+    }
 
-      const menteeEmail = menteeUser?.user?.email;
-      const mentorEmail = mentorUser?.user?.email;
+    console.log(`Found ${sessions1h?.length || 0} sessions needing 1-hour reminder`);
+    console.log(`Found ${sessions5m?.length || 0} sessions needing 5-minute reminder`);
 
-      console.log(`Processing session ${session.id}: mentee=${menteeEmail}, mentor=${mentorEmail}`);
+    // Helper function to send notifications
+    async function notifyForSession(session: any, isFiveMin: boolean) {
+        const mentor = Array.isArray(session.mentors) ? session.mentors[0] : session.mentors;
+        const profile = Array.isArray(session.profiles) ? session.profiles[0] : session.profiles;
+        
+        const mentorName = mentor?.display_name || mentor?.name || 'Your mentor';
+        const menteeName = profile?.display_name || 'Your mentee';
+        const sessionTime = new Date(session.session_date).toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short'
+        });
+        
+        const { data: menteeUser } = await supabase.auth.admin.getUserById(session.user_id);
+        const { data: mentorUser } = await supabase.auth.admin.getUserById(mentor.user_id);
 
-      // Create in-app notifications
-      const notifications = [
-        {
-          user_id: session.user_id,
-          type: 'booking',
-          title: '⏰ Session starts in 1 hour',
-          message: `Your session with ${mentorName} starts soon. Please be ready!`,
-          link: `/mentor/${session.mentor_id}`
-        },
-        {
-          user_id: mentor.user_id,
-          type: 'booking',
-          title: '⏰ Session starts in 1 hour',
-          message: `Your session with ${menteeName} starts soon. Please be ready!`,
-          link: `/mentor/dashboard`
+        const menteeEmail = menteeUser?.user?.email;
+        const mentorEmail = mentorUser?.user?.email;
+
+        const timeText = isFiveMin ? '5 minutes' : '1 hour';
+        const title = `⏰ Session starts in ${timeText}`;
+        const subject = `⏰ Reminder: Your session starts in ${timeText}`;
+
+        console.log(`Processing ${timeText} reminder for session ${session.id}: mentee=${menteeEmail}, mentor=${mentorEmail}`);
+
+        // Create in-app notifications
+        const notifications = [
+          {
+            user_id: session.user_id,
+            type: 'booking',
+            title,
+            message: `Your session with ${mentorName} is about to start. Please be ready!`,
+            link: `/mentor/${session.mentor_id}`
+          },
+          {
+            user_id: mentor.user_id,
+            type: 'booking',
+            title,
+            message: `Your session with ${menteeName} is about to start. Please be ready!`,
+            link: `/mentor/dashboard`
+          }
+        ];
+
+        const { error: notifError } = await supabase
+          .from('notifications')
+          .insert(notifications);
+
+        if (notifError) {
+          console.error('Notification creation error:', notifError);
+        } else {
+          console.log(`Created in-app notifications for session ${session.id}`);
         }
-      ];
 
-      const { error: notifError } = await supabase
-        .from('notifications')
-        .insert(notifications);
-
-      if (notifError) {
-        console.error('Notification creation error:', notifError);
-      } else {
-        console.log('Created in-app notifications for session', session.id);
-      }
-
-      // Send emails
-      const emailTemplate = (recipientName: string, partnerName: string) => `<!DOCTYPE html>
+        // Email template
+        const emailTemplate = (recipientName: string, partnerName: string) => `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
@@ -122,7 +165,7 @@ serve(async (req: Request): Promise<Response> => {
       <tr>
         <td style="padding:20px; color:#333333; font-size:16px; line-height:1.5;">
           <p>👋 Hello ${recipientName},</p>
-          <p>This is a quick reminder that your mentoring session starts in <strong>1 hour</strong> with <strong>${partnerName}</strong>.</p>
+          <p>This is a quick reminder that your mentoring session starts in <strong>${timeText}</strong> with <strong>${partnerName}</strong>.</p>
           <table cellpadding="10" cellspacing="0" width="100%" style="margin:15px 0; border:1px solid #ddd; border-radius:6px;">
             <tr>
               <td><strong>Session Time:</strong></td>
@@ -136,7 +179,7 @@ serve(async (req: Request): Promise<Response> => {
             </a>
           </p>
           <p style="margin-top:20px; font-size:14px; color:#777;">
-            Please be ready a few minutes early to ensure a smooth start. 
+            ${isFiveMin ? 'Your session is starting very soon!' : 'Please be ready a few minutes early to ensure a smooth start.'}
           </p>
         </td>
       </tr>
@@ -149,66 +192,89 @@ serve(async (req: Request): Promise<Response> => {
   </body>
 </html>`;
 
-      // Send to mentee
-      if (menteeEmail) {
-        try {
-          const menteeResponse = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${RESEND_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: "HabeshaCommunity <no-reply@habeshacommunity.com>",
-              to: [menteeEmail],
-              subject: "⏰ Reminder: Your session starts in 1 hour",
-              html: emailTemplate(menteeName, mentorName),
-            }),
-          });
+        // Send to mentee
+        if (menteeEmail) {
+          try {
+            const menteeResponse = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                from: "HabeshaCommunity <no-reply@habeshacommunity.com>",
+                to: [menteeEmail],
+                subject,
+                html: emailTemplate(menteeName, mentorName),
+              }),
+            });
 
-          if (!menteeResponse.ok) {
-            console.error('Failed to send email to mentee:', await menteeResponse.text());
-          } else {
-            console.log('Email sent to mentee:', menteeEmail);
+            if (!menteeResponse.ok) {
+              console.error('Failed to send email to mentee:', await menteeResponse.text());
+            } else {
+              console.log('Email sent to mentee:', menteeEmail);
+            }
+          } catch (emailError) {
+            console.error('Error sending email to mentee:', emailError);
           }
-        } catch (emailError) {
-          console.error('Error sending email to mentee:', emailError);
         }
+
+        // Send to mentor
+        if (mentorEmail) {
+          try {
+            const mentorResponse = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                from: "HabeshaCommunity <no-reply@habeshacommunity.com>",
+                to: [mentorEmail],
+                subject,
+                html: emailTemplate(mentorName, menteeName),
+              }),
+            });
+
+            if (!mentorResponse.ok) {
+              console.error('Failed to send email to mentor:', await mentorResponse.text());
+            } else {
+              console.log('Email sent to mentor:', mentorEmail);
+            }
+          } catch (emailError) {
+            console.error('Error sending email to mentor:', emailError);
+          }
+        }
+
+        // Mark reminder as sent
+        const flagField = isFiveMin ? 'reminder_5m_sent' : 'reminder_1h_sent';
+        await supabase
+          .from('bookings')
+          .update({ [flagField]: true })
+          .eq('id', session.id);
+
+        console.log(`Marked ${flagField} for session ${session.id}`);
       }
 
-      // Send to mentor
-      if (mentorEmail) {
-        try {
-          const mentorResponse = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${RESEND_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: "HabeshaCommunity <no-reply@habeshacommunity.com>",
-              to: [mentorEmail],
-              subject: "⏰ Reminder: Your session starts in 1 hour",
-              html: emailTemplate(mentorName, menteeName),
-            }),
-          });
-
-          if (!mentorResponse.ok) {
-            console.error('Failed to send email to mentor:', await mentorResponse.text());
-          } else {
-            console.log('Email sent to mentor:', mentorEmail);
-          }
-        } catch (emailError) {
-          console.error('Error sending email to mentor:', emailError);
-        }
-      }
+    // Process 1-hour reminders
+    for (const session of sessions1h || []) {
+      await notifyForSession(session, false);
     }
+
+    // Process 5-minute reminders
+    for (const session of sessions5m || []) {
+      await notifyForSession(session, true);
+    }
+
+    const totalProcessed = (sessions1h?.length || 0) + (sessions5m?.length || 0);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        processed: upcomingSessions?.length || 0,
-        message: `Processed ${upcomingSessions?.length || 0} session reminders`
+        reminders_1h: sessions1h?.length || 0,
+        reminders_5m: sessions5m?.length || 0,
+        total_processed: totalProcessed,
+        message: `Processed ${totalProcessed} reminders (${sessions1h?.length || 0} × 1h, ${sessions5m?.length || 0} × 5min)`
       }),
       {
         status: 200,
