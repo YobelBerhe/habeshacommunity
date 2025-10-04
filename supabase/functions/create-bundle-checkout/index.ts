@@ -27,7 +27,10 @@ serve(async (req: Request) => {
     const { mentorId, bundleSize } = await req.json();
     
     if (!mentorId || !bundleSize) {
-      throw new Error("Missing mentorId or bundleSize");
+      return new Response(JSON.stringify({ error: 'Missing mentorId or bundleSize' }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     const supabase = createClient(
@@ -43,7 +46,10 @@ serve(async (req: Request) => {
       .single();
 
     if (mentorError || !mentor) {
-      throw new Error('Mentor not found');
+      return new Response(JSON.stringify({ error: 'Mentor not found' }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     if (!mentor.stripe_account_id) {
@@ -51,7 +57,7 @@ serve(async (req: Request) => {
         error: 'This mentor has not connected their Stripe account yet. Please contact them to set up payments.' 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
+        status: 200,
       });
     }
 
@@ -60,7 +66,7 @@ serve(async (req: Request) => {
         error: 'Mentor payouts are being set up. Please try again in a few minutes.' 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
+        status: 200,
       });
     }
 
