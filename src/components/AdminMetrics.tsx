@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Parser } from "json2csv";
+import { exportToCSV } from "@/utils/csvExport";
 import {
   LineChart,
   Line,
@@ -127,30 +127,12 @@ export default function AdminMetrics() {
 
   const handleExportMentors = () => {
     if (!topMentors || topMentors.length === 0) return;
-    const parser = new Parser();
-    const csv = parser.parse(topMentors);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `top-mentors-${timeframe}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToCSV(topMentors, `top-mentors-${timeframe}.csv`);
   };
 
   const handleExportRevenue = () => {
     if (!chartData || chartData.length === 0) return;
-    const parser = new Parser();
-    const csv = parser.parse(chartData);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `revenue-data-${timeframe}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToCSV(chartData, `revenue-data-${timeframe}.csv`);
   };
 
   return (
