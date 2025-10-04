@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket, ArrowUpFromLine } from 'lucide-react';
+import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket, ArrowUpFromLine, Heart } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import { BundlePurchase } from '@/components/BundlePurchase';
@@ -200,7 +200,7 @@ export default function MentorDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MentorHeader title={mentor.display_name || mentor.name} backPath="/mentor" />
+      <MentorHeader title="Mentor Profile" backPath="/mentor" />
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -209,15 +209,26 @@ export default function MentorDetail() {
           <div className="lg:col-span-2 space-y-6">
             {/* Profile Header Card */}
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 relative">
+                {/* Save button - upper right corner on mobile */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 z-10"
+                  title="Save mentor"
+                >
+                  <Heart className="w-5 h-5" />
+                </Button>
+
                 <div className="flex items-start gap-4">
-                  <Avatar className="w-24 h-24 rounded-lg">
+                  {/* Larger profile photo on mobile */}
+                  <Avatar className="w-32 h-32 lg:w-24 lg:h-24 rounded-lg">
                     <AvatarImage 
                       src={mentor.photos?.[0] || mentor.profile_picture_url || mentor.avatar_url} 
                       alt={mentor.display_name || mentor.name}
                       className="object-cover"
                     />
-                    <AvatarFallback className="rounded-lg text-2xl">{(mentor.display_name || mentor.name)?.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="rounded-lg text-3xl lg:text-2xl">{(mentor.display_name || mentor.name)?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   
                   <div className="flex-1">
@@ -231,7 +242,7 @@ export default function MentorDetail() {
                         variant="ghost"
                         size="sm"
                         onClick={handleShareProfile}
-                        className="ml-auto"
+                        className="ml-auto lg:inline-flex hidden"
                         title="Share profile"
                       >
                         <ArrowUpFromLine className="w-4 h-4" />
