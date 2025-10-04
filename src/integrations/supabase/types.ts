@@ -582,7 +582,6 @@ export type Database = {
           created_at: string
           credits_left: number
           currency: string
-          expires_at: string | null
           id: string
           mentor_id: string
           price_cents: number
@@ -594,7 +593,6 @@ export type Database = {
           created_at?: string
           credits_left: number
           currency?: string
-          expires_at?: string | null
           id?: string
           mentor_id: string
           price_cents: number
@@ -606,7 +604,6 @@ export type Database = {
           created_at?: string
           credits_left?: number
           currency?: string
-          expires_at?: string | null
           id?: string
           mentor_id?: string
           price_cents?: number

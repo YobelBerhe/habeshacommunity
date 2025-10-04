@@ -5,11 +5,14 @@ import { useAuth } from '@/store/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, DollarSign, Calendar } from 'lucide-react';
+import { MapPin, DollarSign, Calendar, Ticket } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import MentorReviews from '@/components/MentorReviews';
 import MentorHeader from '@/components/MentorHeader';
+import { BundlePurchase } from '@/components/BundlePurchase';
+import { CreditsDisplay } from '@/components/CreditsDisplay';
+import { bookSessionWithCredit, checkAvailableCredits } from '@/utils/bundleActions';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,12 +21,23 @@ export default function MentorDetail() {
   const { toast } = useToast();
   const [mentor, setMentor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [availableCredits, setAvailableCredits] = useState({ hasCredits: false, totalCredits: 0 });
 
   useEffect(() => {
     if (id) {
       fetchMentor();
+      if (user) {
+        loadCredits();
+      }
     }
-  }, [id]);
+  }, [id, user]);
+
+  const loadCredits = async () => {
+    if (!id) return;
+    const credits = await checkAvailableCredits(id);
+    setAvailableCredits(credits);
+  };
 
   const fetchMentor = async () => {
     try {
@@ -144,27 +158,72 @@ export default function MentorDetail() {
                 </div>
               )}
 
-              <div className="pt-4">
+              <div className="pt-4 space-y-3">
+                {availableCredits.hasCredits && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-primary/10 p-3 rounded-lg">
+                    <Ticket className="w-4 h-4 text-primary" />
+                    <span>You have {availableCredits.totalCredits} credits available</span>
+                  </div>
+                )}
+                
                 <Button 
-                  onClick={() => {
+                  onClick={async () => {
                     if (!user) {
                       navigate('/auth/login');
                       return;
                     }
-                    toast({
-                      title: "Contact Mentor",
-                      description: "Booking system requires additional database setup",
-                    });
+                    
+                    setBookingLoading(true);
+                    try {
+                      const result = await bookSessionWithCredit(id!);
+                      
+                      if (result.needsPurchase) {
+                        toast({
+                          title: "No credits available",
+                          description: "Purchase a bundle or book a single session below",
+                        });
+                      } else if (result.success) {
+                        toast({
+                          title: "Session booked!",
+                          description: `You have ${result.creditsLeft} credits remaining`,
+                        });
+                        loadCredits();
+                        navigate('/mentor/bookings');
+                      }
+                    } catch (error) {
+                      toast({
+                        title: "Booking failed",
+                        description: error instanceof Error ? error.message : "Please try again",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setBookingLoading(false);
+                    }
                   }}
                   className="w-full"
                   size="lg"
+                  disabled={bookingLoading}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  Book a Session
+                  {bookingLoading ? 'Processing...' : availableCredits.hasCredits ? 'Book with Credit' : 'Book a Session'}
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* User's Credits for this Mentor */}
+          {user && (
+            <CreditsDisplay userId={user.id} mentorId={id} showActions={false} />
+          )}
+
+          {/* Bundle Purchase Section */}
+          {mentor.price_cents && (
+            <BundlePurchase
+              mentorId={mentor.id}
+              singleSessionPrice={mentor.price_cents}
+              currency={mentor.currency}
+            />
+          )}
 
           {/* Reviews Section */}
           <MentorReviews

@@ -55,13 +55,35 @@ serve(async (req: Request) => {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const bookingId = session?.metadata?.booking_id;
+      const bundleSize = session?.metadata?.bundle_size;
       
-      if (bookingId) {
-        const supabase = createClient(
-          Deno.env.get("SUPABASE_URL") ?? "",
-          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-        );
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
 
+      // Handle bundle purchase
+      if (bundleSize) {
+        const userId = session?.metadata?.user_id;
+        const mentorId = session?.metadata?.mentor_id;
+
+        if (userId && mentorId) {
+          await supabase
+            .from('mentor_credits')
+            .insert({
+              user_id: userId,
+              mentor_id: mentorId,
+              bundle_size: parseInt(bundleSize),
+              credits_left: parseInt(bundleSize),
+              price_cents: session.amount_total,
+              currency: session.currency?.toUpperCase() || 'USD',
+            });
+
+          console.log('Bundle credits created:', { userId, mentorId, bundleSize });
+        }
+      }
+      // Handle single session booking
+      else if (bookingId) {
         // Get booking and mentor details
         const { data: booking } = await supabase
           .from('mentor_bookings')
