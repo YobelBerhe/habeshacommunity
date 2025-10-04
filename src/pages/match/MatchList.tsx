@@ -69,8 +69,9 @@ export default function MatchList() {
   };
 
   const handleChat = async (match: Match) => {
+    if (!user) return;
     try {
-      const otherUserId = match.user1_id === user!.id ? match.user2_id : match.user1_id;
+      const otherUserId = match.user1_id === user.id ? match.user2_id : match.user1_id;
       const { getOrCreateConversation } = await import('@/utils/conversations');
       const { conversationId } = await getOrCreateConversation(otherUserId);
       navigate('/inbox', { state: { openConversationId: conversationId, mentorName: match.profile?.name || 'Conversation' } });

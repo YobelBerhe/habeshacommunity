@@ -972,7 +972,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id: string
+          id?: string
           link?: string | null
           message?: string | null
           read?: boolean | null

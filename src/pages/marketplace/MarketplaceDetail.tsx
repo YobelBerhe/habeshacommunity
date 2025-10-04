@@ -291,7 +291,19 @@ export default function MarketplaceDetail() {
           <div className="mb-6">
             <div className="flex flex-col gap-3">
               <Button
-                onClick={() => navigate(`/inbox?listing=${listing.id}`)}
+                onClick={async () => {
+                  if (!user) {
+                    navigate('/auth/login');
+                    return;
+                  }
+                  try {
+                    const { getOrCreateConversation } = await import('@/utils/conversations');
+                    const { conversationId } = await getOrCreateConversation(listing.user_id);
+                    navigate('/inbox', { state: { openConversationId: conversationId, mentorName: listing.title } });
+                  } catch (e: any) {
+                    console.error('Failed to start conversation:', e);
+                  }
+                }}
                 className="w-full"
                 disabled={user?.id === listing.user_id}
               >
