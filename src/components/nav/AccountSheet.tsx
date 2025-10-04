@@ -1,14 +1,29 @@
 import { Link } from 'react-router-dom';
-import { Heart, Settings, LogOut, LogIn, UserPlus, List } from 'lucide-react';
+import { Heart, Settings, LogOut, LogIn, UserPlus, List, GraduationCap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
 import { useLanguage } from '@/store/language';
 import { t } from '@/lib/i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useEffect, useState } from 'react';
 
 export function AccountSheet({ children }:{ children?: React.ReactNode }) {
   const { user, refresh } = useAuth();
   const { language } = useLanguage();
+  const [hasMentorProfile, setHasMentorProfile] = useState(false);
+
+  useEffect(() => {
+    const checkMentorProfile = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('mentors')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setHasMentorProfile(!!data);
+    };
+    checkMentorProfile();
+  }, [user]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -44,6 +59,16 @@ export function AccountSheet({ children }:{ children?: React.ReactNode }) {
                 <List className="w-4 h-4" />
                 {t(language, "my_listings")}
               </Link>
+
+              {hasMentorProfile && (
+                <Link 
+                  to="/mentor/dashboard" 
+                  className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                >
+                  <GraduationCap className="w-4 h-4 text-primary" />
+                  Mentor Dashboard
+                </Link>
+              )}
               
                <Link 
                  to="/account/settings" 
