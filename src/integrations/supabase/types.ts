@@ -966,6 +966,7 @@ export type Database = {
           link: string | null
           message: string | null
           read: boolean | null
+          read_at: string | null
           title: string
           type: Database["public"]["Enums"]["notification_type"]
           user_id: string
@@ -976,6 +977,7 @@ export type Database = {
           link?: string | null
           message?: string | null
           read?: boolean | null
+          read_at?: string | null
           title: string
           type: Database["public"]["Enums"]["notification_type"]
           user_id: string
@@ -986,6 +988,7 @@ export type Database = {
           link?: string | null
           message?: string | null
           read?: boolean | null
+          read_at?: string | null
           title?: string
           type?: Database["public"]["Enums"]["notification_type"]
           user_id?: string

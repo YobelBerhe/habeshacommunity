@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Bell, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 type NotificationRow = {
   id: string;
@@ -17,6 +18,7 @@ type NotificationRow = {
 };
 
 export default function NotificationsPage() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +92,7 @@ export default function NotificationsPage() {
     }
     
     if (notification.link) {
-      window.location.href = notification.link;
+      navigate(notification.link);
     }
   };
 

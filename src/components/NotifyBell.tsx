@@ -31,6 +31,7 @@ export default function NotifyBell() {
       .from('notifications')
       .select('*')
       .eq('user_id', currentUser.id)
+      .is('read_at', null)
       .order('created_at', { ascending: false })
       .limit(50);
     
@@ -60,12 +61,18 @@ export default function NotifyBell() {
           },
           (payload) => {
             if (payload.eventType === 'INSERT') {
-              setItems(prev => [payload.new as Notification, ...prev].slice(0, 50));
-              toast.info('New notification received');
+              const newNotif = payload.new as Notification;
+              // Only add if it's unread
+              if (!newNotif.read_at) {
+                setItems(prev => [newNotif, ...prev].slice(0, 50));
+                toast.info('New notification received');
+              }
             } else if (payload.eventType === 'UPDATE') {
-              setItems(prev => prev.map(i => 
-                i.id === (payload.new as any).id ? (payload.new as Notification) : i
-              ));
+              const updatedNotif = payload.new as Notification;
+              // Remove from list if it was marked as read
+              if (updatedNotif.read_at) {
+                setItems(prev => prev.filter(i => i.id !== updatedNotif.id));
+              }
             }
           }
         ).subscribe();
@@ -101,10 +108,8 @@ export default function NotifyBell() {
 
       if (error) throw error;
 
-      setItems(prev => prev.map(i => ({ 
-        ...i, 
-        read_at: i.read_at ?? new Date().toISOString() 
-      })));
+      // Clear all items since they're all now read
+      setItems([]);
       
       toast.success('All notifications marked as read');
     } catch (error) {
@@ -121,9 +126,8 @@ export default function NotifyBell() {
 
       if (error) throw error;
 
-      setItems(prev => prev.map(i => 
-        i.id === id ? { ...i, read_at: new Date().toISOString() } : i
-      ));
+      // Remove the notification from the list since it's now read
+      setItems(prev => prev.filter(i => i.id !== id));
     } catch (error) {
       console.error('Error marking notification as read:', error);
       toast.error('Failed to mark notification as read');
