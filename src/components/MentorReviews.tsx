@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Star } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/store/auth';
+import MentorReviewForm from '@/components/MentorReviewForm';
 
 interface Review {
   id: string;
@@ -19,19 +22,58 @@ interface MentorReviewsProps {
   mentorId: string;
   ratingAvg?: number;
   ratingCount?: number;
+  mentorName?: string;
 }
 
 export default function MentorReviews({
   mentorId,
   ratingAvg = 0,
   ratingCount = 0,
+  mentorName = 'this mentor',
 }: MentorReviewsProps) {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [eligibleBooking, setEligibleBooking] = useState<{ id: string } | null>(null);
 
   useEffect(() => {
     fetchReviews();
-  }, [mentorId]);
+    if (user) {
+      checkEligibility();
+    }
+  }, [mentorId, user]);
+
+  const checkEligibility = async () => {
+    if (!user) return;
+
+    try {
+      // Check if user has completed bookings with this mentor that haven't been reviewed
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('mentor_id', mentorId)
+        .eq('user_id', user.id)
+        .eq('status', 'confirmed')
+        .limit(1);
+
+      if (bookings && bookings.length > 0) {
+        // Check if user already reviewed this booking
+        const { data: existingReview } = await supabase
+          .from('mentor_reviews')
+          .select('id')
+          .eq('mentor_id', mentorId)
+          .eq('user_id', user.id)
+          .limit(1);
+
+        if (!existingReview || existingReview.length === 0) {
+          setEligibleBooking(bookings[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking review eligibility:', error);
+    }
+  };
 
   const fetchReviews = async () => {
     try {
@@ -71,6 +113,12 @@ export default function MentorReviews({
     }
   };
 
+  const handleReviewSubmitted = () => {
+    setShowReviewForm(false);
+    setEligibleBooking(null);
+    fetchReviews();
+  };
+
   const renderStars = (rating: number) => {
     return (
       <div className="flex gap-0.5">
@@ -89,22 +137,30 @@ export default function MentorReviews({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Reviews</span>
-          {ratingCount > 0 && (
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              <span className="text-xl font-bold">{ratingAvg.toFixed(1)}</span>
-              <span className="text-sm text-muted-foreground">
-                ({ratingCount} {ratingCount === 1 ? 'review' : 'reviews'})
-              </span>
-            </div>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-3">
+              <span>Reviews</span>
+              {ratingCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <span className="text-xl font-bold">{ratingAvg.toFixed(1)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    ({ratingCount} {ratingCount === 1 ? 'review' : 'reviews'})
+                  </span>
+                </div>
+              )}
+            </CardTitle>
+            {eligibleBooking && (
+              <Button onClick={() => setShowReviewForm(true)} size="sm">
+                Write a Review
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
         {loading ? (
           <div className="text-center py-8 text-muted-foreground">
             Loading reviews...
@@ -151,5 +207,17 @@ export default function MentorReviews({
         )}
       </CardContent>
     </Card>
+
+    {eligibleBooking && (
+      <MentorReviewForm
+        isOpen={showReviewForm}
+        onClose={() => setShowReviewForm(false)}
+        mentorId={mentorId}
+        mentorName={mentorName}
+        bookingId={eligibleBooking.id}
+        onReviewSubmitted={handleReviewSubmitted}
+      />
+    )}
+  </>
   );
 }

@@ -295,6 +295,7 @@ export default function MentorDetail() {
           {/* Reviews Section */}
           <MentorReviews
             mentorId={mentor.id}
+            mentorName={mentor.display_name || mentor.name}
             ratingAvg={mentor.rating_avg}
             ratingCount={mentor.rating_count}
           />
