@@ -37,7 +37,7 @@ serve(async (req: Request): Promise<Response> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: "HabeshaCommunity <onboarding@resend.dev>",
+        from: "HabeshaCommunity <no-reply@habeshacommunity.com>",
         to: [recipientEmail],
         subject: `💬 New message on HabeshaCommunity`,
         html: `<!DOCTYPE html>
