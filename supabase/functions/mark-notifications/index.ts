@@ -13,8 +13,8 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
-    const supabase = createClient(
+    // Create Supabase clients
+    const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
@@ -24,8 +24,15 @@ serve(async (req) => {
       }
     );
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Get authenticated user (extract Bearer token explicitly)
+    const authHeader = req.headers.get('Authorization') || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
     
     if (authError || !user) {
       return new Response(
@@ -38,7 +45,7 @@ serve(async (req) => {
 
     if (action === 'mark-all') {
       // Mark all unread notifications as read
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
         .is('read_at', null)
@@ -59,7 +66,7 @@ serve(async (req) => {
 
     } else if (action === 'mark-one' && notificationId) {
       // Mark specific notification as read
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
         .eq('user_id', user.id)
