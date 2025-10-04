@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import MentorReviewForm from '@/components/MentorReviewForm';
 
 interface MyBooking {
   id: string;
@@ -23,6 +24,9 @@ export default function MyBookings() {
   const [bookings, setBookings] = useState<MyBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<MyBooking | null>(null);
+  const [reviewedBookings, setReviewedBookings] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadBookings = async () => {
@@ -50,6 +54,18 @@ export default function MyBookings() {
           console.error('Error loading bookings:', error);
         } else {
           setBookings(data || []);
+          
+          // Check which bookings have reviews
+          if (data && data.length > 0) {
+            const { data: reviews } = await supabase
+              .from('mentor_reviews')
+              .select('booking_id')
+              .in('booking_id', data.map(b => b.id));
+            
+            if (reviews) {
+              setReviewedBookings(new Set(reviews.map(r => r.booking_id)));
+            }
+          }
         }
       } catch (error) {
         console.error('Error in loadBookings:', error);
@@ -60,6 +76,14 @@ export default function MyBookings() {
 
     loadBookings();
   }, []);
+
+  const handleReviewSubmitted = () => {
+    if (selectedBooking) {
+      setReviewedBookings(new Set([...reviewedBookings, selectedBooking.id]));
+    }
+    setReviewModalOpen(false);
+    setSelectedBooking(null);
+  };
 
   const getStatusBadge = (status: string) => {
     const variants: { [key: string]: any } = {
@@ -158,9 +182,29 @@ export default function MyBookings() {
                   )}
                   
                   {booking.status === 'completed' && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-blue-800 font-medium">✓ Session completed</p>
-                      <p className="text-blue-700 text-sm">We hope you found the session helpful!</p>
+                    <div className="mt-4 space-y-3">
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-blue-800 font-medium">✓ Session completed</p>
+                        <p className="text-blue-700 text-sm">We hope you found the session helpful!</p>
+                      </div>
+                      {!reviewedBookings.has(booking.id) && (
+                        <Button
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setReviewModalOpen(true);
+                          }}
+                          className="w-full"
+                          variant="outline"
+                        >
+                          <Star className="w-4 h-4 mr-2" />
+                          Leave a Review
+                        </Button>
+                      )}
+                      {reviewedBookings.has(booking.id) && (
+                        <p className="text-sm text-muted-foreground text-center">
+                          ✓ Review submitted
+                        </p>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -169,6 +213,21 @@ export default function MyBookings() {
           </div>
         )}
       </div>
+
+      {/* Review Modal */}
+      {selectedBooking && (
+        <MentorReviewForm
+          isOpen={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          mentorId={selectedBooking.mentor_id}
+          mentorName={selectedBooking.mentors?.display_name || 'Mentor'}
+          bookingId={selectedBooking.id}
+          onReviewSubmitted={handleReviewSubmitted}
+        />
+      )}
     </div>
   );
 }

@@ -5,10 +5,11 @@ import { useAuth } from '@/store/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, DollarSign, ArrowLeft, Calendar } from 'lucide-react';
+import { MapPin, DollarSign, ArrowLeft, Calendar, Star } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { getAppState } from '@/utils/storage';
 import { VerificationBadge } from '@/components/VerificationBadge';
+import MentorReviews from '@/components/MentorReviews';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -166,6 +167,13 @@ export default function MentorDetail() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Reviews Section */}
+          <MentorReviews
+            mentorId={mentor.id}
+            ratingAvg={mentor.rating_avg}
+            ratingCount={mentor.rating_count}
+          />
         </div>
       </div>
     </div>

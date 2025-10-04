@@ -573,6 +573,51 @@ export type Database = {
           },
         ]
       }
+      mentor_reviews: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          id: string
+          mentor_id: string
+          rating: number
+          review_text: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          mentor_id: string
+          rating: number
+          review_text?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          rating?: number
+          review_text?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_reviews_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_verifications: {
         Row: {
           admin_notes: string | null
@@ -640,6 +685,8 @@ export type Database = {
           payouts_enabled: boolean | null
           photos: string[] | null
           price_cents: number | null
+          rating_avg: number | null
+          rating_count: number | null
           stripe_account_id: string | null
           timezone: string | null
           title: string
@@ -668,6 +715,8 @@ export type Database = {
           payouts_enabled?: boolean | null
           photos?: string[] | null
           price_cents?: number | null
+          rating_avg?: number | null
+          rating_count?: number | null
           stripe_account_id?: string | null
           timezone?: string | null
           title: string
@@ -696,6 +745,8 @@ export type Database = {
           payouts_enabled?: boolean | null
           photos?: string[] | null
           price_cents?: number | null
+          rating_avg?: number | null
+          rating_count?: number | null
           stripe_account_id?: string | null
           timezone?: string | null
           title?: string

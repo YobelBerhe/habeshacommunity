@@ -26,7 +26,8 @@ interface Mentor {
   country: string;
   price_cents: number;
   currency: string;
-  rating?: number;
+  rating_avg?: number;
+  rating_count?: number;
   photos: string[];
   website_url: string;
   social_links?: any;
@@ -55,6 +56,7 @@ export default function MentorList() {
         .from('mentors')
         .select('*')
         .order('is_verified', { ascending: false })
+        .order('rating_avg', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -200,10 +202,11 @@ export default function MentorList() {
                       <CountryFlag country={mentor.country} className="w-5 h-4" />
                     )}
                   </div>
-                  {(mentor.rating ?? 0) > 0 && (
+                  {(mentor.rating_avg ?? 0) > 0 && (
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm">{mentor.rating?.toFixed(1)}</span>
+                      <span className="text-sm font-medium">{mentor.rating_avg?.toFixed(1)}</span>
+                      <span className="text-xs text-muted-foreground">({mentor.rating_count})</span>
                     </div>
                   )}
                 </CardTitle>
