@@ -156,34 +156,48 @@ export default function MentorList() {
       </div>;
   }
   return <div className="min-h-screen bg-background">
-      <MentorHeader title="Find a Mentor" backPath="/" />
-      
-      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
-        {/* Desktop: Heading + Button */}
-        <div className="hidden md:flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Find a Mentor</h1>
-          <Button onClick={() => navigate('/mentor/onboarding')}>
-            Become a Mentor
+      {/* Sticky Header with Search and Filters */}
+      <header className="sticky top-0 z-50 bg-background border-b">
+        {/* Back arrow and title */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="h-8 w-8">
+            <span className="sr-only">Back</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Button>
+          <h1 className="text-lg font-semibold">Search Mentors</h1>
         </div>
 
-        {/* Mobile: Just heading, button is in sticky footer */}
-        
-
-        {/* Compact Filter Bar */}
-        <div className="space-y-3 mb-6">
-          {/* Search and Primary Filters */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input placeholder="Search mentors..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1" />
-            <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap px-3 py-2 border rounded-md bg-background">
-              <input type="checkbox" checked={verifiedOnly} onChange={e => setVerifiedOnly(e.target.checked)} className="w-4 h-4 rounded border-border text-primary focus:ring-primary" />
-              <CheckCircle2 className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Verified</span>
-            </label>
-          </div>
+        {/* Filters Section */}
+        <div className="px-4 py-3 space-y-2">
+          {/* Search Bar */}
+          <Input 
+            placeholder="Search mentors..." 
+            value={searchTerm} 
+            onChange={e => setSearchTerm(e.target.value)} 
+            className="w-full"
+          />
           
-          {/* Compact Filters Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+          {/* Main Filters Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2">
+            <Select value={sortBy} onValueChange={(value) => {
+              setSortBy(value);
+              if (value === 'featured' && verifiedOnly) {
+                setVerifiedOnly(false);
+              }
+            }}>
+              <SelectTrigger className="bg-background h-9 text-sm">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="featured">Featured</SelectItem>
+                <SelectItem value="verified">Verified Only</SelectItem>
+                <SelectItem value="rating">Top Rated</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="price_low">Low Price</SelectItem>
+                <SelectItem value="price_high">High Price</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Select value={skillFilter} onValueChange={setSkillFilter}>
               <SelectTrigger className="bg-background h-9 text-sm">
                 <SelectValue placeholder="Skill" />
@@ -195,20 +209,6 @@ export default function MentorList() {
                 <SelectItem value="Career">Career</SelectItem>
                 <SelectItem value="Leadership">Leadership</SelectItem>
                 <SelectItem value="Design">Design</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={industryFilter} onValueChange={setIndustryFilter}>
-              <SelectTrigger className="bg-background h-9 text-sm">
-                <SelectValue placeholder="Industry" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                <SelectItem value="all">All Industries</SelectItem>
-                <SelectItem value="Tech">Tech</SelectItem>
-                <SelectItem value="Healthcare">Healthcare</SelectItem>
-                <SelectItem value="Finance">Finance</SelectItem>
-                <SelectItem value="Education">Education</SelectItem>
-                <SelectItem value="Startups">Startups</SelectItem>
               </SelectContent>
             </Select>
 
@@ -226,22 +226,6 @@ export default function MentorList() {
               </SelectContent>
             </Select>
 
-            <Select value={topicFilter} onValueChange={setTopicFilter}>
-              <SelectTrigger className="bg-background h-9 text-sm">
-                <SelectValue placeholder="Topic" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                <SelectItem value="all">All Topics</SelectItem>
-                <SelectItem value="language">Language</SelectItem>
-                <SelectItem value="health">Health</SelectItem>
-                <SelectItem value="career">Career</SelectItem>
-                <SelectItem value="tech">Tech</SelectItem>
-                <SelectItem value="finance">Finance</SelectItem>
-                <SelectItem value="immigration">Immigration</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-              </SelectContent>
-            </Select>
-
             <Select value={minRating} onValueChange={setMinRating}>
               <SelectTrigger className="bg-background h-9 text-sm">
                 <SelectValue placeholder="Rating" />
@@ -254,39 +238,29 @@ export default function MentorList() {
               </SelectContent>
             </Select>
 
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="bg-background h-9 text-sm">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="verified">Verified</SelectItem>
-                <SelectItem value="rating">Top Rated</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="price_low">Low Price</SelectItem>
-                <SelectItem value="price_high">High Price</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* City Filter + Clear */}
-          <div className="flex gap-2">
-            <Input placeholder="City" value={cityFilter} onChange={e => setCityFilter(e.target.value)} className="flex-1 h-9 text-sm" />
-            <Button variant="outline" size="sm" onClick={() => {
-            setSearchTerm('');
-            setSkillFilter('all');
-            setIndustryFilter('all');
-            setLanguageFilter('all');
-            setTopicFilter('all');
-            setCityFilter('');
-            setVerifiedOnly(false);
-            setMinRating('0');
-            setSortBy('featured');
-          }}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setSearchTerm('');
+                setSkillFilter('all');
+                setIndustryFilter('all');
+                setLanguageFilter('all');
+                setTopicFilter('all');
+                setCityFilter('');
+                setVerifiedOnly(false);
+                setMinRating('0');
+                setSortBy('featured');
+              }}
+              className="h-9"
+            >
               Clear
             </Button>
           </div>
         </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-6 pb-24 md:pb-8">
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedMentors.map(mentor => <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
