@@ -525,6 +525,7 @@ export type Database = {
           stripe_session_id: string | null
           transfer_id: string | null
           updated_at: string
+          used_credit: boolean | null
           user_id: string
         }
         Insert: {
@@ -543,6 +544,7 @@ export type Database = {
           stripe_session_id?: string | null
           transfer_id?: string | null
           updated_at?: string
+          used_credit?: boolean | null
           user_id: string
         }
         Update: {
@@ -561,11 +563,59 @@ export type Database = {
           stripe_session_id?: string | null
           transfer_id?: string | null
           updated_at?: string
+          used_credit?: boolean | null
           user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "mentor_bookings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_credits: {
+        Row: {
+          bundle_size: number
+          created_at: string
+          credits_left: number
+          currency: string
+          expires_at: string | null
+          id: string
+          mentor_id: string
+          price_cents: number
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          bundle_size: number
+          created_at?: string
+          credits_left: number
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          mentor_id: string
+          price_cents: number
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          bundle_size?: number
+          created_at?: string
+          credits_left?: number
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          mentor_id?: string
+          price_cents?: number
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_credits_mentor_id_fkey"
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "mentors"
