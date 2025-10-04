@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
 
     // Build safe return/refresh URLs (use your app's public URL)
     // If you have a dedicated payouts page, use that path.
-    const appOrigin = origin ?? "https://your-app.lovable.dev";
+    const appOrigin = origin ?? `${req.headers.get("origin") || "https://habeshanetwork.com"}`;
     const returnUrl = `${appOrigin}/mentor/payouts?onboarding=done`;
     const refreshUrl = `${appOrigin}/mentor/payouts?onboarding=retry=1`;
 
