@@ -152,17 +152,17 @@ export default function MentorList() {
     <div className="min-h-screen bg-background">
       <MentorHeader title="Find a Mentor" backPath="/" />
       
-      <div className="container mx-auto px-4 py-8">
-        {/* Centered CTA Button */}
-        <div className="mb-6">
-          <Button 
-            onClick={() => navigate('/mentor/onboarding')}
-            className="w-full max-w-2xl mx-auto block"
-            size="lg"
-          >
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
+        {/* Desktop: Heading + Button */}
+        <div className="hidden md:flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Find a Mentor</h1>
+          <Button onClick={() => navigate('/mentor/onboarding')}>
             Become a Mentor
           </Button>
         </div>
+
+        {/* Mobile: Just heading, button is in sticky footer */}
+        <h1 className="md:hidden text-2xl font-bold mb-4">Find a Mentor</h1>
 
         {/* Compact Filter Bar */}
         <div className="space-y-3 mb-6">
@@ -458,6 +458,17 @@ export default function MentorList() {
           mentorUserId={selectedMentor.user_id}
         />
       )}
+
+      {/* Mobile Sticky Footer - Become a Mentor CTA */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border shadow-lg z-50">
+        <Button 
+          onClick={() => navigate('/mentor/onboarding')}
+          className="w-full"
+          size="lg"
+        >
+          Become a Mentor
+        </Button>
+      </div>
     </div>
   );
 }
