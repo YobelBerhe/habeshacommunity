@@ -20,6 +20,7 @@ import TopicView from "./pages/forums/TopicView";
 import MentorList from "./pages/mentor/MentorList";
 import MentorOnboarding from "./pages/mentor/MentorOnboarding";
 import MentorDetail from "./pages/mentor/MentorDetail";
+import MentorDashboard from "./pages/mentor/MentorDashboard";
 import MentorRequests from "./pages/mentor/MentorRequests";
 import MyBookings from "./pages/mentor/MyBookings";
 import BookingSuccess from "./pages/mentor/BookingSuccess";
@@ -67,6 +68,7 @@ const App = () => (
           <Route path="/forums/topic/:id" element={<TopicView />} />
           <Route path="/mentor" element={<MentorList />} />
           <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
+          <Route path="/mentor/dashboard" element={<MentorDashboard />} />
           <Route path="/mentor/:id" element={<MentorDetail />} />
           <Route path="/mentor/requests" element={<MentorRequests />} />
           <Route path="/mentor/bookings" element={<MyBookings />} />

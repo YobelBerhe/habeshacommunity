@@ -646,6 +646,7 @@ export type Database = {
           topics: string[] | null
           updated_at: string
           user_id: string
+          verification_celebrated: boolean | null
           website_url: string | null
         }
         Insert: {
@@ -673,6 +674,7 @@ export type Database = {
           topics?: string[] | null
           updated_at?: string
           user_id: string
+          verification_celebrated?: boolean | null
           website_url?: string | null
         }
         Update: {
@@ -700,6 +702,7 @@ export type Database = {
           topics?: string[] | null
           updated_at?: string
           user_id?: string
+          verification_celebrated?: boolean | null
           website_url?: string | null
         }
         Relationships: []
