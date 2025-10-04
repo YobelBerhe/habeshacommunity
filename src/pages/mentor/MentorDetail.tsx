@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket } from 'lucide-react';
+import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket, Share2 } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import { BundlePurchase } from '@/components/BundlePurchase';
@@ -38,6 +38,23 @@ export default function MentorDetail() {
     if (!id) return;
     const credits = await checkAvailableCredits(id);
     setAvailableCredits(credits);
+  };
+
+  const handleShareProfile = async () => {
+    const shareUrl = `${window.location.origin}/mentor/${id}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link copied!",
+        description: "Profile link has been copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleMessageMentor = async () => {
@@ -164,8 +181,8 @@ export default function MentorDetail() {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <CardTitle className="text-2xl">{mentor.display_name || mentor.name}</CardTitle>
                     {mentor.is_verified && <VerificationBadge isVerified={true} showText />}
                     {badges.length > 0 && (
@@ -173,6 +190,15 @@ export default function MentorDetail() {
                         {badges.length} Badge{badges.length > 1 ? 's' : ''}
                       </Badge>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleShareProfile}
+                      className="ml-auto"
+                      title="Share profile"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </Button>
                   </div>
                   {mentor.title && (
                     <p className="text-muted-foreground mt-1">{mentor.title}</p>
@@ -192,7 +218,7 @@ export default function MentorDetail() {
                   )}
                 </div>
                 {mentor.price_cents && (
-                  <div className="text-right">
+                  <div className="text-right ml-4">
                     <div className="text-2xl font-bold">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',

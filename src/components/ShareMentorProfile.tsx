@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Copy, Facebook, Twitter, Linkedin, Share2 } from "lucide-react";
+import { Copy, Facebook, Twitter, Linkedin, Share2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -50,6 +49,14 @@ export function ShareMentorProfile({ mentorId, referralCode }: ShareMentorProfil
     );
   };
 
+  const shareToWhatsApp = () => {
+    const text = `Book a mentorship session with me!`;
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(text + ' ' + shareUrl)}`,
+      '_blank'
+    );
+  };
+
   return (
     <div className="p-6 bg-card rounded-xl shadow-sm border">
       <div className="flex items-center gap-2 mb-3">
@@ -92,6 +99,14 @@ export function ShareMentorProfile({ mentorId, referralCode }: ShareMentorProfil
           className="flex items-center gap-2"
         >
           <Linkedin size={16} /> LinkedIn
+        </Button>
+
+        <Button
+          onClick={shareToWhatsApp}
+          variant="outline"
+          className="flex items-center gap-2 bg-green-50 hover:bg-green-100 border-green-200"
+        >
+          <MessageCircle size={16} /> WhatsApp
         </Button>
       </div>
     </div>
