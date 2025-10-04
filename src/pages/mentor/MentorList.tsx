@@ -153,16 +153,28 @@ export default function MentorList() {
       <MentorHeader title="Find a Mentor" backPath="/" />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Find a Mentor</h1>
-          <Button onClick={() => navigate('/mentor/onboarding')}>Become a Mentor</Button>
+        {/* Centered CTA Button */}
+        <div className="mb-6">
+          <Button 
+            onClick={() => navigate('/mentor/onboarding')}
+            className="w-full max-w-2xl mx-auto block"
+            size="lg"
+          >
+            Become a Mentor
+          </Button>
         </div>
 
-        {/* Filter Bar */}
-        <div className="space-y-4 mb-6">
-          {/* Verified Only Toggle */}
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2 cursor-pointer">
+        {/* Compact Filter Bar */}
+        <div className="space-y-3 mb-6">
+          {/* Search and Primary Filters */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              placeholder="Search mentors..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+            />
+            <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap px-3 py-2 border rounded-md bg-background">
               <input 
                 type="checkbox" 
                 checked={verifiedOnly} 
@@ -170,44 +182,56 @@ export default function MentorList() {
                 className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
               />
               <CheckCircle2 className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Show only verified mentors</span>
+              <span className="text-sm font-medium">Verified</span>
             </label>
           </div>
-
-          {/* Search and Filters Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <Input
-              placeholder="Search mentors..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="md:col-span-2"
-            />
-            <Input
-              placeholder="Filter by skill..."
-              value={skillFilter}
-              onChange={(e) => setSkillFilter(e.target.value)}
-            />
-            <Input
-              placeholder="Filter by industry..."
-              value={industryFilter}
-              onChange={(e) => setIndustryFilter(e.target.value)}
-            />
-            <Input
-              placeholder="Filter by language..."
-              value={languageFilter}
-              onChange={(e) => setLanguageFilter(e.target.value)}
-            />
-            <Input
-              placeholder="City"
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-            />
-          </div>
           
-          {/* Additional Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Compact Filters Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            <Select value={skillFilter} onValueChange={setSkillFilter}>
+              <SelectTrigger className="bg-background h-9 text-sm">
+                <SelectValue placeholder="Skill" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="">All Skills</SelectItem>
+                <SelectItem value="React">React</SelectItem>
+                <SelectItem value="AI">AI</SelectItem>
+                <SelectItem value="Career">Career</SelectItem>
+                <SelectItem value="Leadership">Leadership</SelectItem>
+                <SelectItem value="Design">Design</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={industryFilter} onValueChange={setIndustryFilter}>
+              <SelectTrigger className="bg-background h-9 text-sm">
+                <SelectValue placeholder="Industry" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="">All Industries</SelectItem>
+                <SelectItem value="Tech">Tech</SelectItem>
+                <SelectItem value="Healthcare">Healthcare</SelectItem>
+                <SelectItem value="Finance">Finance</SelectItem>
+                <SelectItem value="Education">Education</SelectItem>
+                <SelectItem value="Startups">Startups</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={languageFilter} onValueChange={setLanguageFilter}>
+              <SelectTrigger className="bg-background h-9 text-sm">
+                <SelectValue placeholder="Language" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="">All Languages</SelectItem>
+                <SelectItem value="English">English</SelectItem>
+                <SelectItem value="Spanish">Spanish</SelectItem>
+                <SelectItem value="French">French</SelectItem>
+                <SelectItem value="Tigrinya">Tigrinya</SelectItem>
+                <SelectItem value="Amharic">Amharic</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Select value={topicFilter} onValueChange={setTopicFilter}>
-              <SelectTrigger className="bg-background">
+              <SelectTrigger className="bg-background h-9 text-sm">
                 <SelectValue placeholder="Topic" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
@@ -221,46 +245,60 @@ export default function MentorList() {
                 <SelectItem value="business">Business</SelectItem>
               </SelectContent>
             </Select>
+
             <Select value={minRating} onValueChange={setMinRating}>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Min Rating" />
+              <SelectTrigger className="bg-background h-9 text-sm">
+                <SelectValue placeholder="Rating" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
                 <SelectItem value="0">All Ratings</SelectItem>
-                <SelectItem value="4">⭐ 4.0+</SelectItem>
-                <SelectItem value="4.5">⭐ 4.5+</SelectItem>
-                <SelectItem value="5">⭐ 5.0 only</SelectItem>
+                <SelectItem value="4">4.0+</SelectItem>
+                <SelectItem value="4.5">4.5+</SelectItem>
+                <SelectItem value="5">5.0</SelectItem>
               </SelectContent>
             </Select>
+
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Sort By" />
+              <SelectTrigger className="bg-background h-9 text-sm">
+                <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
-                <SelectItem value="featured">Featured First</SelectItem>
-                <SelectItem value="verified">Verified First</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-                <SelectItem value="newest">Newest Mentors</SelectItem>
-                <SelectItem value="price_low">Lowest Price</SelectItem>
-                <SelectItem value="price_high">Highest Price</SelectItem>
+                <SelectItem value="featured">Featured</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="rating">Top Rated</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="price_low">Low Price</SelectItem>
+                <SelectItem value="price_high">High Price</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Clear Filters Button */}
-          <Button variant="outline" onClick={() => {
-            setSearchTerm('');
-            setSkillFilter('');
-            setIndustryFilter('');
-            setLanguageFilter('');
-            setTopicFilter('all');
-            setCityFilter('');
-            setVerifiedOnly(false);
-            setMinRating('0');
-            setSortBy('featured');
-          }}>
-            Clear All Filters
-          </Button>
+          {/* City Filter + Clear */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="City"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+              className="flex-1 h-9 text-sm"
+            />
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                setSearchTerm('');
+                setSkillFilter('');
+                setIndustryFilter('');
+                setLanguageFilter('');
+                setTopicFilter('all');
+                setCityFilter('');
+                setVerifiedOnly(false);
+                setMinRating('0');
+                setSortBy('featured');
+              }}
+            >
+              Clear
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
