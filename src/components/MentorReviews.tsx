@@ -153,7 +153,7 @@ export default function MentorReviews({
                 </div>
               )}
             </CardTitle>
-            {eligibleBooking && (
+            {user && eligibleBooking && (
               <Button onClick={() => setShowReviewForm(true)} size="sm">
                 Write a Review
               </Button>
@@ -161,15 +161,25 @@ export default function MentorReviews({
           </div>
         </CardHeader>
         <CardContent>
+        {user && !eligibleBooking && reviews.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            To review, you need to take a session first.
+          </div>
+        )}
+        {user && !eligibleBooking && reviews.length > 0 && (
+          <div className="text-sm text-muted-foreground mb-4 text-center">
+            To leave a review, you need to take a session first.
+          </div>
+        )}
         {loading ? (
           <div className="text-center py-8 text-muted-foreground">
             Loading reviews...
           </div>
-        ) : reviews.length === 0 ? (
+        ) : reviews.length === 0 && (!user || eligibleBooking) ? (
           <div className="text-center py-8 text-muted-foreground">
             No reviews yet. Be the first to review this mentor!
           </div>
-        ) : (
+        ) : reviews.length > 0 ? (
           <div className="space-y-4">
             {reviews.map((review) => (
               <div
@@ -204,7 +214,7 @@ export default function MentorReviews({
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
 
