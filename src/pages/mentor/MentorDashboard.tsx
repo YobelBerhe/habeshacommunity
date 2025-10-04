@@ -64,6 +64,9 @@ export default function MentorDashboard() {
     earnings: 0
   });
   const [chartData, setChartData] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
+  const [sessionCount, setSessionCount] = useState(0);
+  const [avgRating, setAvgRating] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   const applyPreset = (preset: typeof presetRanges[0]) => {
@@ -107,6 +110,37 @@ export default function MentorDashboard() {
       }
 
       setMentor(mentorData);
+
+      // Fetch ALL confirmed bookings for badge progress (not just date range)
+      const { data: allBookings } = await supabase
+        .from('mentor_bookings')
+        .select('id, status')
+        .eq('mentor_id', mentorData.id)
+        .eq('status', 'confirmed');
+
+      setSessionCount(allBookings?.length || 0);
+
+      // Fetch average rating
+      const { data: reviews } = await supabase
+        .from('mentor_reviews')
+        .select('rating')
+        .eq('mentor_id', mentorData.id);
+
+      if (reviews && reviews.length > 0) {
+        const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+        setAvgRating(avg);
+      }
+
+      // Fetch badges
+      const { data: badgesData } = await supabase
+        .from('mentor_badges')
+        .select('*')
+        .eq('mentor_id', mentorData.id)
+        .order('earned_at', { ascending: false });
+
+      if (badgesData) {
+        setBadges(badgesData);
+      }
 
       // Fetch booking stats filtered by date range
       const { data: bookings, error: bookingsError } = await supabase
@@ -381,6 +415,125 @@ export default function MentorDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Badge Progress Section */}
+        <Card className="mb-8 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🏆 Badge Progress
+            </CardTitle>
+            <CardDescription>
+              Earn badges to increase your visibility and build trust with mentees
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Current Badges */}
+            {badges.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">Your Badges</h3>
+                <div className="flex flex-wrap gap-3">
+                  {badges.map((badge) => (
+                    <div
+                      key={badge.id}
+                      className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 rounded-full border-2 border-yellow-400 shadow-md"
+                    >
+                      <span className="text-2xl">{badge.icon}</span>
+                      <span className="font-medium">{badge.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Milestone Progress */}
+            {(() => {
+              const milestones = [
+                { label: 'Bronze Mentor', icon: '🥉', threshold: 10 },
+                { label: 'Silver Mentor', icon: '🥈', threshold: 50 },
+                { label: 'Gold Mentor', icon: '🥇', threshold: 100 },
+              ];
+              const nextMilestone = milestones.find(m => sessionCount < m.threshold);
+              const progressPercent = nextMilestone
+                ? Math.min(100, (sessionCount / nextMilestone.threshold) * 100)
+                : 100;
+
+              return (
+                <div>
+                  <h3 className="font-semibold mb-3">Session Milestones</h3>
+                  {nextMilestone ? (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm">
+                          <span className="font-bold text-lg">{sessionCount}</span>
+                          <span className="text-muted-foreground"> / {nextMilestone.threshold} sessions</span>
+                        </p>
+                        <span className="flex items-center gap-1.5 text-sm font-medium">
+                          Next: {nextMilestone.icon} {nextMilestone.label}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 h-4 rounded-full transition-all duration-500 flex items-center justify-center"
+                          style={{ width: `${progressPercent}%` }}
+                        >
+                          {progressPercent > 15 && (
+                            <span className="text-xs text-white font-bold">
+                              {Math.round(progressPercent)}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {nextMilestone.threshold - sessionCount} more session{nextMilestone.threshold - sessionCount !== 1 ? 's' : ''} to unlock!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-yellow-400">
+                      <p className="text-green-600 dark:text-green-400 font-semibold flex items-center gap-2">
+                        <span className="text-2xl">🎉</span>
+                        You&apos;ve unlocked all milestone badges!
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Top Rated Badge Status */}
+            <div>
+              <h3 className="font-semibold mb-3">Quality Badge</h3>
+              {avgRating !== null && avgRating >= 4.8 ? (
+                <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-yellow-400">
+                  <p className="text-yellow-600 dark:text-yellow-400 font-semibold flex items-center gap-2">
+                    <span className="text-2xl">⭐</span>
+                    You&apos;ve earned the Top Rated Mentor badge! (Rating: {avgRating.toFixed(2)})
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+                  <p className="text-sm">
+                    <span className="font-medium">Top Rated ⭐:</span> Maintain a 4.8+ average rating
+                    {avgRating !== null && (
+                      <span className="block mt-1 text-muted-foreground">
+                        Current rating: {avgRating.toFixed(2)} ({(4.8 - avgRating).toFixed(2)} away from Top Rated)
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-4 border-t">
+              <Button
+                variant="link"
+                className="text-sm px-0"
+                onClick={() => navigate('/badges')}
+              >
+                Learn more about badges →
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Earnings Chart */}
         {chartData.length > 0 && (

@@ -479,8 +479,65 @@ export default function MentorOnboarding() {
                   <Input
                     value={formData.website_url}
                     onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                    placeholder="https://yourwebsite.com"
+                  placeholder="https://yourwebsite.com"
                   />
+                </div>
+
+                {/* Badge System Preview */}
+                <div className="p-6 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950 rounded-xl border-2 border-yellow-200 dark:border-yellow-800">
+                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+                    🏆 Badge System
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Earn badges as you grow! These badges increase your visibility and trust in the community.
+                  </p>
+
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-3">
+                      <span className="text-2xl shrink-0">🥉</span>
+                      <div>
+                        <strong>Bronze Mentor</strong>
+                        <p className="text-sm text-muted-foreground">Complete 10 sessions</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-2xl shrink-0">🥈</span>
+                      <div>
+                        <strong>Silver Mentor</strong>
+                        <p className="text-sm text-muted-foreground">Complete 50 sessions</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-2xl shrink-0">🥇</span>
+                      <div>
+                        <strong>Gold Mentor</strong>
+                        <p className="text-sm text-muted-foreground">Complete 100 sessions</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-2xl shrink-0">⭐</span>
+                      <div>
+                        <strong>Top Rated</strong>
+                        <p className="text-sm text-muted-foreground">Maintain 4.8+ average rating</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-2xl shrink-0">⚡</span>
+                      <div>
+                        <strong>Responsive Mentor</strong>
+                        <p className="text-sm text-muted-foreground">Fast replies under 1 hour</p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="mt-4 px-0 text-sm"
+                    onClick={() => window.open('/badges', '_blank')}
+                  >
+                    Learn more about badges →
+                  </Button>
                 </div>
 
                 <Button
