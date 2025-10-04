@@ -5,14 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket, Share2 } from 'lucide-react';
+import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket, ArrowUpFromLine } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import { BundlePurchase } from '@/components/BundlePurchase';
 import { CreditsDisplay } from '@/components/CreditsDisplay';
 import MentorReviews from '@/components/MentorReviews';
 import { bookSessionWithCredit, checkAvailableCredits } from '@/utils/bundleActions';
+import { bookMentorSession } from '@/utils/stripeActions';
 import { useAuth } from '@/store/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -63,15 +65,6 @@ export default function MentorDetail() {
       return;
     }
 
-    if (!mentor.is_verified) {
-      toast({
-        title: "Cannot message mentor",
-        description: "You can only message verified mentors",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       // Check if conversation already exists
       const { data: existingConv } = await supabase
@@ -107,6 +100,29 @@ export default function MentorDetail() {
         description: "Please try again",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleBookSingleSession = async () => {
+    if (!user) {
+      navigate('/auth/login');
+      return;
+    }
+    
+    setBookingLoading(true);
+    try {
+      const result = await bookMentorSession(id!);
+      if (result.redirectUrl) {
+        window.location.href = result.redirectUrl;
+      }
+    } catch (error) {
+      toast({
+        title: "Booking failed",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setBookingLoading(false);
     }
   };
 
@@ -181,9 +197,14 @@ export default function MentorDetail() {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <CardTitle className="text-2xl">{mentor.display_name || mentor.name}</CardTitle>
+                <div className="flex items-center gap-4 flex-1">
+                  <Avatar className="w-16 h-16 rounded-lg">
+                    <AvatarImage src={mentor.profile_picture_url} alt={mentor.display_name || mentor.name} />
+                    <AvatarFallback className="rounded-lg">{(mentor.display_name || mentor.name)?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <CardTitle className="text-2xl">{mentor.display_name || mentor.name}</CardTitle>
                     {mentor.is_verified && <VerificationBadge isVerified={true} showText />}
                     {badges.length > 0 && (
                       <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
@@ -197,25 +218,26 @@ export default function MentorDetail() {
                       className="ml-auto"
                       title="Share profile"
                     >
-                      <Share2 className="w-4 h-4" />
+                      <ArrowUpFromLine className="w-4 h-4" />
                     </Button>
                   </div>
-                  {mentor.title && (
-                    <p className="text-muted-foreground mt-1">{mentor.title}</p>
-                  )}
-                  {badges.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {badges.map((badge) => (
-                        <span 
-                          key={badge.id}
-                          className="px-3 py-1 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 text-yellow-800 rounded-full text-sm flex items-center gap-1.5 font-medium"
-                        >
-                          <span className="text-base">{badge.icon}</span>
-                          {badge.label}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                    {mentor.title && (
+                      <p className="text-muted-foreground mt-1">{mentor.title}</p>
+                    )}
+                    {badges.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {badges.map((badge) => (
+                          <span 
+                            key={badge.id}
+                            className="px-3 py-1 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 text-yellow-800 rounded-full text-sm flex items-center gap-1.5 font-medium"
+                          >
+                            <span className="text-base">{badge.icon}</span>
+                            {badge.label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {mentor.price_cents && (
                   <div className="text-right ml-4">
@@ -275,60 +297,70 @@ export default function MentorDetail() {
                   </div>
                 )}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Button 
-                    onClick={async () => {
-                      if (!user) {
-                        navigate('/auth/login');
-                        return;
-                      }
-                      
-                      setBookingLoading(true);
-                      try {
-                        const result = await bookSessionWithCredit(id!);
-                        
-                        if (result.needsPurchase) {
-                          toast({
-                            title: "No credits available",
-                            description: "Purchase a bundle or book a single session below",
-                          });
-                        } else if (result.success) {
-                          toast({
-                            title: "Session booked!",
-                            description: `You have ${result.creditsLeft} credits remaining`,
-                          });
-                          loadCredits();
-                          navigate('/mentor/bookings');
+                <div className="space-y-3">
+                  {availableCredits.hasCredits ? (
+                    <Button 
+                      onClick={async () => {
+                        if (!user) {
+                          navigate('/auth/login');
+                          return;
                         }
-                      } catch (error) {
-                        toast({
-                          title: "Booking failed",
-                          description: error instanceof Error ? error.message : "Please try again",
-                          variant: "destructive",
-                        });
-                      } finally {
-                        setBookingLoading(false);
-                      }
-                    }}
-                    className="w-full"
-                    size="lg"
-                    disabled={bookingLoading}
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {bookingLoading ? 'Processing...' : availableCredits.hasCredits ? 'Book with Credit' : 'Book a Session'}
-                  </Button>
-
-                  {mentor.is_verified && (
-                    <Button
-                      onClick={handleMessageMentor}
-                      variant="outline"
-                      size="lg"
+                        
+                        setBookingLoading(true);
+                        try {
+                          const result = await bookSessionWithCredit(id!);
+                          
+                          if (result.needsPurchase) {
+                            toast({
+                              title: "No credits available",
+                              description: "Purchase a bundle below",
+                            });
+                          } else if (result.success) {
+                            toast({
+                              title: "Session booked!",
+                              description: `You have ${result.creditsLeft} credits remaining`,
+                            });
+                            loadCredits();
+                            navigate('/mentor/bookings');
+                          }
+                        } catch (error) {
+                          toast({
+                            title: "Booking failed",
+                            description: error instanceof Error ? error.message : "Please try again",
+                            variant: "destructive",
+                          });
+                        } finally {
+                          setBookingLoading(false);
+                        }
+                      }}
                       className="w-full"
+                      size="lg"
+                      disabled={bookingLoading}
                     >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Message Mentor
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {bookingLoading ? 'Processing...' : 'Book with Credit'}
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={handleBookSingleSession}
+                      className="w-full"
+                      size="lg"
+                      disabled={bookingLoading}
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {bookingLoading ? 'Processing...' : 'Book Single Session'}
                     </Button>
                   )}
+
+                  <Button
+                    onClick={handleMessageMentor}
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Message Mentor
+                  </Button>
                 </div>
               </div>
             </CardContent>
