@@ -1,15 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { format, subDays, startOfMonth, endOfMonth, startOfYear } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, MessageSquare, Settings, CheckCircle2, Clock, Users } from 'lucide-react';
+import { Calendar as CalendarComp } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar, DollarSign, MessageSquare, Settings, CheckCircle2, Clock, Users, CalendarIcon, TrendingUp } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import VerificationCelebration from '@/components/VerificationCelebration';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import MentorSkillsEditor from '@/components/MentorSkillsEditor';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+type DateRange = {
+  from: Date;
+  to: Date;
+};
 
 interface MentorData {
   id: string;
@@ -27,22 +37,52 @@ interface BookingStat {
   pending: number;
   confirmed: number;
   completed: number;
+  earnings: number;
 }
+
+const presetRanges = [
+  { label: "Today", days: 0 },
+  { label: "Last 7 Days", days: 7 },
+  { label: "Last 30 Days", days: 30 },
+  { label: "This Month", special: "thisMonth" },
+  { label: "Last Month", special: "lastMonth" },
+  { label: "This Year", special: "thisYear" },
+];
 
 export default function MentorDashboard() {
   const navigate = useNavigate();
   const [mentor, setMentor] = useState<MentorData | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
   const [stats, setStats] = useState<BookingStat>({
     total: 0,
     pending: 0,
     confirmed: 0,
-    completed: 0
+    completed: 0,
+    earnings: 0
   });
+  const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const applyPreset = (preset: typeof presetRanges[0]) => {
+    const now = new Date();
+    if (preset.special === "thisMonth") {
+      setDateRange({ from: startOfMonth(now), to: now });
+    } else if (preset.special === "lastMonth") {
+      const lastMonth = subDays(startOfMonth(now), 1);
+      setDateRange({ from: startOfMonth(lastMonth), to: endOfMonth(lastMonth) });
+    } else if (preset.special === "thisYear") {
+      setDateRange({ from: startOfYear(now), to: now });
+    } else {
+      setDateRange({ from: subDays(now, preset.days), to: now });
+    }
+  };
 
   useEffect(() => {
     fetchMentorData();
-  }, []);
+  }, [dateRange]);
 
   const fetchMentorData = async () => {
     try {
@@ -68,21 +108,44 @@ export default function MentorDashboard() {
 
       setMentor(mentorData);
 
-      // Fetch booking stats
+      // Fetch booking stats filtered by date range
       const { data: bookings, error: bookingsError } = await supabase
         .from('mentor_bookings')
-        .select('status')
-        .eq('mentor_id', mentorData.id);
+        .select('status, net_to_mentor_cents, created_at')
+        .eq('mentor_id', mentorData.id)
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString());
 
       if (bookingsError) throw bookingsError;
 
       if (bookings) {
+        const totalEarnings = bookings
+          .filter(b => b.status === 'completed')
+          .reduce((sum, b) => sum + (b.net_to_mentor_cents || 0), 0) / 100;
+
         setStats({
           total: bookings.length,
           pending: bookings.filter(b => b.status === 'pending').length,
-          confirmed: bookings.filter(b => b.status === 'confirmed').length,
-          completed: bookings.filter(b => b.status === 'completed').length
+          confirmed: bookings.filter(b => b.status === 'accepted').length,
+          completed: bookings.filter(b => b.status === 'completed').length,
+          earnings: totalEarnings
         });
+
+        // Chart data by day
+        const byDay: Record<string, number> = {};
+        bookings
+          .filter(b => b.status === 'completed')
+          .forEach((b) => {
+            const day = new Date(b.created_at).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            });
+            byDay[day] = (byDay[day] || 0) + (b.net_to_mentor_cents || 0) / 100;
+          });
+
+        setChartData(
+          Object.keys(byDay).map((d) => ({ day: d, earnings: byDay[d] }))
+        );
       }
     } catch (error) {
       console.error('Error fetching mentor data:', error);
@@ -145,7 +208,71 @@ export default function MentorDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="mb-6">
+          {/* Date Range Picker with Presets */}
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle className="text-sm">Performance Period</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {presetRanges.map((preset) => (
+                  <Button
+                    key={preset.label}
+                    onClick={() => applyPreset(preset)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateRange && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(dateRange.from, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Pick a date range</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComp
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={{ from: dateRange?.from, to: dateRange?.to }}
+                    onSelect={(range: any) => {
+                      if (range?.from && range?.to) {
+                        setDateRange({ from: range.from, to: range.to });
+                      }
+                    }}
+                    numberOfMonths={2}
+                    disabled={(date) => date > new Date()}
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
@@ -243,7 +370,52 @@ export default function MentorDashboard() {
               </Button>
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Earnings</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${stats.earnings.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">Selected period</p>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Earnings Chart */}
+        {chartData.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Earnings Over Time
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="day" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--background))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "6px",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="earnings"
+                    stroke="hsl(var(--primary))"
+                    name="Earnings ($)"
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Profile Info */}
         <Card>
