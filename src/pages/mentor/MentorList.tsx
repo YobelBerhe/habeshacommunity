@@ -13,7 +13,6 @@ import CountryFlag from '@/components/CountryFlag';
 import ImageBox from '@/components/ImageBox';
 import MessageMentorModal from '@/components/MessageMentorModal';
 import { VerificationBadge } from '@/components/VerificationBadge';
-
 interface Mentor {
   id: string;
   user_id: string;
@@ -33,7 +32,6 @@ interface Mentor {
   is_verified: boolean;
   created_at?: string;
 }
-
 export default function MentorList() {
   const navigate = useNavigate();
   const [mentors, setMentors] = useState<Mentor[]>([]);
@@ -49,26 +47,27 @@ export default function MentorList() {
   const [sortBy, setSortBy] = useState('featured');
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
-
   useEffect(() => {
     fetchMentors();
   }, []);
-
   const fetchMentors = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('mentors')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('mentors').select(`
           *,
           mentor_skills(skill)
-        `)
-        .eq('available', true)
-        .order('is_featured', { ascending: false })
-        .order('is_verified', { ascending: false })
-        .order('rating_avg', { ascending: false })
-        .order('created_at', { ascending: false });
-
+        `).eq('available', true).order('is_featured', {
+        ascending: false
+      }).order('is_verified', {
+        ascending: false
+      }).order('rating_avg', {
+        ascending: false
+      }).order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
       setMentors(data || []);
     } catch (error) {
@@ -80,21 +79,13 @@ export default function MentorList() {
   };
 
   // Filter and sort mentors
-  const filteredAndSortedMentors = mentors.filter((mentor) => {
+  const filteredAndSortedMentors = mentors.filter(mentor => {
     const lowerQuery = searchTerm.toLowerCase();
     const skills = (mentor as any).mentor_skills?.map((s: any) => s.skill.toLowerCase()) || [];
     const mentorSkills = (mentor as any).skills || [];
     const mentorIndustries = (mentor as any).industries || [];
     const mentorLanguages = mentor.languages || [];
-    
-    const matchesSearch =
-      !searchTerm ||
-      mentor.display_name?.toLowerCase().includes(lowerQuery) ||
-      mentor.bio?.toLowerCase().includes(lowerQuery) ||
-      mentor.topics?.some(t => t.toLowerCase().includes(lowerQuery)) ||
-      skills.some(s => s.includes(lowerQuery)) ||
-      mentorSkills.some((s: string) => s.toLowerCase().includes(lowerQuery));
-
+    const matchesSearch = !searchTerm || mentor.display_name?.toLowerCase().includes(lowerQuery) || mentor.bio?.toLowerCase().includes(lowerQuery) || mentor.topics?.some(t => t.toLowerCase().includes(lowerQuery)) || skills.some(s => s.includes(lowerQuery)) || mentorSkills.some((s: string) => s.toLowerCase().includes(lowerQuery));
     const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
     const matchesSkill = !skillFilter || skillFilter === 'all' || mentorSkills.some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase()));
     const matchesIndustry = !industryFilter || industryFilter === 'all' || mentorIndustries.some((i: string) => i.toLowerCase().includes(industryFilter.toLowerCase()));
@@ -102,54 +93,47 @@ export default function MentorList() {
     const matchesCity = !cityFilter || mentor.city?.toLowerCase() === cityFilter.toLowerCase();
     const matchesVerified = !verifiedOnly || mentor.is_verified;
     const matchesRating = mentor.rating_avg >= parseFloat(minRating);
-
     return matchesSearch && matchesTopic && matchesSkill && matchesIndustry && matchesLanguage && matchesCity && matchesVerified && matchesRating;
   }).sort((a, b) => {
-      switch (sortBy) {
-        case 'featured':
-          if ((a as any).is_featured !== (b as any).is_featured) {
-            return (b as any).is_featured ? 1 : -1;
-          }
+    switch (sortBy) {
+      case 'featured':
+        if ((a as any).is_featured !== (b as any).is_featured) {
+          return (b as any).is_featured ? 1 : -1;
+        }
+        return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
+      case 'rating':
+        return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
+      case 'newest':
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      case 'price_low':
+        return (a.price_cents ?? Infinity) - (b.price_cents ?? Infinity);
+      case 'price_high':
+        return (b.price_cents ?? 0) - (a.price_cents ?? 0);
+      case 'verified':
+      default:
+        // Verified first, then rating, then newest
+        if (a.is_verified !== b.is_verified) {
+          return b.is_verified ? 1 : -1;
+        }
+        if ((b.rating_avg ?? 0) !== (a.rating_avg ?? 0)) {
           return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
-        case 'rating':
-          return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
-        case 'newest':
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-        case 'price_low':
-          return (a.price_cents ?? Infinity) - (b.price_cents ?? Infinity);
-        case 'price_high':
-          return (b.price_cents ?? 0) - (a.price_cents ?? 0);
-        case 'verified':
-        default:
-          // Verified first, then rating, then newest
-          if (a.is_verified !== b.is_verified) {
-            return b.is_verified ? 1 : -1;
-          }
-          if ((b.rating_avg ?? 0) !== (a.rating_avg ?? 0)) {
-            return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
-          }
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-      }
-    });
-
+        }
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    }
+  });
   const formatPrice = (cents: number, currency: string) => {
     const amount = cents / 100;
     return `${currency} ${amount.toFixed(0)}`;
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <MentorHeader title="Find a Mentor" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading mentors...</div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <MentorHeader title="Find a Mentor" backPath="/" />
       
       <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
@@ -162,25 +146,15 @@ export default function MentorList() {
         </div>
 
         {/* Mobile: Just heading, button is in sticky footer */}
-        <h1 className="md:hidden text-2xl font-bold mb-4">Find a Mentor</h1>
+        
 
         {/* Compact Filter Bar */}
         <div className="space-y-3 mb-6">
           {/* Search and Primary Filters */}
           <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              placeholder="Search mentors..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
-            />
+            <Input placeholder="Search mentors..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1" />
             <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap px-3 py-2 border rounded-md bg-background">
-              <input 
-                type="checkbox" 
-                checked={verifiedOnly} 
-                onChange={(e) => setVerifiedOnly(e.target.checked)}
-                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-              />
+              <input type="checkbox" checked={verifiedOnly} onChange={e => setVerifiedOnly(e.target.checked)} className="w-4 h-4 rounded border-border text-primary focus:ring-primary" />
               <CheckCircle2 className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Verified</span>
             </label>
@@ -275,48 +249,30 @@ export default function MentorList() {
 
           {/* City Filter + Clear */}
           <div className="flex gap-2">
-            <Input
-              placeholder="City"
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-              className="flex-1 h-9 text-sm"
-            />
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setSearchTerm('');
-                setSkillFilter('all');
-                setIndustryFilter('all');
-                setLanguageFilter('all');
-                setTopicFilter('all');
-                setCityFilter('');
-                setVerifiedOnly(false);
-                setMinRating('0');
-                setSortBy('featured');
-              }}
-            >
+            <Input placeholder="City" value={cityFilter} onChange={e => setCityFilter(e.target.value)} className="flex-1 h-9 text-sm" />
+            <Button variant="outline" size="sm" onClick={() => {
+            setSearchTerm('');
+            setSkillFilter('all');
+            setIndustryFilter('all');
+            setLanguageFilter('all');
+            setTopicFilter('all');
+            setCityFilter('');
+            setVerifiedOnly(false);
+            setMinRating('0');
+            setSortBy('featured');
+          }}>
               Clear
             </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedMentors.map((mentor) => (
-            <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
+          {filteredAndSortedMentors.map(mentor => <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
               {/* Profile Photo with Price Overlay */}
               <div className="relative">
-                {mentor.photos?.[0] ? (
-                  <ImageBox
-                    src={mentor.photos[0]}
-                    alt={mentor.display_name}
-                    className="rounded-t-lg h-64 w-full object-cover"
-                  />
-                ) : (
-                  <div className="rounded-t-lg h-64 w-full bg-muted flex items-center justify-center">
+                {mentor.photos?.[0] ? <ImageBox src={mentor.photos[0]} alt={mentor.display_name} className="rounded-t-lg h-64 w-full object-cover" /> : <div className="rounded-t-lg h-64 w-full bg-muted flex items-center justify-center">
                     <span className="text-muted-foreground">No photo</span>
-                  </div>
-                )}
+                  </div>}
                 {/* Price Overlay */}
                 <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full border">
                   <div className="flex items-center gap-1 text-xs font-semibold">
@@ -325,11 +281,9 @@ export default function MentorList() {
                   </div>
                 </div>
                 {/* Featured Badge */}
-                {(mentor as any).is_featured && (
-                  <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                {(mentor as any).is_featured && <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
                     ⭐ Featured
-                  </div>
-                )}
+                  </div>}
               </div>
               
               <CardHeader>
@@ -337,17 +291,13 @@ export default function MentorList() {
                   <div className="flex items-center gap-2">
                     <span>{mentor.display_name}</span>
                     {mentor.is_verified && <VerificationBadge isVerified={true} />}
-                    {mentor.country && (
-                      <CountryFlag country={mentor.country} className="w-5 h-4" />
-                    )}
+                    {mentor.country && <CountryFlag country={mentor.country} className="w-5 h-4" />}
                   </div>
-                  {(mentor.rating_avg ?? 0) > 0 && (
-                    <div className="flex items-center gap-1">
+                  {(mentor.rating_avg ?? 0) > 0 && <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <span className="text-sm font-medium">{mentor.rating_avg?.toFixed(1)}</span>
                       <span className="text-xs text-muted-foreground">({mentor.rating_count})</span>
-                    </div>
-                  )}
+                    </div>}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4" />
@@ -362,113 +312,72 @@ export default function MentorList() {
                 
                 <div className="space-y-1.5">
                   {/* Skills Section */}
-                  {(mentor as any).mentor_skills && (mentor as any).mentor_skills.length > 0 ? (
-                    <div>
+                  {(mentor as any).mentor_skills && (mentor as any).mentor_skills.length > 0 ? <div>
                       <span className="text-xs font-medium text-muted-foreground">Skills:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {(mentor as any).mentor_skills.slice(0, 3).map((skillObj: any) => (
-                          <Badge key={skillObj.skill} variant="secondary" className="text-xs px-1.5 py-0.5">
+                        {(mentor as any).mentor_skills.slice(0, 3).map((skillObj: any) => <Badge key={skillObj.skill} variant="secondary" className="text-xs px-1.5 py-0.5">
                             {skillObj.skill}
-                          </Badge>
-                        ))}
-                        {(mentor as any).mentor_skills.length > 3 && (
-                          <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                          </Badge>)}
+                        {(mentor as any).mentor_skills.length > 3 && <Badge variant="outline" className="text-xs px-1.5 py-0.5">
                             +{(mentor as any).mentor_skills.length - 3}
-                          </Badge>
-                        )}
+                          </Badge>}
                       </div>
-                    </div>
-                  ) : (
-                    <div>
+                    </div> : <div>
                       <span className="text-xs font-medium text-muted-foreground">Topics:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {mentor.topics?.slice(0, 2).map((topic) => (
-                          <Badge key={topic} variant="secondary" className="text-xs px-1.5 py-0.5">
+                        {mentor.topics?.slice(0, 2).map(topic => <Badge key={topic} variant="secondary" className="text-xs px-1.5 py-0.5">
                             {topic}
-                          </Badge>
-                        ))}
-                        {mentor.topics?.length > 2 && (
-                          <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                          </Badge>)}
+                        {mentor.topics?.length > 2 && <Badge variant="outline" className="text-xs px-1.5 py-0.5">
                             +{mentor.topics.length - 2}
-                          </Badge>
-                        )}
+                          </Badge>}
                       </div>
-                    </div>
-                  )}
+                    </div>}
                   
-                  {mentor.languages?.length > 0 && (
-                    <div>
+                  {mentor.languages?.length > 0 && <div>
                       <span className="text-xs font-medium text-muted-foreground">Languages:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {mentor.languages.slice(0, 2).map((lang) => (
-                          <Badge key={lang} variant="outline" className="text-xs px-1.5 py-0.5">
+                        {mentor.languages.slice(0, 2).map(lang => <Badge key={lang} variant="outline" className="text-xs px-1.5 py-0.5">
                             {lang.toUpperCase()}
-                          </Badge>
-                        ))}
+                          </Badge>)}
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
               
               <CardFooter className="pt-2">
                 <div className="flex gap-2 w-full">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedMentor(mentor);
-                      setMessageModalOpen(true);
-                    }}
-                    className="flex-1"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => {
+                setSelectedMentor(mentor);
+                setMessageModalOpen(true);
+              }} className="flex-1">
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/mentor/${mentor.id}`)}
-                    className="flex-1"
-                  >
+                  <Button size="sm" onClick={() => navigate(`/mentor/${mentor.id}`)} className="flex-1">
                     Book Session
                   </Button>
                 </div>
               </CardFooter>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
-        {filteredAndSortedMentors.length === 0 && (
-          <div className="text-center py-12">
+        {filteredAndSortedMentors.length === 0 && <div className="text-center py-12">
             <p className="text-muted-foreground">No mentors found matching your criteria.</p>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Message Modal */}
-      {selectedMentor && (
-        <MessageMentorModal
-          isOpen={messageModalOpen}
-          onClose={() => {
-            setMessageModalOpen(false);
-            setSelectedMentor(null);
-          }}
-          mentorId={selectedMentor.id}
-          mentorName={selectedMentor.display_name}
-          mentorUserId={selectedMentor.user_id}
-        />
-      )}
+      {selectedMentor && <MessageMentorModal isOpen={messageModalOpen} onClose={() => {
+      setMessageModalOpen(false);
+      setSelectedMentor(null);
+    }} mentorId={selectedMentor.id} mentorName={selectedMentor.display_name} mentorUserId={selectedMentor.user_id} />}
 
       {/* Mobile Sticky Footer - Become a Mentor CTA */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border shadow-lg z-50">
-        <Button 
-          onClick={() => navigate('/mentor/onboarding')}
-          className="w-full"
-          size="lg"
-        >
+        <Button onClick={() => navigate('/mentor/onboarding')} className="w-full" size="lg">
           Become a Mentor
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 }
