@@ -68,8 +68,15 @@ export default function MatchList() {
     }
   };
 
-  const handleChat = (matchId: string) => {
-    navigate(`/inbox`);
+  const handleChat = async (match: Match) => {
+    try {
+      const otherUserId = match.user1_id === user!.id ? match.user2_id : match.user1_id;
+      const { getOrCreateConversation } = await import('@/utils/conversations');
+      const { conversationId } = await getOrCreateConversation(otherUserId);
+      navigate('/inbox', { state: { openConversationId: conversationId, mentorName: match.profile?.name || 'Conversation' } });
+    } catch (e) {
+      console.error('Failed to open chat from match:', e);
+    }
   };
 
   if (!user) return null;
@@ -143,7 +150,7 @@ export default function MatchList() {
                       
                       <Button 
                         size="sm"
-                        onClick={() => handleChat(match.id)}
+                        onClick={() => handleChat(match)}
                         className="w-full"
                       >
                         <MessageCircle className="w-4 h-4 mr-2" />

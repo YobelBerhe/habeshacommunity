@@ -125,6 +125,16 @@ export default function MentorDetail() {
       return;
     }
 
+    // Prevent messaging yourself
+    if (mentor?.user_id === user.id) {
+      toast({
+        title: 'Cannot message yourself',
+        description: 'You can’t start a conversation with your own profile.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       // Check if conversation already exists
       const { data: existingConv } = await supabase

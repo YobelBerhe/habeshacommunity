@@ -1,4 +1,10 @@
-import { X } from "lucide-react";
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { getOrCreateConversation } from '@/utils/conversations';
+import { useNavigate } from 'react-router-dom';
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -11,12 +17,29 @@ interface MessageModalProps {
 export default function MessageModal({ 
   isOpen, 
   onClose, 
-  listingTitle 
+  listingTitle,
+  listingOwnerId,
 }: MessageModalProps) {
-  // Disabled - requires database schema update for direct messaging
-  // Current schema uses conversations table, not direct messages with recipient_id
-  
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [message, setMessage] = useState(`Hi, I'm interested in: ${listingTitle}`);
+  const [sending, setSending] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleSend = async () => {
+    try {
+      setSending(true);
+      const { conversationId } = await getOrCreateConversation(listingOwnerId, message);
+      toast({ title: 'Message sent' });
+      onClose();
+      navigate('/inbox', { state: { openConversationId: conversationId, mentorName: listingTitle } });
+    } catch (e: any) {
+      toast({ title: 'Failed to send message', description: e?.message || 'Please try again', variant: 'destructive' });
+    } finally {
+      setSending(false);
+    }
+  };
   
   return (
     <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
@@ -27,9 +50,12 @@ export default function MessageModal({
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="text-center text-muted-foreground py-8">
-          <p>Direct messaging feature is being updated.</p>
-          <p className="text-sm mt-2">Please check back soon!</p>
+        <div>
+          <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder="Write your message..." />
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={handleSend} disabled={sending}>{sending ? 'Sending...' : 'Send'}</Button>
+          </div>
         </div>
       </div>
     </div>
