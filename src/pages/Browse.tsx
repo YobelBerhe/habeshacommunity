@@ -31,6 +31,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import NotifyBell from "@/components/NotifyBell";
 import AuthButtons from "@/components/AuthButtons";
 import SortDropdown from "@/components/SortDropdown";
+import MentorFilters from "@/components/search/MentorFilters";
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";
@@ -63,6 +64,17 @@ export default function Browse() {
     localStorage.getItem('hn.filter.postedToday') === 'true'
   );
 
+  // Mentor-specific filters
+  const [mentorVerifiedOnly, setMentorVerifiedOnly] = useState(() =>
+    localStorage.getItem('hn.mentor.verifiedOnly') === 'true'
+  );
+  const [mentorMinRating, setMentorMinRating] = useState(() =>
+    localStorage.getItem('hn.mentor.minRating') || '0'
+  );
+  const [mentorSortBy, setMentorSortBy] = useState(() =>
+    localStorage.getItem('hn.mentor.sortBy') || 'verified'
+  );
+
   // Initialize filters from URL params (don't pre-select cities)
   const [filters, setFilters] = useState<SearchFilters>(() => ({
     city: searchParams.get("city") || undefined,
@@ -79,6 +91,9 @@ export default function Browse() {
   useEffect(() => localStorage.setItem('hn.sort', sortKey), [sortKey]);
   useEffect(() => localStorage.setItem('hn.filter.hasImage', hasImageFilter.toString()), [hasImageFilter]);
   useEffect(() => localStorage.setItem('hn.filter.postedToday', postedTodayFilter.toString()), [postedTodayFilter]);
+  useEffect(() => localStorage.setItem('hn.mentor.verifiedOnly', mentorVerifiedOnly.toString()), [mentorVerifiedOnly]);
+  useEffect(() => localStorage.setItem('hn.mentor.minRating', mentorMinRating), [mentorMinRating]);
+  useEffect(() => localStorage.setItem('hn.mentor.sortBy', mentorSortBy), [mentorSortBy]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -110,10 +125,48 @@ export default function Browse() {
       try {
         // Handle mentor category specially
         if (filters.category === 'mentor') {
-          const { data, error } = await supabase
+          let query = supabase
             .from('mentors')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*');
+
+          // Apply filters
+          if (mentorVerifiedOnly) {
+            query = query.eq('is_verified', true);
+          }
+
+          if (parseFloat(mentorMinRating) > 0) {
+            query = query.gte('rating_avg', parseFloat(mentorMinRating));
+          }
+
+          // Apply subcategory filter (topics)
+          if (filters.subcategory) {
+            query = query.contains('topics', [filters.subcategory]);
+          }
+
+          // Apply sorting
+          switch (mentorSortBy) {
+            case 'rating':
+              query = query.order('rating_avg', { ascending: false, nullsFirst: false });
+              break;
+            case 'newest':
+              query = query.order('created_at', { ascending: false });
+              break;
+            case 'price_low':
+              query = query.order('price_cents', { ascending: true, nullsFirst: false });
+              break;
+            case 'price_high':
+              query = query.order('price_cents', { ascending: false, nullsFirst: false });
+              break;
+            case 'verified':
+            default:
+              query = query
+                .order('is_verified', { ascending: false })
+                .order('rating_avg', { ascending: false, nullsFirst: false })
+                .order('created_at', { ascending: false });
+              break;
+          }
+
+          const { data, error } = await query;
             
           if (error) throw error;
           
@@ -256,7 +309,7 @@ export default function Browse() {
     };
 
     loadListings();
-  }, [filters.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory, user]);
+  }, [filters.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory, user, mentorVerifiedOnly, mentorMinRating, mentorSortBy]);
 
   // Filter and sort listings
   const processedListings = useMemo(() => {
@@ -585,8 +638,16 @@ export default function Browse() {
                 </Popover>
 
                 {/* Additional Filters based on category */}
-                {filters.category && (
-                  filters.category === 'mentor' ? (
+                {filters.category === 'mentor' && (
+                  <>
+                    <MentorFilters
+                      verifiedOnly={mentorVerifiedOnly}
+                      minRating={mentorMinRating}
+                      sortBy={mentorSortBy}
+                      onVerifiedOnlyChange={setMentorVerifiedOnly}
+                      onMinRatingChange={setMentorMinRating}
+                      onSortByChange={setMentorSortBy}
+                    />
                     <Button 
                       size="sm" 
                       className="gap-1"
@@ -594,16 +655,18 @@ export default function Browse() {
                     >
                       Become a Mentor
                     </Button>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="gap-1"
-                    >
-                      More Filters
-                      <ChevronDown className="w-3 h-3 text-primary" />
-                    </Button>
-                  )
+                  </>
+                )}
+                
+                {filters.category && filters.category !== 'mentor' && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                  >
+                    More Filters
+                    <ChevronDown className="w-3 h-3 text-primary" />
+                  </Button>
                 )}
 
                 <Button
@@ -777,6 +840,20 @@ export default function Browse() {
                 {language === 'EN' ? 'Clear' : 'ኣጽዓን'}
               </Button>
             </div>
+
+            {/* Mentor-specific filters for mobile */}
+            {filters.category === 'mentor' && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <MentorFilters
+                  verifiedOnly={mentorVerifiedOnly}
+                  minRating={mentorMinRating}
+                  sortBy={mentorSortBy}
+                  onVerifiedOnlyChange={setMentorVerifiedOnly}
+                  onMinRatingChange={setMentorMinRating}
+                  onSortByChange={setMentorSortBy}
+                />
+              </div>
+            )}
             
             {/* Results and controls */}
             <div className="flex items-center justify-between">
