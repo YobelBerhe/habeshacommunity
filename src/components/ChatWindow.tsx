@@ -95,17 +95,30 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
     e.preventDefault();
     if (!newMessage.trim() || !user) return;
 
+    const messageContent = newMessage.trim();
     setSending(true);
     try {
       const { error } = await supabase.from('messages').insert({
         conversation_id: conversationId,
         sender_id: user.id,
-        content: newMessage.trim(),
+        content: messageContent,
       } as any);
 
       if (error) throw error;
 
       setNewMessage('');
+
+      // Send email notification (non-blocking)
+      supabase.functions.invoke('send-message-notification', {
+        body: {
+          conversationId,
+          senderId: user.id,
+          messageContent,
+        },
+      }).catch(err => {
+        console.error('Failed to send email notification:', err);
+        // Don't show error to user, email is optional
+      });
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');

@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import imageCompression from 'browser-image-compression';
 import { ImageCropper } from '@/components/ImageCropper';
+import { EmailNotificationToggle } from '@/components/EmailNotificationToggle';
 
 export default function AccountSettings() {
   const [displayName, setDisplayName] = useState('');
@@ -286,6 +287,8 @@ export default function AccountSettings() {
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
+
+          <EmailNotificationToggle />
         </div>
       </div>
     </div>

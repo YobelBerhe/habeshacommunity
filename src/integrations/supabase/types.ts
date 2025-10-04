@@ -921,6 +921,7 @@ export type Database = {
           country: string | null
           created_at: string
           display_name: string | null
+          email_notifications_enabled: boolean | null
           id: string
           updated_at: string
         }
@@ -931,6 +932,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
+          email_notifications_enabled?: boolean | null
           id: string
           updated_at?: string
         }
@@ -941,6 +943,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
+          email_notifications_enabled?: boolean | null
           id?: string
           updated_at?: string
         }
