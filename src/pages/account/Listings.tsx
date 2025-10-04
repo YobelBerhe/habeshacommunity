@@ -9,24 +9,27 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/store/language';
 import { t } from '@/lib/i18n';
 import type { Listing } from '@/types';
-
 export default function MyListings() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, openPost } = useAuth();
-  const { language } = useLanguage();
-
+  const {
+    user,
+    openPost
+  } = useAuth();
+  const {
+    language
+  } = useLanguage();
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
-    
     const loadMyListings = async () => {
       try {
-        const { data: listings, error: listingsError } = await supabase
-          .from('listings')
-          .select(`
+        const {
+          data: listings,
+          error: listingsError
+        } = await supabase.from('listings').select(`
             *,
             listing_contacts (
               id,
@@ -34,12 +37,10 @@ export default function MyListings() {
               contact_value,
               created_at
             )
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
+          `).eq('user_id', user.id).order('created_at', {
+          ascending: false
+        });
         if (listingsError) throw listingsError;
-
         const myListings = listings?.map(l => ({
           id: l.id,
           user_id: l.user_id || "",
@@ -61,14 +62,15 @@ export default function MyListings() {
           lat: l.location_lat,
           lng: l.location_lng,
           created_at: l.created_at,
-          contact: { phone: l.listing_contacts?.[0]?.contact_value || "" },
+          contact: {
+            phone: l.listing_contacts?.[0]?.contact_value || ""
+          },
           photos: l.images || [],
           lon: l.location_lng || undefined,
           createdAt: new Date(l.created_at).getTime(),
           updatedAt: new Date(l.updated_at).getTime(),
-          hasImage: !!(l.images?.length),
-        } as Listing)) || [];
-
+          hasImage: !!l.images?.length
+        }) as Listing) || [];
         setListings(myListings);
       } catch (error) {
         console.error('Error loading my listings:', error);
@@ -77,10 +79,8 @@ export default function MyListings() {
         setLoading(false);
       }
     };
-
     loadMyListings();
   }, [user]);
-
   const handleListingPosted = (updatedListing: Listing) => {
     // Refresh listings after edit or create
     setListings(prev => {
@@ -96,23 +96,16 @@ export default function MyListings() {
       }
     });
   };
-
   const handleEdit = (listing: Listing) => {
     useAuth.getState().openEditPost(listing);
   };
-
   const handleDelete = async (listingId: string) => {
     if (!confirm('Delete this listing? This action cannot be undone.')) return;
-    
     try {
-      const { error } = await supabase
-        .from('listings')
-        .delete()
-        .eq('id', listingId)
-        .eq('user_id', user?.id);
-
+      const {
+        error
+      } = await supabase.from('listings').delete().eq('id', listingId).eq('user_id', user?.id);
       if (error) throw error;
-      
       setListings(prev => prev.filter(l => l.id !== listingId));
       toast.success('Listing deleted successfully');
     } catch (error) {
@@ -120,104 +113,65 @@ export default function MyListings() {
       toast.error('Failed to delete listing');
     }
   };
-
   if (!user && !loading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <MentorHeader title="My Listings" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Sign in required</h2>
             <p className="text-muted-foreground mb-6">Please sign in to view and edit your listings</p>
-            <a 
-              href="/auth/login" 
-              className="btn-primary inline-block"
-            >
+            <a href="/auth/login" className="btn-primary inline-block">
               Sign In
             </a>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <MentorHeader title="My Listings" backPath="/" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading your listings...</div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <MentorHeader title={t(language, "my_listings")} backPath="/" />
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-end mb-4">
-          <button 
-            onClick={openPost}
-            className="btn-primary flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Post</span>
-          </button>
+          
         </div>
 
-        {listings.length === 0 ? (
-          <div className="text-center py-12">
+        {listings.length === 0 ? <div className="text-center py-12">
             <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">No listings yet</h2>
             <p className="text-muted-foreground mb-6">Create your first listing to get started</p>
-            <button 
-              onClick={openPost}
-              className="btn-primary"
-            >
+            <button onClick={openPost} className="btn-primary">
               {t(language, "post_listing")}
             </button>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {listings.map(listing => (
-              <div key={listing.id} className="relative">
-                <ListingCard 
-                  listing={listing}
-                  onSelect={() => window.location.href = `/l/${listing.id}`}
-                />
+          </div> : <div className="grid gap-4">
+            {listings.map(listing => <div key={listing.id} className="relative">
+                <ListingCard listing={listing} onSelect={() => window.location.href = `/l/${listing.id}`} />
                 <div className="absolute top-2 right-2 flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(listing);
-                    }}
-                    className="p-2 bg-background/80 hover:bg-background rounded-full shadow-md"
-                  >
+                  <button onClick={e => {
+              e.stopPropagation();
+              handleEdit(listing);
+            }} className="p-2 bg-background/80 hover:bg-background rounded-full shadow-md">
                     <Edit className="w-4 h-4 text-primary" />
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(listing.id);
-                    }}
-                    className="p-2 bg-background/80 hover:bg-background rounded-full shadow-md"
-                  >
+                  <button onClick={e => {
+              e.stopPropagation();
+              handleDelete(listing.id);
+            }} className="p-2 bg-background/80 hover:bg-background rounded-full shadow-md">
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              </div>)}
+          </div>}
       </div>
       
-      <PostModal 
-        city={listings[0]?.city || "Unknown"} 
-        onPosted={handleListingPosted}
-      />
-    </div>
-  );
+      <PostModal city={listings[0]?.city || "Unknown"} onPosted={handleListingPosted} />
+    </div>;
 }
