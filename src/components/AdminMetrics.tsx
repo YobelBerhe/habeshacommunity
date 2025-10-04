@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { exportToCSV } from "@/utils/csvExport";
+import { format, subDays, startOfMonth, endOfMonth, startOfYear } from "date-fns";
 import {
   LineChart,
   Line,
@@ -14,7 +15,15 @@ import {
 } from "recharts";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Download, TrendingUp, DollarSign, Users, Calendar, ArrowLeft } from "lucide-react";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Download, TrendingUp, DollarSign, Users, ArrowLeft, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type DateRange = {
+  from: Date;
+  to: Date;
+};
 
 type Timeframe = "7days" | "month" | "all";
 
@@ -31,8 +40,21 @@ interface ChartDataPoint {
   payouts: number;
 }
 
+const presetRanges = [
+  { label: "Today", days: 0 },
+  { label: "Last 7 Days", days: 7 },
+  { label: "Last 30 Days", days: 30 },
+  { label: "This Month", special: "thisMonth" },
+  { label: "Last Month", special: "lastMonth" },
+  { label: "This Year", special: "thisYear" },
+];
+
 export default function AdminMetrics() {
   const navigate = useNavigate();
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
   const [metrics, setMetrics] = useState({
     totalBookings: 0,
     totalProcessed: 0,
@@ -41,26 +63,30 @@ export default function AdminMetrics() {
   });
   const [topMentors, setTopMentors] = useState<MentorStats[]>([]);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [timeframe, setTimeframe] = useState<Timeframe>("all");
   const [loading, setLoading] = useState(true);
+
+  const applyPreset = (preset: typeof presetRanges[0]) => {
+    const now = new Date();
+    if (preset.special === "thisMonth") {
+      setDateRange({ from: startOfMonth(now), to: now });
+    } else if (preset.special === "lastMonth") {
+      const lastMonth = subDays(startOfMonth(now), 1);
+      setDateRange({ from: startOfMonth(lastMonth), to: endOfMonth(lastMonth) });
+    } else if (preset.special === "thisYear") {
+      setDateRange({ from: startOfYear(now), to: now });
+    } else {
+      setDateRange({ from: subDays(now, preset.days), to: now });
+    }
+  };
 
   const fetchMetrics = async () => {
     setLoading(true);
     let query = supabase
       .from("mentor_bookings")
       .select("id, application_fee_cents, net_to_mentor_cents, status, mentor_id, created_at")
-      .eq("status", "completed");
-
-    if (timeframe === "7days") {
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      query = query.gte("created_at", sevenDaysAgo);
-    }
-    if (timeframe === "month") {
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-      query = query.gte("created_at", startOfMonth.toISOString());
-    }
+      .eq("status", "completed")
+      .gte("created_at", dateRange.from.toISOString())
+      .lte("created_at", dateRange.to.toISOString());
 
     const { data: bookings } = await query;
 
@@ -125,16 +151,18 @@ export default function AdminMetrics() {
 
   useEffect(() => {
     fetchMetrics();
-  }, [timeframe]);
+  }, [dateRange]);
 
   const handleExportMentors = () => {
     if (!topMentors || topMentors.length === 0) return;
-    exportToCSV(topMentors, `top-mentors-${timeframe}.csv`);
+    const dateStr = `${format(dateRange.from, 'yyyy-MM-dd')}_to_${format(dateRange.to, 'yyyy-MM-dd')}`;
+    exportToCSV(topMentors, `top-mentors-${dateStr}.csv`);
   };
 
   const handleExportRevenue = () => {
     if (!chartData || chartData.length === 0) return;
-    exportToCSV(chartData, `revenue-data-${timeframe}.csv`);
+    const dateStr = `${format(dateRange.from, 'yyyy-MM-dd')}_to_${format(dateRange.to, 'yyyy-MM-dd')}`;
+    exportToCSV(chartData, `revenue-data-${dateStr}.csv`);
   };
 
   return (
@@ -155,6 +183,63 @@ export default function AdminMetrics() {
 
       {/* Content */}
       <div className="px-4 py-4 space-y-4">
+        {/* Date Range Picker with Presets */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {presetRanges.map((preset) => (
+              <Button
+                key={preset.label}
+                onClick={() => applyPreset(preset)}
+                variant="outline"
+                size="sm"
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !dateRange && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRange?.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(dateRange.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Pick a date range</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={{ from: dateRange?.from, to: dateRange?.to }}
+                onSelect={(range: any) => {
+                  if (range?.from && range?.to) {
+                    setDateRange({ from: range.from, to: range.to });
+                  }
+                }}
+                numberOfMonths={2}
+                disabled={(date) => date > new Date()}
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
         {/* Export Buttons */}
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleExportMentors} variant="outline" size="sm">
@@ -165,25 +250,6 @@ export default function AdminMetrics() {
             <Download className="w-4 h-4 mr-2" />
             Export Revenue
           </Button>
-        </div>
-
-        {/* Timeframe Filters */}
-        <div className="flex flex-wrap gap-2">
-          {[
-            { label: "Last 7 Days", value: "7days" as Timeframe, icon: Calendar },
-            { label: "This Month", value: "month" as Timeframe, icon: Calendar },
-            { label: "All Time", value: "all" as Timeframe, icon: TrendingUp },
-          ].map((f) => (
-            <Button
-              key={f.value}
-              onClick={() => setTimeframe(f.value)}
-              variant={timeframe === f.value ? "default" : "outline"}
-              size="sm"
-            >
-              <f.icon className="w-4 h-4 mr-2" />
-              {f.label}
-            </Button>
-          ))}
         </div>
 
         {/* KPIs */}
