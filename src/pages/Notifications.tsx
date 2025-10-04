@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import MentorHeader from '@/components/MentorHeader';
 
 type NotificationRow = {
   id: string;
@@ -113,25 +114,19 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Bell className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Notifications</h1>
-          {unreadCount > 0 && (
-            <Badge variant="destructive">{unreadCount} unread</Badge>
-          )}
-        </div>
-        
+    <div className="min-h-screen bg-background">
+      <MentorHeader title="Notifications" backPath="/" />
+      <div className="container mx-auto px-4 pt-4 pb-8">
         {unreadCount > 0 && (
-          <Button onClick={markAllAsRead} variant="outline" size="sm">
-            <CheckCheck className="h-4 w-4 mr-2" />
-            Mark all read
-          </Button>
+          <div className="mb-4 flex justify-end">
+            <Button onClick={markAllAsRead} variant="outline" size="sm">
+              <CheckCheck className="h-4 w-4 mr-2" />
+              Mark all read
+            </Button>
+          </div>
         )}
-      </div>
 
-      {loading ? (
+        {loading ? (
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-muted-foreground">Loading notifications...</div>
@@ -189,7 +184,8 @@ export default function NotificationsPage() {
             ))
           )}
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
