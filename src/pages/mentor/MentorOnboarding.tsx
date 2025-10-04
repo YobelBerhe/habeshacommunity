@@ -7,9 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, X } from 'lucide-react';
-import MobileHeader from '@/components/layout/MobileHeader';
-import Header from '@/components/Header';
+import { Plus, X } from 'lucide-react';
+import MentorHeader from '@/components/MentorHeader';
 import { getAppState } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
 import PhotoUpload from '@/components/PhotoUpload';
@@ -196,23 +195,12 @@ export default function MentorOnboarding() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
+      <MentorHeader 
+        title="Become a Mentor" 
+        backPath="/mentor" 
       />
       
       <div className="container max-w-3xl mx-auto px-4 py-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate(-1)}
-          className="mb-4"
-          disabled={createdMentorId !== null}
-        >
-          ← Back
-        </Button>
 
         {!createdMentorId ? (
           <Card>

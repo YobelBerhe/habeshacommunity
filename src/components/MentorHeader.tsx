@@ -11,18 +11,17 @@ export default function MentorHeader({ title, backPath = '/' }: MentorHeaderProp
   const navigate = useNavigate();
 
   return (
-    <header className="w-full border-b bg-background/70 backdrop-blur sticky top-0 z-[9999]">
-      <div className="container mx-auto px-4 py-3 flex items-center gap-4">
+    <header className="w-full border-b bg-background sticky top-0 z-[9999]">
+      <div className="px-4 py-2 flex items-center gap-3">
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={() => navigate(backPath)}
-          className="flex items-center gap-2"
+          className="h-8 w-8"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back
+          <ArrowLeft className="w-5 h-5" />
         </Button>
-        {title && <h1 className="text-xl font-semibold">{title}</h1>}
+        {title && <h1 className="text-lg font-semibold">{title}</h1>}
       </div>
     </header>
   );
