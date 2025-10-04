@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Upload } from 'lucide-react';
+import { Heart, Upload, Edit2 } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { getAppState } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ImageCropper } from '@/components/ImageCropper';
 
 interface Question {
   id: string;
@@ -36,6 +37,10 @@ export default function MatchOnboarding() {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
+  
+  // Cropper state
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -76,17 +81,30 @@ export default function MatchOnboarding() {
     }
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    // Create temporary URL for cropping
+    const imageUrl = URL.createObjectURL(file);
+    setTempImageUrl(imageUrl);
+    setEditingPhotoIndex(null); // Adding new photo
+  };
+
+  const handleEditPhoto = (index: number) => {
+    setTempImageUrl(photos[index]);
+    setEditingPhotoIndex(index);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!user) return;
+
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${Date.now()}.jpg`;
       
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('chat-media')
-        .upload(fileName, file);
+        .upload(fileName, croppedBlob);
 
       if (uploadError) throw uploadError;
 
@@ -94,7 +112,18 @@ export default function MatchOnboarding() {
         .from('chat-media')
         .getPublicUrl(fileName);
 
-      setPhotos([...photos, publicUrl]);
+      if (editingPhotoIndex !== null) {
+        // Replace existing photo
+        const newPhotos = [...photos];
+        newPhotos[editingPhotoIndex] = publicUrl;
+        setPhotos(newPhotos);
+      } else {
+        // Add new photo
+        setPhotos([...photos, publicUrl]);
+      }
+
+      setTempImageUrl(null);
+      setEditingPhotoIndex(null);
     } catch (error) {
       console.error('Upload error:', error);
       toast({
@@ -103,6 +132,14 @@ export default function MatchOnboarding() {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleCropCancel = () => {
+    if (tempImageUrl && editingPhotoIndex === null) {
+      URL.revokeObjectURL(tempImageUrl);
+    }
+    setTempImageUrl(null);
+    setEditingPhotoIndex(null);
   };
 
   const handleSubmit = async () => {
@@ -215,12 +252,21 @@ export default function MatchOnboarding() {
                   <Label>Photos (up to 5)</Label>
                   <div className="grid grid-cols-3 gap-4 mt-2">
                     {photos.map((photo, idx) => (
-                      <img
-                        key={idx}
-                        src={photo}
-                        alt={`Photo ${idx + 1}`}
-                        className="w-full h-24 object-cover rounded-md"
-                      />
+                      <div key={idx} className="relative group">
+                        <img
+                          src={photo}
+                          alt={`Photo ${idx + 1}`}
+                          className="w-full h-24 object-cover rounded-md"
+                        />
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="absolute bottom-1 right-1 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleEditPhoto(idx)}
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                      </div>
                     ))}
                     {photos.length < 5 && (
                       <label className="border-2 border-dashed rounded-md h-24 flex items-center justify-center cursor-pointer hover:bg-muted">
@@ -305,6 +351,14 @@ export default function MatchOnboarding() {
           </CardContent>
         </Card>
       </div>
+
+      {tempImageUrl && (
+        <ImageCropper
+          imageUrl={tempImageUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }
