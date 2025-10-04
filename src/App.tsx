@@ -27,6 +27,7 @@ import BookingSuccess from "./pages/mentor/BookingSuccess";
 import MentorPayouts from "./pages/mentor/MentorPayouts";
 import VerifyProfile from "./pages/mentor/VerifyProfile";
 import VerificationReview from "./pages/admin/VerificationReview";
+import AdminMetrics from "./pages/admin/Metrics";
 import MatchOnboarding from "./pages/match/MatchOnboarding";
 import MatchDiscover from "./pages/match/MatchDiscover";
 import MatchProfile from "./pages/match/MatchProfile";
@@ -76,6 +77,7 @@ const App = () => (
           <Route path="/mentor/payouts" element={<MentorPayouts />} />
           <Route path="/mentor/verify" element={<VerifyProfile />} />
           <Route path="/admin/verifications" element={<VerificationReview />} />
+          <Route path="/admin/metrics" element={<AdminMetrics />} />
           <Route path="/match" element={<MatchDiscover />} />
           <Route path="/match/discover" element={<MatchDiscover />} />
           <Route path="/match/onboarding" element={<MatchOnboarding />} />
