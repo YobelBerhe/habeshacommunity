@@ -32,6 +32,7 @@ interface Mentor {
   website_url: string;
   social_links?: any;
   is_verified: boolean;
+  created_at?: string;
 }
 
 export default function MentorList() {
@@ -42,6 +43,8 @@ export default function MentorList() {
   const [topicFilter, setTopicFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [minRating, setMinRating] = useState('0');
+  const [sortBy, setSortBy] = useState('verified');
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const appState = getAppState();
@@ -68,17 +71,42 @@ export default function MentorList() {
     }
   };
 
-  const filteredMentors = mentors.filter(mentor => {
-    const matchesSearch = !searchTerm || 
-      mentor.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mentor.bio?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
-    const matchesCity = !cityFilter || mentor.city?.toLowerCase().includes(cityFilter.toLowerCase());
-    const matchesVerified = !verifiedOnly || mentor.is_verified === true;
-    
-    return matchesSearch && matchesTopic && matchesCity && matchesVerified;
-  });
+  const filteredAndSortedMentors = mentors
+    .filter(mentor => {
+      const matchesSearch = !searchTerm || 
+        mentor.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        mentor.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        mentor.topics?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
+      const matchesCity = !cityFilter || mentor.city?.toLowerCase().includes(cityFilter.toLowerCase());
+      const matchesVerified = !verifiedOnly || mentor.is_verified === true;
+      const matchesRating = (mentor.rating_avg ?? 0) >= parseFloat(minRating);
+      
+      return matchesSearch && matchesTopic && matchesCity && matchesVerified && matchesRating;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'rating':
+          return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
+        case 'newest':
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        case 'price_low':
+          return (a.price_cents ?? Infinity) - (b.price_cents ?? Infinity);
+        case 'price_high':
+          return (b.price_cents ?? 0) - (a.price_cents ?? 0);
+        case 'verified':
+        default:
+          // Verified first, then rating, then newest
+          if (a.is_verified !== b.is_verified) {
+            return b.is_verified ? 1 : -1;
+          }
+          if ((b.rating_avg ?? 0) !== (a.rating_avg ?? 0)) {
+            return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
+          }
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      }
+    });
 
   const formatPrice = (cents: number, currency: string) => {
     const amount = cents / 100;
@@ -118,58 +146,90 @@ export default function MentorList() {
           <Button onClick={() => navigate('/mentor/onboarding')}>Become a Mentor</Button>
         </div>
 
-        {/* Verified Only Toggle */}
-        <div className="mb-4">
-          <label className="flex items-center gap-2 cursor-pointer w-fit">
-            <input 
-              type="checkbox" 
-              checked={verifiedOnly} 
-              onChange={(e) => setVerifiedOnly(e.target.checked)}
-              className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-            />
-            <CheckCircle2 className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">Show only verified mentors</span>
-          </label>
-        </div>
+        {/* Filter Bar */}
+        <div className="space-y-4 mb-6">
+          {/* Verified Only Toggle */}
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={verifiedOnly} 
+                onChange={(e) => setVerifiedOnly(e.target.checked)}
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Show only verified mentors</span>
+            </label>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Input
-            placeholder="Search mentors..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Select value={topicFilter} onValueChange={setTopicFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Topic" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Topics</SelectItem>
-              <SelectItem value="language">Language</SelectItem>
-              <SelectItem value="health">Health</SelectItem>
-              <SelectItem value="career">Career</SelectItem>
-              <SelectItem value="tech">Tech</SelectItem>
-              <SelectItem value="finance">Finance</SelectItem>
-              <SelectItem value="immigration">Immigration</SelectItem>
-              <SelectItem value="business">Business</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            placeholder="City"
-            value={cityFilter}
-            onChange={(e) => setCityFilter(e.target.value)}
-          />
+          {/* Search and Filters Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <Input
+              placeholder="Search mentors..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="md:col-span-2"
+            />
+            <Select value={topicFilter} onValueChange={setTopicFilter}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Topic" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Topics</SelectItem>
+                <SelectItem value="language">Language</SelectItem>
+                <SelectItem value="health">Health</SelectItem>
+                <SelectItem value="career">Career</SelectItem>
+                <SelectItem value="tech">Tech</SelectItem>
+                <SelectItem value="finance">Finance</SelectItem>
+                <SelectItem value="immigration">Immigration</SelectItem>
+                <SelectItem value="business">Business</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              placeholder="City"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+            />
+            <Select value={minRating} onValueChange={setMinRating}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Min Rating" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="0">All Ratings</SelectItem>
+                <SelectItem value="4">⭐ 4.0+</SelectItem>
+                <SelectItem value="4.5">⭐ 4.5+</SelectItem>
+                <SelectItem value="5">⭐ 5.0 only</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="verified">Verified First</SelectItem>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+                <SelectItem value="newest">Newest Mentors</SelectItem>
+                <SelectItem value="price_low">Lowest Price</SelectItem>
+                <SelectItem value="price_high">Highest Price</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Clear Filters Button */}
           <Button variant="outline" onClick={() => {
             setSearchTerm('');
             setTopicFilter('all');
             setCityFilter('');
             setVerifiedOnly(false);
+            setMinRating('0');
+            setSortBy('verified');
           }}>
-            Clear Filters
+            Clear All Filters
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMentors.map((mentor) => (
+          {filteredAndSortedMentors.map((mentor) => (
             <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
               {/* Profile Photo with Price Overlay */}
               <div className="relative">
@@ -280,7 +340,7 @@ export default function MentorList() {
           ))}
         </div>
 
-        {filteredMentors.length === 0 && (
+        {filteredAndSortedMentors.length === 0 && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No mentors found matching your criteria.</p>
           </div>
