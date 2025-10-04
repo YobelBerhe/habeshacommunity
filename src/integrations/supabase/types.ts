@@ -771,6 +771,8 @@ export type Database = {
           expertise: string[] | null
           hourly_rate_cents: number | null
           id: string
+          industries: string[] | null
+          is_featured: boolean | null
           is_verified: boolean | null
           languages: string[] | null
           name: string
@@ -780,6 +782,7 @@ export type Database = {
           price_cents: number | null
           rating_avg: number | null
           rating_count: number | null
+          skills: string[] | null
           stripe_account_id: string | null
           timezone: string | null
           title: string
@@ -801,6 +804,8 @@ export type Database = {
           expertise?: string[] | null
           hourly_rate_cents?: number | null
           id?: string
+          industries?: string[] | null
+          is_featured?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
           name: string
@@ -810,6 +815,7 @@ export type Database = {
           price_cents?: number | null
           rating_avg?: number | null
           rating_count?: number | null
+          skills?: string[] | null
           stripe_account_id?: string | null
           timezone?: string | null
           title: string
@@ -831,6 +837,8 @@ export type Database = {
           expertise?: string[] | null
           hourly_rate_cents?: number | null
           id?: string
+          industries?: string[] | null
+          is_featured?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
           name?: string
@@ -840,6 +848,7 @@ export type Database = {
           price_cents?: number | null
           rating_avg?: number | null
           rating_count?: number | null
+          skills?: string[] | null
           stripe_account_id?: string | null
           timezone?: string | null
           title?: string

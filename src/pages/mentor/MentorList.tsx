@@ -40,10 +40,13 @@ export default function MentorList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [topicFilter, setTopicFilter] = useState('all');
+  const [skillFilter, setSkillFilter] = useState('');
+  const [industryFilter, setIndustryFilter] = useState('');
+  const [languageFilter, setLanguageFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [minRating, setMinRating] = useState('0');
-  const [sortBy, setSortBy] = useState('verified');
+  const [sortBy, setSortBy] = useState('featured');
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
 
@@ -61,6 +64,7 @@ export default function MentorList() {
           mentor_skills(skill)
         `)
         .eq('available', true)
+        .order('is_featured', { ascending: false })
         .order('is_verified', { ascending: false })
         .order('rating_avg', { ascending: false })
         .order('created_at', { ascending: false });
@@ -79,22 +83,34 @@ export default function MentorList() {
   const filteredAndSortedMentors = mentors.filter((mentor) => {
     const lowerQuery = searchTerm.toLowerCase();
     const skills = (mentor as any).mentor_skills?.map((s: any) => s.skill.toLowerCase()) || [];
+    const mentorSkills = (mentor as any).skills || [];
+    const mentorIndustries = (mentor as any).industries || [];
+    const mentorLanguages = mentor.languages || [];
     
     const matchesSearch =
       !searchTerm ||
       mentor.display_name?.toLowerCase().includes(lowerQuery) ||
       mentor.bio?.toLowerCase().includes(lowerQuery) ||
       mentor.topics?.some(t => t.toLowerCase().includes(lowerQuery)) ||
-      skills.some(s => s.includes(lowerQuery));
+      skills.some(s => s.includes(lowerQuery)) ||
+      mentorSkills.some((s: string) => s.toLowerCase().includes(lowerQuery));
 
-    const matchesTopic = !topicFilter || mentor.topics?.includes(topicFilter);
+    const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
+    const matchesSkill = !skillFilter || mentorSkills.some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase()));
+    const matchesIndustry = !industryFilter || mentorIndustries.some((i: string) => i.toLowerCase().includes(industryFilter.toLowerCase()));
+    const matchesLanguage = !languageFilter || mentorLanguages.some((l: string) => l.toLowerCase().includes(languageFilter.toLowerCase()));
     const matchesCity = !cityFilter || mentor.city?.toLowerCase() === cityFilter.toLowerCase();
     const matchesVerified = !verifiedOnly || mentor.is_verified;
     const matchesRating = mentor.rating_avg >= parseFloat(minRating);
 
-    return matchesSearch && matchesTopic && matchesCity && matchesVerified && matchesRating;
+    return matchesSearch && matchesTopic && matchesSkill && matchesIndustry && matchesLanguage && matchesCity && matchesVerified && matchesRating;
   }).sort((a, b) => {
       switch (sortBy) {
+        case 'featured':
+          if ((a as any).is_featured !== (b as any).is_featured) {
+            return (b as any).is_featured ? 1 : -1;
+          }
+          return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
         case 'rating':
           return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
         case 'newest':
@@ -159,13 +175,37 @@ export default function MentorList() {
           </div>
 
           {/* Search and Filters Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3">
             <Input
               placeholder="Search mentors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="md:col-span-2"
             />
+            <Input
+              placeholder="Filter by skill..."
+              value={skillFilter}
+              onChange={(e) => setSkillFilter(e.target.value)}
+            />
+            <Input
+              placeholder="Filter by industry..."
+              value={industryFilter}
+              onChange={(e) => setIndustryFilter(e.target.value)}
+            />
+            <Input
+              placeholder="Filter by language..."
+              value={languageFilter}
+              onChange={(e) => setLanguageFilter(e.target.value)}
+            />
+            <Input
+              placeholder="City"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+            />
+          </div>
+          
+          {/* Additional Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <Select value={topicFilter} onValueChange={setTopicFilter}>
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Topic" />
@@ -181,11 +221,6 @@ export default function MentorList() {
                 <SelectItem value="business">Business</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              placeholder="City"
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-            />
             <Select value={minRating} onValueChange={setMinRating}>
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Min Rating" />
@@ -202,6 +237,7 @@ export default function MentorList() {
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
+                <SelectItem value="featured">Featured First</SelectItem>
                 <SelectItem value="verified">Verified First</SelectItem>
                 <SelectItem value="rating">Highest Rated</SelectItem>
                 <SelectItem value="newest">Newest Mentors</SelectItem>
@@ -214,11 +250,14 @@ export default function MentorList() {
           {/* Clear Filters Button */}
           <Button variant="outline" onClick={() => {
             setSearchTerm('');
+            setSkillFilter('');
+            setIndustryFilter('');
+            setLanguageFilter('');
             setTopicFilter('all');
             setCityFilter('');
             setVerifiedOnly(false);
             setMinRating('0');
-            setSortBy('verified');
+            setSortBy('featured');
           }}>
             Clear All Filters
           </Button>
@@ -247,6 +286,12 @@ export default function MentorList() {
                     {formatPrice(mentor.price_cents, mentor.currency)}/hr
                   </div>
                 </div>
+                {/* Featured Badge */}
+                {(mentor as any).is_featured && (
+                  <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                    ⭐ Featured
+                  </div>
+                )}
               </div>
               
               <CardHeader>

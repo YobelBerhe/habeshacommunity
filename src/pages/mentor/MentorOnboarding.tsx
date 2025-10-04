@@ -23,6 +23,18 @@ const popularTopics = [
   'Finance', 'Design', 'Business Strategy', 'Personal Development'
 ];
 
+const popularSkills = [
+  'React', 'Python', 'JavaScript', 'AI/ML', 'Career Coaching', 'Leadership',
+  'Product Strategy', 'Data Analysis', 'UX Design', 'Business Development',
+  'Marketing Strategy', 'Public Speaking', 'Fundraising', 'Team Building'
+];
+
+const industries = [
+  'Technology', 'Healthcare', 'Finance', 'Education', 'E-commerce',
+  'SaaS', 'Consulting', 'Non-Profit', 'Media', 'Real Estate',
+  'Manufacturing', 'Retail', 'Hospitality', 'Legal', 'Startups'
+];
+
 const languages = ['English', 'Amharic', 'Tigrinya', 'Oromo', 'Arabic', 'Spanish', 'French', 'German'];
 
 export default function MentorOnboarding() {
@@ -41,7 +53,11 @@ export default function MentorOnboarding() {
     currency: 'USD',
     topics: [] as string[],
     languages: [] as string[],
+    skills: [] as string[],
+    industries: [] as string[],
     custom_topic: '',
+    custom_skill: '',
+    custom_industry: '',
     photos: [] as string[],
     website_url: '',
     plan_description: '2 calls per month (30min/call)',
@@ -84,6 +100,8 @@ export default function MentorOnboarding() {
           currency: formData.currency,
           topics: formData.topics,
           languages: formData.languages,
+          skills: formData.skills,
+          industries: formData.industries,
           photos: formData.photos,
           website_url: formData.website_url || null,
           available: true,
@@ -134,6 +152,46 @@ export default function MentorOnboarding() {
         ? prev.languages.filter(l => l !== language)
         : [...prev.languages, language]
     }));
+  };
+
+  const addSkill = (skill: string) => {
+    if (!formData.skills.includes(skill)) {
+      setFormData({ ...formData, skills: [...formData.skills, skill] });
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setFormData({ ...formData, skills: formData.skills.filter(s => s !== skill) });
+  };
+
+  const addCustomSkill = () => {
+    if (formData.custom_skill.trim() && !formData.skills.includes(formData.custom_skill.trim())) {
+      setFormData({ 
+        ...formData, 
+        skills: [...formData.skills, formData.custom_skill.trim()],
+        custom_skill: ''
+      });
+    }
+  };
+
+  const addIndustry = (industry: string) => {
+    if (!formData.industries.includes(industry)) {
+      setFormData({ ...formData, industries: [...formData.industries, industry] });
+    }
+  };
+
+  const removeIndustry = (industry: string) => {
+    setFormData({ ...formData, industries: formData.industries.filter(i => i !== industry) });
+  };
+
+  const addCustomIndustry = () => {
+    if (formData.custom_industry.trim() && !formData.industries.includes(formData.custom_industry.trim())) {
+      setFormData({ 
+        ...formData, 
+        industries: [...formData.industries, formData.custom_industry.trim()],
+        custom_industry: ''
+      });
+    }
   };
 
   return (
@@ -319,6 +377,100 @@ export default function MentorOnboarding() {
                       </Badge>
                     ))}
                   </div>
+                </div>
+
+                {/* Skills */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Key Skills</label>
+                  <p className="text-sm text-muted-foreground mb-3">Select or add your key skills that mentees can filter by</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {popularSkills.map(skill => (
+                      <Badge
+                        key={skill}
+                        variant={formData.skills.includes(skill) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => formData.skills.includes(skill) ? removeSkill(skill) : addSkill(skill)}
+                      >
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      value={formData.custom_skill}
+                      onChange={(e) => setFormData({ ...formData, custom_skill: e.target.value })}
+                      placeholder="Add custom skill"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill())}
+                    />
+                    <Button type="button" variant="outline" onClick={addCustomSkill}>
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {formData.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formData.skills.map(skill => (
+                        <Badge key={skill} variant="secondary">
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => removeSkill(skill)}
+                            className="ml-2 hover:text-destructive"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Industries */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Industries</label>
+                  <p className="text-sm text-muted-foreground mb-3">Select industries you have experience in</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {industries.map(industry => (
+                      <Badge
+                        key={industry}
+                        variant={formData.industries.includes(industry) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => formData.industries.includes(industry) ? removeIndustry(industry) : addIndustry(industry)}
+                      >
+                        {industry}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      value={formData.custom_industry}
+                      onChange={(e) => setFormData({ ...formData, custom_industry: e.target.value })}
+                      placeholder="Add custom industry"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomIndustry())}
+                    />
+                    <Button type="button" variant="outline" onClick={addCustomIndustry}>
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {formData.industries.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formData.industries.map(industry => (
+                        <Badge key={industry} variant="secondary">
+                          {industry}
+                          <button
+                            type="button"
+                            onClick={() => removeIndustry(industry)}
+                            className="ml-2 hover:text-destructive"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Social Links */}
