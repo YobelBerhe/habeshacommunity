@@ -116,9 +116,23 @@ export function BundlePurchase({ mentorId, singleSessionPrice, currency = 'USD' 
                 </div>
 
                 <Button
-                  onClick={() => handlePurchaseBundle(bundle.size)}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (loading === null) {
+                      handlePurchaseBundle(bundle.size);
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (loading === null) {
+                      handlePurchaseBundle(bundle.size);
+                    }
+                  }}
                   disabled={loading !== null}
-                  className="w-full"
+                  className="w-full touch-manipulation"
                   variant={bundle.popular ? 'default' : 'outline'}
                 >
                   {loading === bundle.size ? 'Processing...' : `Buy ${bundle.size} Sessions`}

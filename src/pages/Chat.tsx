@@ -418,10 +418,20 @@ export default function Chat() {
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
-                    handleSend();
+                    e.stopPropagation();
+                    if (!loading && message.trim() && !isGlobal) {
+                      handleSend();
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!loading && message.trim() && !isGlobal) {
+                      handleSend();
+                    }
                   }}
                   disabled={loading || !message.trim() || isGlobal}
-                  className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
+                  className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0 touch-manipulation"
                   title={isGlobal ? 'Select a city to send messages' : loading ? 'Sending...' : 'Send message'}
                 >
                   <Send className="w-4 h-4" />
