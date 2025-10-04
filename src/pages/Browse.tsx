@@ -462,9 +462,9 @@ export default function Browse() {
                 </button>
                 <button 
                   className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'marketplace' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    filters.category === 'forsale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                   }`}
-                  onClick={() => setFilters({ ...filters, category: 'marketplace' })}
+                  onClick={() => setFilters({ ...filters, category: 'forsale' })}
                 >
                   Marketplace
                 </button>

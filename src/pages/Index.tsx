@@ -575,8 +575,8 @@ export default function Index() {
           
           <TrendingRail 
             label="Trending in Marketplace" 
-            category="marketplace"
-            link="/browse?category=marketplace"
+            category="forsale"
+            link="/browse?category=forsale"
           />
         </div>
 

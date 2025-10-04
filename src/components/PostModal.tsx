@@ -21,7 +21,7 @@ const catOptions: { key: string; label: string }[] = [
   { key: "services", label: "Services" },
   { key: "community", label: "Community" },
   { key: "mentor", label: "Mentor Profile" },
-  { key: "marketplace", label: "Marketplace Item" },
+  { key: "forsale", label: "Marketplace Item" },
   { key: "match", label: "Match & Connect" },
 ];
 
@@ -239,7 +239,7 @@ export default function PostModal({ city, onPosted }: Props) {
         { slug: "life", label: "Life Coaching" },
       ];
     }
-    if (category === "marketplace") {
+    if (category === "forsale") {
       return [
         { slug: "electronics", label: "Electronics" },
         { slug: "furniture", label: "Furniture" },
@@ -292,7 +292,7 @@ export default function PostModal({ city, onPosted }: Props) {
       if (!bio.trim()) newErrors.bio = "Bio is required";
     }
     
-    if (category === "marketplace") {
+    if (category === "forsale") {
       if (!condition) newErrors.condition = "Condition is required";
     }
     
@@ -366,7 +366,7 @@ export default function PostModal({ city, onPosted }: Props) {
           ].filter(Boolean)
         });
       }
-      if (category === "marketplace") {
+      if (category === "forsale") {
         finalDescription += formatAttrs({
           condition, brand, model, purchaseDate, warranty,
           reasonForSelling, shippingAvailable
@@ -737,7 +737,7 @@ export default function PostModal({ city, onPosted }: Props) {
           </div>
         )}
 
-        {category === "marketplace" && (
+        {category === "forsale" && (
           <div className="space-y-3 mb-4 p-4 border rounded-lg bg-muted/30">
             <h3 className="text-sm font-semibold mb-2">🛍️ Item Details</h3>
             <div>

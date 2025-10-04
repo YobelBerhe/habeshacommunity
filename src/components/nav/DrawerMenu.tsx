@@ -237,7 +237,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=marketplace&sub=electronics');
+                    navigate('/browse?category=forsale&sub=electronics');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
@@ -248,7 +248,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=marketplace&sub=furniture');
+                    navigate('/browse?category=forsale&sub=furniture');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
@@ -259,7 +259,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=marketplace&sub=vehicles');
+                    navigate('/browse?category=forsale&sub=vehicles');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
@@ -270,7 +270,7 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=marketplace&sub=books');
+                    navigate('/browse?category=forsale&sub=books');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
