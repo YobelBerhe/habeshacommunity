@@ -5,15 +5,13 @@ type City = { name: string; country: string; lat: string; lon: string };
 export default function CitySearch({ value, onSelect }:{
   value?: string; onSelect: (c: City) => void;
 }) {
-  const [q, setQ] = useState(value ?? "");
+  const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<City[]>([]);
   const [locked, setLocked] = useState(false);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  useEffect(()=>setQ(value ?? ""),[value]);
 
   useEffect(()=>{
     const off=(e:MouseEvent)=>{ if(!boxRef.current?.contains(e.target as Node)) setOpen(false); };
