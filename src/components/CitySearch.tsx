@@ -60,7 +60,7 @@ export default function CitySearch({ value, onSelect }:{
         <div className="absolute left-0 right-0 top-[46px] z-[9999] max-h-72 overflow-auto bg-background text-foreground border border-input rounded-xl shadow-2xl">
           {items.map((c,i)=>(
             <div key={i}
-                 className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                 className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
              onMouseDown={()=>{ 
                setLocked(true);
                const sel = `${c.name}, ${c.country}`;

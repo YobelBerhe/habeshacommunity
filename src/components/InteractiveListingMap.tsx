@@ -506,7 +506,7 @@ export default function InteractiveListingMap({
     if (!showBorders && boundaryLayer) {
       mapInstanceRef.current.removeLayer(boundaryLayer);
       setBoundaryLayer(null);
-    } else if (showBorders && (searchCity || searchCountry)) {
+    } else if (showBorders && !boundaryLayer && (searchCity || searchCountry)) {
       // Re-add boundary when toggle is turned on
       if (searchCity) {
         addBoundary(searchCity, 'city');
@@ -514,7 +514,7 @@ export default function InteractiveListingMap({
         addBoundary(searchCountry, 'country');
       }
     }
-  }, [showBorders, searchCity, searchCountry]);
+  }, [showBorders]);
 
   return (
     <div className="relative w-full" style={{ height }}>

@@ -531,6 +531,7 @@ export default function Index() {
           onPrimary={handleHousingClick}
           onSecondary={handleJobsClick}
           onCityClick={handleCityClick}
+          onNavigate={(path) => navigate(path)}
         />
       </div>
 

@@ -12,6 +12,7 @@ type Props = {
   SearchBar?: React.ComponentType<any>;
   onPrimary?: () => void;
   onSecondary?: () => void;
+  onNavigate?: (path: string) => void;
 };
 
 export default function WorldActivityHero({
@@ -20,6 +21,7 @@ export default function WorldActivityHero({
   SearchBar,
   onPrimary,
   onSecondary,
+  onNavigate,
 }: Props) {
   const mapRef = useRef<LeafletMap | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -141,6 +143,54 @@ export default function WorldActivityHero({
             </div>
           ) : null}
         </div>
+
+        {/* Navigation buttons - Desktop only */}
+        {onNavigate && (
+          <div className="hidden md:flex justify-center gap-2 mt-4 flex-wrap">
+            <button
+              onClick={() => onNavigate('/browse?category=community')}
+              className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
+            >
+              Community
+            </button>
+            <button
+              onClick={() => onNavigate('/mentor')}
+              className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
+            >
+              Mentor
+            </button>
+            <button
+              onClick={() => onNavigate('/match/discover')}
+              className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
+            >
+              Match
+            </button>
+            <button
+              onClick={() => onNavigate('/browse?category=housing')}
+              className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
+            >
+              Housing
+            </button>
+            <button
+              onClick={() => onNavigate('/browse?category=jobs')}
+              className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
+            >
+              Jobs
+            </button>
+            <button
+              onClick={() => onNavigate('/browse?category=services')}
+              className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
+            >
+              Services
+            </button>
+            <button
+              onClick={() => onNavigate('/marketplace')}
+              className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
+            >
+              Marketplace
+            </button>
+          </div>
+        )}
 
         <p className="text-white/90 md:text-xl text-center mt-6 mb-8">
           <span className="text-red-500">Live now:</span> <b>{totals.totalPeople}</b> people in <b>{totals.totalCities}</b> cities
