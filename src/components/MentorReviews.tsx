@@ -50,11 +50,11 @@ export default function MentorReviews({
     try {
       // Check if user has completed bookings with this mentor that haven't been reviewed
       const { data: bookings } = await supabase
-        .from('bookings')
+        .from('mentor_bookings')
         .select('id')
         .eq('mentor_id', mentorId)
         .eq('user_id', user.id)
-        .eq('status', 'confirmed')
+        .eq('status', 'completed')
         .limit(1);
 
       if (bookings && bookings.length > 0) {
@@ -62,8 +62,7 @@ export default function MentorReviews({
         const { data: existingReview } = await supabase
           .from('mentor_reviews')
           .select('id')
-          .eq('mentor_id', mentorId)
-          .eq('user_id', user.id)
+          .eq('booking_id', bookings[0].id)
           .limit(1);
 
         if (!existingReview || existingReview.length === 0) {
