@@ -178,7 +178,7 @@ export default function MentorList() {
           />
           
           {/* Main Filters Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             <Select value={sortBy} onValueChange={(value) => {
               setSortBy(value);
               if (value === 'featured' && verifiedOnly) {
@@ -237,6 +237,13 @@ export default function MentorList() {
                 <SelectItem value="5">5.0</SelectItem>
               </SelectContent>
             </Select>
+
+            <Input 
+              placeholder="City" 
+              value={cityFilter} 
+              onChange={e => setCityFilter(e.target.value)} 
+              className="h-9 text-sm"
+            />
 
             <Button 
               variant="outline" 
