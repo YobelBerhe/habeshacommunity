@@ -193,55 +193,158 @@ export default function MentorDetail() {
       <MentorHeader title={mentor.display_name || mentor.name} backPath="/mentor" />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-4 flex-1">
-                  <Avatar className="w-16 h-16 rounded-lg">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column - Profile & Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Profile Header Card */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <Avatar className="w-24 h-24 rounded-lg">
                     <AvatarImage src={mentor.profile_picture_url} alt={mentor.display_name || mentor.name} />
-                    <AvatarFallback className="rounded-lg">{(mentor.display_name || mentor.name)?.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="rounded-lg text-2xl">{(mentor.display_name || mentor.name)?.charAt(0)}</AvatarFallback>
                   </Avatar>
+                  
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <CardTitle className="text-2xl">{mentor.display_name || mentor.name}</CardTitle>
-                    {mentor.is_verified && <VerificationBadge isVerified={true} showText />}
-                    {badges.length > 0 && (
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
-                        {badges.length} Badge{badges.length > 1 ? 's' : ''}
-                      </Badge>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleShareProfile}
-                      className="ml-auto"
-                      title="Share profile"
-                    >
-                      <ArrowUpFromLine className="w-4 h-4" />
-                    </Button>
-                  </div>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      {mentor.is_verified && (
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
+                          ✓ Quick Responder
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <h1 className="text-3xl font-bold mb-1">{mentor.display_name || mentor.name}</h1>
                     {mentor.title && (
-                      <p className="text-muted-foreground mt-1">{mentor.title}</p>
+                      <p className="text-lg text-muted-foreground mb-3">{mentor.title}</p>
                     )}
+                    
+                    <div className="flex items-center gap-3 mb-3 flex-wrap">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleShareProfile}
+                        title="Share profile"
+                      >
+                        <ArrowUpFromLine className="w-4 h-4 mr-1" />
+                        Share
+                      </Button>
+                      
+                      {mentor.rating_avg > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-semibold">{mentor.rating_avg}</span>
+                          <span className="text-muted-foreground text-sm">({mentor.rating_count} reviews)</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                      {mentor.country && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {mentor.city && `${mentor.city}, `}{mentor.country}
+                        </span>
+                      )}
+                      {mentor.available && (
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                          Active today
+                        </span>
+                      )}
+                    </div>
+                    
                     {badges.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         {badges.map((badge) => (
-                          <span 
+                          <Badge 
                             key={badge.id}
-                            className="px-3 py-1 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 text-yellow-800 rounded-full text-sm flex items-center gap-1.5 font-medium"
+                            variant="outline"
+                            className="bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200 text-yellow-800"
                           >
-                            <span className="text-base">{badge.icon}</span>
+                            <span className="mr-1">{badge.icon}</span>
                             {badge.label}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     )}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Skills */}
+            {mentor.topics && mentor.topics.length > 0 && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold text-lg mb-3">Skills & Expertise</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {mentor.topics.map((topic: string) => (
+                      <Badge key={topic} variant="secondary" className="px-3 py-1">{topic}</Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* About */}
+            {mentor.bio && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold text-lg mb-3">About</h3>
+                  <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{mentor.bio}</p>
+                  
+                  {mentor.languages && mentor.languages.length > 0 && (
+                    <div className="mt-4 pt-4 border-t">
+                      <h4 className="font-semibold text-sm mb-2">Languages</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {mentor.languages.map((lang: string) => (
+                          <Badge key={lang} variant="outline">{lang}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Inquiries */}
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold text-lg mb-2">Open to inquiries</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  You can message {mentor.display_name || mentor.name} to ask questions before booking a session.
+                </p>
+                <Button
+                  onClick={handleMessageMentor}
+                  variant="default"
+                  className="w-full sm:w-auto"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Get in touch
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Reviews Section */}
+            <MentorReviews
+              mentorId={mentor.id}
+              mentorName={mentor.display_name || mentor.name}
+              ratingAvg={mentor.rating_avg}
+              ratingCount={mentor.rating_count}
+            />
+          </div>
+
+          {/* Right Column - Sticky Services Card */}
+          <div className="lg:sticky lg:top-8 h-fit">
+            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+              <CardContent className="pt-6">
+                <h3 className="font-semibold text-lg mb-3">Mentorship Plans</h3>
+                
                 {mentor.price_cents && (
-                  <div className="text-right ml-4">
-                    <div className="text-2xl font-bold">
+                  <div className="mb-4">
+                    <div className="text-3xl font-bold text-foreground">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: mentor.currency || 'USD'
@@ -250,50 +353,26 @@ export default function MentorDetail() {
                     <p className="text-sm text-muted-foreground">per session</p>
                   </div>
                 )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {(mentor.city || mentor.country) && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="w-4 h-4" />
-                  <span>{mentor.city}{mentor.country && `, ${mentor.country}`}</span>
-                </div>
-              )}
 
-              {mentor.bio && (
-                <div>
-                  <h3 className="font-semibold mb-2">About</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap">{mentor.bio}</p>
-                </div>
-              )}
+                <ul className="space-y-2 mb-6 text-sm">
+                  <li className="flex items-start gap-2">
+                    <Calendar className="w-4 h-4 mt-0.5 text-primary" />
+                    <span>1-on-1 video calls</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <MessageCircle className="w-4 h-4 mt-0.5 text-primary" />
+                    <span>Direct messaging support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Star className="w-4 h-4 mt-0.5 text-primary" />
+                    <span>Personalized guidance</span>
+                  </li>
+                </ul>
 
-              {mentor.topics && mentor.topics.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-2">Topics</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {mentor.topics.map((topic: string) => (
-                      <Badge key={topic} variant="secondary">{topic}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {mentor.languages && mentor.languages.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-2">Languages</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {mentor.languages.map((lang: string) => (
-                      <Badge key={lang} variant="outline">{lang}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-4 space-y-3">
                 {availableCredits.hasCredits && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-primary/10 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm bg-primary/10 p-3 rounded-lg mb-4">
                     <Ticket className="w-4 h-4 text-primary" />
-                    <span>You have {availableCredits.totalCredits} credits available</span>
+                    <span className="font-medium">You have {availableCredits.totalCredits} credits available</span>
                   </div>
                 )}
                 
@@ -351,42 +430,32 @@ export default function MentorDetail() {
                       {bookingLoading ? 'Processing...' : 'Book Single Session'}
                     </Button>
                   )}
-
-                  <Button
-                    onClick={handleMessageMentor}
-                    variant="outline"
-                    size="lg"
-                    className="w-full"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Message Mentor
-                  </Button>
+                  
+                  <p className="text-xs text-center text-muted-foreground">
+                    Secure payment • Cancel anytime
+                  </p>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* User's Credits for this Mentor */}
+            {user && (
+              <div className="mt-6">
+                <CreditsDisplay userId={user.id} mentorId={id} showActions={false} />
               </div>
-            </CardContent>
-          </Card>
+            )}
 
-          {/* User's Credits for this Mentor */}
-          {user && (
-            <CreditsDisplay userId={user.id} mentorId={id} showActions={false} />
-          )}
-
-          {/* Bundle Purchase Section */}
-          {mentor.price_cents && (
-            <BundlePurchase
-              mentorId={mentor.id}
-              singleSessionPrice={mentor.price_cents}
-              currency={mentor.currency}
-            />
-          )}
-
-          {/* Reviews Section */}
-          <MentorReviews
-            mentorId={mentor.id}
-            mentorName={mentor.display_name || mentor.name}
-            ratingAvg={mentor.rating_avg}
-            ratingCount={mentor.rating_count}
-          />
+            {/* Bundle Purchase Section */}
+            {mentor.price_cents && (
+              <div className="mt-6">
+                <BundlePurchase
+                  mentorId={mentor.id}
+                  singleSessionPrice={mentor.price_cents}
+                  currency={mentor.currency}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
