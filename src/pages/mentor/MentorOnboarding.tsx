@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, X } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 import MobileHeader from '@/components/layout/MobileHeader';
 import Header from '@/components/Header';
 import { getAppState } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
 import PhotoUpload from '@/components/PhotoUpload';
 import CountryFlag from '@/components/CountryFlag';
+import MentorSkillsEditor from '@/components/MentorSkillsEditor';
+import { toast } from 'sonner';
+
 const popularTopics = [
   'Career Development', 'Technical Skills', 'Leadership', 'Entrepreneurship',
   'Software Engineering', 'Data Science', 'Product Management', 'Marketing',
@@ -26,8 +28,8 @@ const languages = ['English', 'Amharic', 'Tigrinya', 'Oromo', 'Arabic', 'Spanish
 export default function MentorOnboarding() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [createdMentorId, setCreatedMentorId] = useState<string | null>(null);
   const appState = getAppState();
 
   const [formData, setFormData] = useState({
@@ -51,88 +53,77 @@ export default function MentorOnboarding() {
     }
   });
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth/login');
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please sign in to become a mentor',
-        variant: 'destructive',
-      });
-      navigate('/auth/login');
-      return;
-    }
+    if (!user) return;
 
-    if (!formData.display_name.trim() || !formData.bio.trim() || formData.topics.length === 0 || formData.photos.length === 0) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please fill in all required fields including at least one photo',
-        variant: 'destructive',
-      });
+    if (!formData.display_name || !formData.bio || !formData.city || !formData.price_cents) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
     setLoading(true);
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('mentors')
         .insert([{
           user_id: user.id,
-          display_name: formData.display_name.trim(),
-          bio: formData.bio.trim(),
-          city: formData.city.trim() || null,
-          country: formData.country.trim() || null,
-          price_cents: formData.price_cents ? parseInt(formData.price_cents) * 100 : 5000,
+          name: formData.display_name,
+          display_name: formData.display_name,
+          bio: formData.bio,
+          city: formData.city,
+          country: formData.country,
+          price_cents: parseInt(formData.price_cents) * 100,
           currency: formData.currency,
           topics: formData.topics,
-          languages: formData.languages.length > 0 ? formData.languages : ['English'],
+          languages: formData.languages,
           photos: formData.photos,
-          website_url: formData.website_url.trim() || null,
-          name: formData.display_name.trim(),
-          title: formData.display_name.trim()
-        }] as any);
+          website_url: formData.website_url || null,
+          available: true,
+          title: formData.plan_description
+        }])
+        .select();
 
       if (error) throw error;
 
-      toast({
-        title: 'Success!',
-        description: 'Your mentor profile has been created! Next: Get verified, then set up payouts.',
-      });
-      
-      navigate('/mentor/verify');
+      // Set the created mentor ID for skills editor
+      if (data && data.length > 0) {
+        setCreatedMentorId(data[0].id);
+        toast.success('Mentor profile created! Now add your skills.');
+      } else {
+        throw new Error('Failed to get mentor ID');
+      }
     } catch (error) {
       console.error('Error creating mentor profile:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create mentor profile. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
+      toast.error('Failed to create mentor profile');
       setLoading(false);
     }
   };
 
   const addTopic = (topic: string) => {
-    if (topic && !formData.topics.includes(topic)) {
-      setFormData(prev => ({
-        ...prev,
-        topics: [...prev.topics, topic]
-      }));
+    if (!formData.topics.includes(topic)) {
+      setFormData({ ...formData, topics: [...formData.topics, topic] });
     }
   };
 
   const removeTopic = (topic: string) => {
-    setFormData(prev => ({
-      ...prev,
-      topics: prev.topics.filter(t => t !== topic)
-    }));
+    setFormData({ ...formData, topics: formData.topics.filter(t => t !== topic) });
   };
 
   const addCustomTopic = () => {
-    if (formData.custom_topic.trim()) {
-      addTopic(formData.custom_topic.trim());
-      setFormData(prev => ({ ...prev, custom_topic: '' }));
+    if (formData.custom_topic.trim() && !formData.topics.includes(formData.custom_topic.trim())) {
+      setFormData({ 
+        ...formData, 
+        topics: [...formData.topics, formData.custom_topic.trim()],
+        custom_topic: ''
+      });
     }
   };
 
@@ -147,257 +138,238 @@ export default function MentorOnboarding() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <MobileHeader />
+      <Header 
+        currentCity={appState.city}
+        onCityChange={() => {}}
+        onAccountClick={() => {}}
+        onLogoClick={() => navigate('/')}
+      />
+      
+      <div className="container max-w-3xl mx-auto px-4 py-8">
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/browse?category=mentor')}
-          className="mb-6"
+          onClick={() => navigate(-1)}
+          className="mb-4"
+          disabled={createdMentorId !== null}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Mentors
+          ← Back
         </Button>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Become a Mentor</CardTitle>
-            <p className="text-muted-foreground">
-              Share your expertise and help others grow in their careers and personal development.
-            </p>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Photo Upload */}
-              <PhotoUpload
-                photos={formData.photos}
-                onPhotosChange={(photos) => setFormData(prev => ({ ...prev, photos }))}
-                maxPhotos={6}
-                bucketName="mentor-photos"
-              />
+        {!createdMentorId ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Become a Mentor</CardTitle>
+              <CardDescription>Share your expertise and help others grow</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Photo Upload */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Profile Photo *</label>
+                  <PhotoUpload
+                    photos={formData.photos}
+                    onPhotosChange={(photos) => setFormData({ ...formData, photos })}
+                    maxPhotos={1}
+                  />
+                </div>
 
-              <div className="relative">
-                <label className="text-sm font-medium">Display Name *</label>
-                <div className="flex items-center gap-2 mt-1">
+                {/* Display Name */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Display Name *</label>
                   <Input
                     value={formData.display_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
-                    placeholder="How would you like to be known?"
+                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                    placeholder="How should mentees call you?"
                     required
-                    className="flex-1"
-                  />
-                  {formData.country && (
-                    <CountryFlag country={formData.country} className="w-6 h-4" />
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Bio *</label>
-                <Textarea
-                  value={formData.bio}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                  placeholder="Tell potential mentees about your background, experience, and what you can help with..."
-                  rows={4}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">City</label>
-                  <Input
-                    value={formData.city}
-                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                    placeholder="Your city"
                   />
                 </div>
+
+                {/* Bio */}
                 <div>
-                  <label className="text-sm font-medium">Country</label>
-                  <Input
-                    value={formData.country}
-                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-                    placeholder="Your country"
+                  <label className="block text-sm font-medium mb-2">Bio *</label>
+                  <Textarea
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    placeholder="Tell us about your experience and what you can help with..."
+                    rows={4}
+                    required
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Hourly Rate (USD)</label>
-                  <Input
-                    type="number"
-                    value={formData.price_cents}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price_cents: e.target.value }))}
-                    placeholder="50"
-                    min="1"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Leave blank for $50/hour default</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Currency</label>
-                  <Select value={formData.currency} onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="ETB">ETB</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Mentorship plan details</label>
-                <Input
-                  value={formData.plan_description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, plan_description: e.target.value }))}
-                  placeholder="e.g., 2 calls per month (30min/call)"
-                />
-                <p className="text-xs text-muted-foreground mt-1">Shown on your mentor page under plans</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Expertise Areas *</label>
-                <div className="mt-2 mb-4">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {formData.topics.map((topic) => (
-                      <Badge key={topic} variant="default" className="pr-1">
-                        {topic}
-                        <button
-                          type="button"
-                          onClick={() => removeTopic(topic)}
-                          className="ml-1 hover:text-destructive"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                {/* Location */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">City *</label>
+                    <Input
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="e.g., New York"
+                      required
+                    />
                   </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
-                    {popularTopics.map((topic) => (
-                      <Button
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Country</label>
+                    <Input
+                      value={formData.country}
+                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                      placeholder="e.g., USA"
+                    />
+                  </div>
+                </div>
+
+                {/* Pricing */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Session Price *</label>
+                    <Input
+                      type="number"
+                      value={formData.price_cents}
+                      onChange={(e) => setFormData({ ...formData, price_cents: e.target.value })}
+                      placeholder="50"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Currency</label>
+                    <Select
+                      value={formData.currency}
+                      onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Plan Details */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Plan Details</label>
+                  <Input
+                    value={formData.plan_description}
+                    onChange={(e) => setFormData({ ...formData, plan_description: e.target.value })}
+                    placeholder="e.g., 2 calls per month (30min/call)"
+                  />
+                </div>
+
+                {/* Expertise Areas */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Expertise Areas</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {popularTopics.map(topic => (
+                      <Badge
                         key={topic}
-                        type="button"
                         variant={formData.topics.includes(topic) ? "default" : "outline"}
-                        size="sm"
+                        className="cursor-pointer"
                         onClick={() => formData.topics.includes(topic) ? removeTopic(topic) : addTopic(topic)}
-                        className="text-xs"
                       >
                         {topic}
-                      </Button>
+                      </Badge>
                     ))}
                   </div>
                   
                   <div className="flex gap-2">
                     <Input
                       value={formData.custom_topic}
-                      onChange={(e) => setFormData(prev => ({ ...prev, custom_topic: e.target.value }))}
-                      placeholder="Add custom expertise area"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomTopic())}
+                      onChange={(e) => setFormData({ ...formData, custom_topic: e.target.value })}
+                      placeholder="Add custom topic"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomTopic())}
                     />
-                    <Button type="button" onClick={addCustomTopic} size="sm">
+                    <Button type="button" variant="outline" onClick={addCustomTopic}>
                       <Plus className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-              </div>
 
-              <div>
-                <label className="text-sm font-medium">Languages</label>
-                <div className="mt-2">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {languages.map((language) => (
-                      <Button
-                        key={language}
-                        type="button"
-                        variant={formData.languages.includes(language) ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => toggleLanguage(language)}
-                        className="text-xs"
+                  {formData.topics.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formData.topics.map(topic => (
+                        <Badge key={topic} variant="secondary">
+                          {topic}
+                          <button
+                            type="button"
+                            onClick={() => removeTopic(topic)}
+                            className="ml-2 hover:text-destructive"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Languages */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Languages</label>
+                  <div className="flex flex-wrap gap-2">
+                    {languages.map(lang => (
+                      <Badge
+                        key={lang}
+                        variant={formData.languages.includes(lang) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => toggleLanguage(lang)}
                       >
-                        {language}
-                      </Button>
+                        {lang}
+                      </Badge>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">Select all languages you can mentor in</p>
                 </div>
-              </div>
 
-              {/* Website & Social Media Links */}
-              <div>
-                <label className="text-sm font-medium">Website & Social Media</label>
-                <div className="space-y-3 mt-2">
-                  <div>
-                    <Input
-                      value={formData.website_url}
-                      onChange={(e) => setFormData(prev => ({ ...prev, website_url: e.target.value }))}
-                      placeholder="Your website URL (optional)"
-                      type="url"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Input
-                      value={formData.social_links.linkedin}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        social_links: { ...prev.social_links, linkedin: e.target.value }
-                      }))}
-                      placeholder="LinkedIn profile URL"
-                      type="url"
-                    />
-                    <Input
-                      value={formData.social_links.twitter}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        social_links: { ...prev.social_links, twitter: e.target.value }
-                      }))}
-                      placeholder="Twitter/X profile URL"
-                      type="url"
-                    />
-                    <Input
-                      value={formData.social_links.instagram}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        social_links: { ...prev.social_links, instagram: e.target.value }
-                      }))}
-                      placeholder="Instagram profile URL"
-                      type="url"
-                    />
-                    <Input
-                      value={formData.social_links.facebook}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        social_links: { ...prev.social_links, facebook: e.target.value }
-                      }))}
-                      placeholder="Facebook profile URL"
-                      type="url"
-                    />
-                  </div>
+                {/* Social Links */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Website / Portfolio</label>
+                  <Input
+                    value={formData.website_url}
+                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                    placeholder="https://yourwebsite.com"
+                  />
                 </div>
-              </div>
 
-              <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
-                <p>After creating your profile, you'll be able to:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Get verified to increase trust with mentees</li>
-                  <li>Connect Stripe to receive payments for sessions</li>
-                  <li>Start accepting mentoring requests</li>
-                </ul>
-              </div>
-
+                <Button
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? 'Creating Profile...' : 'Create Mentor Profile'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Add Your Skills</CardTitle>
+              <CardDescription>
+                Select or add skills that showcase your expertise. These help mentees find you!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MentorSkillsEditor 
+                mentorId={createdMentorId}
+                onSkillsUpdated={() => {
+                  toast.success('Skills saved! Redirecting to dashboard...');
+                  setTimeout(() => navigate('/mentor/dashboard'), 1500);
+                }}
+              />
               <Button
-                type="submit" 
-                disabled={loading}
-                className="w-full"
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => {
+                  toast.info('Redirecting to dashboard...');
+                  navigate('/mentor/dashboard');
+                }}
               >
-                {loading ? 'Creating Profile...' : 'Create Mentor Profile'}
+                Skip for Now
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

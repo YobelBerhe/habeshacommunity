@@ -10,6 +10,8 @@ import MobileHeader from '@/components/layout/MobileHeader';
 import { getAppState } from '@/utils/storage';
 import VerificationCelebration from '@/components/VerificationCelebration';
 import { VerificationBadge } from '@/components/VerificationBadge';
+import MentorSkillsEditor from '@/components/MentorSkillsEditor';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface MentorData {
   id: string;
@@ -275,7 +277,30 @@ export default function MentorDashboard() {
             </div>
             
             <div>
-              <h3 className="font-semibold mb-2">Topics</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Topics</h3>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm">Edit Skills</Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Edit Your Skills</DialogTitle>
+                      <DialogDescription>
+                        Update your skills to help mentees find you more easily
+                      </DialogDescription>
+                    </DialogHeader>
+                    {mentor && (
+                      <MentorSkillsEditor 
+                        mentorId={mentor.id}
+                        onSkillsUpdated={() => {
+                          fetchMentorData();
+                        }}
+                      />
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {mentor?.topics?.map((topic) => (
                   <Badge key={topic} variant="secondary">

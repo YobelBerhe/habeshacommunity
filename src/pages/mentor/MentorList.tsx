@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -54,38 +55,48 @@ export default function MentorList() {
   }, []);
 
   const fetchMentors = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('mentors')
-        .select('*')
+        .select(`
+          *,
+          mentor_skills(skill)
+        `)
+        .eq('available', true)
         .order('is_verified', { ascending: false })
-        .order('rating_avg', { ascending: false, nullsFirst: false })
+        .order('rating_avg', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setMentors(data || []);
     } catch (error) {
       console.error('Error fetching mentors:', error);
+      toast.error('Failed to load mentors');
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredAndSortedMentors = mentors
-    .filter(mentor => {
-      const matchesSearch = !searchTerm || 
-        mentor.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        mentor.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        mentor.topics?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesTopic = !topicFilter || topicFilter === 'all' || mentor.topics?.includes(topicFilter);
-      const matchesCity = !cityFilter || mentor.city?.toLowerCase().includes(cityFilter.toLowerCase());
-      const matchesVerified = !verifiedOnly || mentor.is_verified === true;
-      const matchesRating = (mentor.rating_avg ?? 0) >= parseFloat(minRating);
-      
-      return matchesSearch && matchesTopic && matchesCity && matchesVerified && matchesRating;
-    })
-    .sort((a, b) => {
+  // Filter and sort mentors
+  const filteredAndSortedMentors = mentors.filter((mentor) => {
+    const lowerQuery = searchTerm.toLowerCase();
+    const skills = (mentor as any).mentor_skills?.map((s: any) => s.skill.toLowerCase()) || [];
+    
+    const matchesSearch =
+      !searchTerm ||
+      mentor.display_name?.toLowerCase().includes(lowerQuery) ||
+      mentor.bio?.toLowerCase().includes(lowerQuery) ||
+      mentor.topics?.some(t => t.toLowerCase().includes(lowerQuery)) ||
+      skills.some(s => s.includes(lowerQuery));
+
+    const matchesTopic = !topicFilter || mentor.topics?.includes(topicFilter);
+    const matchesCity = !cityFilter || mentor.city?.toLowerCase() === cityFilter.toLowerCase();
+    const matchesVerified = !verifiedOnly || mentor.is_verified;
+    const matchesRating = mentor.rating_avg >= parseFloat(minRating);
+
+    return matchesSearch && matchesTopic && matchesCity && matchesVerified && matchesRating;
+  }).sort((a, b) => {
       switch (sortBy) {
         case 'rating':
           return (b.rating_avg ?? 0) - (a.rating_avg ?? 0);
@@ -282,21 +293,40 @@ export default function MentorList() {
                 </p>
                 
                 <div className="space-y-1.5">
-                  <div>
-                    <span className="text-xs font-medium text-muted-foreground">Topics:</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {mentor.topics?.slice(0, 2).map((topic) => (
-                        <Badge key={topic} variant="secondary" className="text-xs px-1.5 py-0.5">
-                          {topic}
-                        </Badge>
-                      ))}
-                      {mentor.topics?.length > 2 && (
-                        <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                          +{mentor.topics.length - 2}
-                        </Badge>
-                      )}
+                  {/* Skills Section */}
+                  {(mentor as any).mentor_skills && (mentor as any).mentor_skills.length > 0 ? (
+                    <div>
+                      <span className="text-xs font-medium text-muted-foreground">Skills:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(mentor as any).mentor_skills.slice(0, 3).map((skillObj: any) => (
+                          <Badge key={skillObj.skill} variant="secondary" className="text-xs px-1.5 py-0.5">
+                            {skillObj.skill}
+                          </Badge>
+                        ))}
+                        {(mentor as any).mentor_skills.length > 3 && (
+                          <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                            +{(mentor as any).mentor_skills.length - 3}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <span className="text-xs font-medium text-muted-foreground">Topics:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {mentor.topics?.slice(0, 2).map((topic) => (
+                          <Badge key={topic} variant="secondary" className="text-xs px-1.5 py-0.5">
+                            {topic}
+                          </Badge>
+                        ))}
+                        {mentor.topics?.length > 2 && (
+                          <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                            +{mentor.topics.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   
                   {mentor.languages?.length > 0 && (
                     <div>

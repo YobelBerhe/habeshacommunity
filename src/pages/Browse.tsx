@@ -127,7 +127,10 @@ export default function Browse() {
         if (filters.category === 'mentor') {
           let query = supabase
             .from('mentors')
-            .select('*');
+            .select(`
+              *,
+              mentor_skills(skill)
+            `);
 
           // Apply filters
           if (mentorVerifiedOnly) {
@@ -169,9 +172,24 @@ export default function Browse() {
           const { data, error } = await query;
             
           if (error) throw error;
+
+          // Filter by search query (including skills)
+          let filteredData = data;
+          if (filters.query) {
+            const lowerQ = filters.query.toLowerCase();
+            filteredData = data?.filter((mentor: any) => {
+              const skills = mentor.mentor_skills?.map((s: any) => s.skill.toLowerCase()) || [];
+              return (
+                mentor.display_name?.toLowerCase().includes(lowerQ) ||
+                mentor.bio?.toLowerCase().includes(lowerQ) ||
+                mentor.topics?.some((t: string) => t.toLowerCase().includes(lowerQ)) ||
+                skills.some((s: string) => s.includes(lowerQ))
+              );
+            });
+          }
           
           // Convert mentor data to listing format
-          const mentorListings = (data || []).map(mentor => ({
+          const mentorListings = (filteredData || []).map(mentor => ({
             id: mentor.id,
             user_id: mentor.user_id,
             city: mentor.city,

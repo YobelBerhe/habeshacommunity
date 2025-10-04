@@ -618,6 +618,35 @@ export type Database = {
           },
         ]
       }
+      mentor_skills: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          skill: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          skill: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          skill?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_skills_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_verifications: {
         Row: {
           admin_notes: string | null
