@@ -75,24 +75,42 @@ export default function MentorDetail() {
         .single();
 
       if (existingConv) {
-        navigate('/inbox');
+        // Navigate to inbox with conversation state
+        navigate('/inbox', { state: { openConversationId: existingConv.id, mentorName: mentor.display_name || mentor.name } });
         return;
       }
 
       // Create new conversation
       const participants = [user.id, mentor.user_id].sort();
-      const { error } = await supabase.from('conversations').insert({
-        participant1_id: participants[0],
-        participant2_id: participants[1],
-      } as any);
+      const { data: newConv, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          participant1_id: participants[0],
+          participant2_id: participants[1],
+        } as any)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (convError) throw convError;
+
+      // Send initial greeting message
+      const { error: msgError } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: newConv.id,
+          sender_id: user.id,
+          content: `Hi ${mentor.display_name || mentor.name}, I'm interested in your mentorship. Looking forward to connecting with you!`,
+        } as any);
+
+      if (msgError) throw msgError;
 
       toast({
         title: "Conversation started",
-        description: "You can now message this mentor",
+        description: "Your message has been sent",
       });
-      navigate('/inbox');
+      
+      // Navigate to inbox and open the conversation
+      navigate('/inbox', { state: { openConversationId: newConv.id, mentorName: mentor.display_name || mentor.name } });
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { MessageCircle } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
@@ -8,6 +8,7 @@ import { ChatWindow } from '@/components/ChatWindow';
 
 export default function Inbox() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [selectedConversation, setSelectedConversation] = useState<{
     id: string;
@@ -19,6 +20,18 @@ export default function Inbox() {
       navigate('/auth/login');
     }
   }, [user, navigate]);
+
+  // Auto-open conversation if passed in state
+  useEffect(() => {
+    if (location.state?.openConversationId && location.state?.mentorName) {
+      setSelectedConversation({
+        id: location.state.openConversationId,
+        name: location.state.mentorName,
+      });
+      // Clear the state after using it
+      navigate('/inbox', { replace: true, state: {} });
+    }
+  }, [location.state]);
 
   if (!user) return null;
 
