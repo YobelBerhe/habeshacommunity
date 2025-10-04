@@ -29,7 +29,7 @@ serve(async (req: Request): Promise<Response> => {
     const appUrl = Deno.env.get('SITE_URL') || 'https://your-app.lovable.app';
     const replyUrl = `${appUrl}/inbox`;
 
-    // Send email via Resend API
+    // Send email via Resend API with branded HabeshaCommunity template
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -37,28 +37,48 @@ serve(async (req: Request): Promise<Response> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: "Mentorship Platform <onboarding@resend.dev>",
+        from: "HabeshaCommunity <onboarding@resend.dev>",
         to: [recipientEmail],
-        subject: `💬 New message from ${senderName}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333;">You have a new message</h2>
-            <p style="color: #666; font-size: 16px;">
-              <strong>${senderName}</strong> sent you a message:
-            </p>
-            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; color: #333;">${messagePreview}</p>
-            </div>
+        subject: `💬 New message on HabeshaCommunity`,
+        html: `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>New Message Notification</title>
+  </head>
+  <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f9f9f9;">
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:#ffffff; border:1px solid #e0e0e0; border-radius:8px;">
+      <tr>
+        <td style="background:#002f6c; color:#ffffff; padding:20px; text-align:center; font-size:22px; font-weight:bold; border-top-left-radius:8px; border-top-right-radius:8px;">
+          HabeshaCommunity
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:20px; color:#333333; font-size:16px; line-height:1.5;">
+          <p>👋 Hello,</p>
+          <p>You've received a new message from <strong>${senderName}</strong> on HabeshaCommunity:</p>
+          <blockquote style="border-left:4px solid #002f6c; padding-left:10px; margin:15px 0; color:#555;">
+            ${messagePreview}
+          </blockquote>
+          <p>
             <a href="${replyUrl}" 
-               style="display: inline-block; background: #007bff; color: white; padding: 12px 24px; 
-                      text-decoration: none; border-radius: 6px; margin-top: 10px;">
+            style="display:inline-block; padding:12px 20px; background:#002f6c; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:bold;">
               Reply Now
             </a>
-            <p style="color: #999; font-size: 14px; margin-top: 30px;">
-              To stop receiving email notifications, update your settings in the app.
-            </p>
-          </div>
-        `,
+          </p>
+          <p style="margin-top:20px; font-size:14px; color:#777;">
+            This is an automated message. You can disable email notifications in your profile settings.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="background:#f2f2f2; padding:15px; text-align:center; font-size:12px; color:#777; border-bottom-left-radius:8px; border-bottom-right-radius:8px;">
+          © 2025 HabeshaCommunity — Building Connections, Growing Together
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`,
       }),
     });
 
