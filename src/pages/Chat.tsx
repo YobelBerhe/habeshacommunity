@@ -248,17 +248,15 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-10">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="text-muted-foreground">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <h1 className="font-semibold">Chat</h1>
-          </div>
-
-          <div className="flex-1 max-w-xs mx-4">
+      {/* Sticky Header with City Search and Board Tabs */}
+      <header className="sticky top-0 z-50 bg-background border-b">
+        {/* Top row: Back arrow + Title + City Search */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b">
+          <Link to="/" className="text-foreground">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-lg font-semibold">Chat</h1>
+          <div className="flex-1 max-w-sm ml-auto">
             <CitySearchBar
               value={selectedCity}
               onCitySelect={handleCitySelect}
@@ -267,27 +265,16 @@ export default function Chat() {
               disableNavigation={true}
             />
           </div>
-
-          <div className="w-6" />
         </div>
-      </header>
-
-      <div className="flex flex-col h-[calc(100vh-73px)]">
-        {/* Global notice */}
-        {isGlobal && (
-          <div className="px-4 py-2 text-xs text-muted-foreground bg-muted/30 border-b">
-            Viewing the global feed. Select a city to post messages.
-          </div>
-        )}
 
         {/* Board tabs */}
-        <div className="border-b bg-muted/30">
+        <div className="bg-background">
           <div className="flex overflow-x-auto">
             {CHAT_BOARDS.map((board) => (
               <button
                 key={board.id}
                 onClick={() => setActiveBoard(board.id)}
-                className={`flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex-shrink-0 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                   activeBoard === board.id
                     ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -299,9 +286,18 @@ export default function Chat() {
           </div>
         </div>
 
-          {/* Chat content */}
-          <div className="flex-1 flex flex-col">
-            <div ref={listRef} className="flex-1 chat-container p-4 space-y-4 overflow-y-auto">
+        {/* Global notice */}
+        {isGlobal && (
+          <div className="px-4 py-2 text-xs text-muted-foreground bg-muted/30">
+            Viewing the global feed. Select a city to post messages.
+          </div>
+        )}
+      </header>
+
+      {/* Chat content */}
+      <div className="flex flex-col h-[calc(100vh-140px)]">
+        <div className="flex-1 flex flex-col bg-background">
+            <div ref={listRef} className="flex-1 p-4 space-y-4 overflow-y-auto bg-background">
               {messages.length === 0 ? (
                 <div className="text-center py-8 px-4">
                   <h3 className="text-lg font-semibold mb-2">
