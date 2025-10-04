@@ -978,7 +978,7 @@ export default function Browse() {
         
         {/* Donation Dialog */}
         <Dialog open={donateDialogOpen} onOpenChange={setDonateDialogOpen}>
-          <DialogContent className="w-full max-w-md">
+          <DialogContent className="w-full max-w-md z-[9999]">
             <DialogHeader>
               <DialogTitle>Support HabeshaCommunity</DialogTitle>
             </DialogHeader>
