@@ -302,7 +302,7 @@ export default function MatchOnboarding() {
                       </Label>
                       {q.choices.length > 0 ? (
                         <select
-                          className="w-full mt-1 p-2 border rounded-md"
+                          className="w-full mt-1 p-2 border border-input rounded-md bg-background text-foreground"
                           value={answers[q.id] || ''}
                           onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
                         >
