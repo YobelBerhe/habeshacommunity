@@ -116,9 +116,19 @@ export default function MentorDetail() {
         window.location.href = result.redirectUrl;
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to book session";
+      
+      // Provide user-friendly messages for common errors
+      let displayMessage = errorMessage;
+      if (errorMessage.includes("payout account")) {
+        displayMessage = "This mentor is still setting up their payment account. Please try again later or contact them directly.";
+      } else if (errorMessage.includes("payout setup")) {
+        displayMessage = "This mentor is completing their payment setup. Please check back soon!";
+      }
+      
       toast({
-        title: "Booking failed",
-        description: error instanceof Error ? error.message : "Please try again",
+        title: "Booking unavailable",
+        description: displayMessage,
         variant: "destructive",
       });
     } finally {
@@ -202,7 +212,11 @@ export default function MentorDetail() {
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="w-24 h-24 rounded-lg">
-                    <AvatarImage src={mentor.profile_picture_url} alt={mentor.display_name || mentor.name} />
+                    <AvatarImage 
+                      src={mentor.photos?.[0] || mentor.profile_picture_url || mentor.avatar_url} 
+                      alt={mentor.display_name || mentor.name}
+                      className="object-cover"
+                    />
                     <AvatarFallback className="rounded-lg text-2xl">{(mentor.display_name || mentor.name)?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   
@@ -213,24 +227,23 @@ export default function MentorDetail() {
                           ✓ Quick Responder
                         </Badge>
                       )}
-                    </div>
-                    
-                    <h1 className="text-3xl font-bold mb-1">{mentor.display_name || mentor.name}</h1>
-                    {mentor.title && (
-                      <p className="text-lg text-muted-foreground mb-3">{mentor.title}</p>
-                    )}
-                    
-                    <div className="flex items-center gap-3 mb-3 flex-wrap">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleShareProfile}
+                        className="ml-auto"
                         title="Share profile"
                       >
-                        <ArrowUpFromLine className="w-4 h-4 mr-1" />
-                        Share
+                        <ArrowUpFromLine className="w-4 h-4" />
                       </Button>
-                      
+                    </div>
+                    
+                    <h1 className="text-3xl font-bold mb-1">{mentor.display_name || mentor.name}</h1>
+                    {mentor.title && (
+                      <p className="text-lg text-emerald-600 dark:text-emerald-400 mb-3">{mentor.title}</p>
+                    )}
+                    
+                    <div className="flex items-center gap-3 mb-3 flex-wrap">
                       {mentor.rating_avg > 0 && (
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -337,7 +350,7 @@ export default function MentorDetail() {
           </div>
 
           {/* Right Column - Sticky Services Card */}
-          <div className="lg:sticky lg:top-8 h-fit">
+          <div className="lg:sticky lg:top-8 h-fit space-y-6">
             <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
               <CardContent className="pt-6">
                 <h3 className="font-semibold text-lg mb-3">Mentorship Plans</h3>
@@ -447,14 +460,22 @@ export default function MentorDetail() {
 
             {/* Bundle Purchase Section */}
             {mentor.price_cents && (
-              <div className="mt-6">
-                <BundlePurchase
-                  mentorId={mentor.id}
-                  singleSessionPrice={mentor.price_cents}
-                  currency={mentor.currency}
-                />
-              </div>
+              <BundlePurchase
+                mentorId={mentor.id}
+                singleSessionPrice={mentor.price_cents}
+                currency={mentor.currency}
+              />
             )}
+
+            {/* Reviews Section - Shows in mobile after services */}
+            <div className="lg:hidden">
+              <MentorReviews
+                mentorId={mentor.id}
+                mentorName={mentor.display_name || mentor.name}
+                ratingAvg={mentor.rating_avg}
+                ratingCount={mentor.rating_count}
+              />
+            </div>
           </div>
         </div>
       </div>

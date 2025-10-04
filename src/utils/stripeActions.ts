@@ -11,7 +11,17 @@ export async function bookMentorSession(mentorId: string) {
       body: { mentorId }
     });
 
-    if (error) throw error;
+    if (error) {
+      // Extract error message from edge function response
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+      throw error;
+    }
+
+    if (!data?.url) {
+      throw new Error('Failed to create checkout session');
+    }
 
     return { 
       success: true, 
@@ -19,7 +29,11 @@ export async function bookMentorSession(mentorId: string) {
     };
   } catch (error) {
     console.error('Booking error:', error);
-    throw error;
+    // Re-throw with a user-friendly message if it's a generic error
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to book session. Please try again.');
   }
 }
 
