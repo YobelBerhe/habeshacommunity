@@ -207,8 +207,118 @@ export default function MentorDetail() {
           
           {/* Left Column - Profile & Details */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Profile Header Card */}
-            <Card>
+            {/* Mobile View - Dark Green Background */}
+            <div className="lg:hidden bg-[#0f2d24] text-white -mx-4 px-4 py-8 rounded-lg">
+              {/* Profile Photo - Large and Centered */}
+              <div className="flex justify-center mb-6">
+                <Avatar className="w-64 h-64 rounded-2xl">
+                  <AvatarImage 
+                    src={mentor.photos?.[0] || mentor.profile_picture_url || mentor.avatar_url} 
+                    alt={mentor.display_name || mentor.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="rounded-2xl text-6xl">{(mentor.display_name || mentor.name)?.charAt(0)}</AvatarFallback>
+                </Avatar>
+              </div>
+
+              {/* Quick Responder Badge */}
+              {mentor.is_verified && (
+                <div className="flex justify-center mb-4">
+                  <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30 border-0">
+                    ⏱️ Quick Responder
+                  </Badge>
+                </div>
+              )}
+
+              {/* Name */}
+              <h1 className="text-4xl font-bold text-center mb-2">{mentor.display_name || mentor.name}</h1>
+              
+              {/* Title */}
+              {mentor.title && (
+                <p className="text-lg text-emerald-300 text-center mb-6">{mentor.title}</p>
+              )}
+
+              {/* Save & Share Buttons */}
+              <div className="flex justify-center gap-3 mb-6">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10"
+                >
+                  ❤️ Save
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleShareProfile}
+                  className="text-white hover:bg-white/10"
+                >
+                  <ArrowUpFromLine className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Rating */}
+              {mentor.rating_avg > 0 && (
+                <div className="flex justify-center items-center gap-2 mb-6">
+                  <div className="flex items-center gap-1 bg-white/10 px-4 py-2 rounded-full">
+                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    <span className="font-semibold text-lg">{mentor.rating_avg}</span>
+                  </div>
+                  <span className="text-white/80 underline">({mentor.rating_count} reviews)</span>
+                </div>
+              )}
+
+              {/* Topics/Expertise */}
+              {mentor.topics && mentor.topics.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-center text-white/90 text-sm mb-2">
+                    {mentor.topics.join(' / ')}
+                  </p>
+                </div>
+              )}
+
+              {/* Location, Status, Response Time */}
+              <div className="space-y-3 mb-6">
+                {mentor.country && (
+                  <div className="flex items-center gap-2 text-white/90">
+                    <span className="text-xl">🌎</span>
+                    <span>{mentor.city && `${mentor.city}, `}{mentor.country}</span>
+                  </div>
+                )}
+                {mentor.available && (
+                  <div className="flex items-center gap-2 text-white/90">
+                    <span className="text-xl">🕐</span>
+                    <span>Active today</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-white/90">
+                  <span className="text-xl">💬</span>
+                  <span>Usually responds in a few hours</span>
+                </div>
+              </div>
+
+              {/* Skills Section */}
+              {mentor.topics && mentor.topics.length > 0 && (
+                <div>
+                  <h3 className="text-xl font-semibold mb-3">Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {mentor.topics.slice(0, 5).map((topic: string) => (
+                      <Badge key={topic} variant="secondary" className="bg-white/10 text-white border-0 hover:bg-white/20">
+                        {topic}
+                      </Badge>
+                    ))}
+                    {mentor.topics.length > 5 && (
+                      <Badge variant="secondary" className="bg-white/10 text-white border-0">
+                        +{mentor.topics.length - 5} more
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop View - Original Card Layout */}
+            <Card className="hidden lg:block">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="w-24 h-24 rounded-lg">
