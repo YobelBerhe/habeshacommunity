@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MessageCircle, Heart } from 'lucide-react';
-import MobileHeader from '@/components/layout/MobileHeader';
-import Header from '@/components/Header';
-import { getAppState } from '@/utils/storage';
+import { MessageCircle, Heart } from 'lucide-react';
+import MentorHeader from '@/components/MentorHeader';
 import { supabase } from '@/integrations/supabase/client';
+import { getOrCreateConversation } from '@/utils/conversations';
+import { useToast } from '@/hooks/use-toast';
 
 interface Match {
   id: string;
@@ -24,7 +24,7 @@ interface Match {
 export default function MatchList() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const appState = getAppState();
+  const { toast } = useToast();
 
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,11 +72,15 @@ export default function MatchList() {
     if (!user) return;
     try {
       const otherUserId = match.user1_id === user.id ? match.user2_id : match.user1_id;
-      const { getOrCreateConversation } = await import('@/utils/conversations');
       const { conversationId } = await getOrCreateConversation(otherUserId);
       navigate('/inbox', { state: { openConversationId: conversationId, mentorName: match.profile?.name || 'Conversation' } });
     } catch (e) {
       console.error('Failed to open chat from match:', e);
+      toast({
+        title: 'Error',
+        description: 'Failed to start conversation',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -84,28 +88,9 @@ export default function MatchList() {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
+      <MentorHeader title="Your Matches" backPath="/match/discover" />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/match/discover')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Discovery
-        </Button>
-
-        <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
-          <Heart className="w-8 h-8 text-primary" />
-          Your Matches
-        </h1>
 
         {loading ? (
           <Card>

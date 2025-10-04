@@ -8,6 +8,7 @@ import { Heart, X, MessageCircle } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getOrCreateConversation } from '@/utils/conversations';
 
 interface MatchProfile {
   id: string;
@@ -35,6 +36,7 @@ export default function MatchProfile() {
   const [profile, setProfile] = useState<MatchProfile | null>(null);
   const [matchScore, setMatchScore] = useState<MatchScore | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -43,8 +45,62 @@ export default function MatchProfile() {
     }
     if (id) {
       loadProfile();
+      checkFavoriteStatus();
     }
   }, [user, id]);
+
+  const checkFavoriteStatus = async () => {
+    if (!id || !user) return;
+    
+    const { data } = await supabase
+      .from('likes')
+      .select('*')
+      .eq('liker_id', user.id)
+      .eq('liked_id', id)
+      .maybeSingle();
+    
+    setIsFavorite(!!data);
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!user || !profile) return;
+
+    try {
+      if (isFavorite) {
+        await supabase
+          .from('likes')
+          .delete()
+          .eq('liker_id', user.id)
+          .eq('liked_id', profile.user_id);
+        
+        setIsFavorite(false);
+        toast({
+          title: "Removed from favorites",
+          description: "Profile removed from your favorites",
+        });
+      } else {
+        await supabase
+          .from('likes')
+          .insert({
+            liker_id: user.id,
+            liked_id: profile.user_id,
+          });
+        
+        setIsFavorite(true);
+        toast({
+          title: "Added to favorites",
+          description: "Profile saved to your favorites",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update favorite status',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const loadProfile = async () => {
     if (!user || !id) return;
@@ -89,29 +145,41 @@ export default function MatchProfile() {
   };
 
   const handleLike = async () => {
+    await handleToggleFavorite();
+    if (!isFavorite) {
+      // Check if it's a match
+      const { data: matchData } = await supabase
+        .from('matches')
+        .select('*')
+        .or(`user1_id.eq.${user!.id},user2_id.eq.${user!.id}`)
+        .or(`user1_id.eq.${profile!.user_id},user2_id.eq.${profile!.user_id}`)
+        .maybeSingle();
+
+      if (matchData) {
+        toast({
+          title: "It's a Match! 🎉",
+          description: `You matched with ${profile!.name}!`,
+        });
+      }
+    }
+  };
+
+  const handleMessage = async () => {
     if (!user || !profile) return;
 
     try {
-      const { error } = await supabase
-        .from('likes')
-        .insert({
-          liker_id: user.id,
-          liked_id: profile.user_id,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Liked!',
-        description: `You liked ${profile.name}'s profile`,
+      const { conversationId } = await getOrCreateConversation(profile.user_id);
+      navigate('/inbox', { 
+        state: { 
+          openConversationId: conversationId, 
+          mentorName: profile.name 
+        } 
       });
-
-      navigate('/match/discover');
     } catch (error) {
-      console.error('Error liking profile:', error);
+      console.error('Error creating conversation:', error);
       toast({
         title: 'Error',
-        description: 'Failed to like profile',
+        description: 'Failed to start conversation',
         variant: 'destructive',
       });
     }
@@ -232,14 +300,15 @@ export default function MatchProfile() {
             <Button
               size="lg"
               onClick={handleLike}
-              className="w-20 h-20 rounded-full bg-primary"
+              className={`w-20 h-20 rounded-full ${isFavorite ? 'bg-primary' : 'bg-primary/50'}`}
             >
-              <Heart className="w-8 h-8 fill-current" />
+              <Heart className={`w-8 h-8 ${isFavorite ? 'fill-current' : ''}`} />
             </Button>
 
             <Button
               variant="outline"
               size="lg"
+              onClick={handleMessage}
               className="w-20 h-20 rounded-full border-2"
             >
               <MessageCircle className="w-8 h-8 text-primary" />

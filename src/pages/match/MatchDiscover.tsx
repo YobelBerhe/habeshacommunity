@@ -7,6 +7,7 @@ import { Heart, X, MessageCircle } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import MatchFilters, { FilterState } from '@/components/match/MatchFilters';
 
 interface MatchProfile {
   id: string;
@@ -26,9 +27,16 @@ export default function MatchDiscover() {
   const { toast } = useToast();
 
   const [profiles, setProfiles] = useState<MatchProfile[]>([]);
+  const [filteredProfiles, setFilteredProfiles] = useState<MatchProfile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    minScore: 50,
+    ageRange: [18, 60],
+    location: "",
+    interest: ""
+  });
 
   useEffect(() => {
     if (!user) {
@@ -43,6 +51,30 @@ export default function MatchDiscover() {
       loadProfiles();
     }
   }, [hasProfile]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [profiles, filters]);
+
+  const applyFilters = () => {
+    let filtered = profiles.filter(p => {
+      const matchesScore = (p.match_percent || 0) >= filters.minScore;
+      const matchesAge = !p.age || (p.age >= filters.ageRange[0] && p.age <= filters.ageRange[1]);
+      const matchesLocation = !filters.location || 
+        p.city?.toLowerCase().includes(filters.location.toLowerCase());
+      const matchesInterest = !filters.interest || 
+        p.interests?.some(i => i.toLowerCase().includes(filters.interest.toLowerCase()));
+      
+      return matchesScore && matchesAge && matchesLocation && matchesInterest;
+    });
+    
+    setFilteredProfiles(filtered);
+    setCurrentIndex(0);
+  };
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
 
   const checkProfile = async () => {
     if (!user) return;
@@ -166,7 +198,7 @@ export default function MatchDiscover() {
     setCurrentIndex(currentIndex + 1);
   };
 
-  const currentProfile = profiles[currentIndex];
+  const currentProfile = filteredProfiles[currentIndex];
 
   if (!user) return null;
 
@@ -174,16 +206,22 @@ export default function MatchDiscover() {
     <div className="min-h-screen bg-background">
       <MentorHeader title="Discover" backPath="/" />
       
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="flex justify-end mb-6">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/match/matches')}
-          >
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Your Matches
-          </Button>
-        </div>
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="flex gap-6">
+          {/* Filters Sidebar */}
+          <MatchFilters onFilterChange={handleFilterChange} />
+          
+          {/* Main Content */}
+          <div className="flex-1 max-w-2xl mx-auto">
+            <div className="flex justify-end mb-6">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/match/matches')}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Your Matches
+              </Button>
+            </div>
 
         {loading ? (
           <Card>
@@ -270,10 +308,12 @@ export default function MatchDiscover() {
             </div>
 
             <p className="text-center text-sm text-muted-foreground">
-              {profiles.length - currentIndex - 1} profiles remaining
+              {filteredProfiles.length - currentIndex - 1} profiles remaining
             </p>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );
