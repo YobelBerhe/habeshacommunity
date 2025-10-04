@@ -80,7 +80,7 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
             .eq('conversation_id', conv.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           // Get unread count
           const { count: unreadCount } = await supabase
@@ -95,7 +95,7 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
             .from('mentors')
             .select('id')
             .eq('user_id', otherParticipantId)
-            .single();
+            .maybeSingle();
 
           return {
             ...conv,

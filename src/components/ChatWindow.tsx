@@ -98,30 +98,42 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
     const messageContent = newMessage.trim();
     setSending(true);
     try {
-      const { error } = await supabase.from('messages').insert({
-        conversation_id: conversationId,
-        sender_id: user.id,
-        content: messageContent,
-      } as any);
+      const { data, error } = await supabase
+        .from('messages')
+        .insert([
+          {
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content: messageContent,
+          } as any,
+        ])
+        .select('id')
+        .single();
 
       if (error) throw error;
+      if (!data?.id) {
+        throw new Error('Message insert returned no id');
+      }
 
       setNewMessage('');
 
       // Send email notification (non-blocking)
-      supabase.functions.invoke('send-message-notification', {
-        body: {
-          conversationId,
-          senderId: user.id,
-          messageContent,
-        },
-      }).catch(err => {
-        console.error('Failed to send email notification:', err);
-        // Don't show error to user, email is optional
-      });
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
+      supabase
+        .functions
+        .invoke('send-message-notification', {
+          body: {
+            conversationId,
+            senderId: user.id,
+            messageContent,
+          },
+        })
+        .catch((err) => {
+          console.error('Failed to send email notification:', err);
+          // Non-blocking
+        });
+    } catch (error: any) {
+      console.error('Error sending message:', error?.message || error, error);
+      toast.error(error?.message || 'Failed to send message');
     } finally {
       setSending(false);
     }
