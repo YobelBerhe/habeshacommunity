@@ -32,6 +32,9 @@ import NotifyBell from "@/components/NotifyBell";
 import AuthButtons from "@/components/AuthButtons";
 import SortDropdown from "@/components/SortDropdown";
 import MentorFilters from "@/components/search/MentorFilters";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";
@@ -47,6 +50,13 @@ export default function Browse() {
   const [loading, setLoading] = useState(false);
   
   // View and sorting state with localStorage persistence
+  // Donation dialog state
+  const [donateDialogOpen, setDonateDialogOpen] = useState(false);
+  const [donateAmount, setDonateAmount] = useState<number>(500); // $5
+  const [customAmount, setCustomAmount] = useState<string>("");
+  const [donateEmail, setDonateEmail] = useState<string>("");
+  const [donateLoading, setDonateLoading] = useState(false);
+  
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     (localStorage.getItem('hn.viewMode') as ViewMode) || 'list'
   );
@@ -418,6 +428,54 @@ export default function Browse() {
     }
   };
 
+  // Donation handlers
+  const DONATE_PRESETS = [500, 1000, 2000]; // $5, $10, $20
+  
+  const donateDisplayAmount = useMemo(() => {
+    const v = customAmount.trim();
+    if (!v) return donateAmount;
+    const n = Math.round(parseFloat(v) * 100);
+    if (Number.isFinite(n)) return n;
+    return donateAmount;
+  }, [customAmount, donateAmount]);
+
+  const isValidDonateAmount = donateDisplayAmount >= 200 && donateDisplayAmount <= 50000;
+  const donateAmountError = customAmount.trim() && !isValidDonateAmount 
+    ? donateDisplayAmount < 200 
+      ? "Minimum donation is $2" 
+      : "Maximum donation is $500"
+    : "";
+
+  const startDonationCheckout = async () => {
+    try {
+      setDonateLoading(true);
+      const { data, error } = await supabase.functions.invoke('create-donation', {
+        body: { amount: donateDisplayAmount, email: donateEmail }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        try {
+          if (window.top && window.top !== window.self) {
+            (window.top as Window).location.href = data.url;
+          } else {
+            window.location.href = data.url;
+          }
+        } catch {
+          window.open(data.url, "_blank", "noopener,noreferrer");
+        }
+      } else {
+        toast.error("Unable to start checkout");
+      }
+    } catch (err) {
+      console.error('Donation error:', err);
+      toast.error("Network error. Please try again.");
+    } finally {
+      setDonateLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop View - Reorganized Layout */}
@@ -543,25 +601,7 @@ export default function Browse() {
                   className={`pb-1 border-b-2 font-medium text-sm ${
                     false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                   }`}
-                  onClick={() => {
-                    // Create donation dialog similar to DonateButton
-                    const dialog = document.createElement('div');
-                    dialog.innerHTML = `
-                      <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
-                          <h3 class="text-lg font-semibold mb-4 dark:text-white">Support HabeshaCommunity</h3>
-                          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Help us maintain and improve our community platform.</p>
-                          <div class="flex gap-2 mb-4">
-                            <button onclick="window.open('https://donate.stripe.com/test_28o4iy2NK41ydTG9AA', '_blank')" class="bg-blue-600 text-white px-4 py-2 rounded flex-1">$5</button>
-                            <button onclick="window.open('https://donate.stripe.com/test_28o4iy2NK41ydTG9AA', '_blank')" class="bg-blue-600 text-white px-4 py-2 rounded flex-1">$10</button>
-                            <button onclick="window.open('https://donate.stripe.com/test_28o4iy2NK41ydTG9AA', '_blank')" class="bg-blue-600 text-white px-4 py-2 rounded flex-1">$20</button>
-                          </div>
-                          <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded">Close</button>
-                        </div>
-                      </div>
-                    `;
-                    document.body.appendChild(dialog);
-                  }}
+                  onClick={() => setDonateDialogOpen(true)}
                 >
                   <Heart className="w-4 h-4 inline mr-1" />
                   Support HabeshaCommunity
@@ -935,6 +975,72 @@ export default function Browse() {
         {/* Modals */}
         <AuthModal />
         <PostModal city={filters.city || "Select a city"} />
+        
+        {/* Donation Dialog */}
+        <Dialog open={donateDialogOpen} onOpenChange={setDonateDialogOpen}>
+          <DialogContent className="w-full max-w-md">
+            <DialogHeader>
+              <DialogTitle>Support HabeshaCommunity</DialogTitle>
+            </DialogHeader>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              Choose an amount or enter a custom donation ($2 - $500).
+            </p>
+
+            <div className="flex gap-2 mb-4">
+              {DONATE_PRESETS.map((cents) => (
+                <Button
+                  key={cents}
+                  variant={(!customAmount && donateAmount === cents) ? "default" : "outline"}
+                  onClick={() => { setDonateAmount(cents); setCustomAmount(""); }}
+                  className="flex-1"
+                >
+                  ${(cents / 100).toFixed(0)}
+                </Button>
+              ))}
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="custom-amount">Custom amount (USD)</Label>
+                <Input
+                  id="custom-amount"
+                  inputMode="decimal"
+                  placeholder="e.g. 7.50"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                  className={donateAmountError ? "border-destructive" : ""}
+                />
+                {donateAmountError && (
+                  <p className="text-xs text-destructive mt-1">{donateAmountError}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="email">Email (optional for receipt)</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={donateEmail}
+                  onChange={(e) => setDonateEmail(e.target.value)}
+                />
+              </div>
+
+              <Button
+                onClick={startDonationCheckout}
+                disabled={donateLoading || !isValidDonateAmount}
+                className="w-full"
+              >
+                {donateLoading ? "Processing..." : `Donate $${(donateDisplayAmount / 100).toFixed(2)}`}
+              </Button>
+
+              <p className="text-center text-xs text-muted-foreground">
+                Powered by Stripe • Test mode enabled
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 }
