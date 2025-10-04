@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 type Notification = {
   id: string;
@@ -14,6 +15,7 @@ type Notification = {
 };
 
 export default function NotifyBell() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
@@ -134,7 +136,7 @@ export default function NotifyBell() {
     }
     
     if (notification.link) {
-      window.location.href = notification.link;
+      navigate(notification.link);
     }
     
     setOpen(false);
