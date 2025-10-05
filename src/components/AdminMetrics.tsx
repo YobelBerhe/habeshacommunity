@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Download, TrendingUp, DollarSign, Users, ArrowLeft, CalendarIcon } from "lucide-react";
+import { Download, TrendingUp, DollarSign, Users, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TopReferrersLeaderboard } from "./TopReferrersLeaderboard";
 
@@ -52,7 +52,6 @@ const presetRanges = [
 ];
 
 export default function AdminMetrics() {
-  const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<DateRange>({
     from: subDays(new Date(), 7),
     to: new Date(),
@@ -168,23 +167,8 @@ export default function AdminMetrics() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-10 bg-background border-b">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="text-xl font-bold">Admin Dashboard</h1>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="px-4 py-4 space-y-4">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+      <div className="space-y-4">
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
