@@ -207,12 +207,12 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
             </ul>
           </details>
 
-          {/* Match & Connect - Toggleable */}
+          {/* Matchmaking - Toggleable */}
           <details className="group border-b">
             <summary className="flex items-center justify-between py-4 cursor-pointer select-none">
               <div className="flex items-center gap-3">
                 <Target className="w-5 h-5 text-primary" />
-                <span className="font-medium">Match & Connect</span>
+                <span className="font-medium">Matchmaking</span>
               </div>
               <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
             </summary>

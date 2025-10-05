@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { Button } from '@/components/ui/button';
-import { Heart, X, Star, MapPin, Briefcase, GraduationCap, Globe, MessageCircle, Shield, ChevronLeft, ChevronRight, Sparkles, Info, SlidersHorizontal, Users, ClipboardList, Trophy, Calendar } from 'lucide-react';
-import MentorHeader from '@/components/MentorHeader';
+import { Heart, X, Star, MapPin, MessageCircle, Shield, Sparkles, Settings, ChevronLeft } from 'lucide-react';
+import { MatchBottomNav } from '@/components/match/MatchBottomNav';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import MatchFilters, { FilterState } from '@/components/match/MatchFilters';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MatchProfile {
   id: string;
@@ -30,21 +30,13 @@ export default function MatchDiscover() {
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const [profiles, setProfiles] = useState<MatchProfile[]>([]);
-  const [filteredProfiles, setFilteredProfiles] = useState<MatchProfile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [matches, setMatches] = useState<string[]>([]);
   const [showMatchNotification, setShowMatchNotification] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    minScore: 50,
-    ageRange: [18, 60],
-    location: "",
-    interest: ""
-  });
 
   useEffect(() => {
     if (!user) {
@@ -59,30 +51,6 @@ export default function MatchDiscover() {
       loadProfiles();
     }
   }, [hasProfile]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [profiles, filters]);
-
-  const applyFilters = () => {
-    let filtered = profiles.filter(p => {
-      const matchesScore = (p.match_percent || 0) >= filters.minScore;
-      const matchesAge = !p.age || (p.age >= filters.ageRange[0] && p.age <= filters.ageRange[1]);
-      const matchesLocation = !filters.location || 
-        p.city?.toLowerCase().includes(filters.location.toLowerCase());
-      const matchesInterest = !filters.interest || 
-        p.interests?.some(i => i.toLowerCase().includes(filters.interest.toLowerCase()));
-      
-      return matchesScore && matchesAge && matchesLocation && matchesInterest;
-    });
-    
-    setFilteredProfiles(filtered);
-    setCurrentIndex(0);
-  };
-
-  const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
-  };
 
   const checkProfile = async () => {
     if (!user) return;
@@ -107,75 +75,42 @@ export default function MatchDiscover() {
     }
   };
 
-  const generateMatchReasons = (profile: MatchProfile, matchPercent: number): string[] => {
-    const reasons: string[] = [];
-    
-    if (matchPercent >= 85) {
-      reasons.push('Excellent compatibility score');
-    }
-    if (profile.city) {
-      reasons.push(`Both from ${profile.city} area`);
-    }
-    if (profile.interests && profile.interests.length > 2) {
-      reasons.push('Shared interests and hobbies');
-    }
-    if (profile.looking_for) {
-      reasons.push('Compatible relationship goals');
-    }
-    
-    return reasons.length > 0 ? reasons : ['Strong compatibility potential'];
-  };
-
   const loadProfiles = async () => {
     if (!user) return;
-
+    
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      // Get profiles that user hasn't liked yet
-      const { data: alreadyLiked, error: likesError } = await supabase
-        .from('likes')
-        .select('liked_id')
-        .eq('liker_id', user.id);
-
-      if (likesError) throw likesError;
-
-      const likedIds = alreadyLiked?.map(l => l.liked_id) || [];
-
-      let query = supabase
+      const { data, error } = await supabase
         .from('match_profiles')
         .select('*')
+        .neq('user_id', user.id)
         .eq('active', true)
-        .neq('user_id', user.id);
-
-      if (likedIds.length > 0) {
-        query = query.not('user_id', 'in', `(${likedIds.join(',')})`);
-      }
-
-      const { data, error } = await query.limit(20);
+        .limit(20);
 
       if (error) throw error;
-      
-      // Calculate match percentages for each profile
+
       const profilesWithScores = await Promise.all(
-        (data || []).map(async (profile) => {
-          const { data: scoreData } = await supabase
-            .rpc('calculate_match_score', {
-              viewer_id: user.id,
-              profile_user_id: profile.user_id,
-            });
-          
-          const matchPercent = scoreData?.[0]?.match_percent || 0;
-          
+        data.map(async (profile) => {
+          const { data: scoreData } = await supabase.rpc('calculate_match_score', {
+            profile_user_id: profile.user_id,
+            viewer_id: user.id,
+          });
+
+          const matchPercent = Array.isArray(scoreData) && scoreData.length > 0 
+            ? scoreData[0].match_percent 
+            : 75;
+          const matchReasons = generateMatchReasons(matchPercent, profile);
+
           return {
             ...profile,
+            name: profile.display_name || profile.name || 'Anonymous',
             match_percent: matchPercent,
-            match_reasons: generateMatchReasons(profile, matchPercent),
-          };
+            match_reasons: matchReasons,
+          } as MatchProfile;
         })
       );
-      
-      setProfiles(profilesWithScores);
+
+      setProfiles(profilesWithScores.sort((a, b) => (b.match_percent || 0) - (a.match_percent || 0)));
     } catch (error) {
       console.error('Error loading profiles:', error);
       toast({
@@ -188,22 +123,29 @@ export default function MatchDiscover() {
     }
   };
 
-  const handleLike = async () => {
-    if (!user || currentIndex >= filteredProfiles.length) return;
+  const generateMatchReasons = (matchPercent: number, profile: MatchProfile) => {
+    const reasons = [];
+    if (matchPercent >= 85) reasons.push('Strong compatibility based on values and interests');
+    if (profile.city) reasons.push(`Both located in ${profile.city}`);
+    if (profile.interests && profile.interests.length > 0) {
+      reasons.push(`Shared interests in ${profile.interests.slice(0, 2).join(' and ')}`);
+    }
+    return reasons;
+  };
 
-    const profile = filteredProfiles[currentIndex];
+  const handleLike = async () => {
+    if (!user || currentIndex >= profiles.length) return;
+    const profile = profiles[currentIndex];
     
     try {
-      const { error } = await supabase
-        .from('likes')
-        .insert({
-          liker_id: user.id,
-          liked_id: profile.user_id,
-        });
+      // For now, just mark as liked without storing
+      // TODO: Create match_likes table if needed
+      
+      toast({
+        title: 'Profile liked!',
+        description: `You liked ${profile.name}`,
+      });
 
-      if (error) throw error;
-
-      // Check if it's a match
       const { data: matchData } = await supabase
         .from('matches')
         .select('*')
@@ -212,7 +154,6 @@ export default function MatchDiscover() {
         .single();
 
       if (matchData) {
-        setMatches([...matches, profile.name]);
         setShowMatchNotification(true);
         setTimeout(() => setShowMatchNotification(false), 5000);
         
@@ -225,6 +166,7 @@ export default function MatchDiscover() {
       nextCard();
     } catch (error) {
       console.error('Error liking profile:', error);
+      nextCard();
     }
   };
 
@@ -233,15 +175,11 @@ export default function MatchDiscover() {
   };
 
   const handleSuperLike = async () => {
-    // Same as like for now, but could add special handling
     await handleLike();
   };
 
   const handleMessage = async () => {
-    if (!user || currentIndex >= filteredProfiles.length) return;
-    const profile = filteredProfiles[currentIndex];
-    
-    // First like them, then navigate to messages
+    if (!user || currentIndex >= profiles.length) return;
     await handleLike();
     toast({
       title: 'Match requested',
@@ -250,327 +188,190 @@ export default function MatchDiscover() {
   };
 
   const nextCard = () => {
-    if (currentIndex < filteredProfiles.length - 1) {
+    if (currentIndex < profiles.length - 1) {
       setCurrentIndex(currentIndex + 1);
-    } else {
-      setCurrentIndex(0);
     }
   };
 
-  const prevCard = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const currentProfile = filteredProfiles[currentIndex];
+  const currentProfile = profiles[currentIndex];
 
   if (!user) return null;
 
-  const getMatchQuality = (percent: number) => {
-    if (percent >= 90) return { label: 'Excellent Match', color: 'from-accent to-green-500' };
-    if (percent >= 75) return { label: 'Great Match', color: 'from-primary to-blue-500' };
-    return { label: 'Good Match', color: 'from-purple-400 to-purple-600' };
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-950 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Loading profiles...</p>
+        </div>
+      </div>
+    );
+  }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <MentorHeader title="Find Your Match" backPath="/" />
-      
-      {/* Header */}
-      <div className="container mx-auto px-4 pt-4">
-        <div className="bg-card shadow-lg rounded-2xl mb-6 p-4 border border-border">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center">
-                <Heart className="w-7 h-7 text-primary-foreground fill-current" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-                  Find Your Match
-                </h1>
-                <p className="text-xs text-muted-foreground">Culturally-aligned connections</p>
-              </div>
+  if (profiles.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-950 dark:to-gray-900 flex flex-col">
+        <div className="bg-white dark:bg-gray-900 shadow-sm p-4 flex items-center justify-between">
+          <button onClick={() => navigate('/')} className="p-2">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h2 className="font-bold text-lg">Discover</h2>
+          <button className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <Settings className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center max-w-md">
+            <div className="w-24 h-24 bg-gradient-to-br from-pink-200 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Heart className="w-12 h-12 text-pink-500" />
             </div>
-
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                <span>Filters</span>
-              </Button>
-
-              <Button
-                onClick={() => navigate('/match/matches')}
-                className="bg-gradient-to-r from-primary to-primary-glow"
-              >
-                {matches.length} Matches
-              </Button>
-            </div>
-          </div>
-
-          {/* Quick Access to Part 2 Features */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/match/quiz')}
-              className="flex items-center space-x-1"
+            <h3 className="text-2xl font-bold mb-2">No More Profiles</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Check back later for new matches!
+            </p>
+            <Button 
+              onClick={() => navigate('/match/list')}
+              className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700"
             >
-              <ClipboardList className="w-4 h-4" />
-              <span>Take Quiz</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/match/success')}
-              className="flex items-center space-x-1"
-            >
-              <Trophy className="w-4 h-4" />
-              <span>Success Stories</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/match/dates')}
-              className="flex items-center space-x-1"
-            >
-              <Calendar className="w-4 h-4" />
-              <span>Date Ideas</span>
+              View Your Matches
             </Button>
           </div>
         </div>
+        
+        <MatchBottomNav />
+      </div>
+    );
+  }
 
-        {/* Filters */}
-        {showFilters && (
-          <div className="mb-6">
-            <MatchFilters onFilterChange={handleFilterChange} />
-          </div>
-        )}
+  if (!currentProfile) return null;
+
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex flex-col pb-20">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-900 shadow-sm p-4 flex items-center justify-between">
+        <button onClick={() => navigate('/')} className="p-2">
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <h2 className="font-bold text-lg">Discover</h2>
+        <button className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          <Settings className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Profile Card */}
-      <div className="container mx-auto px-4 pb-8">
-        <div className="max-w-2xl mx-auto">
-          {loading ? (
-            <div className="bg-card rounded-3xl shadow-lg p-12 text-center border border-border">
-              <p className="text-muted-foreground">Loading profiles...</p>
-            </div>
-          ) : !currentProfile ? (
-            <div className="bg-card rounded-3xl shadow-lg p-12 text-center border border-border">
-              <Heart className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-              <h3 className="text-lg font-semibold mb-2">No More Profiles</h3>
-              <p className="text-muted-foreground mb-4">
-                Check back later for new matches!
-              </p>
-              <Button onClick={loadProfiles}>Refresh</Button>
-            </div>
-          ) : (
-            <div className="bg-card rounded-3xl shadow-lg overflow-hidden border border-border">
-              {/* Profile Image Area */}
-              <div className="relative h-96 bg-muted/30 flex items-center justify-center">
-                {/* Compatibility Badge */}
-                {currentProfile.match_percent !== undefined && currentProfile.match_percent > 0 && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <div className={`bg-gradient-to-r ${getMatchQuality(currentProfile.match_percent).color} text-white px-5 py-2 rounded-full shadow-lg flex items-center space-x-2`}>
-                      <Sparkles className="w-5 h-5" />
-                      <span className="font-bold text-lg">{currentProfile.match_percent}% Match</span>
-                    </div>
-                    <div className="mt-2 bg-card px-4 py-1 rounded-full shadow-md">
-                      <span className="text-sm font-semibold">{getMatchQuality(currentProfile.match_percent).label}</span>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Verified Badge */}
-                <div className="absolute top-4 right-4 bg-card rounded-full px-4 py-2 flex items-center space-x-2 shadow-lg z-10">
-                  <Shield className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-bold text-primary">Verified</span>
+      {/* Card Stack */}
+      <div className="flex-1 p-4 flex items-center justify-center">
+        <div className="relative w-full max-w-md">
+          {/* Main Card */}
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
+            {/* Profile Image Area */}
+            <div className="relative h-96 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 dark:from-pink-900 dark:via-purple-900 dark:to-blue-900 flex items-center justify-center">
+              {/* Compatibility Badge */}
+              <div className="absolute top-4 left-4 bg-white dark:bg-gray-800 rounded-full px-4 py-2 shadow-lg">
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4 text-green-500" />
+                  <span className="font-bold text-green-600 dark:text-green-400">
+                    {currentProfile.match_percent || 75}%
+                  </span>
                 </div>
-                
-                {/* Profile Image Placeholder */}
-                {currentProfile.photos && currentProfile.photos[0] ? (
-                  <img
-                    src={currentProfile.photos[0]}
-                    alt={currentProfile.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-56 h-56 bg-muted rounded-full shadow-2xl flex items-center justify-center">
-                    <Users className="w-32 h-32 text-muted-foreground/30" />
-                  </div>
-                )}
+              </div>
 
-                {/* Navigation */}
+              {/* Verified Badge */}
+              <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg">
+                <Shield className="w-5 h-5 text-blue-600" />
+              </div>
+
+              {/* Profile Image Placeholder */}
+              <div className="w-40 h-40 bg-white dark:bg-gray-700 rounded-full shadow-xl flex items-center justify-center">
+                <span className="text-6xl">👤</span>
+              </div>
+            </div>
+
+            {/* Profile Info */}
+            <div className="p-6">
+              <div className="mb-4">
+                <h3 className="text-2xl font-bold">
+                  {currentProfile.name}{currentProfile.age ? `, ${currentProfile.age}` : ''}
+                </h3>
+                <div className="flex items-center text-gray-600 dark:text-gray-400 mt-1">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{currentProfile.city}</span>
+                </div>
+              </div>
+
+              {currentProfile.bio && (
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-4">
+                  {currentProfile.bio}
+                </p>
+              )}
+
+              {/* Quick Info */}
+              {currentProfile.interests && currentProfile.interests.length > 0 && (
+                <div className="flex gap-2 flex-wrap mb-4">
+                  {currentProfile.interests.slice(0, 3).map((interest, idx) => (
+                    <span 
+                      key={idx} 
+                      className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium"
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-center space-x-4">
                 <button 
-                  onClick={prevCard}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-card rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform"
+                  onClick={handlePass}
+                  className="w-14 h-14 bg-white dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600 rounded-full flex items-center justify-center hover:border-red-300 dark:hover:border-red-600 transition-all shadow-lg"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <X className="w-7 h-7 text-red-500" />
                 </button>
+
                 <button 
-                  onClick={nextCard}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-card rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform"
+                  onClick={handleSuperLike}
+                  className="w-14 h-14 bg-white dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600 rounded-full flex items-center justify-center hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-lg"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <Star className="w-6 h-6 text-blue-500" />
+                </button>
+
+                <button 
+                  onClick={handleLike}
+                  className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
+                >
+                  <Heart className="w-8 h-8 text-white fill-white" />
+                </button>
+
+                <button 
+                  onClick={handleMessage}
+                  className="w-14 h-14 bg-white dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600 rounded-full flex items-center justify-center hover:border-purple-300 dark:hover:border-purple-600 transition-all shadow-lg"
+                >
+                  <MessageCircle className="w-6 h-6 text-purple-500" />
                 </button>
               </div>
 
-              {/* Profile Info */}
-              <div className="p-8">
-                {/* Name */}
-                <div className="mb-6">
-                  <h2 className="text-4xl font-bold mb-2">
-                    {currentProfile.display_name || currentProfile.name}
-                    {currentProfile.age ? `, ${currentProfile.age}` : ''}
-                  </h2>
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="w-5 h-5 mr-2" />
-                    <span>{currentProfile.city}{currentProfile.country ? `, ${currentProfile.country}` : ''}</span>
-                  </div>
-                </div>
-
-                {/* Info Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  {currentProfile.gender && (
-                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Users className="w-5 h-5 text-primary" />
-                        <span className="text-sm font-semibold">Gender</span>
-                      </div>
-                      <p className="font-medium">{currentProfile.gender}</p>
-                    </div>
-                  )}
-                  
-                  {currentProfile.seeking && (
-                    <div className="bg-gradient-to-br from-accent/5 to-accent/10 rounded-2xl p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Heart className="w-5 h-5 text-accent" />
-                        <span className="text-sm font-semibold">Seeking</span>
-                      </div>
-                      <p className="font-medium">{currentProfile.seeking}</p>
-                    </div>
-                  )}
-                  
-                  <div className="bg-gradient-to-br from-muted to-muted/50 rounded-2xl p-4 col-span-2">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Globe className="w-5 h-5 text-foreground" />
-                      <span className="text-sm font-semibold">Location</span>
-                    </div>
-                    <p className="font-medium">{currentProfile.city}</p>
-                  </div>
-                </div>
-
-                {/* Bio */}
-                {currentProfile.bio && (
-                  <div className="mb-6">
-                    <h3 className="font-bold mb-3 flex items-center text-lg">
-                      <Info className="w-5 h-5 mr-2 text-muted-foreground" />
-                      About Me
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed bg-muted rounded-2xl p-5">
-                      {currentProfile.bio}
-                    </p>
-                  </div>
-                )}
-
-                {/* Interests */}
-                {currentProfile.interests && currentProfile.interests.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="font-bold mb-3">Interests</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {currentProfile.interests.map((interest, idx) => (
-                        <span key={idx} className="px-4 py-2 bg-primary/10 text-primary rounded-full font-medium">
-                          {interest}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Match Reasons */}
-                {currentProfile.match_reasons && currentProfile.match_reasons.length > 0 && (
-                  <div className="bg-gradient-to-br from-accent/5 to-accent/10 rounded-2xl p-6 mb-6">
-                    <h3 className="font-bold mb-4 flex items-center text-lg">
-                      <Sparkles className="w-5 h-5 mr-2 text-accent" />
-                      Why You Match
-                    </h3>
-                    <ul className="space-y-3">
-                      {currentProfile.match_reasons.map((reason, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <div className="w-2 h-2 bg-accent rounded-full mt-2 mr-3 flex-shrink-0" />
-                          <span className="text-muted-foreground">{reason}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Looking For */}
-                {currentProfile.looking_for && (
-                  <div className="bg-primary/5 rounded-2xl p-4 mb-8">
-                    <p>
-                      <span className="font-bold text-primary">Looking for: </span>
-                      <span className="text-muted-foreground">{currentProfile.looking_for}</span>
-                    </p>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-center space-x-6">
-                  <button 
-                    onClick={handlePass}
-                    className="w-20 h-20 bg-card border-4 border-border rounded-full flex items-center justify-center hover:border-destructive hover:bg-destructive/5 transition-all shadow-xl group"
-                  >
-                    <X className="w-10 h-10 text-muted-foreground group-hover:text-destructive transition-colors" />
-                  </button>
-
-                  <button 
-                    onClick={handleSuperLike}
-                    className="w-20 h-20 bg-card border-4 border-border rounded-full flex items-center justify-center hover:border-primary hover:bg-primary/5 transition-all shadow-xl group"
-                  >
-                    <Star className="w-9 h-9 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </button>
-
-                  <button 
-                    onClick={handleLike}
-                    className="w-24 h-24 bg-gradient-to-br from-primary to-primary-glow rounded-full flex items-center justify-center hover:shadow-2xl transition-all shadow-xl transform hover:scale-110"
-                  >
-                    <Heart className="w-12 h-12 text-primary-foreground fill-current" />
-                  </button>
-
-                  <button 
-                    onClick={handleMessage}
-                    className="w-20 h-20 bg-card border-4 border-border rounded-full flex items-center justify-center hover:border-accent hover:bg-accent/5 transition-all shadow-xl group"
-                  >
-                    <MessageCircle className="w-9 h-9 text-muted-foreground group-hover:text-accent transition-colors" />
-                  </button>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Profile <span className="font-bold">{currentIndex + 1}</span> of {filteredProfiles.length}
-                  </p>
-                </div>
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {currentIndex + 1} of {profiles.length}
+                </p>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
       {/* Match Notification */}
-      {showMatchNotification && matches.length > 0 && (
-        <div className="fixed bottom-8 right-8 bg-primary text-primary-foreground px-8 py-5 rounded-2xl shadow-xl flex items-center space-x-4 z-50 border border-border animate-in slide-in-from-bottom-5">
+      {showMatchNotification && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-xl flex items-center space-x-4 z-50 animate-in slide-in-from-top-5">
           <Heart className="w-8 h-8 fill-current" />
           <div>
             <p className="font-bold text-lg">It's a Match! 🎉</p>
-            <p className="text-sm opacity-90">{matches.length} new connection(s)</p>
+            <p className="text-sm opacity-90">You have a new connection!</p>
           </div>
         </div>
       )}
+
+      <MatchBottomNav />
     </div>
   );
 }

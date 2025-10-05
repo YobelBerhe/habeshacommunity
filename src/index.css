@@ -30,6 +30,11 @@
     --primary: 215 94% 50%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 215 94% 60%;
+    
+    /* Matchmaking pink/purple gradients */
+    --match-pink: 340 82% 62%;
+    --match-rose: 346 77% 60%;
+    --match-purple: 271 76% 63%;
 
     /* Secondary: Warm earth tone */
     --secondary: 25 25% 92%;

@@ -22,7 +22,7 @@ const catOptions: { key: string; label: string }[] = [
   { key: "community", label: "Community" },
   { key: "mentor", label: "Mentor Profile" },
   { key: "forsale", label: "Marketplace Item" },
-  { key: "match", label: "Match & Connect" },
+  { key: "match", label: "Matchmaking" },
 ];
 
 export default function PostModal({ city, onPosted }: Props) {

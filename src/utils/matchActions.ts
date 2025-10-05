@@ -10,7 +10,7 @@ export async function likeUser(targetUserId: string) {
       userId: targetUserId,
       type: 'match_like',
       title: 'Someone liked you!',
-      body: 'You have a new like in Match & Connect.',
+      body: 'You have a new like in Matchmaking.',
       link: '/match'
     },
     headers: {

@@ -69,7 +69,7 @@ export const TAXONOMY: Record<
     ],
   },
   match: {
-    name: { en: "Match & Connect", ti: "ምትእምማን ኣገናዝብ" },
+    name: { en: "Matchmaking", ti: "ምትእምማን ኣገናዝብ" },
     sub: [
       "friends","dating","networking",
     ],
