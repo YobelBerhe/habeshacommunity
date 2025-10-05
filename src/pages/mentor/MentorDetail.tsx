@@ -16,6 +16,7 @@ import { bookMentorSession } from '@/utils/stripeActions';
 import { useAuth } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar } from '@/components/ui/calendar';
+import TimeSlotPicker from '@/components/mentor/TimeSlotPicker';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +30,8 @@ export default function MentorDetail() {
   const [availableCredits, setAvailableCredits] = useState({ hasCredits: false, totalCredits: 0 });
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [selectedTimeRange, setSelectedTimeRange] = useState<{ start: string; end: string }>();
 
   useEffect(() => {
     if (id) {
@@ -193,15 +196,29 @@ export default function MentorDetail() {
     }
   };
 
+  const handleSlotSelect = (slotId: string, startTime: string, endTime: string) => {
+    setSelectedSlotId(slotId);
+    setSelectedTimeRange({ start: startTime, end: endTime });
+  };
+
   const handleBookSingleSession = async () => {
     if (!user) {
       navigate('/auth/login');
       return;
     }
+
+    if (!selectedDate || !selectedSlotId) {
+      toast({
+        title: "Select date and time",
+        description: "Please select a date and time slot to book",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setBookingLoading(true);
     try {
-      const result = await bookMentorSession(id!);
+      const result = await bookMentorSession(id!, selectedSlotId);
       if (result.redirectUrl) {
         window.location.href = result.redirectUrl;
       }
@@ -456,20 +473,29 @@ export default function MentorDetail() {
             {/* Availability Calendar */}
             <Card>
               <CardHeader>
-                <CardTitle>Availability</CardTitle>
+                <CardTitle>Select Date & Time</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  onSelect={(date) => {
+                    setSelectedDate(date);
+                    setSelectedSlotId(undefined);
+                    setSelectedTimeRange(undefined);
+                  }}
                   className="rounded-md border"
                   disabled={(date) => date < new Date()}
                 />
                 {selectedDate && (
-                  <p className="mt-4 text-sm text-muted-foreground text-center">
-                    Selected: {selectedDate.toLocaleDateString()}
-                  </p>
+                  <div className="pt-4 border-t">
+                    <TimeSlotPicker
+                      mentorId={id!}
+                      selectedDate={selectedDate}
+                      onSlotSelect={handleSlotSelect}
+                      selectedSlotId={selectedSlotId}
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -520,10 +546,19 @@ export default function MentorDetail() {
                           navigate('/auth/login');
                           return;
                         }
+
+                        if (!selectedDate || !selectedSlotId) {
+                          toast({
+                            title: "Select date and time",
+                            description: "Please select a date and time slot to book",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
                         
                         setBookingLoading(true);
                         try {
-                          const result = await bookSessionWithCredit(id!);
+                          const result = await bookSessionWithCredit(id!, selectedSlotId);
                           
                           if (result.needsPurchase) {
                             toast({
@@ -550,7 +585,7 @@ export default function MentorDetail() {
                       }}
                       className="w-full"
                       size="lg"
-                      disabled={bookingLoading}
+                      disabled={bookingLoading || !selectedSlotId}
                     >
                       <CalendarIcon className="w-4 h-4 mr-2" />
                       {bookingLoading ? 'Processing...' : 'Book with Credit'}
@@ -560,7 +595,7 @@ export default function MentorDetail() {
                       onClick={handleBookSingleSession}
                       className="w-full"
                       size="lg"
-                      disabled={bookingLoading}
+                      disabled={bookingLoading || !selectedSlotId}
                     >
                       <CalendarIcon className="w-4 h-4 mr-2" />
                       {bookingLoading ? 'Processing...' : 'Book Single Session'}

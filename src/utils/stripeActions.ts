@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export async function bookMentorSession(mentorId: string) {
+export async function bookMentorSession(mentorId: string, slotId?: string) {
   try {
     // Get current user
     const { data: { user } } = await supabase.auth.getUser();
@@ -8,7 +8,7 @@ export async function bookMentorSession(mentorId: string) {
 
     // Call the edge function to create checkout session
     const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-      body: { mentorId }
+      body: { mentorId, slotId }
     });
 
     if (error) {

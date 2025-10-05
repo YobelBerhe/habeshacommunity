@@ -26,6 +26,7 @@ import MyBookings from "./pages/mentor/MyBookings";
 import BookingSuccess from "./pages/mentor/BookingSuccess";
 import MentorPayouts from "./pages/mentor/MentorPayouts";
 import VerifyProfile from "./pages/mentor/VerifyProfile";
+import ManageAvailability from "./pages/mentor/ManageAvailability";
 import VerificationReview from "./pages/admin/VerificationReview";
 import BadgesInfo from "./pages/BadgesInfo";
 import AdminMetrics from "./pages/admin/Metrics";
@@ -77,6 +78,7 @@ const App = () => (
           <Route path="/mentor/booking-success" element={<BookingSuccess />} />
           <Route path="/mentor/payouts" element={<MentorPayouts />} />
           <Route path="/mentor/verify" element={<VerifyProfile />} />
+          <Route path="/mentor/availability" element={<ManageAvailability />} />
           <Route path="/badges" element={<BadgesInfo />} />
           <Route path="/admin/verifications" element={<VerificationReview />} />
           <Route path="/admin/metrics" element={<AdminMetrics />} />

@@ -24,7 +24,7 @@ serve(async (req: Request) => {
     const user = data.user;
     if (!user?.id) throw new Error("User not authenticated");
 
-    const { mentorId, notes } = await req.json();
+    const { mentorId, slotId, notes } = await req.json();
     
     if (!mentorId) {
       throw new Error("Missing mentorId");
@@ -34,6 +34,23 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+
+    // If slotId is provided, check if it's still available
+    if (slotId) {
+      const { data: slot, error: slotError } = await supabase
+        .from('mentor_availability')
+        .select('is_booked')
+        .eq('id', slotId)
+        .single();
+
+      if (slotError || !slot) {
+        throw new Error('Invalid time slot');
+      }
+
+      if (slot.is_booked) {
+        throw new Error('This time slot has already been booked');
+      }
+    }
 
     // Check for available credits
     const { data: credits, error: creditsError } = await supabase
@@ -99,6 +116,14 @@ serve(async (req: Request) => {
         .update({ credits_left: creditRecord.credits_left })
         .eq('id', creditRecord.id);
       throw bookingError;
+    }
+
+    // Mark slot as booked if slotId provided
+    if (slotId) {
+      await supabase
+        .from('mentor_availability')
+        .update({ is_booked: true })
+        .eq('id', slotId);
     }
 
     // Generate join URL

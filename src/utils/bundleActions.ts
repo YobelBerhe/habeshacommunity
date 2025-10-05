@@ -1,12 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export async function bookSessionWithCredit(mentorId: string, notes?: string) {
+export async function bookSessionWithCredit(mentorId: string, slotId?: string, notes?: string) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not signed in');
 
     const { data, error } = await supabase.functions.invoke('book-with-credit', {
-      body: { mentorId, notes },
+      body: { mentorId, slotId, notes },
     });
 
     if (error) throw error;

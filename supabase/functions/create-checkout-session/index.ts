@@ -29,8 +29,31 @@ serve(async (req: Request) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) throw new Error("Not authenticated");
 
-    const { mentorId } = await req.json();
+    const { mentorId, slotId } = await req.json();
     if (!mentorId) throw new Error("Mentor ID required");
+
+    // Initialize Supabase with service role key for slot checks
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // If slotId is provided, check if it's still available
+    if (slotId) {
+      const { data: slot, error: slotError } = await supabaseAdmin
+        .from('mentor_availability')
+        .select('is_booked')
+        .eq('id', slotId)
+        .single();
+
+      if (slotError || !slot) {
+        throw new Error('Invalid time slot');
+      }
+
+      if (slot.is_booked) {
+        throw new Error('This time slot has already been booked');
+      }
+    }
 
     // Get mentor details including Stripe account
     const { data: mentor, error: mentorError } = await supabase
@@ -50,7 +73,7 @@ serve(async (req: Request) => {
     }
 
     // Create booking
-    const { data: booking, error: bookingError } = await supabase
+    const { data: booking, error: bookingError } = await supabaseAdmin
       .from('mentor_bookings')
       .insert({
         mentor_id: mentorId,
@@ -62,6 +85,14 @@ serve(async (req: Request) => {
       .single();
 
     if (bookingError) throw bookingError;
+
+    // Mark slot as booked if slotId provided
+    if (slotId) {
+      await supabaseAdmin
+        .from('mentor_availability')
+        .update({ is_booked: true })
+        .eq('id', slotId);
+    }
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -105,7 +136,7 @@ serve(async (req: Request) => {
     });
 
     // Update booking with Stripe session ID
-    await supabase
+    await supabaseAdmin
       .from('mentor_bookings')
       .update({ stripe_session_id: session.id })
       .eq('id', booking.id);

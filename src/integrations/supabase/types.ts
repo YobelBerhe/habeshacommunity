@@ -26,6 +26,7 @@ export type Database = {
           notes: string | null
           reminder_1h_sent: boolean | null
           reminder_5m_sent: boolean | null
+          scheduled_time: string | null
           session_date: string
           status: string | null
           stripe_payment_intent_id: string | null
@@ -43,6 +44,7 @@ export type Database = {
           notes?: string | null
           reminder_1h_sent?: boolean | null
           reminder_5m_sent?: boolean | null
+          scheduled_time?: string | null
           session_date: string
           status?: string | null
           stripe_payment_intent_id?: string | null
@@ -60,6 +62,7 @@ export type Database = {
           notes?: string | null
           reminder_1h_sent?: boolean | null
           reminder_5m_sent?: boolean | null
+          scheduled_time?: string | null
           session_date?: string
           status?: string | null
           stripe_payment_intent_id?: string | null
@@ -524,6 +527,47 @@ export type Database = {
           user2_id?: string
         }
         Relationships: []
+      }
+      mentor_availability: {
+        Row: {
+          available_date: string
+          created_at: string | null
+          end_time: string
+          id: string
+          is_booked: boolean | null
+          mentor_id: string
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          available_date: string
+          created_at?: string | null
+          end_time: string
+          id?: string
+          is_booked?: boolean | null
+          mentor_id: string
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          available_date?: string
+          created_at?: string | null
+          end_time?: string
+          id?: string
+          is_booked?: boolean | null
+          mentor_id?: string
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_availability_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mentor_badges: {
         Row: {
@@ -1207,6 +1251,15 @@ export type Database = {
           match_percent: number
           matched_questions: number
           total_questions: number
+        }[]
+      }
+      get_available_slots: {
+        Args: { p_date: string; p_mentor_id: string }
+        Returns: {
+          end_time: string
+          id: string
+          is_booked: boolean
+          start_time: string
         }[]
       }
       get_listing_counts: {

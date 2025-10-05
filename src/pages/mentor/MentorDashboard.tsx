@@ -370,7 +370,7 @@ export default function MentorDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/mentor/requests')}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -405,6 +405,23 @@ export default function MentorDashboard() {
             </CardContent>
           </Card>
 
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/mentor/availability')}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Availability
+              </CardTitle>
+              <CardDescription>
+                Set your available time slots for bookings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full">
+                Manage Schedule
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/mentor/payouts')}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -419,16 +436,6 @@ export default function MentorDashboard() {
               <Button variant="outline" className="w-full">
                 View Earnings
               </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Earnings</CardTitle>
-              <DollarSign className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${stats.earnings.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">Selected period</p>
             </CardContent>
           </Card>
         </div>
