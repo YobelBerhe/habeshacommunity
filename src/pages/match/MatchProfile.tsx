@@ -223,10 +223,10 @@ export default function MatchProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background via-secondary/5 to-accent/5">
+      <div className="min-h-screen bg-background">
         <MentorHeader title="Profile" backPath="/match/discover" />
         <div className="container mx-auto px-4 py-8 max-w-2xl">
-          <div className="bg-card rounded-3xl shadow-2xl p-12 text-center">
+          <div className="bg-card rounded-3xl shadow-lg p-12 text-center border border-border">
             <p className="text-muted-foreground">Loading profile...</p>
           </div>
         </div>
@@ -236,10 +236,10 @@ export default function MatchProfile() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background via-secondary/5 to-accent/5">
+      <div className="min-h-screen bg-background">
         <MentorHeader title="Profile" backPath="/match/discover" />
         <div className="container mx-auto px-4 py-8 max-w-2xl">
-          <div className="bg-card rounded-3xl shadow-2xl p-12 text-center">
+          <div className="bg-card rounded-3xl shadow-lg p-12 text-center border border-border">
             <p className="text-muted-foreground mb-4">Profile not found</p>
             <button 
               onClick={() => navigate('/match/discover')}
@@ -262,13 +262,13 @@ export default function MatchProfile() {
   const displayName = profile.display_name || profile.name;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-secondary/5 to-accent/5">
+    <div className="min-h-screen bg-background">
       <MentorHeader title="Profile" backPath="/match/discover" />
       
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="bg-card rounded-3xl shadow-2xl overflow-hidden">
+        <div className="bg-card rounded-3xl shadow-lg overflow-hidden border border-border">
           {/* Profile Image Area */}
-          <div className="relative h-96 bg-gradient-to-br from-secondary/20 via-accent/20 to-primary/20 flex items-center justify-center">
+          <div className="relative h-96 bg-muted/30 flex items-center justify-center">
             {/* Compatibility Badge */}
             {matchScore && matchScore.match_percent > 0 && (
               <div className="absolute top-4 left-4 z-10">
