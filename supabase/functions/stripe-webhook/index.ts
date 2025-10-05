@@ -140,6 +140,73 @@ serve(async (req: Request) => {
           }
         }
       }
+      // Handle product orders (digital/physical)
+      else if (session?.metadata?.order_id) {
+        const orderId = session.metadata.order_id;
+        const kind = session.metadata.kind;
+
+        // Update order status to paid
+        await supabase
+          .from('orders')
+          .update({
+            status: 'paid_pending_fulfillment',
+            stripe_payment_intent: session.payment_intent as string,
+          })
+          .eq('id', orderId);
+
+        // Get order details for ledger
+        const { data: order } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', orderId)
+          .single();
+
+        if (order) {
+          const sellerNet = order.subtotal_cents - order.platform_fee_cents;
+
+          // Create ledger entries
+          await supabase.from('ledger_entries').insert([
+            {
+              seller_id: order.seller_id,
+              order_id: orderId,
+              type: 'sale',
+              amount_cents: sellerNet,
+              note: 'Order payment received'
+            },
+            {
+              seller_id: order.seller_id,
+              order_id: orderId,
+              type: 'commission',
+              amount_cents: -order.platform_fee_cents,
+              note: 'Platform commission (15%)'
+            }
+          ]);
+
+          // Update seller balance (put on hold for physical, available for digital)
+          if (kind === 'digital') {
+            await supabase
+              .from('seller_balances')
+              .upsert({
+                seller_id: order.seller_id,
+                available_cents: sellerNet,
+              }, { onConflict: 'seller_id' });
+
+            // Deliver digital product
+            await supabase.functions.invoke('deliver-digital', {
+              body: { orderId }
+            });
+          } else {
+            await supabase
+              .from('seller_balances')
+              .upsert({
+                seller_id: order.seller_id,
+                on_hold_cents: sellerNet,
+              }, { onConflict: 'seller_id' });
+          }
+
+          console.log('Product order processed:', { orderId, kind, sellerNet });
+        }
+      }
     }
 
     return new Response(JSON.stringify({ received: true }), {

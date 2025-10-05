@@ -244,6 +244,88 @@ export type Database = {
         }
         Relationships: []
       }
+      fulfillments: {
+        Row: {
+          carrier: string | null
+          created_at: string
+          id: string
+          label_url: string | null
+          order_id: string
+          raw_events: Json | null
+          status: string
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          carrier?: string | null
+          created_at?: string
+          id?: string
+          label_url?: string | null
+          order_id: string
+          raw_events?: Json | null
+          status?: string
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          carrier?: string | null
+          created_at?: string
+          id?: string
+          label_url?: string | null
+          order_id?: string
+          raw_events?: Json | null
+          status?: string
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fulfillments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ledger_entries: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          note: string | null
+          order_id: string | null
+          seller_id: string
+          type: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          seller_id: string
+          type: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          seller_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
@@ -305,21 +387,32 @@ export type Database = {
           country: string | null
           created_at: string
           currency: string | null
+          delivery_mode: string | null
+          delivery_title: string | null
+          delivery_token: string | null
+          delivery_url: string | null
           description: string
+          dims_cm: Json | null
+          featured_until: string | null
+          hs_code: string | null
           id: string
           images: string[] | null
+          inventory: number | null
           is_featured: boolean | null
           location_lat: number | null
           location_lng: number | null
+          origin_country: string | null
           price_cents: number | null
           status: Database["public"]["Enums"]["listing_status"] | null
           subcategory: string | null
           tags: string[] | null
           title: string
+          type: string | null
           updated_at: string
           user_id: string
           views: number | null
           website_url: string | null
+          weight_grams: number | null
         }
         Insert: {
           category: Database["public"]["Enums"]["listing_category"]
@@ -328,21 +421,32 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          delivery_mode?: string | null
+          delivery_title?: string | null
+          delivery_token?: string | null
+          delivery_url?: string | null
           description: string
+          dims_cm?: Json | null
+          featured_until?: string | null
+          hs_code?: string | null
           id: string
           images?: string[] | null
+          inventory?: number | null
           is_featured?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
+          origin_country?: string | null
           price_cents?: number | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           subcategory?: string | null
           tags?: string[] | null
           title: string
+          type?: string | null
           updated_at?: string
           user_id: string
           views?: number | null
           website_url?: string | null
+          weight_grams?: number | null
         }
         Update: {
           category?: Database["public"]["Enums"]["listing_category"]
@@ -351,21 +455,32 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          delivery_mode?: string | null
+          delivery_title?: string | null
+          delivery_token?: string | null
+          delivery_url?: string | null
           description?: string
+          dims_cm?: Json | null
+          featured_until?: string | null
+          hs_code?: string | null
           id?: string
           images?: string[] | null
+          inventory?: number | null
           is_featured?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
+          origin_country?: string | null
           price_cents?: number | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           subcategory?: string | null
           tags?: string[] | null
           title?: string
+          type?: string | null
           updated_at?: string
           user_id?: string
           views?: number | null
           website_url?: string | null
+          weight_grams?: number | null
         }
         Relationships: []
       }
@@ -1042,6 +1157,131 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          buyer_id: string | null
+          created_at: string
+          currency: string
+          delivery_link_hash: string | null
+          id: string
+          kind: string
+          listing_id: string | null
+          platform_fee_cents: number
+          qty: number
+          seller_id: string | null
+          shipping_cents: number
+          status: string
+          stripe_payment_intent: string | null
+          subtotal_cents: number
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          delivery_link_hash?: string | null
+          id?: string
+          kind: string
+          listing_id?: string | null
+          platform_fee_cents: number
+          qty?: number
+          seller_id?: string | null
+          shipping_cents?: number
+          status?: string
+          stripe_payment_intent?: string | null
+          subtotal_cents: number
+          total_cents: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          delivery_link_hash?: string | null
+          id?: string
+          kind?: string
+          listing_id?: string | null
+          platform_fee_cents?: number
+          qty?: number
+          seller_id?: string | null
+          shipping_cents?: number
+          status?: string
+          stripe_payment_intent?: string | null
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_methods: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          seller_id: string
+          type: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          details: Json
+          id?: string
+          seller_id: string
+          type: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          seller_id?: string
+          type?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      payouts: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          method_type: string
+          provider_ref: string | null
+          seller_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          method_type: string
+          provider_ref?: string | null
+          seller_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          method_type?: string
+          provider_ref?: string | null
+          seller_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1183,6 +1423,27 @@ export type Database = {
           name?: string | null
           params?: Json
           user_id?: string
+        }
+        Relationships: []
+      }
+      seller_balances: {
+        Row: {
+          available_cents: number
+          on_hold_cents: number
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          available_cents?: number
+          on_hold_cents?: number
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          available_cents?: number
+          on_hold_cents?: number
+          seller_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
