@@ -42,6 +42,7 @@ import Marketplace from "./pages/marketplace/Marketplace";
 import MarketplaceDetail from "./pages/marketplace/MarketplaceDetail";
 import Inbox from "./pages/inbox/Inbox";
 import AdminSeed from "./pages/admin/Seed";
+import AdminDashboard from "./pages/admin/Dashboard";
 import GlobalMap from "./components/GlobalMap";
 import DonateSuccess from "./pages/donate/Success";
 import DonateCancel from "./pages/donate/Cancel";
@@ -84,6 +85,8 @@ const App = () => (
           <Route path="/mentor/verify" element={<VerifyProfile />} />
           <Route path="/mentor/availability" element={<ManageAvailability />} />
           <Route path="/badges" element={<BadgesInfo />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/verifications" element={<VerificationReview />} />
           <Route path="/admin/metrics" element={<AdminMetrics />} />
           <Route path="/match" element={<MatchDiscover />} />
