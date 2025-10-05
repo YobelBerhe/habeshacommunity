@@ -88,6 +88,22 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
     }
   };
 
+  const handleCall = () => {
+    toast.info(`Calling ${participantName}...`, {
+      description: 'Voice call feature coming soon!'
+    });
+  };
+
+  const handleVideoCall = () => {
+    toast.info(`Starting video call with ${participantName}...`, {
+      description: 'Video call feature coming soon!'
+    });
+  };
+
+  const handleAttachment = () => {
+    toast.info('Attachments feature coming soon!');
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !user) return;
@@ -166,10 +182,20 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <button className="hover:opacity-80 transition-opacity">
+            <button 
+              type="button"
+              onClick={handleCall}
+              className="hover:opacity-80 transition-opacity"
+              aria-label="Voice call"
+            >
               <Phone className="w-5 h-5" />
             </button>
-            <button className="hover:opacity-80 transition-opacity">
+            <button 
+              type="button"
+              onClick={handleVideoCall}
+              className="hover:opacity-80 transition-opacity"
+              aria-label="Video call"
+            >
               <Video className="w-5 h-5" />
             </button>
           </div>
@@ -226,7 +252,9 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
         <div className="flex items-center space-x-2">
           <button 
             type="button"
+            onClick={handleAttachment}
             className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Add attachment"
           >
             <Plus className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
