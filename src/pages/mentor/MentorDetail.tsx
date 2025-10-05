@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar, Ticket, ArrowUpFromLine, Heart } from 'lucide-react';
+import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar as CalendarIcon, Ticket, ArrowUpFromLine, Heart } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import { BundlePurchase } from '@/components/BundlePurchase';
@@ -15,6 +15,7 @@ import { bookSessionWithCredit, checkAvailableCredits } from '@/utils/bundleActi
 import { bookMentorSession } from '@/utils/stripeActions';
 import { useAuth } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Calendar } from '@/components/ui/calendar';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,7 @@ export default function MentorDetail() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [availableCredits, setAvailableCredits] = useState({ hasCredits: false, totalCredits: 0 });
   const [isFavorite, setIsFavorite] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>();
 
   useEffect(() => {
     if (id) {
@@ -298,16 +300,26 @@ export default function MentorDetail() {
             {/* Profile Header Card */}
             <Card>
               <CardContent className="pt-6 relative">
-                {/* Save button - upper right corner on mobile */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleToggleFavorite}
-                  className="absolute top-4 right-4 z-10"
-                  title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                >
-                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                </Button>
+                {/* Action buttons in top right corner */}
+                <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleToggleFavorite}
+                    title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleShareProfile}
+                    className="hidden lg:inline-flex"
+                    title="Share profile"
+                  >
+                    <ArrowUpFromLine className="w-4 h-4" />
+                  </Button>
+                </div>
 
                 <div className="flex items-start gap-4">
                   {/* Larger profile photo on mobile */}
@@ -323,19 +335,10 @@ export default function MentorDetail() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
                       {mentor.is_verified && (
-                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900 dark:text-emerald-100">
                           ✓ Quick Responder
                         </Badge>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleShareProfile}
-                        className="ml-auto lg:inline-flex hidden"
-                        title="Share profile"
-                      >
-                        <ArrowUpFromLine className="w-4 h-4" />
-                      </Button>
                     </div>
                     
                     {mentor.title && (
@@ -450,7 +453,28 @@ export default function MentorDetail() {
 
           {/* Right Column - Sticky Services Card */}
           <div className="lg:sticky lg:top-8 h-fit space-y-6">
-            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+            {/* Availability Calendar */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Availability</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border"
+                  disabled={(date) => date < new Date()}
+                />
+                {selectedDate && (
+                  <p className="mt-4 text-sm text-muted-foreground text-center">
+                    Selected: {selectedDate.toLocaleDateString()}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-card border-border">
               <CardContent className="pt-6">
                 <h3 className="font-semibold text-lg mb-3">Mentorship Plans</h3>
                 
@@ -468,7 +492,7 @@ export default function MentorDetail() {
 
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 mt-0.5 text-primary" />
+                    <CalendarIcon className="w-4 h-4 mt-0.5 text-primary" />
                     <span>1-on-1 video calls</span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -528,7 +552,7 @@ export default function MentorDetail() {
                       size="lg"
                       disabled={bookingLoading}
                     >
-                      <Calendar className="w-4 h-4 mr-2" />
+                      <CalendarIcon className="w-4 h-4 mr-2" />
                       {bookingLoading ? 'Processing...' : 'Book with Credit'}
                     </Button>
                   ) : (
@@ -538,7 +562,7 @@ export default function MentorDetail() {
                       size="lg"
                       disabled={bookingLoading}
                     >
-                      <Calendar className="w-4 h-4 mr-2" />
+                      <CalendarIcon className="w-4 h-4 mr-2" />
                       {bookingLoading ? 'Processing...' : 'Book Single Session'}
                     </Button>
                   )}
