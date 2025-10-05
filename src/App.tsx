@@ -30,6 +30,10 @@ import ManageAvailability from "./pages/mentor/ManageAvailability";
 import VerificationReview from "./pages/admin/VerificationReview";
 import BadgesInfo from "./pages/BadgesInfo";
 import AdminMetrics from "./pages/admin/Metrics";
+import AdminUsers from "./pages/admin/Users";
+import AdminReports from "./pages/admin/Reports";
+import AdminContent from "./pages/admin/Content";
+import AdminAnalytics from "./pages/admin/Analytics";
 import MatchOnboarding from "./pages/match/MatchOnboarding";
 import MatchDiscover from "./pages/match/MatchDiscover";
 import MatchProfile from "./pages/match/MatchProfile";
@@ -89,6 +93,10 @@ const App = () => (
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/verifications" element={<VerificationReview />} />
           <Route path="/admin/metrics" element={<AdminMetrics />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/content" element={<AdminContent />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/match" element={<MatchDiscover />} />
           <Route path="/match/discover" element={<MatchDiscover />} />
           <Route path="/match/onboarding" element={<MatchOnboarding />} />
