@@ -154,13 +154,13 @@ export default function WorldActivityHero({
               Community
             </button>
             <button
-              onClick={() => onNavigate('/mentor')}
+              onClick={() => onNavigate('/browse?category=mentor')}
               className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
             >
               Mentor
             </button>
             <button
-              onClick={() => onNavigate('/match/discover')}
+              onClick={() => onNavigate('/browse?category=match')}
               className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
             >
               Match
@@ -184,7 +184,7 @@ export default function WorldActivityHero({
               Services
             </button>
             <button
-              onClick={() => onNavigate('/marketplace')}
+              onClick={() => onNavigate('/browse?category=marketplace')}
               className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all"
             >
               Marketplace
