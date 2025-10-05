@@ -897,6 +897,7 @@ export type Database = {
           user_id: string
           verification_celebrated: boolean | null
           website_url: string | null
+          youtube_link: string | null
         }
         Insert: {
           available?: boolean | null
@@ -931,6 +932,7 @@ export type Database = {
           user_id: string
           verification_celebrated?: boolean | null
           website_url?: string | null
+          youtube_link?: string | null
         }
         Update: {
           available?: boolean | null
@@ -965,6 +967,7 @@ export type Database = {
           user_id?: string
           verification_celebrated?: boolean | null
           website_url?: string | null
+          youtube_link?: string | null
         }
         Relationships: []
       }

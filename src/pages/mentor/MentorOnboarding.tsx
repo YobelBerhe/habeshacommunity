@@ -59,6 +59,7 @@ export default function MentorOnboarding() {
     custom_industry: '',
     photos: [] as string[],
     website_url: '',
+    youtube_link: '',
     plan_description: '2 calls per month (30min/call)',
     social_links: {
       twitter: '',
@@ -103,6 +104,7 @@ export default function MentorOnboarding() {
           industries: formData.industries,
           photos: formData.photos,
           website_url: formData.website_url || null,
+          youtube_link: formData.youtube_link || null,
           available: true,
           title: formData.plan_description
         }])
@@ -469,6 +471,20 @@ export default function MentorOnboarding() {
                     onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
                   placeholder="https://yourwebsite.com"
                   />
+                </div>
+
+                {/* YouTube Intro Video */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">YouTube Intro Video</label>
+                  <Input
+                    type="url"
+                    value={formData.youtube_link}
+                    onChange={(e) => setFormData({ ...formData, youtube_link: e.target.value })}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Add a YouTube video link to showcase yourself (optional)
+                  </p>
                 </div>
 
                 {/* Badge System Preview */}

@@ -17,6 +17,7 @@ import { useAuth } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar } from '@/components/ui/calendar';
 import TimeSlotPicker from '@/components/mentor/TimeSlotPicker';
+import MentorIntroVideo from '@/components/mentor/MentorIntroVideo';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -440,6 +441,9 @@ export default function MentorDetail() {
                 </CardContent>
               </Card>
             )}
+
+            {/* YouTube Intro Video */}
+            <MentorIntroVideo youtubeLink={mentor.youtube_link} />
 
             {/* Inquiries */}
             <Card>
