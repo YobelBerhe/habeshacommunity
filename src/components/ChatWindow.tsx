@@ -1,9 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, Plus, ChevronLeft, Phone, Video, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/store/auth';
 
@@ -141,28 +138,46 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-8 flex justify-center">
+      <div className="h-[600px] flex flex-col bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+        <div className="p-8 flex justify-center items-center h-full">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="h-[600px] flex flex-col">
-      <CardHeader className="border-b">
-        <div className="flex items-center gap-3">
+    <div className="h-[600px] flex flex-col bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+      {/* Chat Header with Gradient */}
+      <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-4">
+        <div className="flex items-center justify-between text-white">
           {onBack && (
-            <Button variant="ghost" size="sm" onClick={onBack}>
-              ← Back
-            </Button>
+            <button onClick={onBack} className="hover:opacity-80 transition-opacity">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
           )}
-          <CardTitle className="text-lg">{participantName}</CardTitle>
+          <div className="flex items-center space-x-2 flex-1 ml-2">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="w-4 h-4 text-pink-600" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">{participantName}</p>
+              <p className="text-xs text-pink-100">Online</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="hover:opacity-80 transition-opacity">
+              <Phone className="w-5 h-5" />
+            </button>
+            <button className="hover:opacity-80 transition-opacity">
+              <Video className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800">
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             No messages yet. Start the conversation!
@@ -176,14 +191,24 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
               }`}
             >
               <div
-                className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                className={`rounded-2xl p-3 max-w-[75%] shadow-sm ${
                   message.sender_id === user?.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 rounded-tr-sm'
+                    : 'bg-white dark:bg-gray-700 rounded-tl-sm'
                 }`}
               >
-                <p className="text-sm">{message.content}</p>
-                <p className="text-xs mt-1 opacity-70">
+                <p className={`text-sm ${
+                  message.sender_id === user?.id 
+                    ? 'text-white' 
+                    : 'text-gray-800 dark:text-gray-200'
+                }`}>
+                  {message.content}
+                </p>
+                <p className={`text-xs mt-1 ${
+                  message.sender_id === user?.id
+                    ? 'text-pink-100'
+                    : 'text-gray-500 dark:text-gray-400'
+                }`}>
                   {new Date(message.created_at).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -194,15 +219,23 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
           ))
         )}
         <div ref={messagesEndRef} />
-      </CardContent>
+      </div>
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t">
-        <div className="flex gap-2">
-          <Textarea
+      {/* Message Input */}
+      <form onSubmit={handleSendMessage} className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
+        <div className="flex items-center space-x-2">
+          <button 
+            type="button"
+            className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Plus className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
+          <input
+            type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="min-h-[80px] resize-none"
+            placeholder="Type a message..."
+            className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 dark:text-white"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -210,23 +243,19 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
               }
             }}
           />
-          <Button
+          <button
             type="submit"
-            size="icon"
             disabled={!newMessage.trim() || sending}
-            className="h-[80px]"
+            className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 transition-transform"
           >
             {sending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5 text-white" />
             )}
-          </Button>
+          </button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Press Enter to send, Shift+Enter for new line
-        </p>
       </form>
-    </Card>
+    </div>
   );
 }
