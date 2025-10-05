@@ -274,12 +274,12 @@ export default function MatchDiscover() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+    <div className="min-h-screen bg-background">
       <MentorHeader title="Find Your Match" backPath="/" />
       
       {/* Header */}
       <div className="container mx-auto px-4 pt-4">
-        <div className="bg-card shadow-lg rounded-2xl mb-6 p-4">
+        <div className="bg-card shadow-lg rounded-2xl mb-6 p-4 border border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center">
@@ -325,11 +325,11 @@ export default function MatchDiscover() {
       <div className="container mx-auto px-4 pb-8">
         <div className="max-w-2xl mx-auto">
           {loading ? (
-            <div className="bg-card rounded-3xl shadow-2xl p-12 text-center">
+            <div className="bg-card rounded-3xl shadow-lg p-12 text-center border border-border">
               <p className="text-muted-foreground">Loading profiles...</p>
             </div>
           ) : !currentProfile ? (
-            <div className="bg-card rounded-3xl shadow-2xl p-12 text-center">
+            <div className="bg-card rounded-3xl shadow-lg p-12 text-center border border-border">
               <Heart className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
               <h3 className="text-lg font-semibold mb-2">No More Profiles</h3>
               <p className="text-muted-foreground mb-4">
@@ -338,9 +338,9 @@ export default function MatchDiscover() {
               <Button onClick={loadProfiles}>Refresh</Button>
             </div>
           ) : (
-            <div className="bg-card rounded-3xl shadow-2xl overflow-hidden">
+            <div className="bg-card rounded-3xl shadow-lg overflow-hidden border border-border">
               {/* Profile Image Area */}
-              <div className="relative h-96 bg-gradient-to-br from-muted via-muted/50 to-background flex items-center justify-center">
+              <div className="relative h-96 bg-muted/30 flex items-center justify-center">
                 {/* Compatibility Badge */}
                 {currentProfile.match_percent !== undefined && currentProfile.match_percent > 0 && (
                   <div className="absolute top-4 left-4 z-10">
@@ -532,7 +532,7 @@ export default function MatchDiscover() {
 
       {/* Match Notification */}
       {showMatchNotification && matches.length > 0 && (
-        <div className="fixed bottom-8 right-8 bg-gradient-to-r from-accent to-green-500 text-white px-8 py-5 rounded-2xl shadow-2xl flex items-center space-x-4 z-50 animate-in slide-in-from-bottom-5">
+        <div className="fixed bottom-8 right-8 bg-primary text-primary-foreground px-8 py-5 rounded-2xl shadow-xl flex items-center space-x-4 z-50 border border-border animate-in slide-in-from-bottom-5">
           <Heart className="w-8 h-8 fill-current" />
           <div>
             <p className="font-bold text-lg">It's a Match! 🎉</p>
