@@ -34,6 +34,10 @@ import MatchOnboarding from "./pages/match/MatchOnboarding";
 import MatchDiscover from "./pages/match/MatchDiscover";
 import MatchProfile from "./pages/match/MatchProfile";
 import MatchList from "./pages/match/MatchList";
+import MatchFamilyMode from "./pages/match/MatchFamilyMode";
+import MatchQuiz from "./pages/match/MatchQuiz";
+import MatchSuccess from "./pages/match/MatchSuccess";
+import MatchDates from "./pages/match/MatchDates";
 import Marketplace from "./pages/marketplace/Marketplace";
 import MarketplaceDetail from "./pages/marketplace/MarketplaceDetail";
 import Inbox from "./pages/inbox/Inbox";
@@ -87,6 +91,10 @@ const App = () => (
           <Route path="/match/onboarding" element={<MatchOnboarding />} />
           <Route path="/match/profile/:id" element={<MatchProfile />} />
           <Route path="/match/matches" element={<MatchList />} />
+          <Route path="/match/family-mode/:id" element={<MatchFamilyMode />} />
+          <Route path="/match/quiz" element={<MatchQuiz />} />
+          <Route path="/match/success" element={<MatchSuccess />} />
+          <Route path="/match/dates" element={<MatchDates />} />
           <Route path="/market" element={<Marketplace />} />
           <Route path="/market/:id" element={<MarketplaceDetail />} />
           <Route path="/inbox" element={<Inbox />} />

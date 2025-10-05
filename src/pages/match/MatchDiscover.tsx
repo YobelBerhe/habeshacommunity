@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
 import { Button } from '@/components/ui/button';
-import { Heart, X, Star, MapPin, Briefcase, GraduationCap, Globe, MessageCircle, Shield, ChevronLeft, ChevronRight, Sparkles, Info, SlidersHorizontal, Users } from 'lucide-react';
+import { Heart, X, Star, MapPin, Briefcase, GraduationCap, Globe, MessageCircle, Shield, ChevronLeft, ChevronRight, Sparkles, Info, SlidersHorizontal, Users, ClipboardList, Trophy, Calendar } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -280,7 +280,7 @@ export default function MatchDiscover() {
       {/* Header */}
       <div className="container mx-auto px-4 pt-4">
         <div className="bg-card shadow-lg rounded-2xl mb-6 p-4 border border-border">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center">
                 <Heart className="w-7 h-7 text-primary-foreground fill-current" />
@@ -310,6 +310,37 @@ export default function MatchDiscover() {
                 {matches.length} Matches
               </Button>
             </div>
+          </div>
+
+          {/* Quick Access to Part 2 Features */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/match/quiz')}
+              className="flex items-center space-x-1"
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span>Take Quiz</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/match/success')}
+              className="flex items-center space-x-1"
+            >
+              <Trophy className="w-4 h-4" />
+              <span>Success Stories</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/match/dates')}
+              className="flex items-center space-x-1"
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Date Ideas</span>
+            </Button>
           </div>
         </div>
 

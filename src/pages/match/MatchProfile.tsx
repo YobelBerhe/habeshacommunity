@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/store/auth';
+import { Button } from '@/components/ui/button';
 import { Heart, X, Star, MessageCircle, MapPin, Globe, Sparkles, Shield, Users, Info } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import { supabase } from '@/integrations/supabase/client';
@@ -402,7 +403,7 @@ export default function MatchProfile() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-center space-x-6">
+            <div className="flex items-center justify-center space-x-6 mb-4">
               <button 
                 onClick={() => navigate('/match/discover')}
                 className="w-20 h-20 bg-card border-4 border-border rounded-full flex items-center justify-center hover:border-destructive/50 hover:bg-destructive/5 transition-all shadow-xl group"
@@ -432,7 +433,19 @@ export default function MatchProfile() {
               </button>
             </div>
 
-            <div className="mt-6 text-center">
+            {/* Family Mode Button */}
+            <div className="text-center mb-4">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/match/family-mode/${profile.user_id}`)}
+                className="flex items-center space-x-2"
+              >
+                <Shield className="w-4 h-4" />
+                <span>Share with Family</span>
+              </Button>
+            </div>
+
+            <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 {matchScore && `${matchScore.matched_questions} of ${matchScore.total_questions} shared preferences`}
               </p>
