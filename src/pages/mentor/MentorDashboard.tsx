@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarComp } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar, DollarSign, MessageSquare, Settings, CheckCircle2, Clock, Users, CalendarIcon, TrendingUp } from 'lucide-react';
+import { Calendar, DollarSign, MessageSquare, Settings, CheckCircle2, Clock, Users, CalendarIcon, TrendingUp, Star, Zap, Award, BarChart3 } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import VerificationCelebration from '@/components/VerificationCelebration';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import MentorSkillsEditor from '@/components/MentorSkillsEditor';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { ShareMentorProfile } from '@/components/ShareMentorProfile';
 
 type DateRange = {
@@ -43,11 +43,9 @@ interface BookingStat {
 }
 
 const presetRanges = [
-  { label: "Today", days: 0 },
   { label: "Last 7 Days", days: 7 },
   { label: "Last 30 Days", days: 30 },
   { label: "This Month", special: "thisMonth" },
-  { label: "Last Month", special: "lastMonth" },
   { label: "This Year", special: "thisYear" },
 ];
 
@@ -97,14 +95,12 @@ export default function MentorDashboard() {
         return;
       }
 
-      // Fetch mentor profile with referral code from profiles
       const { data: mentorData, error: mentorError } = await supabase
         .from('mentors')
         .select('*, referral_code:user_id(referral_code)')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      // Flatten referral_code if nested
       if (mentorData && mentorData.referral_code && typeof mentorData.referral_code === 'object') {
         mentorData.referral_code = (mentorData.referral_code as any).referral_code;
       }
@@ -118,7 +114,6 @@ export default function MentorDashboard() {
 
       setMentor(mentorData);
 
-      // Fetch ALL confirmed bookings for badge progress (not just date range)
       const { data: allBookings } = await supabase
         .from('mentor_bookings')
         .select('id, status')
@@ -127,7 +122,6 @@ export default function MentorDashboard() {
 
       setSessionCount(allBookings?.length || 0);
 
-      // Fetch average rating
       const { data: reviews } = await supabase
         .from('mentor_reviews')
         .select('rating')
@@ -138,7 +132,6 @@ export default function MentorDashboard() {
         setAvgRating(avg);
       }
 
-      // Fetch badges
       const { data: badgesData } = await supabase
         .from('mentor_badges')
         .select('*')
@@ -149,7 +142,6 @@ export default function MentorDashboard() {
         setBadges(badgesData);
       }
 
-      // Fetch booking stats filtered by date range
       const { data: bookings, error: bookingsError } = await supabase
         .from('mentor_bookings')
         .select('status, net_to_mentor_cents, created_at')
@@ -172,7 +164,6 @@ export default function MentorDashboard() {
           earnings: totalEarnings
         });
 
-        // Chart data by day
         const byDay: Record<string, number> = {};
         bookings
           .filter(b => b.status === 'completed')
@@ -205,7 +196,11 @@ export default function MentorDashboard() {
       <div className="min-h-screen bg-background">
         <MentorHeader title="Mentor Dashboard" backPath="/" />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading your dashboard...</div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-muted animate-pulse rounded-xl" />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -215,7 +210,6 @@ export default function MentorDashboard() {
     <div className="min-h-screen bg-background">
       <MentorHeader title="Mentor Dashboard" backPath="/" />
       
-      {/* Verification Celebration Component */}
       <VerificationCelebration />
 
       <div className="container mx-auto px-4 py-8">
@@ -224,10 +218,10 @@ export default function MentorDashboard() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-3xl font-bold">Mentor Dashboard</h1>
+                <h1 className="text-3xl font-bold">Dashboard</h1>
                 {mentor?.is_verified && <VerificationBadge isVerified={true} />}
               </div>
-              <p className="text-muted-foreground">Welcome back, {mentor?.display_name}!</p>
+              <p className="text-muted-foreground">Welcome back, {mentor?.display_name}</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => navigate('/account/settings')}>
@@ -235,12 +229,11 @@ export default function MentorDashboard() {
                 Settings
               </Button>
               <Button onClick={() => navigate(`/mentor/${mentor?.id}`)}>
-                View My Profile
+                View Profile
               </Button>
             </div>
           </div>
 
-          {/* Status Badge */}
           <div className="mt-4">
             <Badge variant={mentor?.available ? 'default' : 'secondary'} className="text-sm">
               {mentor?.available ? 'Available for Booking' : 'Unavailable'}
@@ -248,7 +241,7 @@ export default function MentorDashboard() {
           </div>
         </div>
 
-        {/* Share Profile Section */}
+        {/* Share Profile */}
         {mentor?.referral_code && (
           <div className="mb-6">
             <ShareMentorProfile 
@@ -258,296 +251,308 @@ export default function MentorDashboard() {
           </div>
         )}
 
-        {/* Stats Grid */}
-        <div className="mb-6">
-          {/* Date Range Picker with Presets */}
-          <Card className="mb-4">
-            <CardHeader>
-              <CardTitle className="text-sm">Performance Period</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {presetRanges.map((preset) => (
-                  <Button
-                    key={preset.label}
-                    onClick={() => applyPreset(preset)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    {preset.label}
-                  </Button>
-                ))}
-              </div>
-              
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !dateRange && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange?.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
-                        </>
-                      ) : (
-                        format(dateRange.from, "LLL dd, y")
-                      )
-                    ) : (
-                      <span>Pick a date range</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComp
-                    initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={{ from: dateRange?.from, to: dateRange?.to }}
-                    onSelect={(range: any) => {
-                      if (range?.from && range?.to) {
-                        setDateRange({ from: range.from, to: range.to });
-                      }
-                    }}
-                    numberOfMonths={2}
-                    disabled={(date) => date > new Date()}
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
-              <p className="text-xs text-muted-foreground">All time</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <Clock className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pending}</div>
-              <p className="text-xs text-muted-foreground">Awaiting confirmation</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.confirmed}</div>
-              <p className="text-xs text-muted-foreground">Upcoming sessions</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed</CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.completed}</div>
-              <p className="text-xs text-muted-foreground">Total sessions</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/mentor/requests')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
-                Booking Requests
-              </CardTitle>
-              <CardDescription>
-                Manage your mentoring session requests
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                View Requests
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/mentor/bookings')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                My Bookings
-              </CardTitle>
-              <CardDescription>
-                View all your scheduled and past sessions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                View Schedule
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/mentor/availability')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Availability
-              </CardTitle>
-              <CardDescription>
-                Set your available time slots for bookings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Manage Schedule
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/mentor/payouts')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5" />
-                Payouts
-              </CardTitle>
-              <CardDescription>
-                Manage your earnings and payout settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                View Earnings
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Badge Progress Section */}
-        <Card className="mb-8 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              🏆 Badge Progress
+        {/* Date Range Picker */}
+        <Card className="mb-6 border-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Performance Period
             </CardTitle>
-            <CardDescription>
-              Earn badges to increase your visibility and build trust with mentees
-            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Current Badges */}
-            {badges.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Your Badges</h3>
-                <div className="flex flex-wrap gap-3">
-                  {badges.map((badge) => (
-                    <div
-                      key={badge.id}
-                      className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 rounded-full border-2 border-yellow-400 shadow-md"
-                    >
-                      <span className="text-2xl">{badge.icon}</span>
-                      <span className="font-medium">{badge.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Milestone Progress */}
-            {(() => {
-              const milestones = [
-                { label: 'Bronze Mentor', icon: '🥉', threshold: 10 },
-                { label: 'Silver Mentor', icon: '🥈', threshold: 50 },
-                { label: 'Gold Mentor', icon: '🥇', threshold: 100 },
-              ];
-              const nextMilestone = milestones.find(m => sessionCount < m.threshold);
-              const progressPercent = nextMilestone
-                ? Math.min(100, (sessionCount / nextMilestone.threshold) * 100)
-                : 100;
-
-              return (
-                <div>
-                  <h3 className="font-semibold mb-3">Session Milestones</h3>
-                  {nextMilestone ? (
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm">
-                          <span className="font-bold text-lg">{sessionCount}</span>
-                          <span className="text-muted-foreground"> / {nextMilestone.threshold} sessions</span>
-                        </p>
-                        <span className="flex items-center gap-1.5 text-sm font-medium">
-                          Next: {nextMilestone.icon} {nextMilestone.label}
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-green-500 to-emerald-500 h-4 rounded-full transition-all duration-500 flex items-center justify-center"
-                          style={{ width: `${progressPercent}%` }}
-                        >
-                          {progressPercent > 15 && (
-                            <span className="text-xs text-white font-bold">
-                              {Math.round(progressPercent)}%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {nextMilestone.threshold - sessionCount} more session{nextMilestone.threshold - sessionCount !== 1 ? 's' : ''} to unlock!
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-yellow-400">
-                      <p className="text-green-600 dark:text-green-400 font-semibold flex items-center gap-2">
-                        <span className="text-2xl">🎉</span>
-                        You&apos;ve unlocked all milestone badges!
-                      </p>
-                    </div>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {presetRanges.map((preset) => (
+                <Button
+                  key={preset.label}
+                  onClick={() => applyPreset(preset)}
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal h-10",
+                    !dateRange && "text-muted-foreground"
                   )}
-                </div>
-              );
-            })()}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Pick a date range</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComp
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={{ from: dateRange?.from, to: dateRange?.to }}
+                  onSelect={(range: any) => {
+                    if (range?.from && range?.to) {
+                      setDateRange({ from: range.from, to: range.to });
+                    }
+                  }}
+                  numberOfMonths={2}
+                  disabled={(date) => date > new Date()}
+                />
+              </PopoverContent>
+            </Popover>
+          </CardContent>
+        </Card>
 
-            {/* Top Rated Badge Status */}
-            <div>
-              <h3 className="font-semibold mb-3">Quality Badge</h3>
-              {avgRating !== null && avgRating >= 4.8 ? (
-                <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-yellow-400">
-                  <p className="text-yellow-600 dark:text-yellow-400 font-semibold flex items-center gap-2">
-                    <span className="text-2xl">⭐</span>
-                    You&apos;ve earned the Top Rated Mentor badge! (Rating: {avgRating.toFixed(2)})
-                  </p>
-                </div>
-              ) : (
-                <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                  <p className="text-sm">
-                    <span className="font-medium">Top Rated ⭐:</span> Maintain a 4.8+ average rating
-                    {avgRating !== null && (
-                      <span className="block mt-1 text-muted-foreground">
-                        Current rating: {avgRating.toFixed(2)} ({(4.8 - avgRating).toFixed(2)} away from Top Rated)
-                      </span>
-                    )}
-                  </p>
+        {/* Enhanced Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Total Bookings */}
+          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full blur-2xl" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Bookings</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="text-3xl font-bold">{stats.total}</div>
+              <p className="text-xs text-muted-foreground mt-1">All time sessions</p>
+            </CardContent>
+          </Card>
+
+          {/* Pending */}
+          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-2xl" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">{stats.pending}</div>
+              <p className="text-xs text-muted-foreground mt-1">Awaiting response</p>
+            </CardContent>
+          </Card>
+
+          {/* Confirmed */}
+          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-full blur-2xl" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Confirmed</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{stats.confirmed}</div>
+              <p className="text-xs text-muted-foreground mt-1">Upcoming sessions</p>
+            </CardContent>
+          </Card>
+
+          {/* Completed */}
+          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.completed}</div>
+              <p className="text-xs text-muted-foreground mt-1">Total sessions done</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/requests')}>
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <CardTitle className="text-base">Booking Requests</CardTitle>
+              <CardDescription className="text-sm">
+                Manage incoming session requests
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/bookings')}>
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/10 to-green-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Calendar className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <CardTitle className="text-base">My Bookings</CardTitle>
+              <CardDescription className="text-sm">
+                View scheduled and past sessions
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/availability')}>
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <CardTitle className="text-base">Availability</CardTitle>
+              <CardDescription className="text-sm">
+                Set your available time slots
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/payouts')}>
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <DollarSign className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <CardTitle className="text-base">Payouts</CardTitle>
+              <CardDescription className="text-sm">
+                Manage earnings and payments
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Enhanced Badge Progress */}
+        <Card className="mb-8 overflow-hidden border-2">
+          <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30">
+            <CardHeader className="border-b bg-white/50 dark:bg-black/20 backdrop-blur-sm">
+              <CardTitle className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-600" />
+                Badge Progress
+              </CardTitle>
+              <CardDescription>
+                Earn badges to boost your visibility and credibility
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              {badges.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Star className="w-4 h-4 text-amber-500" />
+                    Your Badges
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {badges.map((badge) => (
+                      <div
+                        key={badge.id}
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 rounded-full border-2 border-amber-400 shadow-md hover:shadow-lg transition-shadow"
+                      >
+                        <span className="text-2xl">{badge.icon}</span>
+                        <span className="font-medium">{badge.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
 
-            <div className="pt-4 border-t">
+              {/* Milestone Progress */}
+              {(() => {
+                const milestones = [
+                  { label: 'Bronze Mentor', icon: '🥉', threshold: 10, color: 'from-orange-400 to-amber-600' },
+                  { label: 'Silver Mentor', icon: '🥈', threshold: 50, color: 'from-gray-300 to-gray-500' },
+                  { label: 'Gold Mentor', icon: '🥇', threshold: 100, color: 'from-yellow-400 to-amber-500' },
+                ];
+                const nextMilestone = milestones.find(m => sessionCount < m.threshold);
+                const progressPercent = nextMilestone
+                  ? Math.min(100, (sessionCount / nextMilestone.threshold) * 100)
+                  : 100;
+
+                return (
+                  <div>
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-emerald-600" />
+                      Session Milestones
+                    </h3>
+                    {nextMilestone ? (
+                      <div className="space-y-3 p-4 bg-white dark:bg-gray-900 rounded-xl border-2">
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm">
+                            <span className="font-bold text-2xl text-primary">{sessionCount}</span>
+                            <span className="text-muted-foreground"> / {nextMilestone.threshold} sessions</span>
+                          </p>
+                          <div className="flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 px-3 py-1.5 rounded-full border">
+                            <span className="text-xl">{nextMilestone.icon}</span>
+                            <span className="text-sm font-semibold">{nextMilestone.label}</span>
+                          </div>
+                        </div>
+                        <div className="relative w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full bg-gradient-to-r ${nextMilestone.color} transition-all duration-500 relative`}
+                            style={{ width: `${progressPercent}%` }}
+                          >
+                            <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-center text-muted-foreground">
+                          <span className="font-semibold text-foreground">{nextMilestone.threshold - sessionCount}</span> more session{nextMilestone.threshold - sessionCount !== 1 ? 's' : ''} to unlock {nextMilestone.icon}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 rounded-xl border-2 border-amber-400">
+                        <p className="text-center font-semibold flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300">
+                          <Zap className="w-5 h-5" />
+                          You've unlocked all milestone badges!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Top Rated Status */}
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  Quality Badge
+                </h3>
+                {avgRating !== null && avgRating >= 4.8 ? (
+                  <div className="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 rounded-xl border-2 border-yellow-400">
+                    <p className="font-semibold flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+                      <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                      Top Rated Mentor ({avgRating.toFixed(2)} ⭐)
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-white dark:bg-gray-900 rounded-xl border-2">
+                    <p className="text-sm mb-2">
+                      <span className="font-medium">Top Rated ⭐:</span> Maintain a 4.8+ average rating
+                    </p>
+                    {avgRating !== null && (
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span>Current: {avgRating.toFixed(2)}</span>
+                          <span className="text-muted-foreground">{(4.8 - avgRating).toFixed(2)} away</span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 transition-all"
+                            style={{ width: `${(avgRating / 4.8) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <Button
                 variant="link"
                 className="text-sm px-0"
@@ -555,57 +560,78 @@ export default function MentorDashboard() {
               >
                 Learn more about badges →
               </Button>
-            </div>
-          </CardContent>
+            </CardContent>
+          </div>
         </Card>
 
-        {/* Earnings Chart */}
+        {/* Enhanced Earnings Chart */}
         {chartData.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
+          <Card className="mb-8 border-2">
+            <CardHeader className="border-b bg-muted/30">
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
+                <TrendingUp className="w-5 h-5 text-primary" />
                 Earnings Over Time
               </CardTitle>
+              <CardDescription>
+                Track your earnings for the selected period
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="day" className="text-xs" />
-                  <YAxis className="text-xs" />
+            <CardContent className="pt-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" opacity={0.3} />
+                  <XAxis 
+                    dataKey="day" 
+                    className="text-xs" 
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    className="text-xs" 
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--background))",
                       border: "1px solid hsl(var(--border))",
-                      borderRadius: "6px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)"
                     }}
+                    formatter={(value: any) => [`$${value.toFixed(2)}`, 'Earnings']}
                   />
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="earnings"
                     stroke="hsl(var(--primary))"
-                    name="Earnings ($)"
-                    strokeWidth={2}
+                    strokeWidth={3}
+                    fill="url(#earningsGradient)"
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
 
         {/* Profile Info */}
-        <Card>
-          <CardHeader>
+        <Card className="border-2">
+          <CardHeader className="border-b bg-muted/30">
             <CardTitle>Your Mentor Profile</CardTitle>
             <CardDescription>
-              Keep your profile up to date to attract more mentees
+              Keep your profile current to attract more mentees
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-6 space-y-4">
             <div>
-              <h3 className="font-semibold mb-2">Current Rate</h3>
-              <p className="text-2xl font-bold text-primary">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Current Rate
+              </h3>
+              <p className="text-3xl font-bold text-primary">
                 {mentor && formatPrice(mentor.price_cents, mentor.currency)}/session
               </p>
             </div>
@@ -621,15 +647,13 @@ export default function MentorDashboard() {
                     <DialogHeader>
                       <DialogTitle>Edit Your Skills</DialogTitle>
                       <DialogDescription>
-                        Update your skills to help mentees find you more easily
+                        Update your skills to help mentees find you
                       </DialogDescription>
                     </DialogHeader>
                     {mentor && (
                       <MentorSkillsEditor 
                         mentorId={mentor.id}
-                        onSkillsUpdated={() => {
-                          fetchMentorData();
-                        }}
+                        onSkillsUpdated={fetchMentorData}
                       />
                     )}
                   </DialogContent>
@@ -654,7 +678,7 @@ export default function MentorDashboard() {
               className="w-full"
               onClick={() => navigate('/mentor/onboarding')}
             >
-              Edit Mentor Profile
+              Edit Profile
             </Button>
           </CardContent>
         </Card>
