@@ -45,7 +45,10 @@ export default function NotificationsPage() {
 
     const { data } = await supabase
       .from('notifications')
-      .select('*')
+      .select(`
+        *,
+        sender:profiles!notifications_sender_id_fkey(display_name, avatar_url)
+      `)
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false })
       .limit(200);
@@ -121,12 +124,16 @@ export default function NotificationsPage() {
   };
 
   // Separate message and non-message notifications
-  const messageNotifications = notifications.filter(n => n.type === 'message' && n.sender_id);
-  const otherNotifications = notifications.filter(n => n.type !== 'message' || !n.sender_id);
+  const messageNotifications = notifications.filter(n => 
+    n.type === 'message' && n.sender_id && n.sender_id.trim() !== ''
+  );
+  const otherNotifications = notifications.filter(n => 
+    n.type !== 'message' || !n.sender_id || n.sender_id.trim() === ''
+  );
 
-  // Group message notifications by sender_id
+  // Group message notifications by sender_id (ensure consistent grouping)
   const groupedMessages = messageNotifications.reduce((acc, notification) => {
-    const senderId = notification.sender_id!;
+    const senderId = notification.sender_id!.trim(); // Trim to handle any whitespace issues
     if (!acc[senderId]) {
       acc[senderId] = [];
     }
