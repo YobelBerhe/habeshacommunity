@@ -42,6 +42,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { Parallax } from '@/components/Parallax';
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";
@@ -446,6 +447,28 @@ export default function Browse() {
 
   // Donation handlers
   const DONATE_PRESETS = [500, 1000, 2000]; // $5, $10, $20
+
+  // Keyboard shortcuts for accessibility
+  useKeyboardShortcut('/', () => {
+    document.querySelector<HTMLInputElement>('[placeholder*="search" i]')?.focus();
+  }, { ctrl: true });
+
+  useKeyboardShortcut('n', () => {
+    if (user) {
+      openPost();
+    } else {
+      openAuth();
+    }
+  }, { ctrl: true });
+
+  useKeyboardShortcut('k', () => {
+    navigate('/chat');
+  }, { ctrl: true });
+
+  useKeyboardShortcut('i', () => {
+    navigate('/inbox');
+  }, { ctrl: true });
+
   
   const donateDisplayAmount = useMemo(() => {
     const v = customAmount.trim();
@@ -494,7 +517,7 @@ export default function Browse() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" id="main-content">
       {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
         {/* Top Bar with Search and Controls */}
