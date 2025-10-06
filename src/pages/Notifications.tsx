@@ -95,9 +95,9 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleNotificationClick = (notification: NotificationRow) => {
+  const handleNotificationClick = async (notification: NotificationRow) => {
     if (!notification.read_at) {
-      markOneAsRead(notification.id);
+      await markOneAsRead(notification.id);
     }
     
     if (notification.link) {
@@ -105,29 +105,56 @@ export default function NotificationsPage() {
     }
   };
 
-  // Group notifications by sender_id for threading (only for message type)
-  const groupedNotifications = notifications.reduce((acc, notification) => {
-    // Only group message notifications by sender
-    const key = (notification.type === 'message' && notification.sender_id) 
-      ? notification.sender_id 
-      : notification.id; // Use notification id for non-message or no sender
-    if (!acc[key]) {
-      acc[key] = [];
+  const handleThreadClick = async (thread: { notifications: NotificationRow[], isThread: boolean }) => {
+    // Mark all unread notifications in this thread as read
+    const unreadNotifs = thread.notifications.filter(n => !n.read_at);
+    
+    for (const notif of unreadNotifs) {
+      await markOneAsRead(notif.id);
     }
-    acc[key].push(notification);
+
+    // Navigate to the link if available
+    const firstNotif = thread.notifications[0];
+    if (firstNotif.link) {
+      navigate(firstNotif.link);
+    }
+  };
+
+  // Separate message and non-message notifications
+  const messageNotifications = notifications.filter(n => n.type === 'message' && n.sender_id);
+  const otherNotifications = notifications.filter(n => n.type !== 'message' || !n.sender_id);
+
+  // Group message notifications by sender_id
+  const groupedMessages = messageNotifications.reduce((acc, notification) => {
+    const senderId = notification.sender_id!;
+    if (!acc[senderId]) {
+      acc[senderId] = [];
+    }
+    acc[senderId].push(notification);
     return acc;
   }, {} as Record<string, NotificationRow[]>);
 
-  // Convert to array and sort by most recent
-  const notificationThreads = Object.values(groupedNotifications)
-    .map(thread => {
-      const sorted = [...thread].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      return {
-        notifications: sorted,
-        latestDate: new Date(sorted[0].created_at).getTime(),
-        hasUnread: sorted.some(n => !n.read_at)
-      };
-    })
+  // Create threads for message groups
+  const messageThreads = Object.values(groupedMessages).map(thread => {
+    const sorted = [...thread].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return {
+      notifications: sorted,
+      latestDate: new Date(sorted[0].created_at).getTime(),
+      hasUnread: sorted.some(n => !n.read_at),
+      isThread: true
+    };
+  });
+
+  // Create individual items for non-message notifications
+  const otherThreads = otherNotifications.map(notification => ({
+    notifications: [notification],
+    latestDate: new Date(notification.created_at).getTime(),
+    hasUnread: !notification.read_at,
+    isThread: false
+  }));
+
+  // Combine and sort all threads
+  const notificationThreads = [...messageThreads, ...otherThreads]
     .sort((a, b) => b.latestDate - a.latestDate);
 
   const unreadCount = notifications.filter(n => !n.read_at).length;
@@ -173,8 +200,7 @@ export default function NotificationsPage() {
 ) : (
             notificationThreads.map((thread, idx) => {
               const firstNotif = thread.notifications[0];
-              const isThread = thread.notifications.length > 1;
-              const isMessageThread = firstNotif.type === 'message' && isThread;
+              const isMessageThread = thread.isThread && firstNotif.type === 'message';
               
               return (
                 <Card 
@@ -182,7 +208,7 @@ export default function NotificationsPage() {
                   className={`cursor-pointer transition-colors hover:bg-muted/50 ${
                     thread.hasUnread ? 'border-l-4 border-l-primary bg-accent/20' : ''
                   }`}
-                  onClick={() => handleNotificationClick(firstNotif)}
+                  onClick={() => thread.isThread ? handleThreadClick(thread) : handleNotificationClick(firstNotif)}
                 >
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
