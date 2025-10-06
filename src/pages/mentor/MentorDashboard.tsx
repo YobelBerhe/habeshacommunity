@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -321,6 +322,12 @@ export default function MentorDashboard() {
         {/* Enhanced Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Total Bookings */}
+          <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.1, type: 'spring', stiffness: 100 }}
+    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+  >
           <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full blur-2xl" />
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
@@ -334,8 +341,15 @@ export default function MentorDashboard() {
               <p className="text-xs text-muted-foreground mt-1">All time sessions</p>
             </CardContent>
           </Card>
+             </motion.div>
 
           {/* Pending */}
+            <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.3, type: 'spring', stiffness: 100 }}
+    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+  >
           <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-2xl" />
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
@@ -349,6 +363,7 @@ export default function MentorDashboard() {
               <p className="text-xs text-muted-foreground mt-1">Awaiting response</p>
             </CardContent>
           </Card>
+              
 
           {/* Confirmed */}
           <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
@@ -364,8 +379,14 @@ export default function MentorDashboard() {
               <p className="text-xs text-muted-foreground mt-1">Upcoming sessions</p>
             </CardContent>
           </Card>
-
+               </motion.div>
           {/* Completed */}
+              <motion.div
+   initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.4, type: 'spring', stiffness: 100 }}
+    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+  >
           <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl" />
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
@@ -379,15 +400,29 @@ export default function MentorDashboard() {
               <p className="text-xs text-muted-foreground mt-1">Total sessions done</p>
             </CardContent>
           </Card>
+                 </motion.div>
         </div>
 
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/requests')}>
-            <CardHeader className="pb-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
+  <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/requests')}>
+    <CardHeader className="pb-3">
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+        <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+      </div>
+      <CardTitle className="text-base">Booking Requests</CardTitle>
+      <CardDescription className="text-sm">
+        Manage incoming session requests
+      </CardDescription>
+    </CardHeader>
+  </Card>
+
+  <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/bookings')}>
+    {/* ... similar cards for other actions */}
+  </Card>
+  
+  {/* 2 more cards */}
+</div>
               <CardTitle className="text-base">Booking Requests</CardTitle>
               <CardDescription className="text-sm">
                 Manage incoming session requests
