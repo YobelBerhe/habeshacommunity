@@ -261,8 +261,8 @@ export default function Chat() {
           <Link to="/" className="text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-lg font-semibold">Chat</h1>
-          <div className="flex-1 max-w-sm ml-auto">
+          <h1 className="text-lg font-semibold mr-4">Chat</h1>
+          <div className="flex-1 max-w-sm">
             <CitySearchBar
               value={selectedCity}
               onCitySelect={handleCitySelect}

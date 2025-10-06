@@ -103,9 +103,12 @@ export default function NotificationsPage() {
     }
   };
 
-  // Group notifications by sender_id for threading
+  // Group notifications by sender_id for threading (only for message type)
   const groupedNotifications = notifications.reduce((acc, notification) => {
-    const key = notification.sender_id || notification.id; // Use notification id if no sender
+    // Only group message notifications by sender
+    const key = (notification.type === 'message' && notification.sender_id) 
+      ? notification.sender_id 
+      : notification.id; // Use notification id for non-message or no sender
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -173,12 +176,13 @@ export default function NotificationsPage() {
             notificationThreads.map((thread, idx) => {
               const firstNotif = thread.notifications[0];
               const isThread = thread.notifications.length > 1;
+              const isMessageThread = firstNotif.type === 'message' && isThread;
               
               return (
                 <Card 
                   key={idx}
                   className={`cursor-pointer transition-colors hover:bg-muted/50 ${
-                    thread.hasUnread ? 'border-l-4 border-l-blue-500 bg-accent/20' : ''
+                    thread.hasUnread ? 'border-l-4 border-l-primary bg-accent/20' : ''
                   }`}
                   onClick={() => handleNotificationClick(firstNotif)}
                 >
@@ -187,23 +191,25 @@ export default function NotificationsPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-medium">
-                            {isThread ? `${thread.notifications.length} messages` : firstNotif.title}
+                            {isMessageThread 
+                              ? `${thread.notifications.length} messages from ${firstNotif.title.replace('New message from ', '')}` 
+                              : firstNotif.title}
                           </h3>
                           {thread.hasUnread && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                           )}
                         </div>
                         
-                        {isThread ? (
-                          <div className="space-y-1">
-                            {thread.notifications.slice(0, 3).map(notif => (
-                              <div key={notif.id} className="text-sm text-muted-foreground">
-                                • {notif.body || notif.title}
+                        {isMessageThread ? (
+                          <div className="space-y-1.5 mt-2">
+                            {thread.notifications.slice(0, 2).map(notif => (
+                              <div key={notif.id} className="text-sm text-muted-foreground pl-3 border-l-2 border-muted">
+                                {notif.body || 'Message'}
                               </div>
                             ))}
-                            {thread.notifications.length > 3 && (
-                              <div className="text-xs text-muted-foreground italic">
-                                +{thread.notifications.length - 3} more
+                            {thread.notifications.length > 2 && (
+                              <div className="text-xs text-primary font-medium pl-3">
+                                +{thread.notifications.length - 2} more messages
                               </div>
                             )}
                           </div>
