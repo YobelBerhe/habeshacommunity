@@ -158,3 +158,41 @@ export function ListSkeleton({ count = 5 }: { count?: number }) {
     </div>
   );
 }
+
+// Skeleton to content smooth transition
+import { motion, AnimatePresence } from 'framer-motion';
+import { ReactNode } from 'react';
+
+export function SkeletonToContent({ 
+  isLoading, 
+  skeleton, 
+  children 
+}: { 
+  isLoading: boolean; 
+  skeleton: ReactNode; 
+  children: ReactNode;
+}) {
+  return (
+    <AnimatePresence mode="wait">
+      {isLoading ? (
+        <motion.div
+          key="skeleton"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {skeleton}
+        </motion.div>
+      ) : (
+        <motion.div
+          key="content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

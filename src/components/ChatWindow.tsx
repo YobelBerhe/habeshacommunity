@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Send, Loader2, Plus, ChevronLeft, Phone, Video, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/store/auth';
+import { useOptimisticMessages } from '@/hooks/useOptimisticMessages';
 
 interface Message {
   id: string;
@@ -10,6 +11,7 @@ interface Message {
   sender_id: string;
   created_at: string;
   read: boolean;
+  isPending?: boolean;
 }
 
 interface ChatWindowProps {
@@ -19,12 +21,16 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ conversationId, participantName, onBack }: ChatWindowProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Use optimistic messages hook
+  const { messages, setMessages, sendMessage } = useOptimisticMessages(
+    conversationId, 
+    user?.id || ''
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -109,26 +115,10 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
     if (!newMessage.trim() || !user) return;
 
     const messageContent = newMessage.trim();
-    setSending(true);
+    setNewMessage(''); // Clear input immediately for instant feedback
+    
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .insert([
-          {
-            conversation_id: conversationId,
-            sender_id: user.id,
-            content: messageContent,
-          } as any,
-        ])
-        .select('id')
-        .single();
-
-      if (error) throw error;
-      if (!data?.id) {
-        throw new Error('Message insert returned no id');
-      }
-
-      setNewMessage('');
+      await sendMessage(messageContent);
 
       // Send email notification (non-blocking)
       supabase
@@ -142,13 +132,11 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
         })
         .catch((err) => {
           console.error('Failed to send email notification:', err);
-          // Non-blocking
         });
     } catch (error: any) {
-      console.error('Error sending message:', error?.message || error, error);
+      console.error('Error sending message:', error?.message || error);
       toast.error(error?.message || 'Failed to send message');
-    } finally {
-      setSending(false);
+      setNewMessage(messageContent); // Restore input on error
     }
   };
 
@@ -217,11 +205,11 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
               }`}
             >
               <div
-                className={`rounded-2xl p-3 max-w-[75%] shadow-sm ${
+                className={`rounded-2xl p-3 max-w-[75%] shadow-sm transition-opacity ${
                   message.sender_id === user?.id
                     ? 'bg-gradient-to-r from-pink-500 to-purple-600 rounded-tr-sm'
                     : 'bg-white dark:bg-gray-700 rounded-tl-sm'
-                }`}
+                } ${message.isPending ? 'opacity-60' : ''}`}
               >
                 <p className={`text-sm ${
                   message.sender_id === user?.id 
@@ -239,6 +227,9 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
+                  {message.isPending && (
+                    <span className="ml-2 italic">Sending...</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -273,14 +264,11 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
           />
           <button
             type="submit"
-            disabled={!newMessage.trim() || sending}
+            disabled={!newMessage.trim()}
             className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 transition-transform"
+            aria-label="Send message"
           >
-            {sending ? (
-              <Loader2 className="w-5 h-5 text-white animate-spin" />
-            ) : (
-              <Send className="w-5 h-5 text-white" />
-            )}
+            <Send className="w-5 h-5 text-white" />
           </button>
         </div>
       </form>

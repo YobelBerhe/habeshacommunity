@@ -478,7 +478,192 @@ announce("5 new items loaded", "polite");
 
 ---
 
-## Resources
+## Phase 9: Advanced UX Patterns
+
+Building patterns that make the app feel instant and intelligent.
+
+---
+
+## Phase 9.1: Optimistic UI Updates ✅
+
+### Implemented Features
+
+#### 1. Generic Optimistic Update Hook
+**File**: `src/hooks/useOptimistic.ts`
+
+- `useOptimistic<T>()` - Generic optimistic state management
+- Applies updates immediately
+- Confirms with server in background
+- Rolls back on error
+- Configurable success/error callbacks
+
+#### 2. Optimistic Favorite Toggle
+**File**: `src/hooks/useOptimisticFavorite.ts`
+
+- `useOptimisticFavorite()` - Instant favorite toggle
+- Updates UI immediately
+- Shows pending state
+- Rolls back on error
+- Toast notifications on success/failure
+
+#### 3. Optimistic Message Sending
+**File**: `src/hooks/useOptimisticMessages.ts`
+
+- `useOptimisticMessages()` - Instant message display
+- Shows message immediately while sending
+- "Sending..." indicator on pending messages
+- Removes message on error
+- Replaces temp ID with real ID on success
+
+#### 4. Optimistic List Operations
+**File**: `src/hooks/useOptimisticList.ts`
+
+- `addItem()` - Add items instantly
+- `removeItem()` - Remove items instantly
+- `updateItem()` - Update items instantly
+- Full rollback support on errors
+- Generic for any list type
+
+#### 5. Loading Transitions
+**Files**: `src/components/LoadingTransition.tsx`, `src/components/LoadingStates.tsx`
+
+**LoadingTransition:**
+- Smooth transitions between loading and content
+- Prevents jarring layout shifts
+- Custom loader support
+- AnimatePresence for smooth exits
+
+**SkeletonToContent:**
+- Smooth skeleton → content transition
+- Fade-out skeleton (0.2s)
+- Fade-in content (0.3s)
+- Prevents flash of content
+
+#### 6. Updated Components
+
+**ListingCard:**
+- Uses `useOptimisticFavorite` hook
+- Instant heart icon fill/unfill
+- Animated scale on interaction
+- Shows pending state with opacity
+- Rollback on error
+
+**ChatWindow:**
+- Uses `useOptimisticMessages` hook
+- Messages appear instantly
+- "Sending..." indicator
+- Input clears immediately
+- Restores text on error
+
+### Usage Examples
+
+#### Optimistic Favorite
+```tsx
+import { useOptimisticFavorite } from '@/hooks/useOptimisticFavorite';
+
+const { isFavorited, toggleFavorite, isPending } = useOptimisticFavorite(
+  listingId,
+  userId,
+  initialState
+);
+
+<button onClick={toggleFavorite} disabled={isPending}>
+  <Heart className={isFavorited ? 'fill-red-500' : ''} />
+</button>
+```
+
+#### Optimistic Messages
+```tsx
+import { useOptimisticMessages } from '@/hooks/useOptimisticMessages';
+
+const { messages, sendMessage } = useOptimisticMessages(conversationId, userId);
+
+const handleSend = async () => {
+  try {
+    await sendMessage(content);
+  } catch (error) {
+    toast.error('Failed to send');
+  }
+};
+```
+
+#### Optimistic List
+```tsx
+import { useOptimisticList } from '@/hooks/useOptimisticList';
+
+const { items, addItem, removeItem, updateItem } = useOptimisticList(initialItems);
+
+// Add with optimistic update
+await addItem(
+  { id: 'temp-123', name: 'New Item' },
+  async () => {
+    const { data } = await supabase.from('items').insert(...).single();
+    return data;
+  }
+);
+```
+
+#### Skeleton Transition
+```tsx
+import { SkeletonToContent } from '@/components/LoadingStates';
+
+<SkeletonToContent
+  isLoading={loading}
+  skeleton={<CardSkeleton />}
+>
+  <ActualContent />
+</SkeletonToContent>
+```
+
+### Testing Checklist
+
+#### Fast Connection
+- [ ] Favorites toggle instantly
+- [ ] Messages appear immediately
+- [ ] List updates feel instant
+- [ ] No loading spinners visible
+
+#### Slow Connection
+- [ ] Pending states visible
+- [ ] "Sending..." indicators shown
+- [ ] Opacity changes for pending items
+- [ ] User understands action in progress
+
+#### Failed Requests
+- [ ] Favorites roll back on error
+- [ ] Messages removed on send failure
+- [ ] Error toasts appear
+- [ ] Previous state restored correctly
+
+#### Edge Cases
+- [ ] Multiple rapid clicks handled
+- [ ] Offline mode graceful
+- [ ] Network reconnection works
+- [ ] No duplicate items in lists
+
+### Performance Benefits
+
+**User Perception:**
+- Actions feel instant (0ms perceived delay)
+- No waiting for server confirmation
+- Smooth transitions reduce cognitive load
+- Clear feedback on pending/error states
+
+**Technical:**
+- Fewer loading spinners
+- Better perceived performance
+- Network errors don't freeze UI
+- Optimistic updates batched efficiently
+
+### Known Limitations
+- Requires unique IDs for list items
+- Complex nested updates need careful state management
+- Realtime conflicts need resolution strategy
+- May show stale data briefly on rollback
+
+---
+
+## Phase 9.2: Smart Search & Autocomplete (Coming Next)
 
 ### WCAG Guidelines
 - [WCAG 2.1 Quick Reference](https://www.w3.org/WAI/WCAG21/quickref/)

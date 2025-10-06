@@ -14,6 +14,9 @@ import ImageBox from "./ImageBox";
 import MessageModal from "./MessageModal";
 import { getListingImages } from "@/lib/listing";
 import { getOptimizedImageUrl } from "@/utils/imageOptimization";
+import { useOptimisticFavorite } from "@/hooks/useOptimisticFavorite";
+import { motion } from "framer-motion";
+import { toast as sonnerToast } from "sonner";
 
 interface ListingCardProps {
   listing: Listing;
@@ -23,19 +26,20 @@ interface ListingCardProps {
 }
 
 const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: ListingCardProps) => {
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [initialFavoriteState, setInitialFavoriteState] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Load initial favorite state
   useEffect(() => {
     if (!user) return;
     
     const loadFavoriteStatus = async () => {
       try {
         const favorites = await fetchFavorites(user.id);
-        setIsFavorited(favorites.has(listing.id));
+        setInitialFavoriteState(favorites.has(listing.id));
       } catch (error) {
         console.error('Error loading favorite status:', error);
       }
@@ -44,31 +48,22 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
     loadFavoriteStatus();
   }, [listing.id, user]);
 
+  // Use optimistic favorite hook
+  const { isFavorited, toggleFavorite: optimisticToggle, isPending } = useOptimisticFavorite(
+    listing.id,
+    user?.id || '',
+    initialFavoriteState
+  );
+
   const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     if (!user) {
-      toast({
-        description: "Please log in to save favorites",
-        duration: 2000,
-      });
+      sonnerToast.error('Please log in to save favorites');
       return;
     }
     
-    try {
-      const newState = await toggleFavorite(listing.id, user.id);
-      setIsFavorited(newState);
-      toast({
-        description: newState ? "Saved to favorites" : "Removed from favorites",
-        duration: 2000,
-      });
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      toast({
-        description: "Failed to update favorites",
-        duration: 2000,
-      });
-    }
+    await optimisticToggle();
   };
 
   const formatPrice = (price?: number) => {
@@ -211,12 +206,20 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                 size="icon"
                 className="absolute top-3 right-3 z-10 h-9 w-9 bg-white/90 hover:bg-white rounded-full backdrop-blur"
                 onClick={handleFavoriteToggle}
+                disabled={isPending}
                 aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
               >
-                <Heart 
-                  className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-black'}`}
-                  strokeWidth={1.8}
-                />
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <Heart 
+                    className={`w-5 h-5 transition-all duration-200 ${
+                      isFavorited ? 'fill-red-500 text-red-500' : 'text-black'
+                    } ${isPending ? 'opacity-60' : ''}`}
+                    strokeWidth={1.8}
+                  />
+                </motion.div>
               </Button>
             </div>
             
