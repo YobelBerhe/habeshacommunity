@@ -690,6 +690,7 @@ export default function Browse() {
               </div>
             </div>
           </div>
+        </div>
         </nav>
 
         {/* Filter Controls Bar */}
