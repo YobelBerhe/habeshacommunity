@@ -118,11 +118,14 @@ export default function NotificationsPage() {
 
   // Convert to array and sort by most recent
   const notificationThreads = Object.values(groupedNotifications)
-    .map(thread => ({
-      notifications: thread,
-      latestDate: new Date(thread[0].created_at).getTime(),
-      hasUnread: thread.some(n => !n.read_at)
-    }))
+    .map(thread => {
+      const sorted = [...thread].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      return {
+        notifications: sorted,
+        latestDate: new Date(sorted[0].created_at).getTime(),
+        hasUnread: sorted.some(n => !n.read_at)
+      };
+    })
     .sort((a, b) => b.latestDate - a.latestDate);
 
   const unreadCount = notifications.filter(n => !n.read_at).length;
