@@ -1,3 +1,4 @@
+import { PageTransition } from '@/components/PageTransition';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -193,6 +194,7 @@ export default function MentorDashboard() {
 
   if (loading) {
     return (
+      <PageTransition>
       <div className="min-h-screen bg-background">
         <MentorHeader title="Mentor Dashboard" backPath="/" />
         <div className="container mx-auto px-4 py-8">
@@ -684,5 +686,6 @@ export default function MentorDashboard() {
         </Card>
       </div>
     </div>
+        <PageTransition>
   );
 }
