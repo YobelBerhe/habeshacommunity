@@ -1,0 +1,43 @@
+{
+  "name": "HabeshaCommunity",
+  "short_name": "Habesha",
+  "description": "Connect, buy, sell, and find opportunities in the global Habesha community",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "social", "lifestyle"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Browse Listings",
+      "url": "/browse",
+      "description": "Browse all listings"
+    },
+    {
+      "name": "Post Listing",
+      "url": "/",
+      "description": "Create a new listing"
+    },
+    {
+      "name": "Messages",
+      "url": "/inbox",
+      "description": "Check your messages"
+    }
+  ]
+}

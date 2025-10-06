@@ -30,13 +30,30 @@ export default defineConfig(({ mode }) => ({
           'chart-vendor': ['recharts'],
           'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
         },
+        // Optimize chunk names for caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
     chunkSizeWarningLimit: 1000,
     sourcemap: false,
+    // Minification options
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+      format: {
+        comments: false,
+      },
+    },
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'framer-motion'],
+    exclude: ['@tanstack/react-virtual'],
   },
   css: {
     preprocessorOptions: {
