@@ -56,6 +56,20 @@ export function useMessageNotifications(onNotification?: (conversationId: string
 
           const senderName = senderProfile?.display_name || 'Someone';
           const messagePreview = newMessage.content.substring(0, 50);
+          const currentUserId = user.id;
+
+          // Create a notification in the database
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              userId: currentUserId,
+              type: 'message',
+              title: `New message from ${senderName}`,
+              body: messagePreview,
+              link: '/inbox',
+              senderId: newMessage.sender_id,
+              conversationId: newMessage.conversation_id
+            }
+          });
 
           // Call optional callback
           if (onNotification) {

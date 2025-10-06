@@ -12,6 +12,8 @@ interface NotificationRequest {
   title: string;
   body?: string;
   link?: string;
+  senderId?: string;
+  conversationId?: string;
 }
 
 serve(async (req) => {
@@ -27,7 +29,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { userId, type, title, body, link }: NotificationRequest = await req.json();
+    const { userId, type, title, body, link, senderId, conversationId }: NotificationRequest = await req.json();
 
     if (!userId || !type || !title) {
       return new Response(
@@ -44,7 +46,9 @@ serve(async (req) => {
         type: type,
         title: title,
         body: body || null,
-        link: link || null
+        link: link || null,
+        sender_id: senderId || null,
+        conversation_id: conversationId || null
       })
       .select()
       .single();

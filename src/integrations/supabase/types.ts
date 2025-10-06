@@ -1123,34 +1123,40 @@ export type Database = {
       }
       notifications: {
         Row: {
+          conversation_id: string | null
           created_at: string
           id: string
           link: string | null
           message: string | null
           read: boolean | null
           read_at: string | null
+          sender_id: string | null
           title: string
           type: Database["public"]["Enums"]["notification_type"]
           user_id: string
         }
         Insert: {
+          conversation_id?: string | null
           created_at?: string
           id?: string
           link?: string | null
           message?: string | null
           read?: boolean | null
           read_at?: string | null
+          sender_id?: string | null
           title: string
           type: Database["public"]["Enums"]["notification_type"]
           user_id: string
         }
         Update: {
+          conversation_id?: string | null
           created_at?: string
           id?: string
           link?: string | null
           message?: string | null
           read?: boolean | null
           read_at?: string | null
+          sender_id?: string | null
           title?: string
           type?: Database["public"]["Enums"]["notification_type"]
           user_id?: string

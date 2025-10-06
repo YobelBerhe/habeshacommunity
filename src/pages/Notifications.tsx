@@ -16,6 +16,12 @@ type NotificationRow = {
   read_at?: string | null;
   created_at: string;
   type: string;
+  sender_id?: string | null;
+  conversation_id?: string | null;
+  sender?: {
+    display_name?: string;
+    avatar_url?: string;
+  } | null;
 };
 
 export default function NotificationsPage() {
@@ -42,7 +48,7 @@ export default function NotificationsPage() {
       .order('created_at', { ascending: false })
       .limit(200);
     
-    setNotifications(data || []);
+    setNotifications((data || []) as any);
     setLoading(false);
   };
 
@@ -97,6 +103,25 @@ export default function NotificationsPage() {
     }
   };
 
+  // Group notifications by sender_id for threading
+  const groupedNotifications = notifications.reduce((acc, notification) => {
+    const key = notification.sender_id || notification.id; // Use notification id if no sender
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(notification);
+    return acc;
+  }, {} as Record<string, NotificationRow[]>);
+
+  // Convert to array and sort by most recent
+  const notificationThreads = Object.values(groupedNotifications)
+    .map(thread => ({
+      notifications: thread,
+      latestDate: new Date(thread[0].created_at).getTime(),
+      hasUnread: thread.some(n => !n.read_at)
+    }))
+    .sort((a, b) => b.latestDate - a.latestDate);
+
   const unreadCount = notifications.filter(n => !n.read_at).length;
 
   if (!user) {
@@ -145,43 +170,65 @@ export default function NotificationsPage() {
               </CardContent>
             </Card>
           ) : (
-            notifications.map(notification => (
-              <Card 
-                key={notification.id} 
-                className={`cursor-pointer transition-colors hover:bg-muted/50 ${
-                  !notification.read_at ? 'border-l-4 border-l-blue-500 bg-accent/20' : ''
-                }`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                <CardContent className="pt-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium">{notification.title}</h3>
-                        {!notification.read_at && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            notificationThreads.map((thread, idx) => {
+              const firstNotif = thread.notifications[0];
+              const isThread = thread.notifications.length > 1;
+              
+              return (
+                <Card 
+                  key={idx}
+                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+                    thread.hasUnread ? 'border-l-4 border-l-blue-500 bg-accent/20' : ''
+                  }`}
+                  onClick={() => handleNotificationClick(firstNotif)}
+                >
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium">
+                            {isThread ? `${thread.notifications.length} messages` : firstNotif.title}
+                          </h3>
+                          {thread.hasUnread && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          )}
+                        </div>
+                        
+                        {isThread ? (
+                          <div className="space-y-1">
+                            {thread.notifications.slice(0, 3).map(notif => (
+                              <div key={notif.id} className="text-sm text-muted-foreground">
+                                • {notif.body || notif.title}
+                              </div>
+                            ))}
+                            {thread.notifications.length > 3 && (
+                              <div className="text-xs text-muted-foreground italic">
+                                +{thread.notifications.length - 3} more
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          firstNotif.body && (
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {firstNotif.body}
+                            </p>
+                          )
                         )}
-                      </div>
-                      
-                      {notification.body && (
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {notification.body}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {notification.type}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(notification.created_at).toLocaleString()}
-                        </span>
+                        
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {firstNotif.type}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(firstNotif.created_at).toLocaleString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
         )}
