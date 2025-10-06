@@ -170,16 +170,25 @@ export default function AccountSettings() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <MentorHeader title="Account Settings" backPath="/" />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading your settings...</div>
+  return (
+    <div className="min-h-screen bg-background">
+      <MentorHeader title="Account Settings" backPath="/" />
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-card rounded-xl border p-6">
+              <div className="h-6 w-48 bg-muted rounded animate-pulse mb-4" />
+              <div className="space-y-3">
+                <div className="h-12 bg-muted rounded animate-pulse" />
+                <div className="h-12 bg-muted rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    );
-  }
-
+    </div>
+  );
+}
   return (
     <div className="min-h-screen bg-background">
       <MentorHeader title="Account Settings" backPath="/" />
