@@ -14,11 +14,17 @@ export function LoadingSpinner({ size = 'md', variant = 'default' }: LoadingSpin
 
   if (variant === 'dots') {
     return (
-      <div className="flex gap-1 items-center justify-center">
+      <div 
+        className="flex gap-1 items-center justify-center"
+        role="status" 
+        aria-label="Loading"
+        aria-live="polite"
+      >
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
             className="w-2 h-2 bg-primary rounded-full"
+            aria-hidden="true"
             animate={{
               y: ['0%', '-50%', '0%'],
               opacity: [0.7, 1, 0.7],
@@ -30,35 +36,44 @@ export function LoadingSpinner({ size = 'md', variant = 'default' }: LoadingSpin
             }}
           />
         ))}
+        <span className="sr-only">Loading...</span>
       </div>
     );
   }
 
   if (variant === 'pulse') {
     return (
-      <motion.div
-        className={`${sizes[size]} bg-primary rounded-full`}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [1, 0.5, 1],
-        }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-        }}
-      />
+      <div role="status" aria-label="Loading" aria-live="polite">
+        <motion.div
+          className={`${sizes[size]} bg-primary rounded-full`}
+          aria-hidden="true"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [1, 0.5, 1],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+          }}
+        />
+        <span className="sr-only">Loading...</span>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      className={`${sizes[size]} border-4 border-primary/30 border-t-primary rounded-full`}
-      animate={{ rotate: 360 }}
-      transition={{
-        duration: 1,
-        repeat: Infinity,
-        ease: 'linear',
-      }}
-    />
+    <div role="status" aria-label="Loading" aria-live="polite">
+      <motion.div
+        className={`${sizes[size]} border-4 border-primary/30 border-t-primary rounded-full`}
+        aria-hidden="true"
+        animate={{ rotate: 360 }}
+        transition={{
+          duration: 1,
+          repeat: Infinity,
+          ease: 'linear',
+        }}
+      />
+      <span className="sr-only">Loading...</span>
+    </div>
   );
 }
