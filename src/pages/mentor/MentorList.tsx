@@ -475,7 +475,6 @@ export default function MentorList() {
              </AnimatedListItem>
             ))}
           </AnimatedList>
-          </div>
         )}
       </div>
 
@@ -501,6 +500,6 @@ export default function MentorList() {
         </Button>
       </div>
     </div>
-        </PageTransition>
+    </PageTransition>
   );
 }

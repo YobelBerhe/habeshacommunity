@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { GridSkeleton } from '@/components/LoadingStates';
 import { EmptyState } from '@/components/EmptyState';
 import { Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
@@ -517,23 +518,27 @@ export default function Browse() {
                 <ThemeToggle />
                 <LanguageToggle value={language} onChange={setLanguage} />
                 <NotifyBell />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => navigate('/chat')}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Chat
-                </Button>
-                <Button
-                  size="sm"
-                  className="gap-2"
-                  onClick={openPost}
-                >
-                  <Plus className="w-4 h-4" />
-                  Post
-                </Button>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => navigate('/chat')}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chat
+                  </Button>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    size="sm"
+                    className="gap-2"
+                    onClick={openPost}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Post
+                  </Button>
+                </motion.div>
                 <AuthButtons />
               </div>
             </div>
@@ -711,13 +716,15 @@ export default function Browse() {
                       onMinRatingChange={setMentorMinRating}
                       onSortByChange={setMentorSortBy}
                     />
-                    <Button 
-                      size="sm" 
-                      className="gap-1"
-                      onClick={() => navigate('/mentor/onboarding')}
-                    >
-                      Become a Mentor
-                    </Button>
+                    <motion.div whileTap={{ scale: 0.95 }}>
+                      <Button 
+                        size="sm" 
+                        className="gap-1"
+                        onClick={() => navigate('/mentor/onboarding')}
+                      >
+                        Become a Mentor
+                      </Button>
+                    </motion.div>
                   </>
                 )}
                 
@@ -732,13 +739,15 @@ export default function Browse() {
                   </Button>
                 )}
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearAll}
-                >
-                  Clear All
-                </Button>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearAll}
+                  >
+                    Clear All
+                  </Button>
+                </motion.div>
               </div>
 
               {/* View and Sort Controls - Right Side */}
@@ -787,13 +796,19 @@ export default function Browse() {
         }}
       />
     ) : (
-      <ListingGrid
-        listings={processedListings}
-        onListingClick={handleListingSelect}
-        loading={false}
-        newlyPostedId={null}
-        viewMode={viewMode}
-      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <ListingGrid
+          listings={processedListings}
+          onListingClick={handleListingSelect}
+          loading={false}
+          newlyPostedId={null}
+          viewMode={viewMode}
+        />
+      </motion.div>
     )}
   </div>
 </div>
@@ -814,14 +829,16 @@ export default function Browse() {
                 onCitySelect={handleCityChange}
               />
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearAll}
-              className="px-3 py-2 h-auto text-xs"
-            >
-              Clear
-            </Button>
+            <motion.div whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearAll}
+                className="px-3 py-2 h-auto text-xs"
+              >
+                Clear
+              </Button>
+            </motion.div>
           </div>
         </div>
 
@@ -911,9 +928,11 @@ export default function Browse() {
               </Popover>
 
               {/* Clear All */}
-              <Button variant="ghost" size="sm" className="flex-shrink-0" onClick={handleClearAll}>
-                {language === 'EN' ? 'Clear' : 'ኣጽዓን'}
-              </Button>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" size="sm" className="flex-shrink-0" onClick={handleClearAll}>
+                  {language === 'EN' ? 'Clear' : 'ኣጽዓን'}
+                </Button>
+              </motion.div>
             </div>
 
             {/* Mentor-specific filters for mobile */}
@@ -987,13 +1006,19 @@ export default function Browse() {
       />
     </div>
   ) : (
-    <ListingGrid
-      listings={processedListings}
-      onListingClick={handleListingSelect}
-      loading={false}
-      newlyPostedId={null}
-      viewMode={viewMode}
-    />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      <ListingGrid
+        listings={processedListings}
+        onListingClick={handleListingSelect}
+        loading={false}
+        newlyPostedId={null}
+        viewMode={viewMode}
+      />
+    </motion.div>
   )}
 </main>
       </div>
@@ -1072,6 +1097,6 @@ export default function Browse() {
           </DialogContent>
         </Dialog>
     </div>
-      <PageTransition>
+    </PageTransition>
   );
 }

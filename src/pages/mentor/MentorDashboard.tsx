@@ -206,10 +206,12 @@ export default function MentorDashboard() {
           </div>
         </div>
       </div>
+      </PageTransition>
     );
   }
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <MentorHeader title="Mentor Dashboard" backPath="/" />
       
@@ -405,24 +407,11 @@ export default function MentorDashboard() {
 
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/requests')}>
-    <CardHeader className="pb-3">
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-        <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-      </div>
-      <CardTitle className="text-base">Booking Requests</CardTitle>
-      <CardDescription className="text-sm">
-        Manage incoming session requests
-      </CardDescription>
-    </CardHeader>
-  </Card>
-
-  <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/bookings')}>
-    {/* ... similar cards for other actions */}
-  </Card>
-  
-  {/* 2 more cards */}
-</div>
+          <Card className="hover:shadow-lg transition-all hover:border-primary cursor-pointer group" onClick={() => navigate('/mentor/requests')}>
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
               <CardTitle className="text-base">Booking Requests</CardTitle>
               <CardDescription className="text-sm">
                 Manage incoming session requests
@@ -721,6 +710,6 @@ export default function MentorDashboard() {
         </Card>
       </div>
     </div>
-        <PageTransition>
+    </PageTransition>
   );
 }

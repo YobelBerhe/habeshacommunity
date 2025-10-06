@@ -287,11 +287,13 @@ export default function MentorDetail() {
           <div className="text-center">Loading mentor details...</div>
         </div>
       </div>
+      </PageTransition>
     );
   }
 
   if (!mentor) {
     return (
+      <PageTransition>
       <div className="min-h-screen bg-background">
         <MentorHeader title="Mentor Profile" backPath="/mentor" />
         <div className="container mx-auto px-4 py-8">
@@ -305,10 +307,12 @@ export default function MentorDetail() {
           </Card>
         </div>
       </div>
+      </PageTransition>
     );
   }
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <MentorHeader title="Mentor Profile" backPath="/mentor" />
       
@@ -646,6 +650,6 @@ export default function MentorDetail() {
         </div>
       </div>
     </div>
-        </PageTransition>
+    </PageTransition>
   );
 }
