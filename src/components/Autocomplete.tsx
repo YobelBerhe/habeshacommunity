@@ -29,10 +29,6 @@ export function Autocomplete<T>({
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setOpen(suggestions.length > 0 && value.length > 0);
-  }, [suggestions, value]);
-
   const handleSelect = (item: T) => {
     onChange(displayValue(item));
     onSelect?.(item);
@@ -41,8 +37,27 @@ export function Autocomplete<T>({
 
   const handleClear = () => {
     onChange('');
+    setOpen(false);
     inputRef.current?.focus();
   };
+
+  const handleFocus = () => {
+    if (value.length > 0 && (suggestions.length > 0 || isLoading)) {
+      setOpen(true);
+    }
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setOpen(false), 200);
+  };
+
+  useEffect(() => {
+    if (value.length > 0 && !isLoading && suggestions.length > 0) {
+      setOpen(true);
+    } else if (value.length === 0 || (!isLoading && suggestions.length === 0 && value.length > 2)) {
+      setOpen(false);
+    }
+  }, [suggestions, isLoading, value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,9 +67,16 @@ export function Autocomplete<T>({
           <Input
             ref={inputRef}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => {
+              onChange(e.target.value);
+              if (e.target.value.length > 0) {
+                setOpen(true);
+              }
+            }}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             placeholder={placeholder}
-            className="pl-10 pr-10"
+            className="pl-10 pr-10 bg-background"
             aria-label={placeholder}
             aria-autocomplete="list"
             aria-controls="autocomplete-list"
@@ -73,20 +95,20 @@ export function Autocomplete<T>({
       </PopoverTrigger>
       
       <PopoverContent 
-        className="p-0 w-[--radix-popover-trigger-width]" 
+        className="p-0 w-[--radix-popover-trigger-width] bg-background border" 
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <Command>
-          <CommandList id="autocomplete-list" role="listbox">
+        <Command className="bg-background">
+          <CommandList id="autocomplete-list" role="listbox" className="bg-background">
             {isLoading ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 Searching...
               </div>
-            ) : suggestions.length === 0 ? (
+            ) : suggestions.length === 0 && value.length > 2 ? (
               <CommandEmpty>No results found</CommandEmpty>
-            ) : (
-              <CommandGroup>
+            ) : suggestions.length > 0 ? (
+              <CommandGroup className="bg-background">
                 <AnimatePresence>
                   {suggestions.map((item, index) => (
                     <motion.div
@@ -99,6 +121,7 @@ export function Autocomplete<T>({
                       <CommandItem
                         onSelect={() => handleSelect(item)}
                         role="option"
+                        className="bg-background hover:bg-accent"
                       >
                         {renderItem ? renderItem(item) : displayValue(item)}
                       </CommandItem>
@@ -106,7 +129,7 @@ export function Autocomplete<T>({
                   ))}
                 </AnimatePresence>
               </CommandGroup>
-            )}
+            ) : null}
           </CommandList>
         </Command>
       </PopoverContent>
