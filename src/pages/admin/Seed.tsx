@@ -1,8 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import MentorHeader from "@/components/MentorHeader";
 
 export default function AdminSeed() {
   return (
-    <div className="container mx-auto p-8">
+    <div className="min-h-screen bg-background">
+      <MentorHeader title="Database Seeding" backPath="/admin/dashboard" />
+      <div className="container mx-auto p-8">
       <Card>
         <CardHeader>
           <CardTitle>Database Seeding</CardTitle>
@@ -19,6 +22,7 @@ export default function AdminSeed() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

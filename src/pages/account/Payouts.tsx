@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign } from "lucide-react";
+import MentorHeader from "@/components/MentorHeader";
 
 export default function Payouts() {
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-bold mb-6">Payouts</h1>
+    <div className="min-h-screen bg-background">
+      <MentorHeader title="Payouts" backPath="/account/settings" />
+      <div className="mx-auto max-w-2xl p-6">
       
       <Card>
         <CardHeader>
@@ -25,6 +27,7 @@ export default function Payouts() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

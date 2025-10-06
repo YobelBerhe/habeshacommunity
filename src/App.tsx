@@ -1,3 +1,4 @@
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -47,7 +48,6 @@ import MarketplaceDetail from "./pages/marketplace/MarketplaceDetail";
 import Inbox from "./pages/inbox/Inbox";
 import AdminSeed from "./pages/admin/Seed";
 import AdminDashboard from "./pages/admin/Dashboard";
-import GlobalMap from "./components/GlobalMap";
 import DonateSuccess from "./pages/donate/Success";
 import DonateCancel from "./pages/donate/Cancel";
 import ListingDetail from "./pages/ListingDetail";
@@ -55,14 +55,16 @@ import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <GlobalMap modalOpen={false} />
-        <Routes>
+const App = () => {
+  const [modalOpen, setModalOpen] = React.useState(false);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/chat" element={<Chat />} />
@@ -119,6 +121,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

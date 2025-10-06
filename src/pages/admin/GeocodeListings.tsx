@@ -1,8 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import MentorHeader from "@/components/MentorHeader";
 
 export default function GeocodeListings() {
   return (
-    <div className="container mx-auto p-8">
+    <div className="min-h-screen bg-background">
+      <MentorHeader title="Geocoding Admin" backPath="/admin/dashboard" />
+      <div className="container mx-auto p-8">
       <Card>
         <CardHeader>
           <CardTitle>Geocoding Admin</CardTitle>
@@ -19,6 +22,7 @@ export default function GeocodeListings() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

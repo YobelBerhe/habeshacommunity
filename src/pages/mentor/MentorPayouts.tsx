@@ -6,6 +6,7 @@ import { ConnectStripeButton } from '@/components/ConnectStripeButton';
 import { CheckCircle, DollarSign, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import MentorHeader from '@/components/MentorHeader';
 
 export default function MentorPayouts() {
   const [searchParams] = useSearchParams();
@@ -46,23 +47,22 @@ export default function MentorPayouts() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center">Loading...</div>
+      <div className="min-h-screen bg-background">
+        <MentorHeader title="Payouts" backPath="/mentor/dashboard" />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center">Loading...</div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Mentor Payouts</h1>
-          <p className="text-muted-foreground">
-            Connect your Stripe account to receive payments from mentoring sessions
-          </p>
-        </div>
+    <div className="min-h-screen bg-background">
+      <MentorHeader title="Payouts" backPath="/mentor/dashboard" />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto space-y-6">
 
         <Card>
           <CardHeader>
@@ -125,6 +125,7 @@ export default function MentorPayouts() {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
