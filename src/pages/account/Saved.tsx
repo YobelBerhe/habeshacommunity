@@ -1,3 +1,5 @@
+import { GridSkeleton } from '@/components/LoadingStates';
+import { EmptyState } from '@/components/EmptyState';
 import { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { useAuth } from '@/store/auth';
@@ -104,37 +106,35 @@ export default function SavedListings() {
     }
   };
 
-  if (!user && !loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <MentorHeader title="Saved Listings" backPath="/" />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <Heart className="w-16 h-16 text-red-500 fill-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Sign in required</h2>
-            <p className="text-muted-foreground mb-6">Please sign in to view your saved listings</p>
-            <a 
-              href="/auth/login" 
-              className="btn-primary inline-block"
-            >
-              Sign In
-            </a>
-          </div>
-        </div>
+ if (!user && !loading) {
+  return (
+    <div className="min-h-screen bg-background">
+      <MentorHeader title="Saved Listings" backPath="/" />
+      <div className="container mx-auto px-4 py-8">
+        <EmptyState
+          icon={Heart}
+          title="Sign in required"
+          description="Please sign in to view your saved listings"
+          action={{
+            label: 'Sign In',
+            onClick: () => window.location.href = '/auth/login',
+          }}
+        />
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <MentorHeader title={t(language, "saved_listings")} backPath="/" />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">{t(language, "loading_saved_listings")}</div>
-        </div>
+  return (
+    <div className="min-h-screen bg-background">
+      <MentorHeader title={t(language, "saved_listings")} backPath="/" />
+      <div className="container mx-auto px-4 py-8">
+        <GridSkeleton count={6} />
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-background">
@@ -142,19 +142,17 @@ export default function SavedListings() {
       
       <div className="container mx-auto px-4 py-6">
 
-        {favorites.length === 0 ? (
-          <div className="text-center py-12">
-            <Heart className="w-16 h-16 text-red-500 fill-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">{t(language, "no_saved_listings_yet")}</h2>
-            <p className="text-muted-foreground mb-6">Start browsing to save listings you're interested in</p>
-            <a 
-              href="/browse" 
-              className="btn-primary inline-block"
-            >
-              Start browsing
-            </a>
-          </div>
-        ) : (
+       {favorites.length === 0 ? (
+  <EmptyState
+    icon={Heart}
+    title={t(language, "no_saved_listings_yet")}
+    description="Start browsing to save listings you're interested in"
+    action={{
+      label: 'Start browsing',
+      onClick: () => window.location.href = '/browse',
+    }}
+  />
+) : (
           <div className="grid gap-4">
             {favorites.map(listing => (
               <div key={listing.id} className="relative">
