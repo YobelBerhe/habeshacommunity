@@ -148,6 +148,11 @@ export default function Browse() {
             `);
 
           // Apply filters
+          console.log('🔍 Mentor filters:', { mentorVerifiedOnly, mentorMinRating, subcategory: filters.subcategory });
+          
+          // Only show available mentors (RLS also handles this)
+          query = query.eq('available', true);
+          
           if (mentorVerifiedOnly) {
             query = query.eq('is_verified', true);
           }
@@ -186,7 +191,11 @@ export default function Browse() {
 
           const { data, error } = await query;
             
-          if (error) throw error;
+          console.log('📊 Mentor query result:', { data, error, count: data?.length });
+          if (error) {
+            console.error('❌ Mentor query error:', error);
+            throw error;
+          }
 
           // Filter by search query (including skills)
           let filteredData = data;
