@@ -1,3 +1,4 @@
+import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { PageTransition } from '@/components/PageTransition';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -317,8 +318,9 @@ export default function MentorList() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatedList className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedMentors.map(mentor => (
+          <AnimatedListItem key={mentor.id}>
               <Card
                 key={mentor.id}
                 className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
@@ -470,7 +472,9 @@ export default function MentorList() {
                   </Button>
                 </CardFooter>
               </Card>
+             </AnimatedListItem>
             ))}
+          </AnimatedList>
           </div>
         )}
       </div>
