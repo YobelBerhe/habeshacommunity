@@ -1292,6 +1292,7 @@ export type Database = {
           credits_balance: number | null
           display_name: string | null
           email_notifications_enabled: boolean | null
+          gender: string | null
           id: string
           referral_code: string | null
           updated_at: string
@@ -1305,6 +1306,7 @@ export type Database = {
           credits_balance?: number | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
+          gender?: string | null
           id: string
           referral_code?: string | null
           updated_at?: string
@@ -1318,6 +1320,7 @@ export type Database = {
           credits_balance?: number | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
+          gender?: string | null
           id?: string
           referral_code?: string | null
           updated_at?: string

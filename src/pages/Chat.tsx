@@ -23,6 +23,7 @@ interface ChatMessage {
   user_id: string;
   username?: string;
   avatar_url?: string | null;
+  gender?: string | null;
   city: string;
   board: string;
   created_at: string;
@@ -30,13 +31,16 @@ interface ChatMessage {
   media_url?: string | null;
 }
 
-// Deterministic user color generator (stable across sessions)
-function colorForUser(userId: string) {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) hash = userId.charCodeAt(i) + ((hash << 5) - hash);
-  const hue = Math.abs(hash) % 360; // 0..359
-  // Use semantic lightness/sat values compatible with theme contrast
-  return `hsl(${hue} 65% 50%)`;
+// Gender-based color generator (blue for male, pink/red for female)
+function colorForUser(gender?: string | null) {
+  if (gender?.toLowerCase() === 'male') {
+    return 'hsl(210 90% 45%)'; // Blue with good contrast
+  } else if (gender?.toLowerCase() === 'female') {
+    return 'hsl(340 85% 45%)'; // Pink/Red with good contrast
+  } else {
+    // Default neutral color for unspecified gender
+    return 'hsl(240 10% 40%)'; // Neutral gray
+  }
 }
 
 export default function Chat() {
@@ -169,7 +173,7 @@ export default function Chat() {
           const userIds = [...new Set(messages.map(m => m.user_id))];
           const { data: profiles } = await supabase
             .from('profiles')
-            .select('id, display_name, avatar_url')
+            .select('id, display_name, avatar_url, gender')
             .in('id', userIds);
 
           const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
@@ -178,6 +182,7 @@ export default function Chat() {
             ...m,
             username: profileMap.get(m.user_id)?.display_name || 'Member',
             avatar_url: profileMap.get(m.user_id)?.avatar_url || null,
+            gender: profileMap.get(m.user_id)?.gender || null,
           }));
 
           setMessages(withNames);
@@ -211,7 +216,7 @@ export default function Chat() {
           // Fetch user profile for the new message
           const { data: profile } = await supabase
             .from('profiles')
-            .select('display_name, avatar_url')
+            .select('display_name, avatar_url, gender')
             .eq('id', msg.user_id)
             .single();
 
@@ -225,6 +230,7 @@ export default function Chat() {
                 ...msg, 
                 username: profile?.display_name || 'Member',
                 avatar_url: profile?.avatar_url || null,
+                gender: profile?.gender || null,
               },
             ];
           });
@@ -312,7 +318,7 @@ export default function Chat() {
               ) : (
                 <div className="space-y-2">
                   {messages.map((msg) => {
-                    const color = colorForUser(msg.user_id);
+                    const color = colorForUser(msg.gender);
                     return (
                       <div key={msg.id} className="flex items-start gap-2 sm:gap-3 py-1">
                         <div
