@@ -13,6 +13,7 @@ import { useLanguage } from "@/store/language";
 import ImageBox from "./ImageBox";
 import MessageModal from "./MessageModal";
 import { getListingImages } from "@/lib/listing";
+import { getOptimizedImageUrl } from "@/utils/imageOptimization";
 
 interface ListingCardProps {
   listing: Listing;
@@ -148,7 +149,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
             {/* Image section */}
             <div className={`relative w-full group/image ${viewMode === "gallery" ? "h-56" : viewMode === "grid" ? "aspect-square" : viewMode === "list" ? "h-72 md:h-96 md:aspect-square" : viewMode === "compact" ? "h-36 md:h-48" : "h-48"}`}>
               <ImageBox
-                src={images[currentImageIndex] || images[0]}
+                src={getOptimizedImageUrl(images[currentImageIndex] || images[0], 640)}
                 alt={listing.title}
                 className="h-full w-full object-cover rounded-t-lg"
               />

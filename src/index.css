@@ -645,3 +645,42 @@ html {
   transform: translateY(0);
 }
 
+/* Phase 7.2: Image Optimization */
+
+/* Prevent layout shift */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Optimize image rendering */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Lazy loaded images */
+.lazy-load-image-background {
+  background-color: hsl(var(--muted));
+}
+
+/* Blur-up effect */
+.lazy-load-image-background.blur {
+  filter: blur(10px);
+}
+
+.lazy-load-image-background.blur.lazy-load-image-loaded {
+  filter: blur(0);
+  transition: filter 0.3s;
+}
+
+/* Prevent image flash */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}
+

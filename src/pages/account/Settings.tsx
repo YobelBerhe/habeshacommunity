@@ -5,9 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import MentorHeader from '@/components/MentorHeader';
 import { toast } from 'sonner';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import imageCompression from 'browser-image-compression';
 import { ImageCropper } from '@/components/ImageCropper';
 import { EmailNotificationToggle } from '@/components/EmailNotificationToggle';
+import { OptimizedImage } from '@/components/OptimizedImage';
 
 export default function AccountSettings() {
   const [displayName, setDisplayName] = useState('');
@@ -206,12 +206,20 @@ export default function AccountSettings() {
               <div>
                 <label className="block text-sm font-medium mb-2">Profile Photo</label>
                 <div className="flex items-center gap-4">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src={avatarUrl} />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                      {user?.email?.charAt(0).toUpperCase() || 'A'}
-                    </AvatarFallback>
-                  </Avatar>
+                  {avatarUrl ? (
+                    <OptimizedImage
+                      src={avatarUrl}
+                      alt="Profile"
+                      className="w-20 h-20 rounded-full object-cover border-4 border-background shadow-lg"
+                      aspectRatio="1/1"
+                    />
+                  ) : (
+                    <Avatar className="w-20 h-20">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                        {user?.email?.charAt(0).toUpperCase() || 'A'}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                   
                   <div className="flex flex-col gap-2">
                     <input
