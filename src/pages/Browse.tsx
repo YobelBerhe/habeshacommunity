@@ -40,6 +40,7 @@ import MentorFilters from "@/components/search/MentorFilters";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollReveal } from '@/components/ScrollReveal';
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";

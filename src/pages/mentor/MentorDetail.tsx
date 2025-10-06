@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar } from '@/components/ui/calendar';
 import TimeSlotPicker from '@/components/mentor/TimeSlotPicker';
 import MentorIntroVideo from '@/components/mentor/MentorIntroVideo';
+import { ScrollReveal } from '@/components/ScrollReveal';
 
 export default function MentorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -322,8 +323,9 @@ export default function MentorDetail() {
           {/* Left Column - Profile & Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Profile Header Card */}
-            <Card>
-              <CardContent className="pt-6 relative">
+            <ScrollReveal direction="up">
+              <Card>
+                <CardContent className="pt-6 relative">
                 {/* Action buttons in top right corner */}
                 <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
                   <Button
@@ -407,46 +409,51 @@ export default function MentorDetail() {
                           </Badge>
                         ))}
                       </div>
-                    )}
-                  </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
+
+        {/* Skills */}
+        {mentor.topics && mentor.topics.length > 0 && (
+          <ScrollReveal direction="up" delay={0.1}>
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold text-lg mb-3">Skills & Expertise</h3>
+                <div className="flex flex-wrap gap-2">
+                  {mentor.topics.map((topic: string) => (
+                    <Badge key={topic} variant="secondary" className="px-3 py-1">{topic}</Badge>
+                  ))}
                 </div>
               </CardContent>
             </Card>
+          </ScrollReveal>
+        )}
 
-            {/* Skills */}
-            {mentor.topics && mentor.topics.length > 0 && (
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold text-lg mb-3">Skills & Expertise</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {mentor.topics.map((topic: string) => (
-                      <Badge key={topic} variant="secondary" className="px-3 py-1">{topic}</Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* About */}
-            {mentor.bio && (
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold text-lg mb-3">About</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{mentor.bio}</p>
-                  
-                  {mentor.languages && mentor.languages.length > 0 && (
-                    <div className="mt-4 pt-4 border-t">
-                      <h4 className="font-semibold text-sm mb-2">Languages</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {mentor.languages.map((lang: string) => (
-                          <Badge key={lang} variant="outline">{lang}</Badge>
-                        ))}
-                      </div>
+        {/* About */}
+        {mentor.bio && (
+          <ScrollReveal direction="up" delay={0.2}>
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold text-lg mb-3">About</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{mentor.bio}</p>
+                
+                {mentor.languages && mentor.languages.length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-semibold text-sm mb-2">Languages</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {mentor.languages.map((lang: string) => (
+                        <Badge key={lang} variant="outline">{lang}</Badge>
+                      ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </ScrollReveal>
+        )}
 
             {/* YouTube Intro Video */}
             <MentorIntroVideo youtubeLink={mentor.youtube_link} />

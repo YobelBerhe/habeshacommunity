@@ -602,3 +602,46 @@
   25% { transform: translateX(-10px); }
   75% { transform: translateX(10px); }
 }
+
+/* Phase 6.5: Smooth Scrolling & Advanced Effects */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth scroll with offset for fixed headers */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-padding-top: 80px;
+  }
+}
+
+/* Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Parallax performance optimization */
+.parallax-container {
+  will-change: transform;
+}
+
+/* Fade in on scroll utility */
+.fade-in-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+

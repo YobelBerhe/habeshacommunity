@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { ShareMentorProfile } from '@/components/ShareMentorProfile';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { ScrollReveal } from '@/components/ScrollReveal';
 
 type DateRange = {
   from: Date;
@@ -472,7 +473,8 @@ export default function MentorDashboard() {
         </div>
 
         {/* Enhanced Badge Progress */}
-        <Card className="mb-8 overflow-hidden border-2">
+        <ScrollReveal direction="up">
+          <Card className="mb-8 overflow-hidden border-2">
           <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30">
             <CardHeader className="border-b bg-white/50 dark:bg-black/20 backdrop-blur-sm">
               <CardTitle className="flex items-center gap-2">
@@ -604,10 +606,12 @@ export default function MentorDashboard() {
             </CardContent>
           </div>
         </Card>
+        </ScrollReveal>
 
         {/* Enhanced Earnings Chart */}
         {chartData.length > 0 && (
-          <Card className="mb-8 border-2">
+          <ScrollReveal direction="up" delay={0.1}>
+            <Card className="mb-8 border-2">
             <CardHeader className="border-b bg-muted/30">
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
@@ -656,6 +660,7 @@ export default function MentorDashboard() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+          </ScrollReveal>
         )}
 
         {/* Profile Info */}
