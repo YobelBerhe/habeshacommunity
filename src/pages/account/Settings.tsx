@@ -12,6 +12,7 @@ import { EmailNotificationToggle } from '@/components/EmailNotificationToggle';
 export default function AccountSettings() {
   const [displayName, setDisplayName] = useState('');
   const [city, setCity] = useState('');
+  const [gender, setGender] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -38,6 +39,7 @@ export default function AccountSettings() {
         if (data) {
           setDisplayName(data.display_name || '');
           setCity(data.city || '');
+          setGender(data.gender || '');
           setAvatarUrl(data.avatar_url || '');
         }
       } catch (error) {
@@ -152,6 +154,7 @@ export default function AccountSettings() {
           id: user.id,
           display_name: displayName.trim(),
           city: city.trim(),
+          gender: gender || null,
           updated_at: new Date().toISOString()
         });
 
@@ -274,6 +277,24 @@ export default function AccountSettings() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Your city will appear on the live activity map
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Gender <span className="text-xs text-muted-foreground">(for chat display)</span>
+                </label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="field w-full"
+                >
+                  <option value="">Prefer not to say</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Your gender determines your username color in chat
                 </p>
               </div>
             </div>
