@@ -326,92 +326,98 @@ export default function MentorDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Total Bookings */}
           <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.1, type: 'spring', stiffness: 100 }}
-    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-  >
-          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full blur-2xl" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Bookings</CardTitle>
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold">
-                <AnimatedCounter value={stats.total} />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">All time sessions</p>
-            </CardContent>
-          </Card>
-             </motion.div>
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 100 }}
+            whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+          >
+            <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full blur-2xl" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Bookings</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold">
+                  <AnimatedCounter value={stats.total} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">All time sessions</p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Pending */}
-            <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.3, type: 'spring', stiffness: 100 }}
-    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-  >
-          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-2xl" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
-                <AnimatedCounter value={stats.pending} />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Awaiting response</p>
-            </CardContent>
-          </Card>
-              
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
+            whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+          >
+            <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-2xl" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                  <AnimatedCounter value={stats.pending} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Awaiting response</p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Confirmed */}
-          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-full blur-2xl" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Confirmed</CardTitle>
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                <AnimatedCounter value={stats.confirmed} />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Upcoming sessions</p>
-            </CardContent>
-          </Card>
-               </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 100 }}
+            whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+          >
+            <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-full blur-2xl" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Confirmed</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                  <AnimatedCounter value={stats.confirmed} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Upcoming sessions</p>
+              </CardContent>
+            </Card>
+          </motion.div>
           {/* Completed */}
-              <motion.div
-   initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.4, type: 'spring', stiffness: 100 }}
-    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-  >
-          <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
-              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                <AnimatedCounter value={stats.completed} />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Total sessions done</p>
-            </CardContent>
-          </Card>
-                 </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, type: 'spring', stiffness: 100 }}
+            whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+          >
+            <Card className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                  <AnimatedCounter value={stats.completed} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Total sessions done</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {/* Quick Actions Grid */}
