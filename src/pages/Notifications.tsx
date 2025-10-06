@@ -1,3 +1,5 @@
+import { ListSkeleton } from '@/components/LoadingStates';
+import { EmptyState } from '@/components/EmptyState';
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -157,25 +159,18 @@ export default function NotificationsPage() {
           </div>
         )}
 
-        {loading ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center text-muted-foreground">Loading notifications...</div>
-          </CardContent>
-        </Card>
-      ) : (
+      {loading ? (
+  <ListSkeleton count={5} />
+) : (
         <div className="space-y-3">
           {notifications.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center text-muted-foreground">
-                  <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <div>No notifications yet.</div>
-                  <div className="text-sm mt-1">We'll notify you when there's something new!</div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
+  <EmptyState
+    icon={Bell}
+    title="No notifications yet"
+    description="We'll notify you when there's something new!"
+    variant="minimal"
+  />
+) : (
             notificationThreads.map((thread, idx) => {
               const firstNotif = thread.notifications[0];
               const isThread = thread.notifications.length > 1;
