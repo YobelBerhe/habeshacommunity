@@ -221,7 +221,8 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
             </div>
             
             {/* Content section below image */}
-            <div className={`${viewMode === "compact" ? "space-y-0.5 p-3 pt-1.5" : "space-y-1"} ${(viewMode === "grid" || viewMode === "gallery") ? "p-2 pt-1" : viewMode === "compact" ? "" : "p-4 pt-2"}`}>
+            <div className={`space-y-0 pt-0 ${(viewMode === "grid" || viewMode === "gallery") ? "px-2 pb-2" : viewMode === "compact" ? "px-3 pb-3" : "px-4 pb-4"}`}>
+
               {/* Desktop layout - clean and minimal */}
               <div className="hidden md:block">
                 {/* Title in one line with truncation */}
