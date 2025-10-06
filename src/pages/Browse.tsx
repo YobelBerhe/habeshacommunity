@@ -1,3 +1,4 @@
+import { PageTransition } from '@/components/PageTransition';
 import { useEffect, useMemo, useState } from "react";
 import { GridSkeleton } from '@/components/LoadingStates';
 import { EmptyState } from '@/components/EmptyState';
@@ -480,6 +481,7 @@ export default function Browse() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
@@ -1070,5 +1072,6 @@ export default function Browse() {
           </DialogContent>
         </Dialog>
     </div>
+      <PageTransition>
   );
 }
