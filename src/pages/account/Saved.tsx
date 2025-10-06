@@ -9,6 +9,9 @@ import MentorHeader from '@/components/MentorHeader';
 import { useLanguage } from '@/store/language';
 import { t } from '@/lib/i18n';
 import type { Listing } from '@/types';
+import { SwipeableCard } from '@/components/SwipeableCard';
+import { PullToRefresh } from '@/components/PullToRefresh';
+import { toast } from 'sonner';
 
 export default function SavedListings() {
   const [favorites, setFavorites] = useState<Listing[]>([]);
@@ -101,8 +104,75 @@ export default function SavedListings() {
         .eq('listing_id', listingId);
       
       setFavorites(prev => prev.filter(f => f.id !== listingId));
+      toast.success('Removed from favorites');
     } catch (error) {
       console.error('Error removing favorite:', error);
+      toast.error('Failed to remove favorite');
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select(`
+          listing_id,
+          listings (
+            id, title, description, price_cents, currency, city, country,
+            category, subcategory, images, created_at, updated_at,
+            location_lat, location_lng, user_id, website_url, tags,
+            listing_contacts (
+              id,
+              contact_method,
+              contact_value
+            )
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      const favListings = data
+        ?.filter(f => f.listings)
+        ?.map(f => {
+          const l = f.listings as any;
+          return {
+            id: l.id,
+            user_id: l.user_id || "",
+            city: l.city,
+            country: l.country || "",
+            category: l.category,
+            subcategory: l.subcategory,
+            title: l.title,
+            description: l.description || "",
+            price: l.price_cents ? l.price_cents / 100 : null,
+            currency: l.currency,
+            contact_phone: l.listing_contacts?.[0]?.contact_method === 'phone' ? l.listing_contacts[0].contact_value : null,
+            contact_whatsapp: l.listing_contacts?.[0]?.contact_method === 'whatsapp' ? l.listing_contacts[0].contact_value : null,
+            contact_telegram: l.listing_contacts?.[0]?.contact_method === 'telegram' ? l.listing_contacts[0].contact_value : null,
+            contact_email: l.listing_contacts?.[0]?.contact_method === 'email' ? l.listing_contacts[0].contact_value : null,
+            website_url: l.website_url,
+            tags: l.tags || [],
+            images: l.images || [],
+            lat: l.location_lat,
+            lng: l.location_lng,
+            created_at: l.created_at,
+            contact: { phone: l.listing_contacts?.[0]?.contact_value || "" },
+            photos: l.images || [],
+            lon: l.location_lng || undefined,
+            createdAt: new Date(l.created_at).getTime(),
+            updatedAt: new Date(l.updated_at || l.created_at).getTime(),
+            hasImage: !!(l.images?.length),
+          } as Listing;
+        }) || [];
+
+      setFavorites(favListings);
+      toast.success('Refreshed');
+    } catch (error) {
+      console.error('Error refreshing favorites:', error);
+      toast.error('Failed to refresh');
     }
   };
 
@@ -153,16 +223,22 @@ export default function SavedListings() {
     }}
   />
 ) : (
-          <div className="grid gap-4">
-            {favorites.map(listing => (
-              <div key={listing.id} className="relative">
-                <ListingCard 
-                  listing={listing}
-                  onSelect={() => window.location.href = `/l/${listing.id}`}
-                />
-              </div>
-            ))}
-          </div>
+          <PullToRefresh onRefresh={handleRefresh}>
+            <div className="grid gap-4">
+              {favorites.map(listing => (
+                <SwipeableCard
+                  key={listing.id}
+                  onSwipeLeft={() => handleRemoveFavorite(listing.id)}
+                  leftAction="delete"
+                >
+                  <ListingCard 
+                    listing={listing}
+                    onSelect={() => window.location.href = `/l/${listing.id}`}
+                  />
+                </SwipeableCard>
+              ))}
+            </div>
+          </PullToRefresh>
         )}
       </div>
     </div>

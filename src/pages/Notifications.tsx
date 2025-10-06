@@ -9,6 +9,8 @@ import { Bell, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import MentorHeader from '@/components/MentorHeader';
+import { SwipeableCard } from '@/components/SwipeableCard';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 type NotificationRow = {
   id: string;
@@ -123,6 +125,21 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleDeleteNotification = async (notificationIds: string[]) => {
+    try {
+      await supabase
+        .from('notifications')
+        .delete()
+        .in('id', notificationIds);
+      
+      setNotifications(prev => prev.filter(n => !notificationIds.includes(n.id)));
+      toast.success('Notification deleted');
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast.error('Failed to delete notification');
+    }
+  };
+
   // Separate message and non-message notifications
   const messageNotifications = notifications.filter(n => 
     n.type === 'message' && n.sender_id && n.sender_id.trim() !== ''
@@ -196,78 +213,87 @@ export default function NotificationsPage() {
       {loading ? (
   <ListSkeleton count={5} />
 ) : (
-        <div className="space-y-3">
-          {notifications.length === 0 ? (
-  <EmptyState
-    icon={Bell}
-    title="No notifications yet"
-    description="We'll notify you when there's something new!"
-    variant="minimal"
-  />
-) : (
-            notificationThreads.map((thread, idx) => {
-              const firstNotif = thread.notifications[0];
-              const isMessageThread = thread.isThread && firstNotif.type === 'message';
-              
-              return (
-                <Card 
-                  key={idx}
-                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${
-                    thread.hasUnread ? 'border-l-4 border-l-primary bg-accent/20' : ''
-                  }`}
-                  onClick={() => thread.isThread ? handleThreadClick(thread) : handleNotificationClick(firstNotif)}
-                >
-                  <CardContent className="pt-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium">
-                            {isMessageThread 
-                              ? `${thread.notifications.length} messages from ${firstNotif.title.replace('New message from ', '')}` 
-                              : firstNotif.title}
-                          </h3>
-                          {thread.hasUnread && (
-                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                          )}
-                        </div>
-                        
-                        {isMessageThread ? (
-                          <div className="space-y-1.5 mt-2">
-                            {thread.notifications.slice(0, 2).map(notif => (
-                              <div key={notif.id} className="text-sm text-muted-foreground pl-3 border-l-2 border-muted">
-                                {notif.body || 'Message'}
+        <PullToRefresh onRefresh={loadNotifications}>
+          <div className="space-y-3">
+            {notifications.length === 0 ? (
+    <EmptyState
+      icon={Bell}
+      title="No notifications yet"
+      description="We'll notify you when there's something new!"
+      variant="minimal"
+    />
+  ) : (
+              notificationThreads.map((thread, idx) => {
+                const firstNotif = thread.notifications[0];
+                const isMessageThread = thread.isThread && firstNotif.type === 'message';
+                
+                return (
+                  <SwipeableCard
+                    key={idx}
+                    onSwipeLeft={() => handleDeleteNotification(thread.notifications.map(n => n.id))}
+                    onSwipeRight={() => thread.isThread ? handleThreadClick(thread) : handleNotificationClick(firstNotif)}
+                    leftAction="delete"
+                    rightAction="favorite"
+                  >
+                    <Card 
+                      className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+                        thread.hasUnread ? 'border-l-4 border-l-primary bg-accent/20' : ''
+                      }`}
+                      onClick={() => thread.isThread ? handleThreadClick(thread) : handleNotificationClick(firstNotif)}
+                    >
+                      <CardContent className="pt-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-medium">
+                                {isMessageThread 
+                                  ? `${thread.notifications.length} messages from ${firstNotif.title.replace('New message from ', '')}` 
+                                  : firstNotif.title}
+                              </h3>
+                              {thread.hasUnread && (
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                              )}
+                            </div>
+                            
+                            {isMessageThread ? (
+                              <div className="space-y-1.5 mt-2">
+                                {thread.notifications.slice(0, 2).map(notif => (
+                                  <div key={notif.id} className="text-sm text-muted-foreground pl-3 border-l-2 border-muted">
+                                    {notif.body || 'Message'}
+                                  </div>
+                                ))}
+                                {thread.notifications.length > 2 && (
+                                  <div className="text-xs text-primary font-medium pl-3">
+                                    +{thread.notifications.length - 2} more messages
+                                  </div>
+                                )}
                               </div>
-                            ))}
-                            {thread.notifications.length > 2 && (
-                              <div className="text-xs text-primary font-medium pl-3">
-                                +{thread.notifications.length - 2} more messages
-                              </div>
+                            ) : (
+                              firstNotif.body && (
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {firstNotif.body}
+                                </p>
+                              )
                             )}
+                            
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {firstNotif.type}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(firstNotif.created_at).toLocaleString()}
+                              </span>
+                            </div>
                           </div>
-                        ) : (
-                          firstNotif.body && (
-                            <p className="text-sm text-muted-foreground mb-2">
-                              {firstNotif.body}
-                            </p>
-                          )
-                        )}
-                        
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {firstNotif.type}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(firstNotif.created_at).toLocaleString()}
-                          </span>
                         </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
-        </div>
+                      </CardContent>
+                    </Card>
+                  </SwipeableCard>
+                );
+              })
+            )}
+          </div>
+        </PullToRefresh>
         )}
       </div>
     </div>

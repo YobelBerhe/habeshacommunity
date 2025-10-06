@@ -512,3 +512,48 @@
   overflow: hidden;
   transition: max-height 300ms ease-in-out, opacity 200ms ease-in-out;
 }
+
+/* Phase 6.3: Advanced Button Interactions */
+
+.btn-spring {
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.btn-spring:hover {
+  transform: scale(1.05);
+}
+
+.btn-spring:active {
+  transform: scale(0.95);
+}
+
+/* Ripple effect */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Magnetic button effect */
+@media (hover: hover) {
+  .btn-magnetic {
+    transition: transform 0.2s ease-out;
+  }
+}
