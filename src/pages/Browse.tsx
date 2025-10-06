@@ -41,6 +41,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { Parallax } from '@/components/Parallax';
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";
@@ -561,71 +562,87 @@ export default function Browse() {
             <div className="flex items-center justify-between py-4">
               {/* Left: All Navigation Items */}
               <div className="flex space-x-6">
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setFilters({ ...filters, category: 'community', subcategory: undefined })}
-                >
-                  Community
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
-                >
-                  Mentor
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
-                >
-                  Match
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setFilters({ ...filters, category: 'housing' })}
-                >
-                  Housing
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setFilters({ ...filters, category: 'jobs' })}
-                >
-                  Jobs
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setFilters({ ...filters, category: 'services' })}
-                >
-                  Services
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    filters.category === 'forsale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setFilters({ ...filters, category: 'forsale' })}
-                >
-                  Marketplace
-                </button>
-                <button 
-                  className={`pb-1 border-b-2 font-medium text-sm ${
-                    false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                  onClick={() => setDonateDialogOpen(true)}
-                >
-                  <Heart className="w-4 h-4 inline mr-1" />
-                  Support HabeshaCommunity
-                </button>
+                <ScrollReveal direction="up" delay={0.1}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setFilters({ ...filters, category: 'community', subcategory: undefined })}
+                  >
+                    Community
+                  </button>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={0.15}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
+                  >
+                    Mentor
+                  </button>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={0.2}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
+                  >
+                    Match
+                  </button>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={0.25}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setFilters({ ...filters, category: 'housing' })}
+                  >
+                    Housing
+                  </button>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={0.3}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setFilters({ ...filters, category: 'jobs' })}
+                  >
+                    Jobs
+                  </button>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={0.35}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setFilters({ ...filters, category: 'services' })}
+                  >
+                    Services
+                  </button>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={0.4}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      filters.category === 'forsale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setFilters({ ...filters, category: 'forsale' })}
+                  >
+                    Marketplace
+                  </button>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={0.45}>
+                  <button 
+                    className={`pb-1 border-b-2 font-medium text-sm ${
+                      false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setDonateDialogOpen(true)}
+                  >
+                    <Heart className="w-4 h-4 inline mr-1" />
+                    Support HabeshaCommunity
+                  </button>
+                </ScrollReveal>
               </div>
             </div>
           </div>

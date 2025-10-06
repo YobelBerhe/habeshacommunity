@@ -29,6 +29,7 @@ import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
 import AiAssistant from "@/components/AiAssistant";
+import { Parallax } from "@/components/Parallax";
 import { getStarPoints } from "@/services/activeUsers";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
@@ -509,17 +510,19 @@ export default function Index() {
 
 
       {/* Background Map */}
-      <div id="bg-map" className="fixed inset-0 -z-10 pointer-events-none">
-        <GlobalMap 
-          focusCity={appState.cityLat && appState.cityLon ? {
-            lat: parseFloat(appState.cityLat),
-            lng: parseFloat(appState.cityLon),
-            name: appState.city
-          } : null}
-          modalOpen={postOpen || acctOpen || loginOpen || detailOpen}
-          viewMode={appState.viewMode}
-        />
-      </div>
+      <Parallax speed={0.3} className="fixed inset-0 -z-10 pointer-events-none">
+        <div id="bg-map" className="w-full h-full">
+          <GlobalMap 
+            focusCity={appState.cityLat && appState.cityLon ? {
+              lat: parseFloat(appState.cityLat),
+              lng: parseFloat(appState.cityLon),
+              name: appState.city
+            } : null}
+            modalOpen={postOpen || acctOpen || loginOpen || detailOpen}
+            viewMode={appState.viewMode}
+          />
+        </div>
+      </Parallax>
 
       {/* Hero section - moved up directly after header */}
       <div className="relative">
