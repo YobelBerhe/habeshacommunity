@@ -29,7 +29,7 @@ export default function ViewToggle({ viewMode, onChange }: ViewToggleProps) {
           className={`h-8 px-2 md:px-2 md:h-8 px-1.5 h-7 w-7 md:w-auto ${
             mode === 'map' ? 'md:hidden order-first md:order-none' : 
             mode === 'grid' ? 'order-2 md:order-none md:hidden' : 
-            mode === 'list' || mode === 'gallery' || mode === 'compact' ? 'hidden md:inline-flex' : 
+            mode === 'list' ? 'hidden md:inline-flex' : 
             ''
           }`}
           aria-label={label}
