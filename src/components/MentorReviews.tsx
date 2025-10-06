@@ -131,7 +131,7 @@ export default function MentorReviews({
 
   return (
     <>
-      <Card>
+      <Card className="hidden md:block">
         <CardHeader className="border-b bg-muted/30">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <CardTitle className="flex items-center gap-3">
