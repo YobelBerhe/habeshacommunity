@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { GridSkeleton } from '@/components/LoadingStates';
+import { EmptyState } from '@/components/EmptyState';
+import { Search } from 'lucide-react';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
@@ -766,20 +769,32 @@ export default function Browse() {
             />
           </div>
 
-          {/* Listings Section - Right Side */}
-          <div className="w-1/2 bg-background overflow-y-auto">
-            <div className="p-6">
-
-              {/* Full-Width Listings Grid */}
-              <ListingGrid
-                listings={processedListings}
-                onListingClick={handleListingSelect}
-                loading={loading}
-                newlyPostedId={null}
-                viewMode={viewMode}
-              />
-            </div>
-          </div>
+         {/* Listings Section - Right Side */}
+<div className="w-1/2 bg-background overflow-y-auto">
+  <div className="p-6">
+    {loading ? (
+      <GridSkeleton count={6} />
+    ) : processedListings.length === 0 ? (
+      <EmptyState
+        icon={Search}
+        title="No listings found"
+        description="Try adjusting your filters or search in a different city"
+        action={{
+          label: 'Clear Filters',
+          onClick: handleClearAll,
+        }}
+      />
+    ) : (
+      <ListingGrid
+        listings={processedListings}
+        onListingClick={handleListingSelect}
+        loading={false}
+        newlyPostedId={null}
+        viewMode={viewMode}
+      />
+    )}
+  </div>
+</div>
         </div>
       </div>
 
@@ -942,30 +957,43 @@ export default function Browse() {
 
 
         {/* Main Content - Mobile */}
-        <main className="px-4 py-6 mb-20">
-          {viewMode === "map" ? (
-            <div className="h-[70vh] w-full">
-              <InteractiveListingMap
-                listings={processedListings}
-                onListingClick={handleListingSelect}
-                center={filters.city ? undefined : { lat: 20, lng: 0 }}
-                zoom={filters.city ? 12 : 2}
-                height="100%"
-                searchCity={filters.city}
-                searchCityCoords={cityCoords}
-                searchCountry={filters.city}
-              />
-            </div>
-          ) : (
-            <ListingGrid
-              listings={processedListings}
-              onListingClick={handleListingSelect}
-              loading={loading}
-              newlyPostedId={null}
-              viewMode={viewMode}
-            />
-          )}
-        </main>
+<main className="px-4 py-6 mb-20">
+  {loading ? (
+    <GridSkeleton count={6} />
+  ) : processedListings.length === 0 ? (
+    <EmptyState
+      icon={Search}
+      title="No listings found"
+      description="Try adjusting your filters or search in a different city"
+      action={{
+        label: 'Clear Filters',
+        onClick: handleClearAll,
+      }}
+      variant="minimal"
+    />
+  ) : viewMode === "map" ? (
+    <div className="h-[70vh] w-full">
+      <InteractiveListingMap
+        listings={processedListings}
+        onListingClick={handleListingSelect}
+        center={filters.city ? undefined : { lat: 20, lng: 0 }}
+        zoom={filters.city ? 12 : 2}
+        height="100%"
+        searchCity={filters.city}
+        searchCityCoords={cityCoords}
+        searchCountry={filters.city}
+      />
+    </div>
+  ) : (
+    <ListingGrid
+      listings={processedListings}
+      onListingClick={handleListingSelect}
+      loading={false}
+      newlyPostedId={null}
+      viewMode={viewMode}
+    />
+  )}
+</main>
       </div>
 
       
