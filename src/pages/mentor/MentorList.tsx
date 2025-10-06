@@ -1,3 +1,4 @@
+import { PageTransition } from '@/components/PageTransition';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -165,6 +166,7 @@ export default function MentorList() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b shadow-sm">
@@ -495,5 +497,6 @@ export default function MentorList() {
         </Button>
       </div>
     </div>
+        </PageTransition>
   );
 }
