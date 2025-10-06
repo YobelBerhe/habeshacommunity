@@ -17,6 +17,8 @@ import ImageBox from '@/components/ImageBox';
 import MessageMentorModal from '@/components/MessageMentorModal';
 import { VerificationBadge } from '@/components/VerificationBadge';
 import MentorCardSkeleton from '@/components/MentorCardSkeleton';
+import { VirtualizedGrid } from '@/components/VirtualizedGrid';
+import { useResponsiveColumns } from '@/hooks/useResponsiveColumns';
 
 interface Mentor {
   id: string;
@@ -203,6 +205,7 @@ const MentorCard = memo(({
 
 export default function MentorList() {
   const navigate = useNavigate();
+  const columns = useResponsiveColumns();
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [mentorBadges, setMentorBadges] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
@@ -483,22 +486,170 @@ export default function MentorList() {
             </CardContent>
           </Card>
         ) : (
-        <AnimatedList className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAndSortedMentors.map(mentor => (
-          <AnimatedListItem key={mentor.id}>
-            <MentorCard
-              mentor={mentor}
-              badges={mentorBadges[mentor.id] || []}
-              onMessage={() => {
-                setSelectedMentor(mentor);
-                setMessageModalOpen(true);
-              }}
-              onViewProfile={() => navigate(`/mentor/${mentor.id}`)}
-              formatPrice={formatPrice}
-            />
-          </AnimatedListItem>
-            ))}
-          </AnimatedList>
+          <VirtualizedGrid
+            items={filteredAndSortedMentors}
+            columns={columns}
+            estimateSize={500}
+            gap={24}
+            className="h-[calc(100vh-300px)]"
+            renderItem={(mentor) => (
+              <Card
+                className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                onClick={() => navigate(`/mentor/${mentor.id}`)}
+              >
+                {/* Enhanced Image with Overlay */}
+                <div className="relative">
+                  <ImageBox
+                    src={mentor.photos?.[0]}
+                    alt={mentor.display_name}
+                    className="rounded-t-lg h-64 w-full"
+                    showOverlay
+                  />
+
+                  {/* Price Badge */}
+                  <div className="absolute top-3 right-3 bg-background/95 backdrop-blur-md px-3 py-1.5 rounded-full border shadow-lg">
+                    <div className="flex items-center gap-1 text-sm font-bold">
+                      <DollarSign className="w-4 h-4 text-primary" />
+                      {formatPrice(mentor.price_cents, mentor.currency)}
+                    </div>
+                  </div>
+
+                  {/* Featured Badge */}
+                  {(mentor as any).is_featured && (
+                    <div className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      Featured
+                    </div>
+                  )}
+
+                  {/* Gradient Overlay on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                </div>
+
+                <CardHeader className="space-y-3">
+                  {/* Name Row */}
+                  <CardTitle className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <span className="truncate">{mentor.display_name}</span>
+                      {mentor.is_verified && <VerificationBadge isVerified={true} />}
+                      {mentor.country && <CountryFlag country={mentor.country} className="w-5 h-4 shrink-0" />}
+                    </div>
+                    {(mentor.rating_avg ?? 0) > 0 && (
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        <span className="text-sm font-semibold">{mentor.rating_avg?.toFixed(1)}</span>
+                      </div>
+                    )}
+                  </CardTitle>
+
+                  {/* Badges Display */}
+                  {mentorBadges[mentor.id] && mentorBadges[mentor.id].length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        {mentorBadges[mentor.id].slice(0, 4).map((badge) => (
+                          <span
+                            key={badge.id}
+                            title={badge.label}
+                            className="text-lg hover:scale-125 transition-transform"
+                          >
+                            {badge.icon}
+                          </span>
+                        ))}
+                      </div>
+                      {mentorBadges[mentor.id].length > 4 && (
+                        <Badge variant="secondary" className="text-xs h-5">
+                          +{mentorBadges[mentor.id].length - 4}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="w-4 h-4" />
+                    <span className="truncate">
+                      {mentor.city}{mentor.country && `, ${mentor.country}`}
+                    </span>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  {/* Bio */}
+                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                    {mentor.bio}
+                  </p>
+
+                  {/* Skills/Topics */}
+                  <div>
+                    {(mentor as any).mentor_skills && (mentor as any).mentor_skills.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {(mentor as any).mentor_skills.slice(0, 3).map((skillObj: any) => (
+                          <Badge key={skillObj.skill} variant="secondary" className="text-xs">
+                            {skillObj.skill}
+                          </Badge>
+                        ))}
+                        {(mentor as any).mentor_skills.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{(mentor as any).mentor_skills.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {mentor.topics?.slice(0, 2).map(topic => (
+                          <Badge key={topic} variant="secondary" className="text-xs">
+                            {topic}
+                          </Badge>
+                        ))}
+                        {mentor.topics?.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{mentor.topics.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Languages */}
+                  {mentor.languages?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {mentor.languages.slice(0, 2).map(lang => (
+                        <Badge key={lang} variant="outline" className="text-xs">
+                          {lang}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+
+                <CardFooter className="gap-2 bg-muted/30">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedMentor(mentor);
+                      setMessageModalOpen(true);
+                    }}
+                    className="flex-1"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1.5" />
+                    Message
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/mentor/${mentor.id}`);
+                    }}
+                    className="flex-1"
+                  >
+                    View Profile
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
+          />
         )}
       </div>
 

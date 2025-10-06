@@ -12,6 +12,7 @@ import type { Listing } from '@/types';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { toast } from 'sonner';
+import { VirtualizedList } from '@/components/VirtualizedList';
 
 export default function SavedListings() {
   const [favorites, setFavorites] = useState<Listing[]>([]);
@@ -224,10 +225,12 @@ export default function SavedListings() {
   />
 ) : (
           <PullToRefresh onRefresh={handleRefresh}>
-            <div className="grid gap-4">
-              {favorites.map(listing => (
+            <VirtualizedList
+              items={favorites}
+              estimateSize={200}
+              className="h-[calc(100vh-200px)]"
+              renderItem={(listing) => (
                 <SwipeableCard
-                  key={listing.id}
                   onSwipeLeft={() => handleRemoveFavorite(listing.id)}
                   leftAction="delete"
                 >
@@ -236,8 +239,8 @@ export default function SavedListings() {
                     onSelect={() => window.location.href = `/l/${listing.id}`}
                   />
                 </SwipeableCard>
-              ))}
-            </div>
+              )}
+            />
           </PullToRefresh>
         )}
       </div>

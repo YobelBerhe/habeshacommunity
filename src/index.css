@@ -3,6 +3,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Phase 7.3: List Virtualization Performance */
+
+/* Smooth scrolling for virtualized lists */
+.virtual-scroll-container {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Optimize repaints */
+.virtual-item {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Reduce paint during scroll */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize animations during scroll */
+@media (prefers-reduced-motion: no-preference) {
+  .optimized-scroll {
+    scroll-behavior: smooth;
+  }
+}
+
 /* Hide scrollbars but keep functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;

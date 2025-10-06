@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import MentorHeader from '@/components/MentorHeader';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { VirtualizedList } from '@/components/VirtualizedList';
 
 type NotificationRow = {
   id: string;
@@ -214,22 +215,24 @@ export default function NotificationsPage() {
   <ListSkeleton count={5} />
 ) : (
         <PullToRefresh onRefresh={loadNotifications}>
-          <div className="space-y-3">
-            {notifications.length === 0 ? (
-    <EmptyState
-      icon={Bell}
-      title="No notifications yet"
-      description="We'll notify you when there's something new!"
-      variant="minimal"
-    />
-  ) : (
-              notificationThreads.map((thread, idx) => {
+          {notifications.length === 0 ? (
+            <EmptyState
+              icon={Bell}
+              title="No notifications yet"
+              description="We'll notify you when there's something new!"
+              variant="minimal"
+            />
+          ) : (
+            <VirtualizedList
+              items={notificationThreads}
+              estimateSize={120}
+              className="h-[calc(100vh-200px)]"
+              renderItem={(thread) => {
                 const firstNotif = thread.notifications[0];
                 const isMessageThread = thread.isThread && firstNotif.type === 'message';
                 
                 return (
                   <SwipeableCard
-                    key={idx}
                     onSwipeLeft={() => handleDeleteNotification(thread.notifications.map(n => n.id))}
                     onSwipeRight={() => thread.isThread ? handleThreadClick(thread) : handleNotificationClick(firstNotif)}
                     leftAction="delete"
@@ -290,9 +293,9 @@ export default function NotificationsPage() {
                     </Card>
                   </SwipeableCard>
                 );
-              })
-            )}
-          </div>
+              }}
+            />
+          )}
         </PullToRefresh>
         )}
       </div>
