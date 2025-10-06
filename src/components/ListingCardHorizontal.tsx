@@ -1,27 +1,59 @@
 // src/components/ListingCardHorizontal.tsx
 import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ListingLite } from '@/lib/trending';
 import { fallbackImage } from '@/lib/trending';
 import { timeAgo } from '@/lib/time';
+import { toggleFavorite, fetchFavorites } from '@/repo/favorites';
+import { useAuth } from '@/store/auth';
+import { toast } from 'sonner';
 
 export function ListingCardHorizontal({ item }: { item: ListingLite }) {
-  const [saved, setSaved] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
+  const { user } = useAuth();
   const images = item.images || [fallbackImage];
   const hasMultipleImages = images.length > 1;
   
   const price = item.price_cents ? item.price_cents / 100 : null;
 
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadFavoriteStatus = async () => {
+      try {
+        const favorites = await fetchFavorites(user.id);
+        setIsFavorited(favorites.has(item.id));
+      } catch (error) {
+        console.error('Error loading favorite status:', error);
+      }
+    };
+    
+    loadFavoriteStatus();
+  }, [item.id, user]);
+
   const handleCardClick = () => {
     navigate(`/l/${item.id}`);
   };
 
-  const handleSaveClick = (e: React.MouseEvent) => {
+  const handleSaveClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setSaved(!saved);
+    
+    if (!user) {
+      toast.error("Please log in to save favorites");
+      return;
+    }
+    
+    try {
+      const newState = await toggleFavorite(item.id, user.id);
+      setIsFavorited(newState);
+      toast.success(newState ? "Saved to favorites" : "Removed from favorites");
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast.error("Failed to update favorites");
+    }
   };
 
   const handlePrevImage = (e: React.MouseEvent) => {
@@ -94,9 +126,10 @@ export function ListingCardHorizontal({ item }: { item: ListingLite }) {
           <button
             type="button"
             onClick={handleSaveClick}
-            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center transition-colors"
+            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center bg-white/90 hover:bg-white rounded-full backdrop-blur transition-colors"
+            aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
           >
-            <Heart className={`w-8 h-8 ${saved ? 'fill-white text-white' : 'fill-black text-white'}`} strokeWidth={2.5} />
+            <Heart className={`w-5 h-5 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-black'}`} strokeWidth={1.8} />
           </button>
         </div>
         

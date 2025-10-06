@@ -213,7 +213,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                 aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
               >
                 <Heart 
-                  className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-black text-black' : 'text-black'}`}
+                  className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-black'}`}
                   strokeWidth={1.8}
                 />
               </Button>
