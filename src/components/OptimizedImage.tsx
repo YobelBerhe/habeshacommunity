@@ -7,13 +7,15 @@ interface OptimizedImageProps {
   alt: string;
   className?: string;
   aspectRatio?: string;
+  decorative?: boolean;
 }
 
 export function OptimizedImage({ 
   src, 
   alt, 
   className = '',
-  aspectRatio = '4/3' 
+  aspectRatio = '4/3',
+  decorative = false
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -37,7 +39,9 @@ export function OptimizedImage({
       
       <LazyLoadImage
         src={src}
-        alt={alt}
+        alt={decorative ? '' : alt}
+        role={decorative ? 'presentation' : undefined}
+        aria-hidden={decorative}
         className={className}
         effect="blur"
         onLoad={() => setIsLoading(false)}

@@ -8,6 +8,7 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   isLoading?: boolean;
   variant?: 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary' | 'link';
   size?: 'sm' | 'default' | 'lg' | 'icon';
+  ariaLabel?: string;
 }
 
 export function AnimatedButton({ 
@@ -16,6 +17,7 @@ export function AnimatedButton({
   disabled,
   variant,
   size,
+  ariaLabel,
   ...props 
 }: AnimatedButtonProps) {
   return (
@@ -27,10 +29,14 @@ export function AnimatedButton({
         {...props}
         variant={variant}
         size={size}
+        aria-label={ariaLabel}
+        aria-busy={isLoading}
+        aria-disabled={disabled || isLoading}
         disabled={disabled || isLoading}
         className="relative"
       >
         <motion.span
+          aria-hidden={isLoading}
           animate={{
             opacity: isLoading ? 0 : 1,
           }}
@@ -40,13 +46,17 @@ export function AnimatedButton({
         </motion.span>
         
         {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <LoadingSpinner size="sm" variant="dots" />
-          </motion.div>
+          <>
+            <span className="sr-only">Loading</span>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 flex items-center justify-center"
+              aria-hidden="true"
+            >
+              <LoadingSpinner size="sm" variant="dots" />
+            </motion.div>
+          </>
         )}
       </Button>
     </motion.div>

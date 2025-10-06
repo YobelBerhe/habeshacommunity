@@ -201,19 +201,28 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-background">
       <MentorHeader title="Notifications" backPath="/" />
-      <div className="container mx-auto px-4 pt-4 pb-8">
-        {unreadCount > 0 && (
-          <div className="mb-4 flex justify-end">
-            <Button onClick={markAllAsRead} variant="outline" size="sm">
-              <CheckCheck className="h-4 w-4 mr-2" />
-              Mark all read
-            </Button>
+      
+      <main role="main" aria-label="Notifications">
+        <div className="container mx-auto px-4 pt-4 pb-8">
+          {/* Unread count announcement */}
+          <div role="status" aria-live="polite" className="sr-only">
+            {unreadCount > 0 
+              ? `You have ${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}` 
+              : 'No unread notifications'}
           </div>
-        )}
 
-      {loading ? (
-  <ListSkeleton count={5} />
-) : (
+          {unreadCount > 0 && (
+            <div className="mb-4 flex justify-end">
+              <Button onClick={markAllAsRead} variant="outline" size="sm">
+                <CheckCheck className="h-4 w-4 mr-2" />
+                Mark all read
+              </Button>
+            </div>
+          )}
+
+          {loading ? (
+            <ListSkeleton count={5} />
+          ) : (
         <PullToRefresh onRefresh={loadNotifications}>
           {notifications.length === 0 ? (
             <EmptyState
@@ -296,9 +305,10 @@ export default function NotificationsPage() {
               }}
             />
           )}
-        </PullToRefresh>
-        )}
-      </div>
+            </PullToRefresh>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

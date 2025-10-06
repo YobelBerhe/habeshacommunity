@@ -517,140 +517,160 @@ export default function Browse() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background" id="main-content">
+    <div className="min-h-screen bg-background">
       {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
         {/* Top Bar with Search and Controls */}
-        <div className="border-b bg-background/70 backdrop-blur">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between gap-4">
-              {/* Left: Logo and City Search */}
-              <div className="flex items-center gap-4">
-                <button 
-                  className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
-                  onClick={() => navigate('/')}
-                  title="Go to Homepage"
-                >
-                  <img 
-                    src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
-                    alt="HabeshaCommunity Logo" 
-                    className="w-8 h-8 rounded-lg"
+        <header role="banner">
+          <div className="border-b bg-background/70 backdrop-blur">
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex items-center justify-between gap-4">
+                {/* Left: Logo and City Search */}
+                <div className="flex items-center gap-4">
+                  <button 
+                    className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
+                    onClick={() => navigate('/')}
+                    title="Go to Homepage"
+                    aria-label="HabeshaCommunity Homepage"
+                  >
+                    <img 
+                      src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
+                      alt="HabeshaCommunity Logo" 
+                      className="w-8 h-8 rounded-lg"
+                    />
+                    <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
+                  </button>
+                  
+                  <CitySearchBar 
+                    value={filters.city}
+                    onCitySelect={handleCityChange}
+                    placeholder="Enter city or location"
+                    className="w-80"
                   />
-                  <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
-                </button>
-                
-                <CitySearchBar 
-                  value={filters.city}
-                  onCitySelect={handleCityChange}
-                  placeholder="Enter city or location"
-                  className="w-80"
-                />
-              </div>
+                </div>
 
-              {/* Right: Controls */}
-              <div className="flex items-center gap-3">
-                <ThemeToggle />
-                <LanguageToggle value={language} onChange={setLanguage} />
-                <NotifyBell />
-                <motion.div whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => navigate('/chat')}
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Chat
-                  </Button>
-                </motion.div>
-                <motion.div whileTap={{ scale: 0.95 }}>
-                  <Button
-                    size="sm"
-                    className="gap-2"
-                    onClick={openPost}
-                  >
-                    <Plus className="w-4 h-4" />
-                    Post
-                  </Button>
-                </motion.div>
-                <AuthButtons />
+                {/* Right: Controls */}
+                <div className="flex items-center gap-3">
+                  <ThemeToggle />
+                  <LanguageToggle value={language} onChange={setLanguage} />
+                  <NotifyBell />
+                  <motion.div whileTap={{ scale: 0.95 }}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => navigate('/chat')}
+                      aria-label="Open chat"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Chat
+                    </Button>
+                  </motion.div>
+                  <motion.div whileTap={{ scale: 0.95 }}>
+                    <Button
+                      size="sm"
+                      className="gap-2"
+                      onClick={openPost}
+                      aria-label="Create new post"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Post
+                    </Button>
+                  </motion.div>
+                  <AuthButtons />
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Navigation Line */}
-        <div className="bg-background border-b border-border">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between py-4">
-              {/* Left: All Navigation Items */}
-              <div className="flex space-x-6">
-                <ScrollReveal direction="up" delay={0.1}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setFilters({ ...filters, category: 'community', subcategory: undefined })}
-                  >
-                    Community
-                  </button>
-                </ScrollReveal>
-                <ScrollReveal direction="up" delay={0.15}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
-                  >
-                    Mentor
-                  </button>
-                </ScrollReveal>
-                <ScrollReveal direction="up" delay={0.2}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
-                  >
-                    Match
-                  </button>
-                </ScrollReveal>
-                <ScrollReveal direction="up" delay={0.25}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setFilters({ ...filters, category: 'housing' })}
-                  >
-                    Housing
-                  </button>
-                </ScrollReveal>
-                <ScrollReveal direction="up" delay={0.3}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setFilters({ ...filters, category: 'jobs' })}
-                  >
-                    Jobs
-                  </button>
-                </ScrollReveal>
-                <ScrollReveal direction="up" delay={0.35}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setFilters({ ...filters, category: 'services' })}
-                  >
-                    Services
-                  </button>
-                </ScrollReveal>
+        <nav role="navigation" aria-label="Category navigation">
+          <div className="bg-background border-b border-border">
+            <div className="container mx-auto px-4">
+              <div className="flex items-center justify-between py-4">
+                {/* Left: All Navigation Items */}
+                <div className="flex space-x-6">
+                  <ScrollReveal direction="up" delay={0.1}>
+                    <button 
+                      className={`pb-1 border-b-2 font-medium text-sm ${
+                        filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      }`}
+                      onClick={() => setFilters({ ...filters, category: 'community', subcategory: undefined })}
+                      aria-label="Filter by community category"
+                      aria-current={filters.category === 'community' ? 'page' : undefined}
+                    >
+                      Community
+                    </button>
+                  </ScrollReveal>
+                  <ScrollReveal direction="up" delay={0.15}>
+                    <button 
+                      className={`pb-1 border-b-2 font-medium text-sm ${
+                        filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      }`}
+                      onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
+                      aria-label="Filter by mentor category"
+                      aria-current={filters.category === 'mentor' ? 'page' : undefined}
+                    >
+                      Mentor
+                    </button>
+                  </ScrollReveal>
+                  <ScrollReveal direction="up" delay={0.2}>
+                    <button 
+                      className={`pb-1 border-b-2 font-medium text-sm ${
+                        filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      }`}
+                      onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
+                      aria-label="Filter by match category"
+                      aria-current={filters.category === 'match' ? 'page' : undefined}
+                    >
+                      Match
+                    </button>
+                  </ScrollReveal>
+                  <ScrollReveal direction="up" delay={0.25}>
+                    <button 
+                      className={`pb-1 border-b-2 font-medium text-sm ${
+                        filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      }`}
+                      onClick={() => setFilters({ ...filters, category: 'housing' })}
+                      aria-label="Filter by housing category"
+                      aria-current={filters.category === 'housing' ? 'page' : undefined}
+                    >
+                      Housing
+                    </button>
+                  </ScrollReveal>
+                  <ScrollReveal direction="up" delay={0.3}>
+                    <button 
+                      className={`pb-1 border-b-2 font-medium text-sm ${
+                        filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      }`}
+                      onClick={() => setFilters({ ...filters, category: 'jobs' })}
+                      aria-label="Filter by jobs category"
+                      aria-current={filters.category === 'jobs' ? 'page' : undefined}
+                    >
+                      Jobs
+                    </button>
+                  </ScrollReveal>
+                  <ScrollReveal direction="up" delay={0.35}>
+                    <button 
+                      className={`pb-1 border-b-2 font-medium text-sm ${
+                        filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      }`}
+                      onClick={() => setFilters({ ...filters, category: 'services' })}
+                      aria-label="Filter by services category"
+                      aria-current={filters.category === 'services' ? 'page' : undefined}
+                    >
+                      Services
+                    </button>
+                  </ScrollReveal>
                 <ScrollReveal direction="up" delay={0.4}>
                   <button 
                     className={`pb-1 border-b-2 font-medium text-sm ${
                       filters.category === 'forsale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                     }`}
                     onClick={() => setFilters({ ...filters, category: 'forsale' })}
+                    aria-label="Filter by marketplace category"
+                    aria-current={filters.category === 'forsale' ? 'page' : undefined}
                   >
                     Marketplace
                   </button>
@@ -661,6 +681,7 @@ export default function Browse() {
                       false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                     }`}
                     onClick={() => setDonateDialogOpen(true)}
+                    aria-label="Support HabeshaCommunity"
                   >
                     <Heart className="w-4 h-4 inline mr-1" />
                     Support HabeshaCommunity
@@ -669,10 +690,10 @@ export default function Browse() {
               </div>
             </div>
           </div>
-        </div>
+        </nav>
 
         {/* Filter Controls Bar */}
-        <div className="bg-background border-b border-border sticky top-0 z-10 hidden md:block">
+        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border sticky top-0 z-10 hidden md:block">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -815,7 +836,19 @@ export default function Browse() {
 
 
         {/* Split View: Map on Left, Listings on Right */}
-        <div className="flex h-[calc(100vh-200px)]">
+        <main id="main-content" role="main" aria-label="Listings">
+          {/* Live region for results count */}
+          <div 
+            role="status" 
+            aria-live="polite" 
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {processedListings.length} listings found
+            {filters.city && ` in ${filters.city}`}
+          </div>
+
+          <div className="flex h-[calc(100vh-200px)]">
           {/* Map Section - Left Side */}
           <div className="w-1/2 relative">
             <LazyMap
@@ -862,7 +895,8 @@ export default function Browse() {
     )}
   </div>
 </div>
-        </div>
+          </div>
+        </main>
       </div>
 
       {/* Mobile View - Keep Existing Layout */}
