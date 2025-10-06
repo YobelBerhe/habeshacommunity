@@ -1,60 +1,72 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Browse from "./pages/Browse";
-import Chat from "./pages/Chat";
-import AuthCallback from "./pages/AuthCallback";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import Reset from "./pages/auth/Reset";
-import Saved from "./pages/account/Saved";
-import Listings from "./pages/account/Listings";
-import Settings from "./pages/account/Settings";
-import Payouts from "./pages/account/Payouts";
-import ForumsBoards from "./pages/forums/Boards";
-import BoardTopics from "./pages/forums/BoardTopics";
-import TopicView from "./pages/forums/TopicView";
-import MentorList from "./pages/mentor/MentorList";
-import MentorOnboarding from "./pages/mentor/MentorOnboarding";
-import MentorDetail from "./pages/mentor/MentorDetail";
-import MentorDashboard from "./pages/mentor/MentorDashboard";
-import MentorRequests from "./pages/mentor/MentorRequests";
-import MyBookings from "./pages/mentor/MyBookings";
-import BookingSuccess from "./pages/mentor/BookingSuccess";
-import MentorPayouts from "./pages/mentor/MentorPayouts";
-import VerifyProfile from "./pages/mentor/VerifyProfile";
-import ManageAvailability from "./pages/mentor/ManageAvailability";
-import VerificationReview from "./pages/admin/VerificationReview";
-import BadgesInfo from "./pages/BadgesInfo";
-import AdminMetrics from "./pages/admin/Metrics";
-import AdminUsers from "./pages/admin/Users";
-import AdminReports from "./pages/admin/Reports";
-import AdminContent from "./pages/admin/Content";
-import AdminAnalytics from "./pages/admin/Analytics";
-import MatchOnboarding from "./pages/match/MatchOnboarding";
-import MatchDiscover from "./pages/match/MatchDiscover";
-import MatchProfile from "./pages/match/MatchProfile";
-import MatchList from "./pages/match/MatchList";
-import MatchFamilyMode from "./pages/match/MatchFamilyMode";
-import MatchQuiz from "./pages/match/MatchQuiz";
-import MatchSuccess from "./pages/match/MatchSuccess";
-import MatchDates from "./pages/match/MatchDates";
-import Marketplace from "./pages/marketplace/Marketplace";
-import MarketplaceDetail from "./pages/marketplace/MarketplaceDetail";
-import Inbox from "./pages/inbox/Inbox";
-import AdminSeed from "./pages/admin/Seed";
-import AdminDashboard from "./pages/admin/Dashboard";
-import DonateSuccess from "./pages/donate/Success";
-import DonateCancel from "./pages/donate/Cancel";
-import ListingDetail from "./pages/ListingDetail";
-import Notifications from "./pages/Notifications";
+import { PageLoader } from "@/components/LoadingStates";
 
-const queryClient = new QueryClient();
+// Lazy load all page components
+const Index = lazy(() => import("./pages/Index"));
+const Browse = lazy(() => import("./pages/Browse"));
+const Chat = lazy(() => import("./pages/Chat"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const Login = lazy(() => import("./pages/auth/Login"));
+const Register = lazy(() => import("./pages/auth/Register"));
+const Reset = lazy(() => import("./pages/auth/Reset"));
+const Saved = lazy(() => import("./pages/account/Saved"));
+const Listings = lazy(() => import("./pages/account/Listings"));
+const Settings = lazy(() => import("./pages/account/Settings"));
+const Payouts = lazy(() => import("./pages/account/Payouts"));
+const ForumsBoards = lazy(() => import("./pages/forums/Boards"));
+const BoardTopics = lazy(() => import("./pages/forums/BoardTopics"));
+const TopicView = lazy(() => import("./pages/forums/TopicView"));
+const MentorList = lazy(() => import("./pages/mentor/MentorList"));
+const MentorOnboarding = lazy(() => import("./pages/mentor/MentorOnboarding"));
+const MentorDetail = lazy(() => import("./pages/mentor/MentorDetail"));
+const MentorDashboard = lazy(() => import("./pages/mentor/MentorDashboard"));
+const MentorRequests = lazy(() => import("./pages/mentor/MentorRequests"));
+const MyBookings = lazy(() => import("./pages/mentor/MyBookings"));
+const BookingSuccess = lazy(() => import("./pages/mentor/BookingSuccess"));
+const MentorPayouts = lazy(() => import("./pages/mentor/MentorPayouts"));
+const VerifyProfile = lazy(() => import("./pages/mentor/VerifyProfile"));
+const ManageAvailability = lazy(() => import("./pages/mentor/ManageAvailability"));
+const VerificationReview = lazy(() => import("./pages/admin/VerificationReview"));
+const BadgesInfo = lazy(() => import("./pages/BadgesInfo"));
+const AdminMetrics = lazy(() => import("./pages/admin/Metrics"));
+const AdminUsers = lazy(() => import("./pages/admin/Users"));
+const AdminReports = lazy(() => import("./pages/admin/Reports"));
+const AdminContent = lazy(() => import("./pages/admin/Content"));
+const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const MatchOnboarding = lazy(() => import("./pages/match/MatchOnboarding"));
+const MatchDiscover = lazy(() => import("./pages/match/MatchDiscover"));
+const MatchProfile = lazy(() => import("./pages/match/MatchProfile"));
+const MatchList = lazy(() => import("./pages/match/MatchList"));
+const MatchFamilyMode = lazy(() => import("./pages/match/MatchFamilyMode"));
+const MatchQuiz = lazy(() => import("./pages/match/MatchQuiz"));
+const MatchSuccess = lazy(() => import("./pages/match/MatchSuccess"));
+const MatchDates = lazy(() => import("./pages/match/MatchDates"));
+const Marketplace = lazy(() => import("./pages/marketplace/Marketplace"));
+const MarketplaceDetail = lazy(() => import("./pages/marketplace/MarketplaceDetail"));
+const Inbox = lazy(() => import("./pages/inbox/Inbox"));
+const AdminSeed = lazy(() => import("./pages/admin/Seed"));
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const DonateSuccess = lazy(() => import("./pages/donate/Success"));
+const DonateCancel = lazy(() => import("./pages/donate/Cancel"));
+const ListingDetail = lazy(() => import("./pages/ListingDetail"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => {
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -66,63 +78,65 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/browse" element={<Browse />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/l/:id" element={<ListingDetail />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
-          <Route path="/auth/reset" element={<Reset />} />
-          <Route path="/account/saved" element={<Saved />} />
-          <Route path="/account/listings" element={<Listings />} />
-          <Route path="/account/settings" element={<Settings />} />
-          <Route path="/account/payouts" element={<Payouts />} />
-          <Route path="/forums" element={<ForumsBoards />} />
-          <Route path="/forums/:boardKey" element={<BoardTopics />} />
-          <Route path="/forums/topic/:id" element={<TopicView />} />
-          <Route path="/mentor" element={<MentorList />} />
-          <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
-          <Route path="/mentor/dashboard" element={<MentorDashboard />} />
-          <Route path="/mentor/:id" element={<MentorDetail />} />
-          <Route path="/mentor/requests" element={<MentorRequests />} />
-          <Route path="/mentor/bookings" element={<MyBookings />} />
-          <Route path="/mentor/booking-success" element={<BookingSuccess />} />
-          <Route path="/mentor/payouts" element={<MentorPayouts />} />
-          <Route path="/mentor/verify" element={<VerifyProfile />} />
-          <Route path="/mentor/availability" element={<ManageAvailability />} />
-          <Route path="/badges" element={<BadgesInfo />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/verifications" element={<VerificationReview />} />
-          <Route path="/admin/metrics" element={<AdminMetrics />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/reports" element={<AdminReports />} />
-          <Route path="/admin/content" element={<AdminContent />} />
-          <Route path="/admin/analytics" element={<AdminAnalytics />} />
-          <Route path="/match" element={<MatchDiscover />} />
-          <Route path="/match/discover" element={<MatchDiscover />} />
-          <Route path="/match/onboarding" element={<MatchOnboarding />} />
-          <Route path="/match/profile/:id" element={<MatchProfile />} />
-          <Route path="/match/matches" element={<MatchList />} />
-          <Route path="/match/family-mode/:id" element={<MatchFamilyMode />} />
-          <Route path="/match/quiz" element={<MatchQuiz />} />
-          <Route path="/match/success" element={<MatchSuccess />} />
-          <Route path="/match/dates" element={<MatchDates />} />
-          <Route path="/market" element={<Marketplace />} />
-          <Route path="/market/:id" element={<MarketplaceDetail />} />
-          <Route path="/inbox" element={<Inbox />} />
-          <Route path="/admin/seed" element={<AdminSeed />} />
-          <Route path="/donate/success" element={<DonateSuccess />} />
-          <Route path="/donate/cancel" element={<DonateCancel />} />
-          <Route path="/notifications" element={<Notifications />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<div>Page not found</div>} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/browse" element={<Browse />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/l/:id" element={<ListingDetail />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/auth/register" element={<Register />} />
+              <Route path="/auth/reset" element={<Reset />} />
+              <Route path="/account/saved" element={<Saved />} />
+              <Route path="/account/listings" element={<Listings />} />
+              <Route path="/account/settings" element={<Settings />} />
+              <Route path="/account/payouts" element={<Payouts />} />
+              <Route path="/forums" element={<ForumsBoards />} />
+              <Route path="/forums/:boardKey" element={<BoardTopics />} />
+              <Route path="/forums/topic/:id" element={<TopicView />} />
+              <Route path="/mentor" element={<MentorList />} />
+              <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
+              <Route path="/mentor/dashboard" element={<MentorDashboard />} />
+              <Route path="/mentor/:id" element={<MentorDetail />} />
+              <Route path="/mentor/requests" element={<MentorRequests />} />
+              <Route path="/mentor/bookings" element={<MyBookings />} />
+              <Route path="/mentor/booking-success" element={<BookingSuccess />} />
+              <Route path="/mentor/payouts" element={<MentorPayouts />} />
+              <Route path="/mentor/verify" element={<VerifyProfile />} />
+              <Route path="/mentor/availability" element={<ManageAvailability />} />
+              <Route path="/badges" element={<BadgesInfo />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/verifications" element={<VerificationReview />} />
+              <Route path="/admin/metrics" element={<AdminMetrics />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/reports" element={<AdminReports />} />
+              <Route path="/admin/content" element={<AdminContent />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
+              <Route path="/match" element={<MatchDiscover />} />
+              <Route path="/match/discover" element={<MatchDiscover />} />
+              <Route path="/match/onboarding" element={<MatchOnboarding />} />
+              <Route path="/match/profile/:id" element={<MatchProfile />} />
+              <Route path="/match/matches" element={<MatchList />} />
+              <Route path="/match/family-mode/:id" element={<MatchFamilyMode />} />
+              <Route path="/match/quiz" element={<MatchQuiz />} />
+              <Route path="/match/success" element={<MatchSuccess />} />
+              <Route path="/match/dates" element={<MatchDates />} />
+              <Route path="/market" element={<Marketplace />} />
+              <Route path="/market/:id" element={<MarketplaceDetail />} />
+              <Route path="/inbox" element={<Inbox />} />
+              <Route path="/admin/seed" element={<AdminSeed />} />
+              <Route path="/donate/success" element={<DonateSuccess />} />
+              <Route path="/donate/cancel" element={<DonateCancel />} />
+              <Route path="/notifications" element={<Notifications />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<div>Page not found</div>} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
      </ErrorBoundary>
   );
 };

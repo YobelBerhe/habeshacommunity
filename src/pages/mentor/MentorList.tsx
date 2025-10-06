@@ -1,7 +1,8 @@
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { PageTransition } from '@/components/PageTransition';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounce } from '@/hooks/useDebounce';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,12 +38,176 @@ interface Mentor {
   created_at?: string;
 }
 
+// Memoized MentorCard component for better performance
+const MentorCard = memo(({ 
+  mentor, 
+  badges, 
+  onMessage, 
+  onViewProfile,
+  formatPrice 
+}: { 
+  mentor: Mentor; 
+  badges: any[]; 
+  onMessage: () => void; 
+  onViewProfile: () => void;
+  formatPrice: (cents: number, currency: string) => string;
+}) => {
+  return (
+    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+      {/* Enhanced Image with Overlay */}
+      <div className="relative">
+        <ImageBox
+          src={mentor.photos?.[0]}
+          alt={mentor.display_name}
+          className="rounded-t-lg h-64 w-full"
+          showOverlay
+        />
+
+        {/* Price Badge */}
+        <div className="absolute top-3 right-3 bg-background/95 backdrop-blur-md px-3 py-1.5 rounded-full border shadow-lg">
+          <div className="flex items-center gap-1 text-sm font-bold">
+            <DollarSign className="w-4 h-4 text-primary" />
+            {formatPrice(mentor.price_cents, mentor.currency)}
+          </div>
+        </div>
+
+        {/* Featured Badge */}
+        {(mentor as any).is_featured && (
+          <div className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            Featured
+          </div>
+        )}
+
+        {/* Gradient Overlay on Hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      </div>
+
+      <CardHeader className="space-y-3">
+        {/* Name Row */}
+        <CardTitle className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <span className="truncate">{mentor.display_name}</span>
+            {mentor.is_verified && <VerificationBadge isVerified={true} />}
+            {mentor.country && <CountryFlag country={mentor.country} className="w-5 h-4 shrink-0" />}
+          </div>
+          {(mentor.rating_avg ?? 0) > 0 && (
+            <div className="flex items-center gap-1 shrink-0">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span className="text-sm font-semibold">{mentor.rating_avg?.toFixed(1)}</span>
+            </div>
+          )}
+        </CardTitle>
+
+        {/* Badges Display */}
+        {badges && badges.length > 0 && (
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              {badges.slice(0, 4).map((badge) => (
+                <span
+                  key={badge.id}
+                  title={badge.label}
+                  className="text-lg hover:scale-125 transition-transform"
+                >
+                  {badge.icon}
+                </span>
+              ))}
+            </div>
+            {badges.length > 4 && (
+              <Badge variant="secondary" className="text-xs h-5">
+                +{badges.length - 4}
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Location */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <MapPin className="w-4 h-4" />
+          <span className="truncate">
+            {mentor.city}{mentor.country && `, ${mentor.country}`}
+          </span>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Bio */}
+        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+          {mentor.bio}
+        </p>
+
+        {/* Skills/Topics */}
+        <div>
+          {(mentor as any).mentor_skills && (mentor as any).mentor_skills.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {(mentor as any).mentor_skills.slice(0, 3).map((skillObj: any) => (
+                <Badge key={skillObj.skill} variant="secondary" className="text-xs">
+                  {skillObj.skill}
+                </Badge>
+              ))}
+              {(mentor as any).mentor_skills.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{(mentor as any).mentor_skills.length - 3}
+                </Badge>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {mentor.topics?.slice(0, 2).map(topic => (
+                <Badge key={topic} variant="secondary" className="text-xs">
+                  {topic}
+                </Badge>
+              ))}
+              {mentor.topics?.length > 2 && (
+                <Badge variant="outline" className="text-xs">
+                  +{mentor.topics.length - 2}
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Languages */}
+        {mentor.languages?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {mentor.languages.slice(0, 2).map(lang => (
+              <Badge key={lang} variant="outline" className="text-xs">
+                {lang}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </CardContent>
+
+      <CardFooter className="gap-2 bg-muted/30">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onMessage}
+          className="flex-1"
+        >
+          <MessageCircle className="w-4 h-4 mr-1.5" />
+          Message
+        </Button>
+        <Button
+          size="sm"
+          onClick={onViewProfile}
+          className="flex-1"
+        >
+          View Profile
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+});
+
 export default function MentorList() {
   const navigate = useNavigate();
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [mentorBadges, setMentorBadges] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const searchTerm = useDebounce(searchInput, 500);
   const [showFilters, setShowFilters] = useState(false);
   const [skillFilter, setSkillFilter] = useState('all');
   const [languageFilter, setLanguageFilter] = useState('all');
@@ -99,7 +264,7 @@ export default function MentorList() {
 
   // Active filters
   const activeFilters = [
-    searchTerm && { label: `Search: "${searchTerm}"`, clear: () => setSearchTerm('') },
+    searchTerm && { label: `Search: "${searchTerm}"`, clear: () => setSearchInput('') },
     skillFilter !== 'all' && { label: `Skill: ${skillFilter}`, clear: () => setSkillFilter('all') },
     languageFilter !== 'all' && { label: `Language: ${languageFilter}`, clear: () => setLanguageFilter('all') },
     cityFilter && { label: `City: ${cityFilter}`, clear: () => setCityFilter('') },
@@ -107,7 +272,7 @@ export default function MentorList() {
   ].filter(Boolean);
 
   const clearAllFilters = () => {
-    setSearchTerm('');
+    setSearchInput('');
     setSkillFilter('all');
     setLanguageFilter('all');
     setCityFilter('');
@@ -188,8 +353,8 @@ export default function MentorList() {
           <div className="flex gap-2">
             <Input
               placeholder="Search by name, skills, topics..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
               className="flex-1"
             />
             <Button
@@ -321,158 +486,17 @@ export default function MentorList() {
         <AnimatedList className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedMentors.map(mentor => (
           <AnimatedListItem key={mentor.id}>
-              <Card
-                key={mentor.id}
-                className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              >
-                {/* Enhanced Image with Overlay */}
-                <div className="relative">
-                  <ImageBox
-                    src={mentor.photos?.[0]}
-                    alt={mentor.display_name}
-                    className="rounded-t-lg h-64 w-full"
-                    showOverlay
-                  />
-
-                  {/* Price Badge */}
-                  <div className="absolute top-3 right-3 bg-background/95 backdrop-blur-md px-3 py-1.5 rounded-full border shadow-lg">
-                    <div className="flex items-center gap-1 text-sm font-bold">
-                      <DollarSign className="w-4 h-4 text-primary" />
-                      {formatPrice(mentor.price_cents, mentor.currency)}
-                    </div>
-                  </div>
-
-                  {/* Featured Badge */}
-                  {(mentor as any).is_featured && (
-                    <div className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      Featured
-                    </div>
-                  )}
-
-                  {/* Gradient Overlay on Hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                </div>
-
-                <CardHeader className="space-y-3">
-                  {/* Name Row */}
-                  <CardTitle className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <span className="truncate">{mentor.display_name}</span>
-                      {mentor.is_verified && <VerificationBadge isVerified={true} />}
-                      {mentor.country && <CountryFlag country={mentor.country} className="w-5 h-4 shrink-0" />}
-                    </div>
-                    {(mentor.rating_avg ?? 0) > 0 && (
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                        <span className="text-sm font-semibold">{mentor.rating_avg?.toFixed(1)}</span>
-                      </div>
-                    )}
-                  </CardTitle>
-
-                  {/* Badges Display */}
-                  {mentorBadges[mentor.id] && mentorBadges[mentor.id].length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        {mentorBadges[mentor.id].slice(0, 4).map((badge) => (
-                          <span
-                            key={badge.id}
-                            title={badge.label}
-                            className="text-lg hover:scale-125 transition-transform"
-                          >
-                            {badge.icon}
-                          </span>
-                        ))}
-                      </div>
-                      {mentorBadges[mentor.id].length > 4 && (
-                        <Badge variant="secondary" className="text-xs h-5">
-                          +{mentorBadges[mentor.id].length - 4}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Location */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    <span className="truncate">
-                      {mentor.city}{mentor.country && `, ${mentor.country}`}
-                    </span>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  {/* Bio */}
-                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                    {mentor.bio}
-                  </p>
-
-                  {/* Skills/Topics */}
-                  <div>
-                    {(mentor as any).mentor_skills && (mentor as any).mentor_skills.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(mentor as any).mentor_skills.slice(0, 3).map((skillObj: any) => (
-                          <Badge key={skillObj.skill} variant="secondary" className="text-xs">
-                            {skillObj.skill}
-                          </Badge>
-                        ))}
-                        {(mentor as any).mentor_skills.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{(mentor as any).mentor_skills.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-1.5">
-                        {mentor.topics?.slice(0, 2).map(topic => (
-                          <Badge key={topic} variant="secondary" className="text-xs">
-                            {topic}
-                          </Badge>
-                        ))}
-                        {mentor.topics?.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{mentor.topics.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Languages */}
-                  {mentor.languages?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {mentor.languages.slice(0, 2).map(lang => (
-                        <Badge key={lang} variant="outline" className="text-xs">
-                          {lang}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-
-                <CardFooter className="gap-2 bg-muted/30">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedMentor(mentor);
-                      setMessageModalOpen(true);
-                    }}
-                    className="flex-1"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-1.5" />
-                    Message
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/mentor/${mentor.id}`)}
-                    className="flex-1"
-                  >
-                    View Profile
-                  </Button>
-                </CardFooter>
-              </Card>
-             </AnimatedListItem>
+            <MentorCard
+              mentor={mentor}
+              badges={mentorBadges[mentor.id] || []}
+              onMessage={() => {
+                setSelectedMentor(mentor);
+                setMessageModalOpen(true);
+              }}
+              onViewProfile={() => navigate(`/mentor/${mentor.id}`)}
+              formatPrice={formatPrice}
+            />
+          </AnimatedListItem>
             ))}
           </AnimatedList>
         )}

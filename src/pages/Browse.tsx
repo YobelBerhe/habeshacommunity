@@ -8,7 +8,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
 import ListingGrid from "@/components/ListingGrid";
-import InteractiveListingMap from "@/components/InteractiveListingMap";
+import { LazyMap } from "@/components/LazyMap";
 import GlobalMap from "@/components/GlobalMap";
 import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
@@ -795,7 +795,7 @@ export default function Browse() {
         <div className="flex h-[calc(100vh-200px)]">
           {/* Map Section - Left Side */}
           <div className="w-1/2 relative">
-            <InteractiveListingMap
+            <LazyMap
               listings={processedListings}
               onListingClick={handleListingSelect}
               center={filters.city ? undefined : { lat: 20, lng: 0 }}
@@ -1021,7 +1021,7 @@ export default function Browse() {
     />
   ) : viewMode === "map" ? (
     <div className="h-[70vh] w-full">
-      <InteractiveListingMap
+      <LazyMap
         listings={processedListings}
         onListingClick={handleListingSelect}
         center={filters.city ? undefined : { lat: 20, lng: 0 }}
