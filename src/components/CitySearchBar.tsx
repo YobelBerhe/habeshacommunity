@@ -46,8 +46,22 @@ export default function CitySearchBar({
     
     const t = setTimeout(async () => {
       try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&accept-language=en&q=${encodeURIComponent(q)}`;
-        const res = await fetch(url, { headers: { "Accept": "application/json" }});
+        // Remove accept-language to allow multilingual search (including Tigrinya)
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&q=${encodeURIComponent(q)}`;
+        const res = await fetch(url, { 
+          headers: { 
+            "Accept": "application/json",
+            "User-Agent": "HabeshaNetwork/1.0" // Nominatim requires user agent
+          }
+        });
+        
+        if (!res.ok) {
+          console.error('Nominatim API error:', res.status);
+          setItems([]);
+          setOpen(false);
+          return;
+        }
+        
         const data = await res.json();
         const list = (data as any[]).map(x => {
           const a = x.address || {};
@@ -55,14 +69,16 @@ export default function CitySearchBar({
           const country = a.country || "";
           return { name, country, lat: x.lat, lon: x.lon };
         }).filter(Boolean);
+        
         setItems(list); 
         if (list.length > 0 && !locked) setOpen(true);
+        else setOpen(false);
       } catch (error) {
-        // Allow manual city entry as fallback
-        setItems([{ name: q, country: "Manual Entry", lat: "0", lon: "0" }]);
-        if (!locked) setOpen(true);
+        console.error('City search error:', error);
+        setItems([]);
+        setOpen(false);
       }
-    }, 200); 
+    }, 300); 
     
     return () => clearTimeout(t);
   }, [q, locked]);
