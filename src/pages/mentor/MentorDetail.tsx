@@ -463,13 +463,15 @@ export default function MentorDetail() {
               </CardContent>
             </Card>
 
-            {/* Reviews Section */}
-            <MentorReviews
-              mentorId={mentor.id}
-              mentorName={mentor.display_name || mentor.name}
-              ratingAvg={mentor.rating_avg}
-              ratingCount={mentor.rating_count}
-            />
+            {/* Reviews Section - Desktop only */}
+            <div className="hidden lg:block">
+              <MentorReviews
+                mentorId={mentor.id}
+                mentorName={mentor.display_name || mentor.name}
+                ratingAvg={mentor.rating_avg}
+                ratingCount={mentor.rating_count}
+              />
+            </div>
           </div>
 
           {/* Right Column - Sticky Services Card */}
