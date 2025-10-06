@@ -141,8 +141,140 @@ export default function Browse() {
       setLoading(true);
       console.log('🔍 Fetching listings with filters:', filters);
       try {
-        // Handle mentor category specially
-        if (filters.category === 'mentor') {
+        // If no category filter, fetch from all sources
+        if (!filters.category) {
+          console.log('🌍 Fetching all listings (including mentors and match profiles)');
+          
+          // Fetch regular listings
+          const regularData = user 
+            ? await fetchListingsWithContacts({
+                city: filters.city,
+                q: filters.query,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+              })
+            : await fetchListings({
+                city: filters.city,
+                q: filters.query,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+              });
+
+          // Fetch mentors
+          let mentorQuery = supabase
+            .from('mentors')
+            .select(`*, mentor_skills(skill)`)
+            .eq('available', true);
+          
+          if (filters.city) mentorQuery = mentorQuery.eq('city', filters.city);
+          const { data: mentorData } = await mentorQuery;
+
+          // Fetch match profiles
+          let matchQuery = supabase
+            .from('match_profiles')
+            .select('*')
+            .eq('active', true);
+          
+          if (filters.city) matchQuery = matchQuery.eq('city', filters.city);
+          const { data: matchData } = await matchQuery;
+
+          // Process regular listings
+          const processedRegular = regularData.map(row => ({
+            id: row.id,
+            user_id: row.user_id || "",
+            city: row.city,
+            country: row.country,
+            category: row.category as string,
+            subcategory: row.subcategory,
+            title: row.title,
+            description: row.description || "",
+            price: row.price_cents ? row.price_cents / 100 : null,
+            currency: row.currency,
+            contact_phone: hasContactAccess(user, row) ? getContactValue(row.contact, 'phone') : null,
+            contact_whatsapp: hasContactAccess(user, row) ? getContactValue(row.contact, 'whatsapp') : null,
+            contact_telegram: hasContactAccess(user, row) ? getContactValue(row.contact, 'telegram') : null,
+            contact_email: hasContactAccess(user, row) ? getContactValue(row.contact, 'email') : null,
+            website_url: row.website_url,
+            tags: row.tags || [],
+            images: row.images || [],
+            lat: row.location_lat,
+            lng: row.location_lng,
+            created_at: row.created_at,
+            contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
+            photos: row.images || [],
+            lon: row.location_lng || undefined,
+            createdAt: new Date(row.created_at).getTime(),
+            updatedAt: new Date(row.updated_at).getTime(),
+            hasImage: !!(row.images?.length),
+          }));
+
+          // Process mentors
+          const processedMentors = (mentorData || []).map(mentor => ({
+            id: mentor.id,
+            user_id: mentor.user_id,
+            city: mentor.city,
+            country: mentor.country,
+            category: 'mentor',
+            subcategory: 'mentor',
+            title: mentor.display_name,
+            description: mentor.bio || "",
+            price: mentor.price_cents ? mentor.price_cents / 100 : null,
+            currency: mentor.currency,
+            contact_phone: null,
+            contact_whatsapp: null,
+            contact_telegram: null,
+            contact_email: null,
+            website_url: mentor.website_url,
+            tags: mentor.topics || [],
+            images: mentor.photos || [],
+            lat: null,
+            lng: null,
+            created_at: mentor.created_at,
+            contact: { phone: "" },
+            photos: mentor.photos || [],
+            lon: undefined,
+            createdAt: new Date(mentor.created_at).getTime(),
+            updatedAt: new Date(mentor.created_at).getTime(),
+            hasImage: !!(mentor.photos?.length),
+          }));
+
+          // Process match profiles
+          const processedMatches = (matchData || []).map(profile => ({
+            id: profile.user_id,
+            user_id: profile.user_id,
+            city: profile.city,
+            country: profile.country,
+            category: 'match',
+            subcategory: 'networking',
+            title: profile.display_name || 'Anonymous',
+            description: profile.bio || "",
+            price: null,
+            currency: 'USD',
+            contact_phone: null,
+            contact_whatsapp: null,
+            contact_telegram: null,
+            contact_email: null,
+            website_url: null,
+            tags: profile.seeking ? [profile.seeking] : [],
+            images: profile.photos || [],
+            lat: null,
+            lng: null,
+            created_at: profile.created_at,
+            contact: { phone: "" },
+            photos: profile.photos || [],
+            lon: undefined,
+            createdAt: new Date(profile.created_at).getTime(),
+            updatedAt: new Date(profile.created_at).getTime(),
+            hasImage: !!(profile.photos?.length),
+          }));
+
+          // Combine all listings
+          const allListings = [...processedRegular, ...processedMentors, ...processedMatches];
+          console.log('✅ Combined all listings:', allListings.length);
+          setListings(allListings);
+          
+        } else if (filters.category === 'mentor') {
+          // Handle mentor category specially
           let query = supabase
             .from('mentors')
             .select(`
