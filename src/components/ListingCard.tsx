@@ -260,6 +260,25 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                         {formatDate(listing.createdAt || new Date(listing.created_at).getTime())}
                       </span>
                     </div>
+                    
+                    {/* Description with heart */}
+                    {(listing as any).about && (
+                      <div className="flex items-start gap-2 mt-1">
+                        <button
+                          onClick={handleFavoriteToggle}
+                          className="flex-shrink-0 mt-0.5"
+                          aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
+                        >
+                          <Heart 
+                            className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`}
+                            strokeWidth={1.8}
+                          />
+                        </button>
+                        <p className="text-xs text-muted-foreground line-clamp-1 leading-tight">
+                          {(listing as any).about}
+                        </p>
+                      </div>
+                    )}
                   </>
                 ) : (
                   // Original layout for other views
@@ -285,6 +304,25 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
                     <div className="text-xs text-muted-foreground">
                       {listing.city}{listing.country && `, ${listing.country}`}
                     </div>
+                    
+                    {/* Description with heart */}
+                    {(listing as any).about && (
+                      <div className="flex items-start gap-2 mt-1">
+                        <button
+                          onClick={handleFavoriteToggle}
+                          className="flex-shrink-0 mt-0.5"
+                          aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
+                        >
+                          <Heart 
+                            className={`w-4 h-4 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`}
+                            strokeWidth={1.8}
+                          />
+                        </button>
+                        <p className="text-xs text-muted-foreground line-clamp-1 leading-tight">
+                          {(listing as any).about}
+                        </p>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
