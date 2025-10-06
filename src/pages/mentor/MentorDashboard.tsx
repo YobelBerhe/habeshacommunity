@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { ShareMentorProfile } from '@/components/ShareMentorProfile';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 type DateRange = {
   from: Date;
@@ -339,7 +340,9 @@ export default function MentorDashboard() {
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <div className="text-3xl font-bold">{stats.total}</div>
+              <div className="text-3xl font-bold">
+                <AnimatedCounter value={stats.total} />
+              </div>
               <p className="text-xs text-muted-foreground mt-1">All time sessions</p>
             </CardContent>
           </Card>
@@ -361,7 +364,9 @@ export default function MentorDashboard() {
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">{stats.pending}</div>
+              <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                <AnimatedCounter value={stats.pending} />
+              </div>
               <p className="text-xs text-muted-foreground mt-1">Awaiting response</p>
             </CardContent>
           </Card>
@@ -377,7 +382,9 @@ export default function MentorDashboard() {
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{stats.confirmed}</div>
+              <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                <AnimatedCounter value={stats.confirmed} />
+              </div>
               <p className="text-xs text-muted-foreground mt-1">Upcoming sessions</p>
             </CardContent>
           </Card>
@@ -398,7 +405,9 @@ export default function MentorDashboard() {
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.completed}</div>
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                <AnimatedCounter value={stats.completed} />
+              </div>
               <p className="text-xs text-muted-foreground mt-1">Total sessions done</p>
             </CardContent>
           </Card>

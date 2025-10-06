@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
+import { AnimatedInput } from "@/components/AnimatedInput";
+import { AnimatedButton } from "@/components/AnimatedButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -60,40 +62,35 @@ export default function Login() {
           </div>
         ) : (
           <form onSubmit={onSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium block mb-1">Email</label>
-              <input 
-                className="w-full border rounded-md p-3 bg-background" 
-                type="email" 
-                required
-                placeholder="Enter your email" 
-                value={email} 
-                onChange={e=>setEmail(e.target.value)} 
-              />
-            </div>
+            <AnimatedInput
+              type="email"
+              label="Email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
             
             {!magicLinkMode && (
-              <div>
-                <label className="text-sm font-medium block mb-1">Password</label>
-                <input 
-                  className="w-full border rounded-md p-3 bg-background" 
-                  type="password" 
-                  required
-                  placeholder="Enter your password" 
-                  value={password} 
-                  onChange={e=>setPassword(e.target.value)} 
-                />
-              </div>
+              <AnimatedInput
+                type="password"
+                label="Password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             )}
             
             {err && <div className="text-sm text-red-600 bg-red-50 dark:bg-red-950 p-2 rounded">{err}</div>}
             
-            <button 
-              className="w-full bg-primary text-primary-foreground rounded-md p-3 font-medium hover:bg-primary/90 transition-colors" 
-              disabled={loading}
+            <AnimatedButton
+              type="submit"
+              isLoading={loading}
+              className="w-full"
             >
-              {loading ? "Signing in…" : magicLinkMode ? "Send magic link" : "Sign in"}
-            </button>
+              {magicLinkMode ? "Send magic link" : "Sign in"}
+            </AnimatedButton>
             
             <div className="text-center">
               <button

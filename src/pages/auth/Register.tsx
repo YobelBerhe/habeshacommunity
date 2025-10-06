@@ -2,6 +2,8 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import CitySearchBar from "@/components/CitySearchBar";
+import { AnimatedInput } from "@/components/AnimatedInput";
+import { AnimatedButton } from "@/components/AnimatedButton";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -87,19 +89,17 @@ export default function Register() {
           </div>
         ) : (
           <form onSubmit={onSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium block mb-1">Display Name</label>
-              <input 
-                className="w-full border rounded-md p-3 bg-background" 
-                placeholder="Your name"
-                value={name} 
-                onChange={e=>setName(e.target.value)} 
-                required
-              />
-            </div>
+            <AnimatedInput
+              type="text"
+              label="Display Name"
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
 
             <div>
-              <label className="text-sm font-medium block mb-1">City you live in</label>
+              <label className="text-sm font-medium block mb-2">City you live in</label>
               <CitySearchBar 
                 value={city}
                 onCitySelect={(cityName) => setCity(cityName)}
@@ -111,38 +111,34 @@ export default function Register() {
               </p>
             </div>
             
-            <div>
-              <label className="text-sm font-medium block mb-1">Email</label>
-              <input 
-                className="w-full border rounded-md p-3 bg-background" 
-                type="email" 
-                required
-                placeholder="Enter your email" 
-                value={email} 
-                onChange={e=>setEmail(e.target.value)} 
-              />
-            </div>
+            <AnimatedInput
+              type="email"
+              label="Email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
             
-            <div>
-              <label className="text-sm font-medium block mb-1">Password</label>
-              <input 
-                className="w-full border rounded-md p-3 bg-background" 
-                type="password" 
-                required
-                placeholder="Create a password (min 6 characters)" 
-                value={password}
-                onChange={e=>setPassword(e.target.value)} 
-              />
-            </div>
+            <AnimatedInput
+              type="password"
+              label="Password"
+              placeholder="Create a password (min 6 characters)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              error={password.length > 0 && password.length < 6 ? "Password must be at least 6 characters" : undefined}
+            />
             
             {err && <div className="text-sm text-red-600 bg-red-50 dark:bg-red-950 p-2 rounded">{err}</div>}
             
-            <button 
-              className="w-full bg-primary text-primary-foreground rounded-md p-3 font-medium hover:bg-primary/90 transition-colors" 
-              disabled={loading}
+            <AnimatedButton
+              type="submit"
+              isLoading={loading}
+              className="w-full"
             >
-              {loading ? "Creating account…" : "Create account"}
-            </button>
+              Create account
+            </AnimatedButton>
           </form>
         )}
         

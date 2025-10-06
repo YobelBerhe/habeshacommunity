@@ -557,3 +557,48 @@
     transition: transform 0.2s ease-out;
   }
 }
+
+/* Phase 6.4: Toast Animations */
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(calc(100% + 1rem));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(100% + 1rem));
+  }
+}
+
+[data-sonner-toast] {
+  animation: toast-slide-in 0.3s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+[data-sonner-toast][data-removed="true"] {
+  animation: toast-slide-out 0.2s ease-in forwards;
+}
+
+/* Success toast with checkmark animation */
+[data-sonner-toast][data-type="success"] {
+  border-left: 4px solid hsl(var(--primary));
+}
+
+/* Error toast shake */
+[data-sonner-toast][data-type="error"] {
+  animation: toast-slide-in 0.3s cubic-bezier(0.21, 1.02, 0.73, 1), 
+             toast-shake 0.4s ease-in-out;
+}
+
+@keyframes toast-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}

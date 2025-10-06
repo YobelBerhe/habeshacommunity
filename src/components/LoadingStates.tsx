@@ -1,5 +1,16 @@
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
+const shimmer = `
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+`;
+
 // Page loader with spinner
 export function PageLoader() {
   return (
@@ -12,37 +23,105 @@ export function PageLoader() {
   );
 }
 
-// Card skeleton loader
+// Card skeleton loader with shimmer effect
 export function CardSkeleton() {
   return (
     <Card className="overflow-hidden">
-      <div className="h-48 bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse" />
+      <style>{shimmer}</style>
+      <div 
+        className="h-48 bg-gradient-to-r from-muted via-muted/50 to-muted"
+        style={{
+          backgroundSize: '1000px 100%',
+          animation: 'shimmer 2s infinite linear'
+        }}
+      />
       <CardHeader className="space-y-2">
-        <div className="h-5 w-3/4 bg-muted rounded animate-pulse" />
-        <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
+        <div 
+          className="h-5 w-3/4 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
+        <div 
+          className="h-4 w-1/2 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="h-3 w-full bg-muted rounded animate-pulse" />
-        <div className="h-3 w-5/6 bg-muted rounded animate-pulse" />
+        <div 
+          className="h-3 w-full bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
+        <div 
+          className="h-3 w-5/6 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
       </CardContent>
       <CardFooter className="gap-2">
-        <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
-        <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
+        <div 
+          className="h-9 flex-1 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
+        <div 
+          className="h-9 flex-1 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
       </CardFooter>
     </Card>
   );
 }
 
-// List item skeleton
+// List item skeleton with shimmer
 export function ListItemSkeleton() {
   return (
     <div className="flex items-center gap-4 p-4 border rounded-lg">
-      <div className="w-12 h-12 bg-muted rounded-full animate-pulse" />
+      <style>{shimmer}</style>
+      <div 
+        className="w-12 h-12 bg-gradient-to-r from-muted via-muted/50 to-muted rounded-full"
+        style={{
+          backgroundSize: '1000px 100%',
+          animation: 'shimmer 2s infinite linear'
+        }}
+      />
       <div className="flex-1 space-y-2">
-        <div className="h-4 w-1/3 bg-muted rounded animate-pulse" />
-        <div className="h-3 w-2/3 bg-muted rounded animate-pulse" />
+        <div 
+          className="h-4 w-1/3 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
+        <div 
+          className="h-3 w-2/3 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+          style={{
+            backgroundSize: '1000px 100%',
+            animation: 'shimmer 2s infinite linear'
+          }}
+        />
       </div>
-      <div className="w-20 h-8 bg-muted rounded animate-pulse" />
+      <div 
+        className="w-20 h-8 bg-gradient-to-r from-muted via-muted/50 to-muted rounded"
+        style={{
+          backgroundSize: '1000px 100%',
+          animation: 'shimmer 2s infinite linear'
+        }}
+      />
     </div>
   );
 }
