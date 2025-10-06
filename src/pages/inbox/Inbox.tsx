@@ -40,7 +40,7 @@ export default function Inbox() {
   }, [location.state]);
 
   if (!user) return null;
-
+import { PageLoader } from '@/components/LoadingStates';
   return (
     <div className="min-h-screen bg-background">
       <MentorHeader title="Messages" backPath="/" />
