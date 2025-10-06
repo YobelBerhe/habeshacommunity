@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { Listing } from '@/types';
+import { logger } from '@/utils/logger';
 
 type AuthState = {
   user: User | null;
@@ -33,21 +34,21 @@ export const useAuth = create<AuthState>((set, get) => ({
   closePost: () => set({ postOpen: false, editingListing: null }),
 
   init: async () => {
-    console.log('🔄 Auth init starting...');
+    logger.info('🔄 Auth init starting...');
     
     // First, check for session in URL (magic link redirect)
     const { data: sessionData } = await supabase.auth.getSession();
-    console.log('📋 Initial session:', sessionData.session);
-    console.log('👤 Initial user:', sessionData.session?.user);
+    logger.info('📋 Initial session:', sessionData.session);
+    logger.info('👤 Initial user:', sessionData.session?.user);
     
     // Set initial state
     set({ user: sessionData.session?.user ?? null, loading: false });
 
     // Set up auth state listener for future changes
     supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔔 Auth state change:', event, session);
+      logger.info('🔔 Auth state change:', event, session);
       const u = (session as Session | null)?.user ?? null;
-      console.log('👤 User after auth change:', u);
+      logger.info('👤 User after auth change:', u);
       set({ user: u, loading: false, authOpen: false });
     });
   },

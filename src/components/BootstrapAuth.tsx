@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/store/auth';
+import { logger } from '@/utils/logger';
 
 export default function BootstrapAuth() {
   const init = useAuth(s => s.init);
   
   useEffect(() => {
-    console.log('🚀 BootstrapAuth: Initializing auth...');
+    logger.info('🚀 BootstrapAuth: Initializing auth...');
     init();
   }, [init]);
   

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export async function likeUser(targetUserId: string) {
   const { data: { session } } = await supabase.auth.getSession();
@@ -29,7 +30,7 @@ export async function passUser(targetUserId: string) {
   
   // For now, just skip without storing passes
   // Later we can implement with proper match_passes table
-  console.log('User passed on:', targetUserId);
+  logger.log('User passed on:', targetUserId);
   return { ok: true };
 }
 

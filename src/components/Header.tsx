@@ -7,6 +7,7 @@ import { useAuth } from '@/store/auth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/store/language';
 import { t } from '@/lib/i18n';
+import { logger } from '@/utils/logger';
 
 export default function Header({
   currentCity, onCityChange, onAccountClick, onLogoClick, rightExtra
@@ -25,12 +26,12 @@ export default function Header({
   
 
   const handlePostClick = () => {
-    console.log('📌 Post button clicked, user:', user);
+    logger.log('📌 Post button clicked, user:', user);
     if (user) {
-      console.log('✅ User found, opening post modal');
+      logger.log('✅ User found, opening post modal');
       openPost();
     } else {
-      console.log('❌ No user, opening auth modal');
+      logger.log('❌ No user, opening auth modal');
       openAuth();
     }
   };
