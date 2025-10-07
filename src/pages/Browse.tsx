@@ -710,10 +710,9 @@ export default function Browse() {
     <div className="min-h-screen bg-background">
       {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
-        {/* Top Bar with Search and Controls */}
-        <header role="banner">
-          <div className="border-b bg-background/70 backdrop-blur">
-            <div className="container mx-auto px-4 py-3">
+        {/* Top Bar with Search and Controls - STICKY */}
+        <header role="banner" className="sticky top-0 z-[50] bg-background/70 backdrop-blur border-b">
+          <div className="container mx-auto px-4 py-3">
               <div className="flex items-center justify-between gap-4">
                 {/* Left: Logo and City Search */}
                 <div className="flex items-center gap-4">
@@ -771,12 +770,11 @@ export default function Browse() {
                 </div>
               </div>
             </div>
-          </div>
         </header>
 
-        {/* Navigation Line */}
+        {/* Navigation Line - NOT STICKY */}
         <nav role="navigation" aria-label="Category navigation">
-          <div className="bg-background border-b border-border sticky top-0 z-[45]">
+          <div className="bg-background border-b border-border">
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between py-4">
                 {/* Left: All Navigation Items */}
@@ -890,8 +888,8 @@ export default function Browse() {
           </div>
         )}
 
-        {/* Filter Controls Bar */}
-        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border sticky top-0 z-[50] hidden md:block">
+        {/* Filter Controls Bar - NOT STICKY */}
+        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border hidden md:block">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -1086,16 +1084,20 @@ export default function Browse() {
                   </Button>
                 </motion.div>
               </div>
+            </div>
+          </div>
+        </div>
 
-              {/* View and Sort Controls - Right Side */}
-              <div className="flex items-center gap-2">
-                <div className="text-sm text-muted-foreground">
-                  {processedListings.length} listings
-                  {filters.city && ` in ${filters.city}`}
-                </div>
-                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
+        {/* Results Count, View Toggle, and Sort - STICKY */}
+        <div className="sticky top-[64px] z-[45] bg-background border-b border-border hidden md:block">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-end gap-2">
+              <div className="text-sm text-muted-foreground">
+                {processedListings.length} listings
+                {filters.city && ` in ${filters.city}`}
               </div>
+              <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+              <SortDropdown sortKey={sortKey} onChange={setSortKey} />
             </div>
           </div>
         </div>
