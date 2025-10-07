@@ -39,6 +39,42 @@
   display: none;
 }
 
+/* Phase 9.3: Enhanced Toast with Undo */
+
+[data-sonner-toast] {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+[data-sonner-toast][data-type="success"] {
+  border-left: 3px solid hsl(var(--primary));
+}
+
+/* Undo button in toast */
+[data-sonner-toast] button[data-button] {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  transition: all 0.2s;
+}
+
+[data-sonner-toast] button[data-button]:hover {
+  background: hsl(var(--primary) / 0.9);
+  transform: scale(1.05);
+}
+
+[data-sonner-toast] button[data-button]:active {
+  transform: scale(0.95);
+}
+
+/* Toast progress bar */
+[data-sonner-toast] [data-progress] {
+  background: hsl(var(--primary));
+}
+
 /* HabeshaCommunity Design System - Inspired by Ethiopian & Eritrean Heritage */
 
 @layer base {

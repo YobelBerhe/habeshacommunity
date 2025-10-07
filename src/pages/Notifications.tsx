@@ -12,6 +12,7 @@ import MentorHeader from '@/components/MentorHeader';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { VirtualizedList } from '@/components/VirtualizedList';
+import { showUndoToast } from '@/components/UndoToast';
 
 type NotificationRow = {
   id: string;
@@ -127,17 +128,55 @@ export default function NotificationsPage() {
   };
 
   const handleDeleteNotification = async (notificationIds: string[]) => {
+    const notificationsToDelete = notifications.filter(n => notificationIds.includes(n.id));
+    
+    // Optimistically remove
+    setNotifications(prev => prev.filter(n => !notificationIds.includes(n.id)));
+    
     try {
       await supabase
         .from('notifications')
         .delete()
         .in('id', notificationIds);
       
-      setNotifications(prev => prev.filter(n => !notificationIds.includes(n.id)));
-      toast.success('Notification deleted');
+      showUndoToast({
+        message: notificationIds.length > 1 ? 'Notifications dismissed' : 'Notification dismissed',
+        onUndo: async () => {
+          // Restore notifications
+          if (notificationsToDelete.length > 0 && user) {
+            // Map to proper format for insertion
+            const notificationsToInsert = notificationsToDelete.map(n => ({
+              id: n.id,
+              user_id: user.id,
+              type: n.type as 'message' | 'system' | 'favorite' | 'mention' | 'reply',
+              title: n.title,
+              message: n.body || undefined,
+              link: n.link || undefined,
+              sender_id: n.sender_id || undefined,
+              conversation_id: n.conversation_id || undefined,
+              read_at: n.read_at || undefined,
+              created_at: n.created_at,
+            }));
+            
+            const { error } = await supabase
+              .from('notifications')
+              .insert(notificationsToInsert);
+            
+            if (error) throw error;
+            setNotifications(prev => [...prev, ...notificationsToDelete].sort(
+              (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            ));
+          }
+        },
+      });
     } catch (error) {
-      console.error('Error deleting notification:', error);
-      toast.error('Failed to delete notification');
+      // Rollback
+      if (notificationsToDelete.length > 0) {
+        setNotifications(prev => [...prev, ...notificationsToDelete].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ));
+      }
+      toast.error('Failed to dismiss notification');
     }
   };
 

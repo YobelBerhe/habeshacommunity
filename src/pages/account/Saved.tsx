@@ -13,6 +13,7 @@ import { SwipeableCard } from '@/components/SwipeableCard';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { toast } from 'sonner';
 import { VirtualizedList } from '@/components/VirtualizedList';
+import { showUndoToast } from '@/components/UndoToast';
 
 export default function SavedListings() {
   const [favorites, setFavorites] = useState<Listing[]>([]);
@@ -97,6 +98,11 @@ export default function SavedListings() {
   const handleRemoveFavorite = async (listingId: string) => {
     if (!user) return;
     
+    const favoriteToRemove = favorites.find(f => f.id === listingId);
+    
+    // Optimistically remove
+    setFavorites(prev => prev.filter(f => f.id !== listingId));
+    
     try {
       await supabase
         .from('favorites')
@@ -104,9 +110,28 @@ export default function SavedListings() {
         .eq('user_id', user.id)
         .eq('listing_id', listingId);
       
-      setFavorites(prev => prev.filter(f => f.id !== listingId));
-      toast.success('Removed from favorites');
+      // Show undo toast
+      showUndoToast({
+        message: 'Removed from favorites',
+        onUndo: async () => {
+          // Restore favorite
+          const { error } = await supabase
+            .from('favorites')
+            .insert({ user_id: user.id, listing_id: listingId });
+          
+          if (error) throw error;
+          
+          // Restore in UI
+          if (favoriteToRemove) {
+            setFavorites(prev => [...prev, favoriteToRemove]);
+          }
+        },
+      });
     } catch (error) {
+      // Rollback on error
+      if (favoriteToRemove) {
+        setFavorites(prev => [...prev, favoriteToRemove]);
+      }
       console.error('Error removing favorite:', error);
       toast.error('Failed to remove favorite');
     }

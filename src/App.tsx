@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,6 +7,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PageLoader } from "@/components/LoadingStates";
 import { SkipLink } from "@/components/SkipLink";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { useUndoableAction } from "@/hooks/useUndoableAction";
+import { UndoBanner } from "@/components/UndoBanner";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -70,7 +73,28 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const [modalOpen, setModalOpen] = React.useState(false);
+  const [showUndoBanner, setShowUndoBanner] = useState(false);
+  const { undoLastAction, redoLastAction, canUndo, canRedo } = useUndoableAction();
+
+  // Ctrl+Z to undo
+  useKeyboardShortcut('z', () => {
+    if (canUndo) {
+      undoLastAction();
+    }
+  }, { ctrl: true });
+
+  // Ctrl+Y or Ctrl+Shift+Z to redo
+  useKeyboardShortcut('y', () => {
+    if (canRedo) {
+      redoLastAction();
+    }
+  }, { ctrl: true });
+
+  useKeyboardShortcut('z', () => {
+    if (canRedo) {
+      redoLastAction();
+    }
+  }, { ctrl: true, shift: true });
 
   return (
     <ErrorBoundary>
@@ -79,6 +103,13 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <UndoBanner
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undoLastAction}
+            onRedo={redoLastAction}
+            onDismiss={() => setShowUndoBanner(false)}
+          />
           <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
