@@ -62,7 +62,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
         <BottomSheet title={categoryLabel} onClose={() => setOpenCat(false)}>
           <div className="max-h-[60vh] overflow-y-auto">
             <button
-              className={`w-full text-left px-4 py-3 hover:bg-accent border-b ${!selectedSubcategory ? 'bg-accent' : ''}`}
+              className={`w-full text-left px-4 py-3 hover:bg-muted active:bg-muted focus:bg-muted border-b ${!selectedSubcategory ? 'bg-muted' : ''}`}
               onClick={() => { 
                 onPickSub(''); 
                 setOpenCat(false); 
@@ -76,7 +76,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
               return (
                 <button
                   key={sub}
-                  className={`w-full text-left px-4 py-3 hover:bg-accent border-b last:border-b-0 ${isSelected ? 'bg-accent' : ''}`}
+                  className={`w-full text-left px-4 py-3 hover:bg-muted active:bg-muted focus:bg-muted border-b last:border-b-0 ${isSelected ? 'bg-muted' : ''}`}
                   onClick={() => { 
                     onPickSub(sub); 
                     setOpenCat(false); 
