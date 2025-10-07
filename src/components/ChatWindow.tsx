@@ -7,6 +7,8 @@ import { useOptimisticMessages } from '@/hooks/useOptimisticMessages';
 import { usePresence } from '@/hooks/usePresence';
 import { PresenceAvatar } from '@/components/PresenceAvatar';
 import { OnlineIndicator } from '@/components/OnlineIndicator';
+import { useAutoSaveDraft } from '@/hooks/useAutoSaveDraft';
+import { DraftRecovery } from '@/components/DraftRecovery';
 
 interface Message {
   id: string;
@@ -28,8 +30,16 @@ interface ChatWindowProps {
 export function ChatWindow({ conversationId, participantName, participantId, participantAvatar, onBack }: ChatWindowProps) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showDraftRecovery, setShowDraftRecovery] = useState(true);
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-save draft
+  const { draftId, deleteDraft } = useAutoSaveDraft(
+    'message',
+    { message: newMessage, conversationId },
+    `message-${conversationId}`
+  );
   
   // Use optimistic messages hook
   const { messages, setMessages, sendMessage } = useOptimisticMessages(
@@ -129,6 +139,7 @@ export function ChatWindow({ conversationId, participantName, participantId, par
 
     const messageContent = newMessage.trim();
     setNewMessage(''); // Clear input immediately for instant feedback
+    deleteDraft(); // Clear draft after sending
     
     try {
       await sendMessage(messageContent);
@@ -151,6 +162,11 @@ export function ChatWindow({ conversationId, participantName, participantId, par
       toast.error(error?.message || 'Failed to send message');
       setNewMessage(messageContent); // Restore input on error
     }
+  };
+
+  const handleRecoverDraft = (content: any) => {
+    setNewMessage(content.message || '');
+    setShowDraftRecovery(false);
   };
 
   if (loading) {
@@ -214,6 +230,17 @@ export function ChatWindow({ conversationId, participantName, participantId, par
           </div>
         </div>
       </div>
+      
+      {/* Draft Recovery */}
+      {showDraftRecovery && (
+        <div className="px-4 pt-4">
+          <DraftRecovery
+            type="message"
+            onRecover={handleRecoverDraft}
+            onDismiss={() => setShowDraftRecovery(false)}
+          />
+        </div>
+      )}
       
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800">
@@ -296,6 +323,11 @@ export function ChatWindow({ conversationId, participantName, participantId, par
             <Send className="w-5 h-5 text-white" />
           </button>
         </div>
+        {newMessage && draftId && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Draft saved
+          </p>
+        )}
       </form>
     </div>
   );

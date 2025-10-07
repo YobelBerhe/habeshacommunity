@@ -13,6 +13,7 @@ import { UndoBanner } from "@/components/UndoBanner";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
 import { PresenceTracker } from "@/components/PresenceTracker";
 import { LiveUpdateStream } from "@/components/LiveUpdateStream";
+import { SyncStatus } from "@/components/SyncStatus";
 import { useAuth } from "@/store/auth";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 
@@ -108,6 +109,7 @@ const App = () => {
       <SkipLink />
       <ConnectionStatus />
       <PresenceTracker />
+      {user && <SyncStatus />}
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
