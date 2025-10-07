@@ -21,7 +21,7 @@ export function MatchBottomNav() {
             key={item.id}
             onClick={() => navigate(item.path)}
             className={`flex flex-col items-center space-y-1 py-2 transition-colors ${
-              isActive ? 'text-pink-600' : 'text-gray-400 hover:text-gray-600'
+              isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <item.icon className="w-6 h-6" />
