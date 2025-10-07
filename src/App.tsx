@@ -11,6 +11,7 @@ import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { useUndoableAction } from "@/hooks/useUndoableAction";
 import { UndoBanner } from "@/components/UndoBanner";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { PresenceTracker } from "@/components/PresenceTracker";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -101,6 +102,7 @@ const App = () => {
     <ErrorBoundary>
       <SkipLink />
       <ConnectionStatus />
+      <PresenceTracker />
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

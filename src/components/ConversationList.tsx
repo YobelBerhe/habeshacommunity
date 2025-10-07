@@ -37,7 +37,7 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
   const { user } = useAuth();
   
   // Track presence for all conversations
-  const { isUserOnline } = usePresence('inbox', user?.id || '');
+  const { isUserOnline } = usePresence('global', user?.id || '');
 
   useEffect(() => {
     if (user) {

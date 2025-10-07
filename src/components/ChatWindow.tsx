@@ -39,7 +39,7 @@ export function ChatWindow({ conversationId, participantName, participantId, par
   
   // Use presence hook for online status
   const { isUserOnline } = usePresence(
-    `conversation:${conversationId}`,
+    'global',
     user?.id || ''
   );
   
