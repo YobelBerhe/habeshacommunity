@@ -87,6 +87,8 @@ const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const Profile = lazy(() => import("./pages/dashboard/Profile"));
 const DashboardSettings = lazy(() => import("./pages/dashboard/Settings"));
 const VideoCall = lazy(() => import("./pages/video/VideoCall"));
+const PaymentCheckout = lazy(() => import("./pages/payment/PaymentCheckout"));
+const BillingHistory = lazy(() => import("./pages/payment/BillingHistory"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -242,6 +244,8 @@ const App = () => {
               
               <Route path="/inbox" element={<Inbox />} />
               <Route path="/video/:id" element={<VideoCall />} />
+              <Route path="/payment/checkout" element={<PaymentCheckout />} />
+              <Route path="/payment/billing" element={<BillingHistory />} />
               <Route path="/admin/seed" element={<AdminSeed />} />
               <Route path="/donate/success" element={<DonateSuccess />} />
               <Route path="/donate/cancel" element={<DonateCancel />} />
