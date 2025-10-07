@@ -19,6 +19,8 @@ import { PerformanceDebug } from "@/components/PerformanceDebug";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { useAuth } from "@/store/auth";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
+import { MatchFlowGuard } from "@/components/match/MatchFlowGuard";
+import { MatchBottomNav } from "@/components/match/MatchBottomNav";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -165,15 +167,27 @@ const App = () => {
               <Route path="/admin/reports" element={<AdminReports />} />
               <Route path="/admin/content" element={<AdminContent />} />
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/match" element={<MatchDiscover />} />
-              <Route path="/match/discover" element={<MatchDiscover />} />
-              <Route path="/match/onboarding" element={<MatchOnboarding />} />
-              <Route path="/match/profile/:id" element={<MatchProfile />} />
-              <Route path="/match/matches" element={<MatchList />} />
-              <Route path="/match/family-mode/:id" element={<MatchFamilyMode />} />
-              <Route path="/match/quiz" element={<MatchQuiz />} />
-              <Route path="/match/success" element={<MatchSuccess />} />
-              <Route path="/match/dates" element={<MatchDates />} />
+              
+              {/* Match Routes - Protected with Flow Guard */}
+              <Route path="/match/*" element={
+                <MatchFlowGuard>
+                  <>
+                    <Routes>
+                      <Route path="onboarding" element={<MatchOnboarding />} />
+                      <Route path="quiz" element={<MatchQuiz />} />
+                      <Route path="discover" element={<MatchDiscover />} />
+                      <Route path="matches" element={<MatchList />} />
+                      <Route path="profile/:id" element={<MatchProfile />} />
+                      <Route path="family-mode/:id" element={<MatchFamilyMode />} />
+                      <Route path="success" element={<MatchSuccess />} />
+                      <Route path="dates" element={<MatchDates />} />
+                      <Route path="" element={<MatchDiscover />} />
+                    </Routes>
+                    <MatchBottomNav />
+                  </>
+                </MatchFlowGuard>
+              } />
+              
               <Route path="/market" element={<Marketplace />} />
               <Route path="/market/:id" element={<MarketplaceDetail />} />
               <Route path="/inbox" element={<Inbox />} />
