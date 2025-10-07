@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, MoreVertical,
-  Heart, MessageSquare,
+  TrendingUp, DollarSign, Heart, MessageSquare,
   CheckCircle, Clock, XCircle, Copy, Share2,
   ShoppingBag, Home, Briefcase, Wrench
 } from 'lucide-react';
@@ -169,7 +169,7 @@ const MyListings = () => {
   };
 
   const handleCopyLink = (listingId: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/marketplace/${listingId}`);
+    navigator.clipboard.writeText(`${window.location.origin}/marketplace/listing/${listingId}`);
     toast.success('Link copied to clipboard');
   };
 
@@ -180,8 +180,8 @@ const MyListings = () => {
       <Card className="p-4 md:p-6 hover:shadow-lg transition-all">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Image Placeholder */}
-          <div className="w-full md:w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
-            <TypeIcon className="w-12 h-12 text-gray-400" />
+          <div className="w-full md:w-32 h-32 bg-gradient-to-br from-muted to-muted/50 rounded-lg flex items-center justify-center flex-shrink-0">
+            <TypeIcon className="w-12 h-12 text-muted-foreground" />
           </div>
 
           {/* Content */}
@@ -191,7 +191,7 @@ const MyListings = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <h3 
                     className="font-bold text-lg hover:text-primary cursor-pointer truncate"
-                    onClick={() => navigate(`/marketplace/${listing.id}`)}
+                    onClick={() => navigate(`/marketplace/${listing.type}/${listing.id}`)}
                   >
                     {listing.title}
                   </h3>
@@ -226,7 +226,7 @@ const MyListings = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate(`/marketplace/${listing.id}`)}>
+                  <DropdownMenuItem onClick={() => navigate(`/marketplace/${listing.type}/${listing.id}`)}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Listing
                   </DropdownMenuItem>
@@ -256,7 +256,7 @@ const MyListings = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => handleDelete(listing.id)}
-                    className="text-red-600 dark:text-red-400"
+                    className="text-destructive"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
@@ -430,7 +430,7 @@ const MyListings = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
