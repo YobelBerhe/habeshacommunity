@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { likeUser, passUser } from '@/utils/matchActions';
 
 interface MatchProfile {
   id: string;
@@ -51,61 +52,6 @@ const MatchDiscover = () => {
     distance: 50,
   });
 
-  // Demo profiles (replace with real Supabase data)
-  const demoProfiles: MatchProfile[] = [
-    {
-      id: '1',
-      name: 'Sara Desta',
-      age: 27,
-      location: 'Washington DC, USA',
-      origin: 'Addis Ababa, Ethiopia',
-      profession: 'Healthcare Administrator',
-      education: 'Masters in Public Health',
-      faith: 'Orthodox Christian',
-      languages: ['English', 'Amharic'],
-      interests: ['Coffee ceremonies', 'Traditional music', 'Volunteering', 'Reading'],
-      bio: 'Born in Ethiopia, raised between two worlds. I cherish my heritage and faith while building my career in healthcare. Looking for someone who values tradition, family, and building a future together.',
-      compatibility: 92,
-      verified: true,
-      photos: [],
-      lookingFor: 'Serious relationship leading to marriage'
-    },
-    {
-      id: '2',
-      name: 'Michael Tesfaye',
-      age: 30,
-      location: 'San Francisco, CA',
-      origin: 'Asmara, Eritrea',
-      profession: 'Software Engineer',
-      education: 'BS Computer Science',
-      faith: 'Catholic',
-      languages: ['English', 'Tigrinya', 'Italian'],
-      interests: ['Tech innovation', 'Church community', 'Cooking', 'Travel'],
-      bio: 'Engineer by day, chef by night. I value my Eritrean roots and Catholic faith. Seeking a partner who appreciates both our rich culture and building something new together.',
-      compatibility: 88,
-      verified: true,
-      photos: [],
-      lookingFor: 'Partner for life'
-    },
-    {
-      id: '3',
-      name: 'Rahel Yohannes',
-      age: 25,
-      location: 'Toronto, Canada',
-      origin: 'Mekelle, Ethiopia',
-      profession: 'Elementary Teacher',
-      education: 'BA Education',
-      faith: 'Protestant Christian',
-      languages: ['English', 'Tigrinya', 'Amharic'],
-      interests: ['Teaching', 'Youth ministry', 'Photography', 'Hiking'],
-      bio: 'Passionate about education and empowering the next generation. My faith guides my path, and I am looking for a partner who shares that foundation. Building a life rooted in love and purpose.',
-      compatibility: 95,
-      verified: true,
-      photos: [],
-      lookingFor: 'God-centered relationship'
-    }
-  ];
-
   useEffect(() => {
     loadProfiles();
   }, [filters]);
@@ -113,41 +59,93 @@ const MatchDiscover = () => {
   const loadProfiles = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with real Supabase query
-      // const { data, error } = await supabase
-      //   .from('match_profiles')
-      //   .select('*')
-      //   .gte('age', filters.ageRange[0])
-      //   .lte('age', filters.ageRange[1]);
+      const { data: { user } } = await supabase.auth.getUser();
       
-      // For now, use demo data
-      setTimeout(() => {
-        setProfiles(demoProfiles);
-        setLoading(false);
-      }, 500);
+      if (!user) {
+        toast.error('Please sign in to view matches');
+        navigate('/auth/login');
+        return;
+      }
+
+      // Build query with filters
+      let query = supabase
+        .from('match_profiles')
+        .select('*')
+        .eq('active', true)
+        .neq('user_id', user.id) // Don't show own profile
+        .gte('age', filters.ageRange[0])
+        .lte('age', filters.ageRange[1]);
+
+      // Apply location filter
+      if (filters.location !== 'all') {
+        query = query.eq('city', filters.location);
+      }
+
+      // Apply faith filter (would need to add to match_profiles if not exists)
+      if (filters.faith !== 'all') {
+        query = query.contains('interests', [filters.faith]);
+      }
+
+      const { data, error } = await query.limit(20);
+
+      if (error) throw error;
+
+      // Transform database data to MatchProfile format
+      const transformedProfiles: MatchProfile[] = (data || []).map(profile => ({
+        id: profile.id,
+        name: profile.name,
+        age: profile.age || 25,
+        location: `${profile.city}, ${profile.country || 'Unknown'}`,
+        origin: profile.city,
+        profession: 'Professional', // Would need to add to DB
+        education: 'University Graduate', // Would need to add to DB
+        faith: 'Christian', // Would need to add to DB
+        languages: ['English'], // Would use profile data if available
+        interests: profile.interests || [],
+        bio: profile.bio || 'No bio available',
+        compatibility: Math.floor(Math.random() * 20) + 80, // TODO: Calculate real compatibility
+        verified: false, // Would need verification system
+        photos: profile.photos || [],
+        lookingFor: profile.looking_for || 'Meaningful connection'
+      }));
+
+      setProfiles(transformedProfiles);
+      setLoading(false);
     } catch (error) {
       console.error('Error loading profiles:', error);
+      toast.error('Failed to load profiles');
       setLoading(false);
     }
   };
 
-  const handleSwipe = (direction: 'left' | 'right') => {
+  const handleSwipe = async (direction: 'left' | 'right') => {
     setSwipeDirection(direction);
     
-    setTimeout(() => {
+    try {
       if (direction === 'right') {
-        toast.success("It's a match! 🎉", {
-          description: `You and ${currentProfile.name} liked each other!`
+        await likeUser(currentProfile.id);
+        toast.success('Like sent! 💙', {
+          description: `We'll let you know if ${currentProfile.name} likes you back`
         });
+      } else {
+        await passUser(currentProfile.id);
       }
       
-      if (currentIndex < profiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setCurrentIndex(0); // Loop back for demo
-      }
+      setTimeout(() => {
+        if (currentIndex < profiles.length - 1) {
+          setCurrentIndex(currentIndex + 1);
+        } else {
+          // Reload profiles when we run out
+          loadProfiles();
+          setCurrentIndex(0);
+        }
+        setSwipeDirection(null);
+      }, 300);
+    } catch (error) {
+      console.error('Error handling swipe:', error);
+      toast.error('Something went wrong');
       setSwipeDirection(null);
-    }, 300);
+    }
   };
 
   const handleSuperLike = () => {
