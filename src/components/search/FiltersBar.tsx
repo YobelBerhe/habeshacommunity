@@ -22,7 +22,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
   const categoryLabel = TAXONOMY[topCategory].name[langKey];
 
   return (
-    <div className="sticky top-14 z-30 bg-background/90 backdrop-blur border-b md:hidden">
+    <div className="sticky top-14 z-[45] bg-background/90 backdrop-blur border-b md:hidden">
       <div className="flex gap-2 p-2">
         <button 
           className="flex items-center gap-1 px-3 py-2 rounded-full bg-muted text-sm font-medium"
@@ -62,7 +62,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
         <BottomSheet title={categoryLabel} onClose={() => setOpenCat(false)}>
           <div className="max-h-[60vh] overflow-y-auto">
             <button
-              className={`w-full text-left px-4 py-3 hover:bg-muted border-b ${!selectedSubcategory ? 'bg-muted' : ''}`}
+              className={`w-full text-left px-4 py-3 hover:bg-accent border-b ${!selectedSubcategory ? 'bg-accent' : ''}`}
               onClick={() => { 
                 onPickSub(''); 
                 setOpenCat(false); 
@@ -76,7 +76,7 @@ export function FiltersBar({ topCategory, selectedSubcategory, onPickSub, onClea
               return (
                 <button
                   key={sub}
-                  className={`w-full text-left px-4 py-3 hover:bg-muted border-b last:border-b-0 ${isSelected ? 'bg-muted' : ''}`}
+                  className={`w-full text-left px-4 py-3 hover:bg-accent border-b last:border-b-0 ${isSelected ? 'bg-accent' : ''}`}
                   onClick={() => { 
                     onPickSub(sub); 
                     setOpenCat(false); 

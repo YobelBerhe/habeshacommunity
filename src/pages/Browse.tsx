@@ -776,7 +776,7 @@ export default function Browse() {
 
         {/* Navigation Line */}
         <nav role="navigation" aria-label="Category navigation">
-          <div className="bg-background border-b border-border">
+          <div className="bg-background border-b border-border sticky top-0 z-[45]">
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between py-4">
                 {/* Left: All Navigation Items */}
@@ -914,7 +914,7 @@ export default function Browse() {
                   >
                     <div className="space-y-1">
                       <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
                         onClick={() => {
                           updateFilters({ category: undefined, subcategory: undefined });
                           setCategoryOpen(false);
@@ -925,7 +925,7 @@ export default function Browse() {
                       {Object.entries(TAXONOMY).map(([key, value]) => (
                         <button
                           key={key}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
                           onClick={() => {
                             updateFilters({ category: key, subcategory: undefined });
                             setCategoryOpen(false);
@@ -962,7 +962,7 @@ export default function Browse() {
                   >
                     <div className="space-y-1">
                       <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
                         onClick={() => {
                           updateFilter('subcategory', undefined);
                           setSubcategoryOpen(false);
@@ -973,7 +973,7 @@ export default function Browse() {
                       {filters.category && TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
                         <button
                           key={sub}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
                           onClick={() => {
                             updateFilter('subcategory', sub);
                             setSubcategoryOpen(false);
@@ -1130,7 +1130,7 @@ export default function Browse() {
           </div>
 
          {/* Listings Section - Right Side */}
-<div className="w-1/2 bg-background overflow-y-auto">
+<div className="w-1/2 bg-background overflow-y-auto relative z-[1]">
   <div className="p-6">
     {loading ? (
       <GridSkeleton count={6} />
@@ -1193,7 +1193,7 @@ export default function Browse() {
         </div>
 
         {/* Filter Controls - Sticky */}
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
+        <div className="sticky top-14 z-[35] bg-background/80 backdrop-blur border-b">
           <div className="px-4 py-3">
             <div className="flex items-center gap-1 mb-3 overflow-x-auto">
               {/* Category Filter */}
@@ -1328,7 +1328,7 @@ export default function Browse() {
 
 
         {/* Main Content - Mobile */}
-<main className="px-4 py-6 mb-20">
+<main className="px-4 py-6 mb-20 relative z-[1]">
   {loading ? (
     <GridSkeleton count={6} />
   ) : processedListings.length === 0 ? (

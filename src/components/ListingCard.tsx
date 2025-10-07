@@ -186,7 +186,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
               )}
               
               {listing.price && (
-                <div className={`absolute top-2 left-2 z-[1] ${viewMode === "grid" ? "" : "hidden md:block"}`}>
+                <div className={`absolute top-2 left-2 z-[1] pointer-events-none ${viewMode === "grid" ? "" : "hidden md:block"}`}>
                   <Badge className="bg-black/70 text-white text-sm px-2 py-1 font-bold">
                     {formatPrice(listing.price)}
                   </Badge>
@@ -204,7 +204,7 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-3 right-3 z-[1] h-9 w-9 bg-white/90 hover:bg-white rounded-full backdrop-blur"
+                className="absolute top-3 right-3 z-[10] h-9 w-9 bg-white/90 hover:bg-white rounded-full backdrop-blur"
                 onClick={handleFavoriteToggle}
                 disabled={isPending}
                 aria-label={isFavorited ? "Remove from favorites" : "Save to favorites"}
