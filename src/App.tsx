@@ -83,6 +83,7 @@ const DonateSuccess = lazy(() => import("./pages/donate/Success"));
 const DonateCancel = lazy(() => import("./pages/donate/Cancel"));
 const ListingDetail = lazy(() => import("./pages/ListingDetail"));
 const Notifications = lazy(() => import("./pages/Notifications"));
+const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -168,6 +169,7 @@ const App = () => {
               <Route path="/account/listings" element={<Listings />} />
               <Route path="/account/settings" element={<Settings />} />
               <Route path="/account/payouts" element={<Payouts />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/forums" element={<ForumsBoards />} />
               <Route path="/forums/:boardKey" element={<BoardTopics />} />
               <Route path="/forums/topic/:id" element={<TopicView />} />
