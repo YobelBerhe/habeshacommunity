@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface Match {
   id: string;
@@ -36,117 +37,6 @@ const MatchList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
-  // Demo matches (replace with real Supabase data)
-  const demoMatches: Match[] = [
-    {
-      id: '1',
-      name: 'Sara Desta',
-      age: 27,
-      location: 'Washington DC',
-      origin: 'Addis Ababa',
-      profession: 'Healthcare Administrator',
-      faith: 'Orthodox Christian',
-      compatibility: 92,
-      matchedAt: '2024-01-15T10:30:00Z',
-      lastActive: '5 min ago',
-      online: true,
-      mutual: true,
-      unreadMessages: 3,
-      favorite: true,
-      verified: true,
-      bio: 'Looking for someone who values tradition and family'
-    },
-    {
-      id: '2',
-      name: 'Michael Tesfaye',
-      age: 30,
-      location: 'San Francisco',
-      origin: 'Asmara',
-      profession: 'Software Engineer',
-      faith: 'Catholic',
-      compatibility: 88,
-      matchedAt: '2024-01-14T15:20:00Z',
-      lastActive: '2 hours ago',
-      online: false,
-      mutual: true,
-      unreadMessages: 0,
-      favorite: false,
-      verified: true,
-      bio: 'Engineer by day, chef by night'
-    },
-    {
-      id: '3',
-      name: 'Rahel Yohannes',
-      age: 25,
-      location: 'Toronto',
-      origin: 'Mekelle',
-      profession: 'Elementary Teacher',
-      faith: 'Protestant',
-      compatibility: 95,
-      matchedAt: '2024-01-13T08:45:00Z',
-      lastActive: '1 day ago',
-      online: false,
-      mutual: true,
-      unreadMessages: 1,
-      favorite: true,
-      verified: true,
-      bio: 'Passionate about education and faith'
-    },
-    {
-      id: '4',
-      name: 'Daniel Abraha',
-      age: 29,
-      location: 'New York',
-      origin: 'Gondar',
-      profession: 'Business Analyst',
-      faith: 'Orthodox Christian',
-      compatibility: 85,
-      matchedAt: '2024-01-12T14:30:00Z',
-      lastActive: 'Just now',
-      online: true,
-      mutual: false,
-      unreadMessages: 0,
-      favorite: false,
-      verified: true,
-      bio: 'Building a future rooted in culture and faith'
-    },
-    {
-      id: '5',
-      name: 'Meron Kidane',
-      age: 26,
-      location: 'Atlanta',
-      origin: 'Asmara',
-      profession: 'Nurse',
-      faith: 'Catholic',
-      compatibility: 90,
-      matchedAt: '2024-01-11T09:15:00Z',
-      lastActive: '3 hours ago',
-      online: false,
-      mutual: true,
-      unreadMessages: 0,
-      favorite: false,
-      verified: true,
-      bio: 'Healthcare professional seeking meaningful connection'
-    },
-    {
-      id: '6',
-      name: 'Yohannes Mehari',
-      age: 31,
-      location: 'Seattle',
-      origin: 'Axum',
-      profession: 'Civil Engineer',
-      faith: 'Orthodox Christian',
-      compatibility: 87,
-      matchedAt: '2024-01-10T16:00:00Z',
-      lastActive: '1 hour ago',
-      online: false,
-      mutual: false,
-      unreadMessages: 2,
-      favorite: false,
-      verified: true,
-      bio: 'Traditional values, modern mindset'
-    }
-  ];
 
   useEffect(() => {
     loadMatches();
@@ -159,18 +49,102 @@ const MatchList = () => {
   const loadMatches = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with real Supabase query
-      // const { data, error } = await supabase
-      //   .from('matches')
-      //   .select('*')
-      //   .order('matched_at', { ascending: false });
-      
-      setTimeout(() => {
-        setMatches(demoMatches);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         setLoading(false);
-      }, 500);
+        return;
+      }
+
+      // Get all matches where user is either user1 or user2
+      const { data: matchesData, error: matchesError } = await supabase
+        .from('matches')
+        .select('*')
+        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+
+      if (matchesError) throw matchesError;
+
+      if (!matchesData || matchesData.length === 0) {
+        setMatches([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get the other user IDs
+      const otherUserIds = matchesData.map(match => 
+        match.user1_id === user.id ? match.user2_id : match.user1_id
+      );
+
+      // Fetch match profiles for these users
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('match_profiles')
+        .select('*')
+        .in('user_id', otherUserIds);
+
+      if (profilesError) throw profilesError;
+
+      // Fetch user profiles for additional info
+      const { data: userProfilesData, error: userProfilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', otherUserIds);
+
+      if (userProfilesError) throw userProfilesError;
+
+      // Check for mutual likes
+      const { data: likesData } = await supabase
+        .from('likes')
+        .select('*')
+        .or(`liker_id.eq.${user.id},liked_id.eq.${user.id}`);
+
+      // Get favorites
+      const { data: favoritesData } = await supabase
+        .from('likes')
+        .select('liked_id')
+        .eq('liker_id', user.id);
+
+      const favoriteIds = new Set(favoritesData?.map(f => f.liked_id) || []);
+
+      // Transform data
+      const transformedMatches: Match[] = profilesData?.map((profile) => {
+        const userProfile = userProfilesData?.find(p => p.id === profile.user_id);
+        const matchRecord = matchesData.find(m => 
+          m.user1_id === profile.user_id || m.user2_id === profile.user_id
+        );
+        
+        // Check if mutual
+        const sentLike = likesData?.find(l => l.liker_id === user.id && l.liked_id === profile.user_id);
+        const receivedLike = likesData?.find(l => l.liker_id === profile.user_id && l.liked_id === user.id);
+        const isMutual = !!(sentLike && receivedLike);
+
+        return {
+          id: profile.id,
+          name: profile.name || userProfile?.display_name || 'Unknown',
+          age: profile.age || 0,
+          location: profile.city || 'Unknown',
+          origin: profile.country || 'Unknown',
+          profession: 'Professional', // You may want to add this field to match_profiles
+          faith: 'Not specified', // You may want to add this field to match_profiles
+          compatibility: 85, // Calculate from user_answers if needed
+          matchedAt: matchRecord?.created_at || new Date().toISOString(),
+          lastActive: 'Recently', // Add last_seen to profiles table if needed
+          online: false, // Implement presence tracking if needed
+          mutual: isMutual,
+          unreadMessages: 0, // Query messages table if needed
+          favorite: favoriteIds.has(profile.user_id),
+          verified: true,
+          bio: profile.bio || ''
+        };
+      }) || [];
+
+      setMatches(transformedMatches);
     } catch (error) {
       console.error('Error loading matches:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load matches',
+        variant: 'destructive'
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -202,10 +176,52 @@ const MatchList = () => {
     setFilteredMatches(filtered);
   };
 
-  const toggleFavorite = (matchId: string) => {
-    setMatches(matches.map(m =>
-      m.id === matchId ? { ...m, favorite: !m.favorite } : m
-    ));
+  const toggleFavorite = async (matchId: string) => {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get the user_id from match_profiles
+      const { data: profileData } = await supabase
+        .from('match_profiles')
+        .select('user_id')
+        .eq('id', matchId)
+        .single();
+
+      if (!profileData) return;
+
+      if (match.favorite) {
+        // Remove favorite
+        await supabase
+          .from('likes')
+          .delete()
+          .eq('liker_id', user.id)
+          .eq('liked_id', profileData.user_id);
+      } else {
+        // Add favorite
+        await supabase
+          .from('likes')
+          .insert({
+            liker_id: user.id,
+            liked_id: profileData.user_id
+          });
+      }
+
+      // Update local state
+      setMatches(matches.map(m =>
+        m.id === matchId ? { ...m, favorite: !m.favorite } : m
+      ));
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update favorite',
+        variant: 'destructive'
+      });
+    }
   };
 
   const getMatchStats = () => {
