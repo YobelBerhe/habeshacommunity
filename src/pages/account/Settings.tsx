@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ImageCropper } from '@/components/ImageCropper';
 import { EmailNotificationToggle } from '@/components/EmailNotificationToggle';
 import { OptimizedImage } from '@/components/OptimizedImage';
+import { StorageInfo } from '@/components/StorageInfo';
 
 export default function AccountSettings() {
   const [displayName, setDisplayName] = useState('');
@@ -327,6 +328,11 @@ export default function AccountSettings() {
           </div>
 
           <EmailNotificationToggle />
+
+          <div className="bg-card rounded-lg border p-6">
+            <h2 className="text-lg font-semibold mb-4">App Storage</h2>
+            <StorageInfo />
+          </div>
         </div>
       </div>
     </div>

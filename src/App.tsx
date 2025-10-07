@@ -14,6 +14,7 @@ import { ConnectionStatus } from "@/components/ConnectionStatus";
 import { PresenceTracker } from "@/components/PresenceTracker";
 import { LiveUpdateStream } from "@/components/LiveUpdateStream";
 import { useAuth } from "@/store/auth";
+import { useServiceWorker } from "@/hooks/useServiceWorker";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -80,6 +81,7 @@ const App = () => {
   const [showUndoBanner, setShowUndoBanner] = useState(false);
   const { undoLastAction, redoLastAction, canUndo, canRedo } = useUndoableAction();
   const { user } = useAuth();
+  useServiceWorker();
 
   // Ctrl+Z to undo
   useKeyboardShortcut('z', () => {

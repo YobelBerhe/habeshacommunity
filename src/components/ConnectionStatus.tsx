@@ -2,10 +2,23 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Wifi, WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useServiceWorker } from '@/hooks/useServiceWorker';
 
 export function ConnectionStatus() {
   const [isConnected, setIsConnected] = useState(true);
   const [showStatus, setShowStatus] = useState(false);
+  const { isOnline } = useServiceWorker();
+
+  useEffect(() => {
+    if (!isOnline) {
+      setIsConnected(false);
+      setShowStatus(true);
+    } else if (!isConnected && isOnline) {
+      setIsConnected(true);
+      setShowStatus(true);
+      setTimeout(() => setShowStatus(false), 3000);
+    }
+  }, [isOnline, isConnected]);
 
   useEffect(() => {
     const channel = supabase.channel('connection-status');
@@ -61,7 +74,7 @@ export function ConnectionStatus() {
               <WifiOff className="w-4 h-4" />
             )}
             <span className="text-sm font-medium">
-              {isConnected ? 'Connected' : 'Connection lost'}
+              {isConnected ? 'Back online' : 'You\'re offline - Cached content available'}
             </span>
           </div>
         </motion.div>
