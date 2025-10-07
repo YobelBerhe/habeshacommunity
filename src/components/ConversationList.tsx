@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/store/auth';
+import { PresenceAvatar } from '@/components/PresenceAvatar';
+import { usePresence } from '@/hooks/usePresence';
 
 interface Conversation {
   id: string;
@@ -34,6 +35,9 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  
+  // Track presence for all conversations
+  const { isUserOnline } = usePresence('inbox', user?.id || '');
 
   useEffect(() => {
     if (user) {
@@ -161,12 +165,12 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
         >
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <Avatar className="w-12 h-12">
-                <AvatarImage src={conv.other_participant.avatar_url || undefined} />
-                <AvatarFallback>
-                  {(conv.other_participant.display_name || 'U')[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <PresenceAvatar
+                src={conv.other_participant.avatar_url || undefined}
+                fallback={(conv.other_participant.display_name || 'U')[0].toUpperCase()}
+                isOnline={isUserOnline(conv.other_participant.id)}
+                size="lg"
+              />
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
