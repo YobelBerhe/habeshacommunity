@@ -54,6 +54,7 @@ const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminReports = lazy(() => import("./pages/admin/Reports"));
 const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const MatchHome = lazy(() => import("./pages/match/MatchHome"));
 const MatchOnboarding = lazy(() => import("./pages/match/MatchOnboarding"));
 const MatchDiscover = lazy(() => import("./pages/match/MatchDiscover"));
 const MatchProfile = lazy(() => import("./pages/match/MatchProfile"));
@@ -173,6 +174,8 @@ const App = () => {
                 <MatchFlowGuard>
                   <>
                     <Routes>
+                      <Route path="" element={<MatchHome />} />
+                      <Route path="home" element={<MatchHome />} />
                       <Route path="onboarding" element={<MatchOnboarding />} />
                       <Route path="quiz" element={<MatchQuiz />} />
                       <Route path="discover" element={<MatchDiscover />} />
@@ -181,7 +184,6 @@ const App = () => {
                       <Route path="family-mode/:id" element={<MatchFamilyMode />} />
                       <Route path="success" element={<MatchSuccess />} />
                       <Route path="dates" element={<MatchDates />} />
-                      <Route path="" element={<MatchDiscover />} />
                     </Routes>
                     <MatchBottomNav />
                   </>

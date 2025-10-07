@@ -10,7 +10,7 @@ export function preloadRoute(routePath: string) {
     '/notifications': () => import('../pages/Notifications'),
     '/account/settings': () => import('../pages/account/Settings'),
     '/account/saved': () => import('../pages/account/Saved'),
-    '/match': () => import('../pages/match/MatchDiscover'),
+    '/match': () => import('../pages/match/MatchHome'),
     '/forums': () => import('../pages/forums/Boards'),
   };
 

@@ -221,7 +221,29 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/browse?category=match');
+                    navigate('/match');
+                  }}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Match Home</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/match/discover');
+                  }}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Discover</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/match/matches');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
@@ -232,11 +254,22 @@ export function DrawerMenu({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/match/onboarding');
+                    navigate('/match/profile/me');
                   }}
                   className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
                 >
-                  <span className="text-sm text-primary">Complete Profile</span>
+                  <span className="text-sm text-primary">My Profile</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate('/match/quiz');
+                  }}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded hover:bg-muted/50 text-left"
+                >
+                  <span className="text-sm text-primary">Compatibility Quiz</span>
                 </button>
               </li>
             </ul>
