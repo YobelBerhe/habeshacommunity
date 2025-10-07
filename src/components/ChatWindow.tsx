@@ -173,20 +173,25 @@ export function ChatWindow({ conversationId, participantName, participantId, par
               <ChevronLeft className="w-6 h-6" />
             </button>
           )}
-          <div className="flex items-center space-x-2 flex-1 ml-2">
+          <div className="flex items-center space-x-3 flex-1 ml-2">
             <PresenceAvatar
               src={participantAvatar}
               fallback={participantName[0] || 'U'}
               isOnline={participantOnline}
-              size="sm"
+              size="md"
             />
             <div>
-              <p className="font-bold text-sm">{participantName}</p>
-              <OnlineIndicator
-                isOnline={participantOnline}
-                showLabel
-                size="sm"
-              />
+              <p className="font-bold text-base">{participantName}</p>
+              <div className="flex items-center gap-1.5">
+                {participantOnline ? (
+                  <>
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-xs text-white/90">Active now</span>
+                  </>
+                ) : (
+                  <span className="text-xs text-white/70">Offline</span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
