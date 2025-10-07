@@ -711,7 +711,7 @@ export default function Browse() {
       {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
         {/* Top Bar with Search and Controls - STICKY */}
-        <header role="banner" className="sticky top-0 z-[50] bg-background/70 backdrop-blur border-b">
+        <header role="banner" className="sticky top-0 z-[50] bg-background border-b shadow-sm">
           <div className="container mx-auto px-4 py-3">
               <div className="flex items-center justify-between gap-4">
                 {/* Left: Logo and City Search */}
@@ -1089,7 +1089,7 @@ export default function Browse() {
         </div>
 
         {/* Results Count, View Toggle, and Sort - STICKY */}
-        <div className="sticky top-[64px] z-[45] bg-background border-b border-border hidden md:block">
+        <div className="sticky top-[73px] z-[45] bg-background border-b shadow-sm hidden md:block">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-end gap-2">
               <div className="text-sm text-muted-foreground">
@@ -1116,7 +1116,7 @@ export default function Browse() {
             {filters.city && ` in ${filters.city}`}
           </div>
 
-          <div className="flex h-[calc(100vh-200px)]">
+          <div className="flex h-[calc(100vh-170px)]">
           {/* Map Section - Left Side */}
           <div className="w-1/2 relative">
             <LazyMap
