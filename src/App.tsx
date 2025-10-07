@@ -106,7 +106,6 @@ const App = () => {
       <SkipLink />
       <ConnectionStatus />
       <PresenceTracker />
-      {user && <LiveUpdateStream />}
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
@@ -119,6 +118,7 @@ const App = () => {
             onDismiss={() => setShowUndoBanner(false)}
           />
           <BrowserRouter>
+            {user && <LiveUpdateStream />}
             <Suspense fallback={<PageLoader />}>
               <Routes>
               <Route path="/" element={<Index />} />
