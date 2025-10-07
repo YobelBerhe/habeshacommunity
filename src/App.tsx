@@ -49,6 +49,8 @@ const MentorRequests = lazy(() => import("./pages/mentor/MentorRequests"));
 const MyBookings = lazy(() => import("./pages/mentor/MyBookings"));
 const BookingSuccess = lazy(() => import("./pages/mentor/BookingSuccess"));
 const CommunityHome = lazy(() => import("./pages/community/CommunityHome"));
+const Forums = lazy(() => import("./pages/community/Forums"));
+const Events = lazy(() => import("./pages/community/Events"));
 const MentorPayouts = lazy(() => import("./pages/mentor/MentorPayouts"));
 const VerifyProfile = lazy(() => import("./pages/mentor/VerifyProfile"));
 const ManageAvailability = lazy(() => import("./pages/mentor/ManageAvailability"));
@@ -226,6 +228,8 @@ const App = () => {
               
               {/* Community Routes */}
               <Route path="/community" element={<CommunityHome />} />
+              <Route path="/community/forums" element={<Forums />} />
+              <Route path="/community/events" element={<Events />} />
               
               <Route path="/inbox" element={<Inbox />} />
               <Route path="/admin/seed" element={<AdminSeed />} />
