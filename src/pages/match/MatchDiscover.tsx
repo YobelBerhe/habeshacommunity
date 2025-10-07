@@ -13,6 +13,7 @@ import { likeUser, passUser } from '@/utils/matchActions';
 
 interface MatchProfile {
   id: string;
+  user_id?: string;
   name: string;
   age: number;
   location: string;
@@ -93,6 +94,7 @@ const MatchDiscover = () => {
       // Transform database data to MatchProfile format
       const transformedProfiles: MatchProfile[] = (data || []).map(profile => ({
         id: profile.id,
+        user_id: profile.user_id,
         name: profile.name,
         age: profile.age || 25,
         location: `${profile.city}, ${profile.country || 'Unknown'}`,
@@ -123,12 +125,19 @@ const MatchDiscover = () => {
     
     try {
       if (direction === 'right') {
-        await likeUser(currentProfile.id);
-        toast.success('Like sent! 💙', {
-          description: `We'll let you know if ${currentProfile.name} likes you back`
-        });
+        const result = await likeUser(currentProfile.user_id || currentProfile.id);
+        
+        if (result.isMatch) {
+          toast.success("It's a Match! 🎉", {
+            description: `You and ${currentProfile.name} liked each other!`
+          });
+        } else {
+          toast.success('Like sent! 💙', {
+            description: `We'll let you know if ${currentProfile.name} likes you back`
+          });
+        }
       } else {
-        await passUser(currentProfile.id);
+        await passUser(currentProfile.user_id || currentProfile.id);
       }
       
       setTimeout(() => {
