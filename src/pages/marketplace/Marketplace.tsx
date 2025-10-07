@@ -97,12 +97,6 @@ export default function Marketplace() {
     return (
       <div className="min-h-screen bg-background">
         <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading marketplace...</div>
         </div>
@@ -113,12 +107,6 @@ export default function Marketplace() {
   return (
     <div className="min-h-screen bg-background">
       <MobileHeader />
-      <Header 
-        currentCity={appState.city}
-        onCityChange={() => {}}
-        onAccountClick={() => {}}
-        onLogoClick={() => navigate('/')}
-      />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">

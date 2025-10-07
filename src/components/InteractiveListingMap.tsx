@@ -374,13 +374,67 @@ export default function InteractiveListingMap({
     // Add the cluster group to the map
     mapInstanceRef.current.addLayer(markerClusterRef.current);
 
+      // Function to add boundary highlighting (defined here so it's available in async IIFE below)
+      const addBoundaryLocal = async (locationName: string, type: 'city' | 'country'): Promise<L.LatLngBounds | null> => {
+        if (!mapInstanceRef.current) return null;
+
+        // Remove existing boundary
+        if (boundaryLayer) {
+          mapInstanceRef.current.removeLayer(boundaryLayer);
+          setBoundaryLayer(null);
+        }
+
+        try {
+          // Fetch multiple candidates and prefer administrative boundaries
+          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=10&polygon_geojson=1&addressdetails=1&q=${encodeURIComponent(locationName)}`;
+          const response = await fetch(url);
+          const results = await response.json();
+
+          let chosen: any | null = null;
+          if (Array.isArray(results)) {
+            // Prefer boundary/administrative with polygon
+            const isAdmin = (r: any) => r.class === 'boundary' && (r.type === 'administrative' || r.addresstype === 'country');
+            const hasPoly = (r: any) => !!r.geojson;
+
+            if (type === 'country') {
+              chosen = results.find((r: any) => (r.addresstype === 'country' || isAdmin(r)) && hasPoly(r))
+                || results.find((r: any) => hasPoly(r));
+            } else {
+              chosen = results.find((r: any) => isAdmin(r) && (r.addresstype === 'city' || r.type === 'city') && hasPoly(r))
+                || results.find((r: any) => (r.addresstype === 'city' || r.type === 'city') && hasPoly(r))
+                || results.find((r: any) => hasPoly(r));
+            }
+          }
+
+          if (chosen?.geojson) {
+            const geojsonLayer = L.geoJSON(chosen.geojson, {
+              style: {
+                color: '#3b82f6',
+                weight: 3,
+                opacity: 0.6,
+                fillOpacity: 0.1
+              }
+            });
+
+            mapInstanceRef.current.addLayer(geojsonLayer);
+            setBoundaryLayer(geojsonLayer);
+
+            return geojsonLayer.getBounds();
+          }
+        } catch (error) {
+          console.error('Error fetching boundary:', error);
+        }
+
+        return null;
+      };
+
       // Handle city/country search zoom functionality
       (async () => {
         if (!mapInstanceRef.current) return;
 
         if (searchCity) {
           // Prefer fitting to city boundary
-          const bounds = await addBoundary(searchCity, 'city');
+          const bounds = await addBoundaryLocal(searchCity, 'city');
           if (bounds) {
             mapInstanceRef.current.fitBounds(bounds, { padding: [30, 30] });
           } else if (searchCityCoords) {
@@ -388,7 +442,7 @@ export default function InteractiveListingMap({
           }
         } else if (searchCountry) {
           // Prefer fitting to country boundary
-          const bounds = await addBoundary(searchCountry, 'country');
+          const bounds = await addBoundaryLocal(searchCountry, 'country');
           if (bounds) {
             mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50] });
           } else {

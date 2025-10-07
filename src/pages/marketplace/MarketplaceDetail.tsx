@@ -136,12 +136,6 @@ export default function MarketplaceDetail() {
     return (
       <div className="min-h-screen bg-background">
         <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading listing...</div>
         </div>
@@ -153,12 +147,6 @@ export default function MarketplaceDetail() {
     return (
       <div className="min-h-screen bg-background">
         <MobileHeader />
-        <Header 
-          currentCity={appState.city}
-          onCityChange={() => {}}
-          onAccountClick={() => {}}
-          onLogoClick={() => navigate('/')}
-        />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <p>Listing not found</p>
