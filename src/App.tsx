@@ -38,6 +38,9 @@ const Payouts = lazy(() => import("./pages/account/Payouts"));
 const ForumsBoards = lazy(() => import("./pages/forums/Boards"));
 const BoardTopics = lazy(() => import("./pages/forums/BoardTopics"));
 const TopicView = lazy(() => import("./pages/forums/TopicView"));
+const MentorHome = lazy(() => import("./pages/mentor/MentorHome"));
+const MentorProfile = lazy(() => import("./pages/mentor/MentorProfile"));
+const MySessions = lazy(() => import("./pages/mentor/MySessions"));
 const MentorList = lazy(() => import("./pages/mentor/MentorList"));
 const MentorOnboarding = lazy(() => import("./pages/mentor/MentorOnboarding"));
 const MentorDetail = lazy(() => import("./pages/mentor/MentorDetail"));
@@ -161,7 +164,10 @@ const App = () => {
               <Route path="/forums" element={<ForumsBoards />} />
               <Route path="/forums/:boardKey" element={<BoardTopics />} />
               <Route path="/forums/topic/:id" element={<TopicView />} />
-              <Route path="/mentor" element={<MentorList />} />
+              <Route path="/mentor" element={<MentorHome />} />
+              <Route path="/mentor/list" element={<MentorList />} />
+              <Route path="/mentor/profile/:id" element={<MentorProfile />} />
+              <Route path="/mentor/sessions" element={<MySessions />} />
               <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
               <Route path="/mentor/dashboard" element={<MentorDashboard />} />
               <Route path="/mentor/:id" element={<MentorDetail />} />
