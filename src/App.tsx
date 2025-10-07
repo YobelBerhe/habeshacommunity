@@ -12,6 +12,8 @@ import { useUndoableAction } from "@/hooks/useUndoableAction";
 import { UndoBanner } from "@/components/UndoBanner";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
 import { PresenceTracker } from "@/components/PresenceTracker";
+import { LiveUpdateStream } from "@/components/LiveUpdateStream";
+import { useAuth } from "@/store/auth";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -77,6 +79,7 @@ const queryClient = new QueryClient({
 const App = () => {
   const [showUndoBanner, setShowUndoBanner] = useState(false);
   const { undoLastAction, redoLastAction, canUndo, canRedo } = useUndoableAction();
+  const { user } = useAuth();
 
   // Ctrl+Z to undo
   useKeyboardShortcut('z', () => {
@@ -103,6 +106,7 @@ const App = () => {
       <SkipLink />
       <ConnectionStatus />
       <PresenceTracker />
+      {user && <LiveUpdateStream />}
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

@@ -1,18 +1,20 @@
 import { ListSkeleton } from '@/components/LoadingStates';
 import { EmptyState } from '@/components/EmptyState';
-import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bell, CheckCheck } from 'lucide-react';
-import { toast } from 'sonner';
+import { Bell, CheckCheck, Settings, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MentorHeader from '@/components/MentorHeader';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { VirtualizedList } from '@/components/VirtualizedList';
 import { showUndoToast } from '@/components/UndoToast';
+import { useLiveNotifications } from '@/hooks/useLiveNotifications';
+import { NotificationSettings } from '@/components/NotificationSettings';
+import { useAuth } from '@/store/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 type NotificationRow = {
   id: string;
@@ -32,79 +34,28 @@ type NotificationRow = {
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [showSettings, setShowSettings] = useState(false);
+  
+  const {
+    notifications: notificationData,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    clearAll,
+  } = useLiveNotifications(user?.id || '');
+
+  // Convert to the format expected by the rest of the component
+  const notifications: NotificationRow[] = notificationData as any;
+  const loading = false;
 
   const loadNotifications = async () => {
-    setLoading(true);
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    setUser(currentUser);
-    
-    if (!currentUser) {
-      setNotifications([]);
-      setLoading(false);
-      return;
-    }
-
-    const { data } = await supabase
-      .from('notifications')
-      .select(`
-        *,
-        sender:profiles!notifications_sender_id_fkey(display_name, avatar_url)
-      `)
-      .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(200);
-    
-    setNotifications((data || []) as any);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadNotifications();
-  }, []);
-
-  const markAllAsRead = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('mark-notifications', {
-        body: { action: 'mark-all' }
-      });
-
-      if (error) throw error;
-
-      setNotifications(prev => prev.map(n => ({
-        ...n,
-        read_at: n.read_at ?? new Date().toISOString()
-      })));
-      
-      toast.success('All notifications marked as read');
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-      toast.error('Failed to mark notifications as read');
-    }
-  };
-
-  const markOneAsRead = async (id: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('mark-notifications', {
-        body: { action: 'mark-one', notificationId: id }
-      });
-
-      if (error) throw error;
-
-      setNotifications(prev => prev.map(n => 
-        n.id === id ? { ...n, read_at: new Date().toISOString() } : n
-      ));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      toast.error('Failed to mark notification as read');
-    }
+    // Handled by useLiveNotifications hook
   };
 
   const handleNotificationClick = async (notification: NotificationRow) => {
     if (!notification.read_at) {
-      await markOneAsRead(notification.id);
+      await markAsRead(notification.id);
     }
     
     if (notification.link) {
@@ -117,7 +68,7 @@ export default function NotificationsPage() {
     const unreadNotifs = thread.notifications.filter(n => !n.read_at);
     
     for (const notif of unreadNotifs) {
-      await markOneAsRead(notif.id);
+      await markAsRead(notif.id);
     }
 
     // Navigate to the link if available
@@ -128,11 +79,6 @@ export default function NotificationsPage() {
   };
 
   const handleDeleteNotification = async (notificationIds: string[]) => {
-    const notificationsToDelete = notifications.filter(n => notificationIds.includes(n.id));
-    
-    // Optimistically remove
-    setNotifications(prev => prev.filter(n => !notificationIds.includes(n.id)));
-    
     try {
       await supabase
         .from('notifications')
@@ -141,42 +87,12 @@ export default function NotificationsPage() {
       
       showUndoToast({
         message: notificationIds.length > 1 ? 'Notifications dismissed' : 'Notification dismissed',
-        onUndo: async () => {
-          // Restore notifications
-          if (notificationsToDelete.length > 0 && user) {
-            // Map to proper format for insertion
-            const notificationsToInsert = notificationsToDelete.map(n => ({
-              id: n.id,
-              user_id: user.id,
-              type: n.type as 'message' | 'system' | 'favorite' | 'mention' | 'reply',
-              title: n.title,
-              message: n.body || undefined,
-              link: n.link || undefined,
-              sender_id: n.sender_id || undefined,
-              conversation_id: n.conversation_id || undefined,
-              read_at: n.read_at || undefined,
-              created_at: n.created_at,
-            }));
-            
-            const { error } = await supabase
-              .from('notifications')
-              .insert(notificationsToInsert);
-            
-            if (error) throw error;
-            setNotifications(prev => [...prev, ...notificationsToDelete].sort(
-              (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-            ));
-          }
+        onUndo: () => {
+          // Notifications will be reloaded by the real-time subscription
         },
       });
     } catch (error) {
-      // Rollback
-      if (notificationsToDelete.length > 0) {
-        setNotifications(prev => [...prev, ...notificationsToDelete].sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        ));
-      }
-      toast.error('Failed to dismiss notification');
+      console.error('Failed to delete notification:', error);
     }
   };
 
@@ -221,8 +137,6 @@ export default function NotificationsPage() {
   const notificationThreads = [...messageThreads, ...otherThreads]
     .sort((a, b) => b.latestDate - a.latestDate);
 
-  const unreadCount = notifications.filter(n => !n.read_at).length;
-
   if (!user) {
     return (
       <div className="container mx-auto p-6">
@@ -243,19 +157,50 @@ export default function NotificationsPage() {
       
       <main role="main" aria-label="Notifications">
         <div className="container mx-auto px-4 pt-4 pb-8">
-          {/* Unread count announcement */}
-          <div role="status" aria-live="polite" className="sr-only">
-            {unreadCount > 0 
-              ? `You have ${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}` 
-              : 'No unread notifications'}
+          {/* Header Actions */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm text-muted-foreground">
+              {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(!showSettings)}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+              
+              {unreadCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={markAllAsRead}
+                >
+                  <CheckCheck className="w-4 h-4 mr-2" />
+                  Mark all read
+                </Button>
+              )}
+              
+              {notifications.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAll}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear all
+                </Button>
+              )}
+            </div>
           </div>
 
-          {unreadCount > 0 && (
-            <div className="mb-4 flex justify-end">
-              <Button onClick={markAllAsRead} variant="outline" size="sm">
-                <CheckCheck className="h-4 w-4 mr-2" />
-                Mark all read
-              </Button>
+          {/* Settings Panel */}
+          {showSettings && (
+            <div className="mb-6 p-6 border rounded-lg bg-card">
+              <NotificationSettings />
             </div>
           )}
 
