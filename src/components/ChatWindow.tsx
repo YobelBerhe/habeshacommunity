@@ -4,6 +4,9 @@ import { Send, Loader2, Plus, ChevronLeft, Phone, Video, User } from 'lucide-rea
 import { toast } from 'sonner';
 import { useAuth } from '@/store/auth';
 import { useOptimisticMessages } from '@/hooks/useOptimisticMessages';
+import { usePresence } from '@/hooks/usePresence';
+import { PresenceAvatar } from '@/components/PresenceAvatar';
+import { OnlineIndicator } from '@/components/OnlineIndicator';
 
 interface Message {
   id: string;
@@ -17,10 +20,12 @@ interface Message {
 interface ChatWindowProps {
   conversationId: string;
   participantName: string;
+  participantId: string;
+  participantAvatar?: string;
   onBack?: () => void;
 }
 
-export function ChatWindow({ conversationId, participantName, onBack }: ChatWindowProps) {
+export function ChatWindow({ conversationId, participantName, participantId, participantAvatar, onBack }: ChatWindowProps) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -31,6 +36,14 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
     conversationId, 
     user?.id || ''
   );
+  
+  // Use presence hook for online status
+  const { isUserOnline } = usePresence(
+    `conversation:${conversationId}`,
+    user?.id || ''
+  );
+  
+  const participantOnline = isUserOnline(participantId);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -161,12 +174,19 @@ export function ChatWindow({ conversationId, participantName, onBack }: ChatWind
             </button>
           )}
           <div className="flex items-center space-x-2 flex-1 ml-2">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-pink-600" />
-            </div>
+            <PresenceAvatar
+              src={participantAvatar}
+              fallback={participantName[0] || 'U'}
+              isOnline={participantOnline}
+              size="sm"
+            />
             <div>
               <p className="font-bold text-sm">{participantName}</p>
-              <p className="text-xs text-pink-100">Online</p>
+              <OnlineIndicator
+                isOnline={participantOnline}
+                showLabel
+                size="sm"
+              />
             </div>
           </div>
           <div className="flex items-center space-x-2">

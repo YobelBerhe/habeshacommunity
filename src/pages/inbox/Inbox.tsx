@@ -13,12 +13,15 @@ export default function Inbox() {
   const [selectedConversation, setSelectedConversation] = useState<{
     id: string;
     name: string;
+    participantId: string;
+    avatar?: string;
   } | null>(null);
 
   // Set up push notifications
   useMessageNotifications((conversationId, senderName) => {
     // Auto-select conversation when notification is clicked
-    setSelectedConversation({ id: conversationId, name: senderName });
+    // Note: senderId would need to be fetched separately or passed from notification
+    setSelectedConversation({ id: conversationId, name: senderName, participantId: '' });
   });
 
   useEffect(() => {
@@ -33,6 +36,8 @@ export default function Inbox() {
       setSelectedConversation({
         id: location.state.openConversationId,
         name: location.state.mentorName,
+        participantId: location.state.mentorId || '',
+        avatar: location.state.mentorAvatar,
       });
       // Clear the state after using it
       navigate('/inbox', { replace: true, state: {} });
@@ -49,12 +54,14 @@ export default function Inbox() {
           <ChatWindow
             conversationId={selectedConversation.id}
             participantName={selectedConversation.name}
+            participantId={selectedConversation.participantId}
+            participantAvatar={selectedConversation.avatar}
             onBack={() => setSelectedConversation(null)}
           />
         ) : (
           <ConversationList
-            onSelectConversation={(id, name) =>
-              setSelectedConversation({ id, name })
+            onSelectConversation={(id, name, participantId, avatar) =>
+              setSelectedConversation({ id, name, participantId, avatar })
             }
           />
         )}

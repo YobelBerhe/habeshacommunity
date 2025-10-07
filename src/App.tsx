@@ -10,6 +10,7 @@ import { SkipLink } from "@/components/SkipLink";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { useUndoableAction } from "@/hooks/useUndoableAction";
 import { UndoBanner } from "@/components/UndoBanner";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -99,6 +100,7 @@ const App = () => {
   return (
     <ErrorBoundary>
       <SkipLink />
+      <ConnectionStatus />
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

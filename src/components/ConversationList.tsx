@@ -27,7 +27,7 @@ interface Conversation {
 }
 
 interface ConversationListProps {
-  onSelectConversation: (conversationId: string, participantName: string) => void;
+  onSelectConversation: (conversationId: string, participantName: string, participantId: string, participantAvatar?: string) => void;
 }
 
 export function ConversationList({ onSelectConversation }: ConversationListProps) {
@@ -153,7 +153,9 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
           onClick={() =>
             onSelectConversation(
               conv.id,
-              conv.other_participant.display_name || 'Unknown User'
+              conv.other_participant.display_name || 'Unknown User',
+              conv.other_participant.id,
+              conv.other_participant.avatar_url || undefined
             )
           }
         >
