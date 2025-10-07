@@ -86,6 +86,7 @@ const Notifications = lazy(() => import("./pages/Notifications"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const Profile = lazy(() => import("./pages/dashboard/Profile"));
 const DashboardSettings = lazy(() => import("./pages/dashboard/Settings"));
+const VideoCall = lazy(() => import("./pages/video/VideoCall"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -240,6 +241,7 @@ const App = () => {
               <Route path="/community/groups" element={<Groups />} />
               
               <Route path="/inbox" element={<Inbox />} />
+              <Route path="/video/:id" element={<VideoCall />} />
               <Route path="/admin/seed" element={<AdminSeed />} />
               <Route path="/donate/success" element={<DonateSuccess />} />
               <Route path="/donate/cancel" element={<DonateCancel />} />
