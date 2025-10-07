@@ -68,7 +68,10 @@ const MatchQuiz = lazy(() => import("./pages/match/MatchQuiz"));
 const MatchSuccess = lazy(() => import("./pages/match/MatchSuccess"));
 const MatchDates = lazy(() => import("./pages/match/MatchDates"));
 const Marketplace = lazy(() => import("./pages/marketplace/Marketplace"));
+const MarketplaceHome = lazy(() => import("./pages/marketplace/MarketplaceHome"));
+const CreateListing = lazy(() => import("./pages/marketplace/CreateListing"));
 const MarketplaceDetail = lazy(() => import("./pages/marketplace/MarketplaceDetail"));
+const MyListings = lazy(() => import("./pages/marketplace/MyListings"));
 const Inbox = lazy(() => import("./pages/inbox/Inbox"));
 const AdminSeed = lazy(() => import("./pages/admin/Seed"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -208,8 +211,17 @@ const App = () => {
                 </MatchFlowGuard>
               } />
               
+              {/* Marketplace Routes */}
               <Route path="/market" element={<Marketplace />} />
               <Route path="/market/:id" element={<MarketplaceDetail />} />
+              <Route path="/marketplace" element={<MarketplaceHome />} />
+              <Route path="/marketplace/create" element={<CreateListing />} />
+              <Route path="/marketplace/my-listings" element={<MyListings />} />
+              <Route path="/marketplace/:id" element={<MarketplaceDetail />} />
+              <Route path="/marketplace/products" element={<MarketplaceHome />} />
+              <Route path="/marketplace/housing" element={<MarketplaceHome />} />
+              <Route path="/marketplace/jobs" element={<MarketplaceHome />} />
+              <Route path="/marketplace/services" element={<MarketplaceHome />} />
               <Route path="/inbox" element={<Inbox />} />
               <Route path="/admin/seed" element={<AdminSeed />} />
               <Route path="/donate/success" element={<DonateSuccess />} />
