@@ -27,7 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
 import { useAuth } from '@/store/auth';
 import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
-import { Grid3X3, Map, ChevronDown, MessageCircle, Plus, Heart } from "lucide-react";
+import { Grid3X3, Map, ChevronDown, MessageCircle, Plus, Heart, X } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
 import PostModal from "@/components/PostModal";
@@ -46,10 +46,15 @@ import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 
 import type { ViewMode, SortKey } from "@/components/ViewToggle";
 import { sortListings, applyQuickFilters } from "@/utils/ui";
+import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
+import { useFilterPresets } from '@/hooks/useFilterPresets';
+import { FilterChips } from '@/components/FilterChips';
+import { FilterPanel } from '@/components/FilterPanel';
+import { useFilterAnalytics } from '@/hooks/useFilterAnalytics';
+import type { FilterChip } from '@/components/FilterChips';
 
 
 export default function Browse() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, openAuth, openPost } = useAuth();
   const { language, setLanguage } = useLanguage();
@@ -57,10 +62,46 @@ export default function Browse() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // View and sorting state with localStorage persistence
+  // Advanced filter configuration
+  const {
+    filters,
+    updateFilter,
+    updateFilters,
+    resetFilters,
+    hasActiveFilters,
+  } = useAdvancedFilters<SearchFilters>([
+    { key: 'city', defaultValue: undefined },
+    { key: 'category', defaultValue: undefined },
+    { key: 'subcategory', defaultValue: undefined },
+    { key: 'query', defaultValue: '' },
+    {
+      key: 'minPrice',
+      defaultValue: undefined,
+      serialize: (v) => v?.toString() || '',
+      deserialize: (v) => v ? Number(v) : undefined,
+    },
+    {
+      key: 'maxPrice',
+      defaultValue: undefined,
+      serialize: (v) => v?.toString() || '',
+      deserialize: (v) => v ? Number(v) : undefined,
+    },
+    { key: 'jobKind', defaultValue: undefined },
+  ], {
+    persistToUrl: true,
+    persistToStorage: true,
+    storageKey: 'browse-filters',
+  });
+
+  // Filter presets
+  const { presets, savePreset, applyPreset, deletePreset } = useFilterPresets<SearchFilters>('browse-presets');
+  
+  // Track filter usage
+  useFilterAnalytics(filters);
+  
   // Donation dialog state
   const [donateDialogOpen, setDonateDialogOpen] = useState(false);
-  const [donateAmount, setDonateAmount] = useState<number>(500); // $5
+  const [donateAmount, setDonateAmount] = useState<number>(500);
   const [customAmount, setCustomAmount] = useState<string>("");
   const [donateEmail, setDonateEmail] = useState<string>("");
   const [donateLoading, setDonateLoading] = useState(false);
@@ -93,17 +134,6 @@ export default function Browse() {
     localStorage.getItem('hn.mentor.sortBy') || 'verified'
   );
 
-  // Initialize filters from URL params (don't pre-select cities)
-  const [filters, setFilters] = useState<SearchFilters>(() => ({
-    city: searchParams.get("city") || undefined,
-    category: searchParams.get("category") || undefined,
-    subcategory: getParam(searchParams, "sub"),
-    query: searchParams.get("q") || "",
-    minPrice: searchParams.get("min") ? Number(searchParams.get("min")) : undefined,
-    maxPrice: searchParams.get("max") ? Number(searchParams.get("max")) : undefined,
-    jobKind: undefined as "regular"|"gig"|undefined,
-  }));
-
   // Persist view and filter states
   useEffect(() => localStorage.setItem('hn.viewMode', viewMode), [viewMode]);
   useEffect(() => localStorage.setItem('hn.sort', sortKey), [sortKey]);
@@ -112,19 +142,6 @@ export default function Browse() {
   useEffect(() => localStorage.setItem('hn.mentor.verifiedOnly', mentorVerifiedOnly.toString()), [mentorVerifiedOnly]);
   useEffect(() => localStorage.setItem('hn.mentor.minRating', mentorMinRating), [mentorMinRating]);
   useEffect(() => localStorage.setItem('hn.mentor.sortBy', mentorSortBy), [mentorSortBy]);
-
-  // Update URL when filters change
-  useEffect(() => {
-    const params = setParams(new URLSearchParams(), {
-      city: filters.city,
-      category: filters.category,
-      sub: filters.subcategory,
-      q: filters.query,
-      min: filters.minPrice?.toString(),
-      max: filters.maxPrice?.toString(),
-    });
-    setSearchParams(params, { replace: true });
-  }, [filters, setSearchParams]);
 
   // Update app state when city changes
   useEffect(() => {
@@ -531,7 +548,7 @@ export default function Browse() {
   const [cityCoords, setCityCoords] = useState<{ lat: number; lng: number } | undefined>();
 
   const handleCityChange = (city: string, lat?: number, lon?: number) => {
-    setFilters({ ...filters, city });
+    updateFilter('city', city);
     if (lat && lon) {
       setCityCoords({ lat, lng: lon });
     } else {
@@ -547,24 +564,61 @@ export default function Browse() {
         newFilters.subcategory = undefined;
       }
     }
-    setFilters(newFilters);
+    updateFilters(newFilters);
   };
 
   const handleClearAll = () => {
-    setFilters({
-      city: undefined,
-      category: undefined,
-      subcategory: undefined,
-      query: "",
-      minPrice: undefined,
-      maxPrice: undefined,
-      jobKind: undefined,
-    });
+    resetFilters();
+    setHasImageFilter(false);
+    setPostedTodayFilter(false);
+    setMentorVerifiedOnly(false);
+    setMentorMinRating('0');
+    setMentorSortBy('verified');
     // Also clear app state city
     const next = { ...appState, city: undefined };
     setAppState(next);
     saveAppState(next);
   };
+  
+  // Generate filter chips
+  const filterChips: FilterChip[] = [
+    filters.category && {
+      key: 'category',
+      label: 'Category',
+      value: TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || filters.category,
+      onRemove: () => updateFilter('category', undefined),
+    },
+    filters.subcategory && {
+      key: 'subcategory',
+      label: 'Subcategory',
+      value: LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory,
+      onRemove: () => updateFilter('subcategory', undefined),
+    },
+    filters.city && {
+      key: 'city',
+      label: 'City',
+      value: filters.city,
+      onRemove: () => updateFilter('city', undefined),
+    },
+    filters.minPrice && {
+      key: 'minPrice',
+      label: 'Min Price',
+      value: `$${filters.minPrice}`,
+      onRemove: () => updateFilter('minPrice', undefined),
+    },
+    filters.maxPrice && {
+      key: 'maxPrice',
+      label: 'Max Price',
+      value: `$${filters.maxPrice}`,
+      onRemove: () => updateFilter('maxPrice', undefined),
+    },
+    hasImageFilter && {
+      key: 'hasImage',
+      label: 'Has Image',
+      value: 'Yes',
+      onRemove: () => setHasImageFilter(false),
+    },
+  ].filter(Boolean) as FilterChip[];
 
   const handleListingSelect = (listing: Listing) => {
     // Handle different categories with their specific routes
@@ -728,7 +782,7 @@ export default function Browse() {
                       className={`pb-1 border-b-2 font-medium text-sm ${
                         filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                       }`}
-                      onClick={() => setFilters({ ...filters, category: 'community', subcategory: undefined })}
+                      onClick={() => updateFilters({ category: 'community', subcategory: undefined })}
                       aria-label="Filter by community category"
                       aria-current={filters.category === 'community' ? 'page' : undefined}
                     >
@@ -740,7 +794,7 @@ export default function Browse() {
                       className={`pb-1 border-b-2 font-medium text-sm ${
                         filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                       }`}
-                      onClick={() => setFilters({ ...filters, category: 'mentor', subcategory: undefined })}
+                      onClick={() => updateFilters({ category: 'mentor', subcategory: undefined })}
                       aria-label="Filter by mentor category"
                       aria-current={filters.category === 'mentor' ? 'page' : undefined}
                     >
@@ -752,7 +806,7 @@ export default function Browse() {
                       className={`pb-1 border-b-2 font-medium text-sm ${
                         filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                       }`}
-                      onClick={() => setFilters({ ...filters, category: 'match', subcategory: undefined })}
+                      onClick={() => updateFilters({ category: 'match', subcategory: undefined })}
                       aria-label="Filter by match category"
                       aria-current={filters.category === 'match' ? 'page' : undefined}
                     >
@@ -764,7 +818,7 @@ export default function Browse() {
                       className={`pb-1 border-b-2 font-medium text-sm ${
                         filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                       }`}
-                      onClick={() => setFilters({ ...filters, category: 'housing' })}
+                      onClick={() => updateFilter('category', 'housing')}
                       aria-label="Filter by housing category"
                       aria-current={filters.category === 'housing' ? 'page' : undefined}
                     >
@@ -776,7 +830,7 @@ export default function Browse() {
                       className={`pb-1 border-b-2 font-medium text-sm ${
                         filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                       }`}
-                      onClick={() => setFilters({ ...filters, category: 'jobs' })}
+                      onClick={() => updateFilter('category', 'jobs')}
                       aria-label="Filter by jobs category"
                       aria-current={filters.category === 'jobs' ? 'page' : undefined}
                     >
@@ -788,7 +842,7 @@ export default function Browse() {
                       className={`pb-1 border-b-2 font-medium text-sm ${
                         filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                       }`}
-                      onClick={() => setFilters({ ...filters, category: 'services' })}
+                      onClick={() => updateFilter('category', 'services')}
                       aria-label="Filter by services category"
                       aria-current={filters.category === 'services' ? 'page' : undefined}
                     >
@@ -800,7 +854,7 @@ export default function Browse() {
                     className={`pb-1 border-b-2 font-medium text-sm ${
                       filters.category === 'forsale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                     }`}
-                    onClick={() => setFilters({ ...filters, category: 'forsale' })}
+                    onClick={() => updateFilter('category', 'forsale')}
                     aria-label="Filter by marketplace category"
                     aria-current={filters.category === 'forsale' ? 'page' : undefined}
                   >
@@ -824,6 +878,13 @@ export default function Browse() {
           </div>
         </div>
         </nav>
+
+        {/* Filter Chips */}
+        {hasActiveFilters() && (
+          <div className="container mx-auto px-4 pt-3">
+            <FilterChips chips={filterChips} onClearAll={handleClearAll} />
+          </div>
+        )}
 
         {/* Filter Controls Bar */}
         <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border sticky top-0 z-10 hidden md:block">
@@ -850,7 +911,7 @@ export default function Browse() {
                     <div className="space-y-1">
                       <button
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
+                        onClick={() => updateFilters({ category: undefined, subcategory: undefined })}
                       >
                         All categories
                       </button>
@@ -858,7 +919,7 @@ export default function Browse() {
                         <button
                           key={key}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                          onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
+                          onClick={() => updateFilters({ category: key, subcategory: undefined })}
                         >
                           {value.name[language.toLowerCase() as 'en' | 'ti']}
                         </button>
@@ -892,7 +953,7 @@ export default function Browse() {
                     <div className="space-y-1">
                       <button
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, subcategory: undefined })}
+                        onClick={() => updateFilter('subcategory', undefined)}
                       >
                         All subcategories
                       </button>
@@ -900,7 +961,7 @@ export default function Browse() {
                         <button
                           key={sub}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                          onClick={() => setFilters({ ...filters, subcategory: sub })}
+                          onClick={() => updateFilter('subcategory', sub)}
                         >
                           {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
                         </button>
@@ -933,14 +994,70 @@ export default function Browse() {
                 )}
                 
                 {filters.category && filters.category !== 'mentor' && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1"
+                  <FilterPanel
+                    onApply={() => {}}
+                    onReset={handleClearAll}
+                    onSavePreset={(name) => savePreset(name, filters)}
+                    hasActiveFilters={hasActiveFilters()}
                   >
-                    More Filters
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
+                    {/* Price Range Filter */}
+                    <div className="space-y-2">
+                      <Label>Price Range</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={filters.minPrice || ''}
+                          onChange={(e) => updateFilter('minPrice', e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={filters.maxPrice || ''}
+                          onChange={(e) => updateFilter('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Has Image Filter */}
+                    <div className="flex items-center justify-between">
+                      <Label>Only with images</Label>
+                      <input
+                        type="checkbox"
+                        checked={hasImageFilter}
+                        onChange={(e) => setHasImageFilter(e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </div>
+
+                    {/* Saved Presets */}
+                    {presets.length > 0 && (
+                      <div className="space-y-2">
+                        <Label>Saved Presets</Label>
+                        <div className="space-y-1">
+                          {presets.map(preset => (
+                            <div key={preset.id} className="flex items-center justify-between p-2 hover:bg-accent rounded">
+                              <button
+                                onClick={() => {
+                                  const presetFilters = applyPreset(preset.id);
+                                  if (presetFilters) updateFilters(presetFilters);
+                                }}
+                                className="flex-1 text-left text-sm"
+                              >
+                                {preset.name}
+                              </button>
+                              <button
+                                onClick={() => deletePreset(preset.id)}
+                                className="p-1 hover:bg-background rounded"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </FilterPanel>
                 )}
 
                 <motion.div whileTap={{ scale: 0.95 }}>
@@ -1081,21 +1198,21 @@ export default function Browse() {
                   collisionPadding={8}
                 >
                   <div className="space-y-1">
-                    <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                      onClick={() => setFilters({ ...filters, category: undefined, subcategory: undefined })}
-                    >
-                      All categories
-                    </button>
-                    {Object.entries(TAXONOMY).map(([key, value]) => (
-                      <button
-                        key={key}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, category: key, subcategory: undefined })}
-                      >
-                        {value.name[language.toLowerCase() as 'en' | 'ti']}
-                      </button>
-                    ))}
+                     <button
+                       className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                       onClick={() => updateFilters({ category: undefined, subcategory: undefined })}
+                     >
+                       All categories
+                     </button>
+                     {Object.entries(TAXONOMY).map(([key, value]) => (
+                       <button
+                         key={key}
+                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
+                         onClick={() => updateFilters({ category: key, subcategory: undefined })}
+                       >
+                         {value.name[language.toLowerCase() as 'en' | 'ti']}
+                       </button>
+                     ))}
                   </div>
                 </PopoverContent>
               </Popover>
@@ -1126,7 +1243,7 @@ export default function Browse() {
                     <div className="space-y-1">
                       <button
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => setFilters({ ...filters, subcategory: undefined })}
+                        onClick={() => updateFilter('subcategory', undefined)}
                       >
                         {language === 'EN' ? 'All' : 'ኩሉ'} {TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti']?.toLowerCase()}
                       </button>
@@ -1134,7 +1251,7 @@ export default function Browse() {
                         <button
                           key={sub}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm text-primary"
-                          onClick={() => setFilters({ ...filters, subcategory: sub })}
+                          onClick={() => updateFilter('subcategory', sub)}
                         >
                           {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
                         </button>
