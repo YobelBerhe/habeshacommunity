@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Heart, GraduationCap, ShoppingBag, Users, Search,
-  TrendingUp, Sparkles, Globe, MessageSquare,
+  TrendingUp, Sparkles, MessageSquare,
   Home, Briefcase, Wrench, Calendar, ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,11 +10,18 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useTheme } from 'next-themes';
+import WorldActivityHero from '@/components/WorldActivityHero';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeUsers] = useState(12847);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const mainApps = [
     {
@@ -84,15 +91,6 @@ const Index = () => {
     }
   ];
 
-  const cityData = [
-    { city: 'Asmara', city_ti: 'ኣስመራ', country: '🇪🇷', users: 2341, left: '52%', top: '48%' },
-    { city: 'Addis Ababa', city_ti: 'አዲስ አበባ', country: '🇪🇹', users: 3892, left: '54%', top: '52%' },
-    { city: 'Washington DC', city_ti: 'ዋሽንግተን', country: '🇺🇸', users: 1847, left: '25%', top: '42%' },
-    { city: 'Toronto', city_ti: 'ቶሮንቶ', country: '🇨🇦', users: 1234, left: '22%', top: '38%' },
-    { city: 'London', city_ti: 'ለንደን', country: '🇬🇧', users: 892, left: '48%', top: '35%' },
-    { city: 'Stockholm', city_ti: 'ስቶክሆልም', country: '🇸🇪', users: 741, left: '50%', top: '28%' }
-  ];
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -109,126 +107,86 @@ const Index = () => {
     }
   };
 
+  const SearchBarComponent = () => (
+    <div className="space-y-4">
+      <form onSubmit={handleSearch} className="w-full">
+        <div className="relative group">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-white/80 group-hover:text-white transition-colors" />
+          <Input
+            type="text"
+            placeholder="Search everything..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full h-16 pl-16 pr-6 text-lg rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-md text-white placeholder:text-white/60 shadow-lg hover:shadow-xl focus:shadow-2xl transition-all focus:bg-white/20"
+          />
+        </div>
+      </form>
+      
+      {/* Four main buttons below search */}
+      <div className="flex flex-wrap gap-3 justify-center">
+        <Button
+          type="button"
+          size="lg"
+          className="min-w-[120px] bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm"
+          onClick={() => checkAuthAndNavigate('/forums')}
+        >
+          <Users className="w-5 h-5 mr-2" />
+          Community
+        </Button>
+        <Button
+          type="button"
+          size="lg"
+          className="min-w-[120px] bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm"
+          onClick={() => checkAuthAndNavigate('/match')}
+        >
+          <Heart className="w-5 h-5 mr-2" />
+          Match
+        </Button>
+        <Button
+          type="button"
+          size="lg"
+          className="min-w-[120px] bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm"
+          onClick={() => checkAuthAndNavigate('/market')}
+        >
+          <ShoppingBag className="w-5 h-5 mr-2" />
+          Market
+        </Button>
+        <Button
+          type="button"
+          size="lg"
+          className="min-w-[120px] bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm"
+          onClick={() => checkAuthAndNavigate('/mentor')}
+        >
+          <GraduationCap className="w-5 h-5 mr-2" />
+          Mentor
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (!mounted) return null;
+
   return (
     <div className="min-h-screen bg-background pb-8 md:pb-0">
-      {/* Hero Section - Mobile Optimized */}
-      <section className="container mx-auto px-4 py-8 md:py-12 lg:py-20 max-w-7xl">
-        {/* Logo & Tagline */}
-        <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-            HabeshaCommunity
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground font-medium px-4">
-            ሓደ ማሕበረሰብ • One Community • አንድ ማህበረሰብ
-          </p>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-            🇪🇷 Eritrea • 🇪🇹 Ethiopia • 🌍 Worldwide
-          </p>
-        </div>
+      {/* Title above map */}
+      <div className="text-center pt-8 pb-4">
+        <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          HabeshaCommunity
+        </h1>
+      </div>
 
-        {/* Global Search Bar - Mobile Optimized */}
-        <form onSubmit={handleSearch} className="max-w-3xl mx-auto mb-8 md:mb-12 px-2">
-          <div className="relative group">
-            <Search className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-            <Input
-              type="text"
-              placeholder="Search everything..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-12 md:h-16 pl-12 md:pl-16 pr-4 md:pr-6 text-base md:text-lg rounded-full border-2 shadow-lg hover:shadow-xl focus:shadow-2xl transition-all"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2 justify-center mt-4">
-            <Badge 
-              variant="secondary" 
-              className="cursor-pointer hover:bg-pink-100 dark:hover:bg-pink-900/30 transition-colors"
-              onClick={() => navigate('/match')}
-            >
-              💝 Find Match
-            </Badge>
-            <Badge 
-              variant="secondary" 
-              className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-              onClick={() => setSearchQuery('housing in Asmara')}
-            >
-              🏠 Housing in Asmara
-            </Badge>
-            <Badge 
-              variant="secondary" 
-              className="cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-              onClick={() => setSearchQuery('remote jobs')}
-            >
-              💼 Remote Jobs
-            </Badge>
-            <Badge 
-              variant="secondary" 
-              className="cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
-              onClick={() => navigate('/mentor')}
-            >
-              🎓 Business Mentors
-            </Badge>
-          </div>
-        </form>
+      {/* World Activity Map with Search Bar */}
+      <WorldActivityHero
+        mode={theme === 'dark' ? 'dark' : 'light'}
+        onCityClick={(city) => navigate(`/browse?city=${encodeURIComponent(city)}`)}
+        SearchBar={SearchBarComponent}
+        onNavigate={(path) => navigate(path)}
+      />
 
-        {/* Live Map Preview - Mobile Optimized */}
-        <Card className="mb-8 md:mb-12 overflow-hidden shadow-2xl">
-          <div className="relative h-64 md:h-80 lg:h-[400px] bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:from-blue-950/30 dark:via-cyan-950/30 dark:to-teal-950/30">
-            {/* Map Background Pattern */}
-            <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }} />
-
-            {/* Center Content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-4">
-              <Globe className="w-12 h-12 md:w-16 lg:w-20 text-blue-500 mb-3 md:mb-4 animate-spin" style={{ animationDuration: '20s' }} />
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2 text-center">🌍 Global Community</h3>
-              <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4 flex items-center">
-                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                {activeUsers.toLocaleString()} active members
-              </p>
-              
-              {/* City Badges */}
-              <div className="flex flex-wrap gap-2 justify-center max-w-full px-4">
-                {cityData.map((location) => (
-                  <Badge 
-                    key={location.city}
-                    className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:scale-105 transition-transform cursor-pointer text-xs md:text-sm"
-                    onClick={() => setSearchQuery(location.city)}
-                  >
-                    {location.country} {location.city}: {location.users.toLocaleString()}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Breathing dots - Hidden on small mobile */}
-            <div className="absolute inset-0 pointer-events-none hidden sm:block">
-              {cityData.map((location, i) => (
-                <div
-                  key={i}
-                  className="absolute"
-                  style={{
-                    left: location.left,
-                    top: location.top,
-                  }}
-                >
-                  <div 
-                    className="w-3 h-3 md:w-4 md:h-4 bg-blue-500 rounded-full animate-ping absolute"
-                    style={{
-                      animationDelay: `${i * 0.5}s`,
-                      animationDuration: '2s'
-                    }}
-                  />
-                  <div className="w-3 h-3 md:w-4 md:h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        {/* Main 4 Apps Grid - Mobile Optimized */}
+      {/* Main 4 Apps Grid */}
+      <section className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {mainApps.map((app, index) => {
+          {mainApps.map((app) => {
             const Icon = app.icon;
             
             return (
@@ -315,7 +273,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Quick Stats - Mobile Optimized */}
+      {/* Quick Stats */}
       <section className="bg-muted/30 py-8 md:py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto text-center">
@@ -339,7 +297,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Cultural Note & Values - Mobile Optimized */}
+      {/* Cultural Note & Values */}
       <section className="py-8 md:py-12">
         <div className="container mx-auto px-4 max-w-4xl">
           <Card className="p-6 md:p-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
@@ -368,7 +326,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Final CTA - Mobile Optimized */}
+      {/* Final CTA */}
       <section className="py-8 md:py-12 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white mx-4 md:mx-0 rounded-2xl md:rounded-none">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">
