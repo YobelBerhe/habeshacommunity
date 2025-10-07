@@ -723,11 +723,10 @@ export default function Browse() {
   return (
     <PageTransition>
     <div className="min-h-screen bg-background">
-      <Breadcrumbs />
       {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
-        {/* Top Bar with Search and Controls - STICKY */}
-        <header role="banner" className="sticky top-0 z-[50] bg-background border-b shadow-sm">
+        {/* Top Bar with Logo and Search - STICKY */}
+        <header role="banner" className="sticky top-0 z-[50] bg-background/95 backdrop-blur-sm border-b">
           <div className="container mx-auto px-4 py-3">
               <div className="flex items-center justify-between gap-4">
                 {/* Left: Logo and City Search */}
@@ -788,11 +787,27 @@ export default function Browse() {
             </div>
         </header>
 
-        {/* Navigation Line - NOT STICKY */}
+        {/* View Toggle and Sort - STICKY below header */}
+        <div className="sticky top-[61px] z-[45] bg-background/95 backdrop-blur-sm border-b">
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {processedListings.length} listings
+                {filters.city && ` in ${filters.city}`}
+              </div>
+              <div className="flex items-center gap-2">
+                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Line - Scrollable */}
         <nav role="navigation" aria-label="Category navigation">
-          <div className="bg-background border-b border-border">
+          <div className="bg-background border-b">
             <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between py-4">
+              <div className="flex items-center justify-between py-3">
                 {/* Left: All Navigation Items */}
                 <div className="flex space-x-6">
                   <ScrollReveal direction="up" delay={0.1}>
@@ -1104,22 +1119,7 @@ export default function Browse() {
           </div>
         </div>
 
-        {/* Results Count, View Toggle, and Sort - STICKY */}
-        <div className="sticky top-[73px] z-[45] bg-background border-b shadow-sm hidden md:block">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-end gap-2">
-              <div className="text-sm text-muted-foreground">
-                {processedListings.length} listings
-                {filters.city && ` in ${filters.city}`}
-              </div>
-              <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-              <SortDropdown sortKey={sortKey} onChange={setSortKey} />
-            </div>
-          </div>
-        </div>
-
-
-        {/* Split View: Map on Left, Listings on Right */}
+        {/* Split View: Map on Left (STICKY), Listings on Right */}
         <main id="main-content" role="main" aria-label="Listings">
           {/* Live region for results count */}
           <div 
@@ -1132,9 +1132,9 @@ export default function Browse() {
             {filters.city && ` in ${filters.city}`}
           </div>
 
-          <div className="flex h-[calc(100vh-170px)]">
-          {/* Map Section - Left Side */}
-          <div className="w-1/2 relative">
+          <div className="flex">
+          {/* Map Section - Left Side (STICKY) */}
+          <div className="w-1/2 sticky top-[109px] h-[calc(100vh-109px)] overflow-hidden">
             <LazyMap
               listings={processedListings}
               onListingClick={handleListingSelect}
@@ -1147,8 +1147,8 @@ export default function Browse() {
             />
           </div>
 
-         {/* Listings Section - Right Side */}
-<div className="w-1/2 bg-background overflow-y-auto relative z-[1]">
+         {/* Listings Section - Right Side (SCROLLABLE) */}
+<div className="w-1/2 bg-background min-h-screen">
   <div className="p-6">
     {loading ? (
       <GridSkeleton count={6} />
