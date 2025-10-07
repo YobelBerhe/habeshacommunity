@@ -8,6 +8,7 @@ interface OptimizedImageProps {
   className?: string;
   aspectRatio?: string;
   decorative?: boolean;
+  priority?: boolean;
 }
 
 export function OptimizedImage({ 
@@ -15,7 +16,8 @@ export function OptimizedImage({
   alt, 
   className = '',
   aspectRatio = '4/3',
-  decorative = false
+  decorative = false,
+  priority = false,
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -27,6 +29,31 @@ export function OptimizedImage({
         style={{ aspectRatio }}
       >
         <span className="text-muted-foreground text-sm">No image</span>
+      </div>
+    );
+  }
+
+  if (priority) {
+    return (
+      <div className="relative" style={{ aspectRatio }}>
+        {isLoading && (
+          <div className="absolute inset-0 bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse" />
+        )}
+        <img
+          src={src}
+          alt={decorative ? '' : alt}
+          role={decorative ? 'presentation' : undefined}
+          aria-hidden={decorative}
+          className={className}
+          loading="eager"
+          decoding="async"
+          onLoad={() => setIsLoading(false)}
+          onError={() => {
+            setError(true);
+            setIsLoading(false);
+          }}
+          style={{ aspectRatio }}
+        />
       </div>
     );
   }

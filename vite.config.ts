@@ -22,16 +22,18 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+          'react-core': ['react', 'react-dom'],
+          'react-router': ['react-router-dom'],
+          'ui-components': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-popover', '@radix-ui/react-tabs'],
           'query-vendor': ['@tanstack/react-query', '@tanstack/react-virtual'],
+          'supabase': ['@supabase/supabase-js'],
           'map-vendor': ['leaflet', 'react-leaflet'],
           'chart-vendor': ['recharts'],
           'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'utils': ['date-fns', 'sonner'],
         },
         // Optimize chunk names for caching
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -39,9 +41,10 @@ export default defineConfig(({ mode }) => ({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    chunkSizeWarningLimit: 1000,
+    target: 'es2020',
+    chunkSizeWarningLimit: 500,
     sourcemap: false,
-    // Minification options
+    cssCodeSplit: true,
     minify: 'terser',
     terserOptions: {
       compress: {

@@ -15,6 +15,8 @@ import { PresenceTracker } from "@/components/PresenceTracker";
 import { LiveUpdateStream } from "@/components/LiveUpdateStream";
 import { SyncStatus } from "@/components/SyncStatus";
 import { InstallBanner } from "@/components/InstallBanner";
+import { PerformanceDebug } from "@/components/PerformanceDebug";
+import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { useAuth } from "@/store/auth";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 
@@ -84,6 +86,7 @@ const App = () => {
   const { undoLastAction, redoLastAction, canUndo, canRedo } = useUndoableAction();
   const { user } = useAuth();
   useServiceWorker();
+  usePerformanceMonitor();
 
   // Ctrl+Z to undo
   useKeyboardShortcut('z', () => {
@@ -112,6 +115,7 @@ const App = () => {
       <PresenceTracker />
       {user && <SyncStatus />}
       <InstallBanner />
+      <PerformanceDebug />
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
