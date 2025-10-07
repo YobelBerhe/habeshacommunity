@@ -104,37 +104,104 @@ const MatchList = () => {
 
       const favoriteIds = new Set(favoritesData?.map(f => f.liked_id) || []);
 
-      // Transform data
-      const transformedMatches: Match[] = profilesData?.map((profile) => {
-        const userProfile = userProfilesData?.find(p => p.id === profile.user_id);
-        const matchRecord = matchesData.find(m => 
-          m.user1_id === profile.user_id || m.user2_id === profile.user_id
-        );
-        
-        // Check if mutual
-        const sentLike = likesData?.find(l => l.liker_id === user.id && l.liked_id === profile.user_id);
-        const receivedLike = likesData?.find(l => l.liker_id === profile.user_id && l.liked_id === user.id);
-        const isMutual = !!(sentLike && receivedLike);
+      // Get all conversations for this user
+      const { data: conversationsData } = await supabase
+        .from('conversations')
+        .select('id, participant1_id, participant2_id')
+        .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`);
 
-        return {
-          id: profile.id,
-          name: profile.name || userProfile?.display_name || 'Unknown',
-          age: profile.age || 0,
-          location: profile.city || 'Unknown',
-          origin: profile.country || 'Unknown',
-          profession: 'Professional', // You may want to add this field to match_profiles
-          faith: 'Not specified', // You may want to add this field to match_profiles
-          compatibility: 85, // Calculate from user_answers if needed
-          matchedAt: matchRecord?.created_at || new Date().toISOString(),
-          lastActive: 'Recently', // Add last_seen to profiles table if needed
-          online: false, // Implement presence tracking if needed
-          mutual: isMutual,
-          unreadMessages: 0, // Query messages table if needed
-          favorite: favoriteIds.has(profile.user_id),
-          verified: true,
-          bio: profile.bio || ''
-        };
-      }) || [];
+      // Get unread message counts for each conversation
+      const unreadCounts = new Map<string, number>();
+      if (conversationsData) {
+        for (const conv of conversationsData) {
+          const otherUserId = conv.participant1_id === user.id ? conv.participant2_id : conv.participant1_id;
+          const { count } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', conv.id)
+            .eq('read', false)
+            .neq('sender_id', user.id);
+          
+          if (count) {
+            unreadCounts.set(otherUserId, count);
+          }
+        }
+      }
+
+      // Get user answers to calculate compatibility
+      const { data: userAnswers } = await supabase
+        .from('user_answers')
+        .select('question_id, answer')
+        .eq('user_id', user.id);
+
+      // Transform data
+      const transformedMatches: Match[] = await Promise.all(
+        profilesData?.map(async (profile) => {
+          const userProfile = userProfilesData?.find(p => p.id === profile.user_id);
+          const matchRecord = matchesData.find(m => 
+            m.user1_id === profile.user_id || m.user2_id === profile.user_id
+          );
+          
+          // Check if mutual
+          const sentLike = likesData?.find(l => l.liker_id === user.id && l.liked_id === profile.user_id);
+          const receivedLike = likesData?.find(l => l.liker_id === profile.user_id && l.liked_id === user.id);
+          const isMutual = !!(sentLike && receivedLike);
+
+          // Calculate compatibility if user has answered questions
+          let compatibility = 85;
+          if (userAnswers && userAnswers.length > 0) {
+            const { data: matchAnswers } = await supabase
+              .from('user_answers')
+              .select('question_id, answer')
+              .eq('user_id', profile.user_id);
+
+            if (matchAnswers && matchAnswers.length > 0) {
+              const commonQuestions = userAnswers.filter(ua => 
+                matchAnswers.some(ma => ma.question_id === ua.question_id && ma.answer === ua.answer)
+              );
+              compatibility = Math.round((commonQuestions.length / Math.max(userAnswers.length, matchAnswers.length)) * 100);
+            }
+          }
+
+          // Get last active (simple heuristic from match creation time)
+          const matchedDate = new Date(matchRecord?.created_at || new Date());
+          const hoursSinceMatch = Math.floor((Date.now() - matchedDate.getTime()) / (1000 * 60 * 60));
+          let lastActive = 'Recently';
+          if (hoursSinceMatch < 1) lastActive = 'Just now';
+          else if (hoursSinceMatch < 24) lastActive = `${hoursSinceMatch}h ago`;
+          else if (hoursSinceMatch < 168) lastActive = `${Math.floor(hoursSinceMatch / 24)}d ago`;
+          else lastActive = 'Over a week ago';
+
+          // Extract profession and faith from bio or interests if available
+          const interests = profile.interests || [];
+          const profession = interests.find(i => 
+            ['Engineer', 'Teacher', 'Healthcare', 'Business', 'Developer'].some(p => i.includes(p))
+          ) || 'Professional';
+          
+          const faith = interests.find(i => 
+            ['Orthodox', 'Catholic', 'Protestant', 'Muslim'].some(f => i.includes(f))
+          ) || profile.bio?.match(/(Orthodox|Catholic|Protestant|Muslim)/i)?.[0] || 'Faith-oriented';
+
+          return {
+            id: profile.id,
+            name: profile.name || userProfile?.display_name || 'Unknown',
+            age: profile.age || 25,
+            location: profile.city || userProfile?.city || 'Unknown',
+            origin: profile.country || userProfile?.country || 'Ethiopia',
+            profession,
+            faith,
+            compatibility,
+            matchedAt: matchRecord?.created_at || new Date().toISOString(),
+            lastActive,
+            online: hoursSinceMatch < 1, // Simple heuristic: online if matched in last hour
+            mutual: isMutual,
+            unreadMessages: unreadCounts.get(profile.user_id) || 0,
+            favorite: favoriteIds.has(profile.user_id),
+            verified: true,
+            bio: profile.bio || 'Looking for meaningful connections'
+          };
+        }) || []
+      );
 
       setMatches(transformedMatches);
     } catch (error) {
