@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Heart, ArrowRight, ArrowLeft, Check, MapPin, Globe, Church, 
   Briefcase, GraduationCap, Users, Sparkles, Home, Calendar,
@@ -15,6 +15,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { getUserId } from '@/repo/auth';
 
 interface OnboardingData {
   // Step 1: Basic Info
@@ -68,6 +70,18 @@ const MatchOnboarding = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 7;
+
+  // Check if user is logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const userId = await getUserId();
+      if (!userId) {
+        toast.error('Please log in to create a profile');
+        navigate('/auth/login');
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const [formData, setFormData] = useState<OnboardingData>({
     name: '',
@@ -189,10 +203,54 @@ const MatchOnboarding = () => {
 
   const handleSubmit = async () => {
     try {
-      // TODO: Save to Supabase
-      // const { error } = await supabase
-      //   .from('match_profiles')
-      //   .insert([formData]);
+      const userId = await getUserId();
+      if (!userId) {
+        toast.error('You must be logged in to create a profile');
+        navigate('/auth/login');
+        return;
+      }
+
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
+        .from('match_profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      // Transform form data to match the match_profiles table schema
+      const profileData = {
+        user_id: userId,
+        name: formData.name,
+        display_name: formData.name,
+        age: parseInt(formData.age),
+        gender: formData.gender,
+        city: formData.location,
+        country: formData.origin.split(',').pop()?.trim() || '',
+        seeking: formData.lookingFor,
+        looking_for: formData.idealPartner || formData.lookingFor,
+        interests: formData.interests,
+        bio: formData.bio,
+        photos: [],
+        active: true
+      };
+
+      let error;
+      if (existingProfile) {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('match_profiles')
+          .update(profileData)
+          .eq('id', existingProfile.id);
+        error = updateError;
+      } else {
+        // Insert new profile with generated id
+        const { error: insertError } = await supabase
+          .from('match_profiles')
+          .insert([{ ...profileData, id: crypto.randomUUID() }]);
+        error = insertError;
+      }
+
+      if (error) throw error;
 
       toast.success('Profile created! 🎉', {
         description: 'Your matchmaking journey begins now'
