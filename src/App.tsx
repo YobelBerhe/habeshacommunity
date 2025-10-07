@@ -4,7 +4,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { PageLoader } from "@/components/LoadingStates";
 import { SkipLink } from "@/components/SkipLink";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
@@ -21,6 +21,7 @@ import { useAuth } from "@/store/auth";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { MatchFlowGuard } from "@/components/match/MatchFlowGuard";
 import { MatchBottomNav } from "@/components/match/MatchBottomNav";
+import Header from "@/components/Header";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -84,6 +85,16 @@ const queryClient = new QueryClient({
   },
 });
 
+// Component to conditionally show header
+const HeaderWrapper = () => {
+  const location = useLocation();
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback'];
+  const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
+  
+  if (shouldHideHeader) return null;
+  return <Header />;
+};
+
 const App = () => {
   const [showUndoBanner, setShowUndoBanner] = useState(false);
   const { undoLastAction, redoLastAction, canUndo, canRedo } = useUndoableAction();
@@ -132,6 +143,7 @@ const App = () => {
           />
           <BrowserRouter>
             {user && <LiveUpdateStream />}
+            <HeaderWrapper />
             <Suspense fallback={<PageLoader />}>
               <Routes>
               <Route path="/" element={<Index />} />
