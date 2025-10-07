@@ -1,14 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
-import { User, Save, Camera, X } from 'lucide-react';
+import { User, Save, Camera, X, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import MentorHeader from '@/components/MentorHeader';
 import { toast } from 'sonner';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { ImageCropper } from '@/components/ImageCropper';
 import { EmailNotificationToggle } from '@/components/EmailNotificationToggle';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { StorageInfo } from '@/components/StorageInfo';
+import { InstallButton } from '@/components/InstallButton';
+import { InstallInstructions } from '@/components/InstallInstructions';
+import { useStandaloneMode } from '@/hooks/useStandaloneMode';
 
 export default function AccountSettings() {
   const [displayName, setDisplayName] = useState('');
@@ -19,8 +23,10 @@ export default function AccountSettings() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [cropperImage, setCropperImage] = useState<string | null>(null);
+  const [showInstructions, setShowInstructions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  const { isStandalone } = useStandaloneMode();
 
   useEffect(() => {
     if (!user) return;
@@ -329,10 +335,55 @@ export default function AccountSettings() {
 
           <EmailNotificationToggle />
 
+          {/* PWA Install Section */}
+          {!isStandalone ? (
+            <div className="bg-card rounded-lg border p-6">
+              <h2 className="text-lg font-semibold mb-4">Install App</h2>
+              
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Install HabeshaCommunity for a better experience with offline access,
+                  faster loading, and push notifications.
+                </p>
+
+                <div className="flex gap-3">
+                  <InstallButton />
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowInstructions(true)}
+                  >
+                    View Instructions
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-lg border border-green-200 dark:border-green-800 p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-green-900 dark:text-green-100">
+                    App Installed!
+                  </h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    You're using the installed version
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-card rounded-lg border p-6">
             <h2 className="text-lg font-semibold mb-4">App Storage</h2>
             <StorageInfo />
           </div>
+
+          <InstallInstructions
+            open={showInstructions}
+            onOpenChange={setShowInstructions}
+          />
         </div>
       </div>
     </div>

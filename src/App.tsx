@@ -14,6 +14,7 @@ import { ConnectionStatus } from "@/components/ConnectionStatus";
 import { PresenceTracker } from "@/components/PresenceTracker";
 import { LiveUpdateStream } from "@/components/LiveUpdateStream";
 import { SyncStatus } from "@/components/SyncStatus";
+import { InstallBanner } from "@/components/InstallBanner";
 import { useAuth } from "@/store/auth";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 
@@ -110,6 +111,7 @@ const App = () => {
       <ConnectionStatus />
       <PresenceTracker />
       {user && <SyncStatus />}
+      <InstallBanner />
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
