@@ -161,7 +161,7 @@ const MarketplaceHome = () => {
       case 'housing': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
       case 'job': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
       case 'service': return 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300';
-      default: return 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -176,7 +176,7 @@ const MarketplaceHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-green-50/20 dark:via-green-950/10 to-background pb-20 md:pb-8">
+    <div className="min-h-screen bg-background pb-20 md:pb-8">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white py-12 md:py-16">
         <div className="container mx-auto px-4">
@@ -196,7 +196,7 @@ const MarketplaceHome = () => {
                 placeholder="Search for items, housing, jobs, services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-12 md:h-16 pl-12 md:pl-16 pr-4 md:pr-6 text-base md:text-lg rounded-full bg-white text-foreground border-0 shadow-xl"
+                className="w-full h-12 md:h-16 pl-12 md:pl-16 pr-4 md:pr-6 text-base md:text-lg rounded-full bg-background text-foreground border-0 shadow-xl"
               />
             </div>
 
@@ -319,9 +319,9 @@ const MarketplaceHome = () => {
                   onClick={() => navigate(`/marketplace/${listing.type}/${listing.id}`)}
                 >
                   {/* Image Placeholder */}
-                  <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+                  <div className="relative h-48 bg-gradient-to-br from-muted to-muted/50">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <TypeIcon className="w-16 h-16 text-gray-400" />
+                      <TypeIcon className="w-16 h-16 text-muted-foreground" />
                     </div>
                     
                     {listing.featured && (
@@ -334,7 +334,7 @@ const MarketplaceHome = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-3 right-3 bg-white/80 hover:bg-white"
+                      className="absolute top-3 right-3 bg-background/80 hover:bg-background"
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
