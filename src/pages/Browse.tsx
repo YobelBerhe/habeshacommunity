@@ -16,6 +16,8 @@ import CitySearchBar from "@/components/CitySearchBar";
 import LanguageToggle from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useSEO } from "@/hooks/useSEO";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey, LABELS } from "@/lib/taxonomy";
 import { t, Lang } from "@/lib/i18n";
@@ -91,6 +93,19 @@ export default function Browse() {
     persistToUrl: true,
     persistToStorage: true,
     storageKey: 'browse-filters',
+  });
+
+  // SEO - Dynamic based on filters
+  useSEO({
+    title: filters.city 
+      ? `Browse Listings in ${filters.city} - HabeshaCommunity`
+      : filters.category
+      ? `Browse ${filters.category} - HabeshaCommunity`
+      : 'Browse Listings - HabeshaCommunity',
+    description: filters.category
+      ? `Find ${filters.category} in ${filters.city || 'your area'}. Connect with the Habesha community.`
+      : 'Browse housing, jobs, services, and more from the Habesha community worldwide.',
+    keywords: ['browse', 'listings', filters.city, filters.category].filter(Boolean) as string[],
   });
 
   // Filter presets
@@ -708,6 +723,7 @@ export default function Browse() {
   return (
     <PageTransition>
     <div className="min-h-screen bg-background">
+      <Breadcrumbs />
       {/* Desktop View - Reorganized Layout */}
       <div className="hidden md:block">
         {/* Top Bar with Search and Controls - STICKY */}

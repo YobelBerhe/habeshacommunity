@@ -30,6 +30,8 @@ import StickyPostCTA from "@/components/StickyPostCTA";
 import Footer from "@/components/Footer";
 import AiAssistant from "@/components/AiAssistant";
 import { Parallax } from "@/components/Parallax";
+import { useSEO } from "@/hooks/useSEO";
+import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import { getStarPoints } from "@/services/activeUsers";
 import { setParams, getParam } from "@/lib/url";
 import { TAXONOMY, CategoryKey } from "@/lib/taxonomy";
@@ -48,6 +50,11 @@ import { sortListings, applyQuickFilters } from "@/utils/ui";
 import { toast } from "sonner";
 
 export default function Index() {
+  useSEO({
+    title: 'HabeshaCommunity - Connect with Habesha Worldwide',
+    description: 'Find housing, jobs, mentors, and connect with the Habesha community across the globe. Browse listings in Asmara, Addis Ababa, Oakland, and more.',
+    keywords: ['habesha', 'eritrean', 'ethiopian', 'community', 'housing', 'jobs', 'mentors'],
+  });
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const params = useParams<{ id?: string }>();
@@ -478,6 +485,8 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background">
+      <OrganizationSchema />
+      <WebSiteSchema />
       <BootstrapAuth />
       {/* Desktop Header */}
       <div className="hidden md:block">
