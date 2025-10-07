@@ -1,377 +1,592 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/store/auth';
+import { Heart, X, Star, MapPin, Briefcase, GraduationCap, Church, Users, Sliders, ArrowLeft, Info, Sparkles, Filter, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Heart, X, Star, MapPin, MessageCircle, Shield, Sparkles, Settings, ChevronLeft } from 'lucide-react';
-import { MatchBottomNav } from '@/components/match/MatchBottomNav';
+import { Card } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from 'sonner';
 
 interface MatchProfile {
   id: string;
-  user_id: string;
   name: string;
-  display_name?: string | null;
-  bio: string | null;
-  age: number | null;
-  city: string;
-  country?: string | null;
-  gender?: string | null;
-  seeking?: string | null;
-  looking_for?: string | null;
-  photos: string[];
+  age: number;
+  location: string;
+  origin: string;
+  profession: string;
+  education: string;
+  faith: string;
+  languages: string[];
   interests: string[];
-  match_percent?: number;
-  match_reasons?: string[];
+  bio: string;
+  compatibility: number;
+  verified: boolean;
+  photos: string[];
+  lookingFor: string;
 }
 
-export default function MatchDiscover() {
+interface Filters {
+  ageRange: [number, number];
+  location: string;
+  faith: string;
+  education: string;
+  distance: number;
+}
+
+const MatchDiscover = () => {
   const navigate = useNavigate();
-  const { user, openAuth } = useAuth();
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
-
-  const [profiles, setProfiles] = useState<MatchProfile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [hasProfile, setHasProfile] = useState(false);
-  const [showMatchNotification, setShowMatchNotification] = useState(false);
+  const [profiles, setProfiles] = useState<MatchProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<Filters>({
+    ageRange: [22, 35],
+    location: 'all',
+    faith: 'all',
+    education: 'all',
+    distance: 50,
+  });
+
+  // Demo profiles (replace with real Supabase data)
+  const demoProfiles: MatchProfile[] = [
+    {
+      id: '1',
+      name: 'Sara Desta',
+      age: 27,
+      location: 'Washington DC, USA',
+      origin: 'Addis Ababa, Ethiopia',
+      profession: 'Healthcare Administrator',
+      education: 'Masters in Public Health',
+      faith: 'Orthodox Christian',
+      languages: ['English', 'Amharic'],
+      interests: ['Coffee ceremonies', 'Traditional music', 'Volunteering', 'Reading'],
+      bio: 'Born in Ethiopia, raised between two worlds. I cherish my heritage and faith while building my career in healthcare. Looking for someone who values tradition, family, and building a future together.',
+      compatibility: 92,
+      verified: true,
+      photos: [],
+      lookingFor: 'Serious relationship leading to marriage'
+    },
+    {
+      id: '2',
+      name: 'Michael Tesfaye',
+      age: 30,
+      location: 'San Francisco, CA',
+      origin: 'Asmara, Eritrea',
+      profession: 'Software Engineer',
+      education: 'BS Computer Science',
+      faith: 'Catholic',
+      languages: ['English', 'Tigrinya', 'Italian'],
+      interests: ['Tech innovation', 'Church community', 'Cooking', 'Travel'],
+      bio: 'Engineer by day, chef by night. I value my Eritrean roots and Catholic faith. Seeking a partner who appreciates both our rich culture and building something new together.',
+      compatibility: 88,
+      verified: true,
+      photos: [],
+      lookingFor: 'Partner for life'
+    },
+    {
+      id: '3',
+      name: 'Rahel Yohannes',
+      age: 25,
+      location: 'Toronto, Canada',
+      origin: 'Mekelle, Ethiopia',
+      profession: 'Elementary Teacher',
+      education: 'BA Education',
+      faith: 'Protestant Christian',
+      languages: ['English', 'Tigrinya', 'Amharic'],
+      interests: ['Teaching', 'Youth ministry', 'Photography', 'Hiking'],
+      bio: 'Passionate about education and empowering the next generation. My faith guides my path, and I am looking for a partner who shares that foundation. Building a life rooted in love and purpose.',
+      compatibility: 95,
+      verified: true,
+      photos: [],
+      lookingFor: 'God-centered relationship'
+    }
+  ];
 
   useEffect(() => {
-    if (!user) {
-      openAuth();
-      return;
-    }
-    checkProfile();
-  }, [user]);
-
-  useEffect(() => {
-    if (hasProfile) {
-      loadProfiles();
-    }
-  }, [hasProfile]);
-
-  const checkProfile = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('match_profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('active', true)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      if (data) {
-        setHasProfile(true);
-      } else {
-        navigate('/match/onboarding');
-      }
-    } catch (error) {
-      console.error('Error checking profile:', error);
-    }
-  };
+    loadProfiles();
+  }, [filters]);
 
   const loadProfiles = async () => {
-    if (!user) return;
-    
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('match_profiles')
-        .select('*')
-        .neq('user_id', user.id)
-        .eq('active', true)
-        .limit(20);
-
-      if (error) throw error;
-
-      const profilesWithScores = await Promise.all(
-        data.map(async (profile) => {
-          const { data: scoreData } = await supabase.rpc('calculate_match_score', {
-            profile_user_id: profile.user_id,
-            viewer_id: user.id,
-          });
-
-          const matchPercent = Array.isArray(scoreData) && scoreData.length > 0 
-            ? scoreData[0].match_percent 
-            : 75;
-          const matchReasons = generateMatchReasons(matchPercent, profile);
-
-          return {
-            ...profile,
-            name: profile.display_name || profile.name || 'Anonymous',
-            match_percent: matchPercent,
-            match_reasons: matchReasons,
-          } as MatchProfile;
-        })
-      );
-
-      setProfiles(profilesWithScores.sort((a, b) => (b.match_percent || 0) - (a.match_percent || 0)));
+      // TODO: Replace with real Supabase query
+      // const { data, error } = await supabase
+      //   .from('match_profiles')
+      //   .select('*')
+      //   .gte('age', filters.ageRange[0])
+      //   .lte('age', filters.ageRange[1]);
+      
+      // For now, use demo data
+      setTimeout(() => {
+        setProfiles(demoProfiles);
+        setLoading(false);
+      }, 500);
     } catch (error) {
       console.error('Error loading profiles:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load profiles',
-        variant: 'destructive',
-      });
-    } finally {
       setLoading(false);
     }
   };
 
-  const generateMatchReasons = (matchPercent: number, profile: MatchProfile) => {
-    const reasons = [];
-    if (matchPercent >= 85) reasons.push('Strong compatibility based on values and interests');
-    if (profile.city) reasons.push(`Both located in ${profile.city}`);
-    if (profile.interests && profile.interests.length > 0) {
-      reasons.push(`Shared interests in ${profile.interests.slice(0, 2).join(' and ')}`);
-    }
-    return reasons;
-  };
-
-  const handleLike = async () => {
-    if (!user || currentIndex >= profiles.length) return;
-    const profile = profiles[currentIndex];
+  const handleSwipe = (direction: 'left' | 'right') => {
+    setSwipeDirection(direction);
     
-    try {
-      // For now, just mark as liked without storing
-      // TODO: Create match_likes table if needed
-      
-      toast({
-        title: 'Profile liked!',
-        description: `You liked ${profile.name}`,
-      });
-
-      const { data: matchData } = await supabase
-        .from('matches')
-        .select('*')
-        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
-        .or(`user1_id.eq.${profile.user_id},user2_id.eq.${profile.user_id}`)
-        .single();
-
-      if (matchData) {
-        setShowMatchNotification(true);
-        setTimeout(() => setShowMatchNotification(false), 5000);
-        
-        toast({
-          title: "It's a Match! 🎉",
-          description: `You matched with ${profile.name}!`,
+    setTimeout(() => {
+      if (direction === 'right') {
+        toast.success("It's a match! 🎉", {
+          description: `You and ${currentProfile.name} liked each other!`
         });
       }
-
-      nextCard();
-    } catch (error) {
-      console.error('Error liking profile:', error);
-      nextCard();
-    }
+      
+      if (currentIndex < profiles.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        setCurrentIndex(0); // Loop back for demo
+      }
+      setSwipeDirection(null);
+    }, 300);
   };
 
-  const handlePass = () => {
-    nextCard();
-  };
-
-  const handleSuperLike = async () => {
-    await handleLike();
-  };
-
-  const handleMessage = async () => {
-    if (!user || currentIndex >= profiles.length) return;
-    await handleLike();
-    toast({
-      title: 'Match requested',
-      description: 'Like them first to start a conversation',
+  const handleSuperLike = () => {
+    toast.success('Super Like sent! ⭐', {
+      description: `${currentProfile.name} will see you liked them`
     });
-  };
-
-  const nextCard = () => {
-    if (currentIndex < profiles.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
+    handleSwipe('right');
   };
 
   const currentProfile = profiles[currentIndex];
 
-  if (!user) return null;
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-950 dark:to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading profiles...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Finding your matches...</p>
         </div>
       </div>
     );
   }
 
-  if (profiles.length === 0) {
+  if (!currentProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-950 dark:to-gray-900 flex flex-col">
-        <div className="bg-white dark:bg-gray-900 shadow-sm p-4 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="p-2">
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <h2 className="font-bold text-lg">Discover</h2>
-          <button className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <Settings className="w-5 h-5" />
-          </button>
-        </div>
-        
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center max-w-md">
-            <div className="w-24 h-24 bg-gradient-to-br from-pink-200 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Heart className="w-12 h-12 text-pink-500" />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">No More Profiles</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Check back later for new matches!
-            </p>
-            <Button 
-              onClick={() => navigate('/match/list')}
-              className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700"
-            >
-              View Your Matches
-            </Button>
-          </div>
-        </div>
-        
-        <MatchBottomNav />
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="p-8 text-center max-w-md">
+          <Sparkles className="w-16 h-16 text-primary mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">No more profiles</h2>
+          <p className="text-muted-foreground mb-4">
+            Check back later for new matches, or adjust your filters to see more people.
+          </p>
+          <Button onClick={() => setShowFilters(true)} className="w-full">
+            <Sliders className="w-4 h-4 mr-2" />
+            Adjust Filters
+          </Button>
+        </Card>
       </div>
     );
   }
-
-  if (!currentProfile) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex flex-col pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/30 dark:via-blue-950/10 to-background">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 shadow-sm p-4 flex items-center justify-between">
-        <button onClick={() => navigate('/')} className="p-2">
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <h2 className="font-bold text-lg">Discover</h2>
-        <button className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <Settings className="w-5 h-5" />
-        </button>
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/match/matches')}
+              className="lg:hidden"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                <Heart className="w-6 h-6 text-white fill-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">Discover</h1>
+                <p className="text-xs text-muted-foreground">Find your match</p>
+              </div>
+            </div>
+
+            <Sheet open={showFilters} onOpenChange={setShowFilters}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="relative">
+                  <Filter className="w-4 h-4" />
+                  {(filters.faith !== 'all' || filters.education !== 'all') && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full" />
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Filters</SheetTitle>
+                </SheetHeader>
+                <FilterPanel filters={filters} setFilters={setFilters} />
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
       </div>
 
-      {/* Card Stack */}
-      <div className="flex-1 p-4 flex items-center justify-center">
-        <div className="relative w-full max-w-md">
-          {/* Main Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
-            {/* Profile Image Area */}
-            <div className="relative h-96 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 dark:from-pink-900 dark:via-purple-900 dark:to-blue-900 flex items-center justify-center">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        {/* Profile Card */}
+        <div className={`relative transition-all duration-300 ${
+          swipeDirection === 'left' ? 'animate-slide-out-left' : 
+          swipeDirection === 'right' ? 'animate-slide-out-right' : 
+          'animate-scale-in'
+        }`}>
+          <Card className="overflow-hidden shadow-xl border-2">
+            {/* Image Section */}
+            <div className="relative h-96 bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 flex items-center justify-center">
               {/* Compatibility Badge */}
-              <div className="absolute top-4 left-4 bg-white dark:bg-gray-800 rounded-full px-4 py-2 shadow-lg">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-green-500" />
-                  <span className="font-bold text-green-600 dark:text-green-400">
-                    {currentProfile.match_percent || 75}%
-                  </span>
+              <div className="absolute top-4 left-4 z-10">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2">
+                  <Sparkles className="w-5 h-5" />
+                  <span className="font-bold text-lg">{currentProfile.compatibility}% Match</span>
                 </div>
               </div>
 
               {/* Verified Badge */}
-              <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg">
-                <Shield className="w-5 h-5 text-blue-600" />
-              </div>
+              {currentProfile.verified && (
+                <div className="absolute top-4 right-4 bg-white dark:bg-card rounded-full px-4 py-2 flex items-center space-x-2 shadow-lg z-10">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">Verified</span>
+                </div>
+              )}
 
-              {/* Profile Image Placeholder */}
-              <div className="w-40 h-40 bg-white dark:bg-gray-700 rounded-full shadow-xl flex items-center justify-center">
-                <span className="text-6xl">👤</span>
+              {/* Profile Photo Placeholder */}
+              <div className="w-48 h-48 bg-white dark:bg-card rounded-full shadow-2xl flex items-center justify-center">
+                <Users className="w-24 h-24 text-muted-foreground" />
               </div>
             </div>
 
             {/* Profile Info */}
-            <div className="p-6">
-              <div className="mb-4">
-                <h3 className="text-2xl font-bold">
-                  {currentProfile.name}{currentProfile.age ? `, ${currentProfile.age}` : ''}
-                </h3>
-                <div className="flex items-center text-gray-600 dark:text-gray-400 mt-1">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{currentProfile.city}</span>
+            <div className="p-6 space-y-6">
+              {/* Name & Basic Info */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-3xl font-bold">{currentProfile.name}, {currentProfile.age}</h2>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate(`/match/profile/${currentProfile.id}`)}
+                  >
+                    <Info className="w-5 h-5" />
+                  </Button>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  <span>{currentProfile.location}</span>
                 </div>
               </div>
 
-              {currentProfile.bio && (
-                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-4">
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl p-4 border border-blue-200/50 dark:border-blue-800/50">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Briefcase className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-semibold text-blue-900 dark:text-blue-100">Profession</span>
+                  </div>
+                  <p className="font-medium text-sm text-foreground">{currentProfile.profession}</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-xl p-4 border border-purple-200/50 dark:border-purple-800/50">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <GraduationCap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="text-xs font-semibold text-purple-900 dark:text-purple-100">Education</span>
+                  </div>
+                  <p className="font-medium text-sm text-foreground">{currentProfile.education}</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-4 border border-amber-200/50 dark:border-amber-800/50">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Church className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span className="text-xs font-semibold text-amber-900 dark:text-amber-100">Faith</span>
+                  </div>
+                  <p className="font-medium text-sm text-foreground">{currentProfile.faith}</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-teal-50 to-green-50 dark:from-teal-950/30 dark:to-green-950/30 rounded-xl p-4 border border-teal-200/50 dark:border-teal-800/50">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <MapPin className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                    <span className="text-xs font-semibold text-teal-900 dark:text-teal-100">Origin</span>
+                  </div>
+                  <p className="font-medium text-sm text-foreground">{currentProfile.origin}</p>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div>
+                <h3 className="font-bold text-foreground mb-3 flex items-center">
+                  <Info className="w-5 h-5 mr-2 text-muted-foreground" />
+                  About
+                </h3>
+                <p className="text-foreground leading-relaxed bg-muted/50 rounded-xl p-4 border border-border">
                   {currentProfile.bio}
                 </p>
-              )}
+              </div>
 
-              {/* Quick Info */}
-              {currentProfile.interests && currentProfile.interests.length > 0 && (
-                <div className="flex gap-2 flex-wrap mb-4">
-                  {currentProfile.interests.slice(0, 3).map((interest, idx) => (
-                    <span 
-                      key={idx} 
-                      className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium"
-                    >
-                      {interest}
-                    </span>
+              {/* Languages */}
+              <div>
+                <h3 className="font-bold text-foreground mb-3">Languages</h3>
+                <div className="flex flex-wrap gap-2">
+                  {currentProfile.languages.map((lang, idx) => (
+                    <Badge key={idx} variant="secondary" className="px-3 py-1">
+                      {lang}
+                    </Badge>
                   ))}
                 </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-center space-x-4">
-                <button 
-                  onClick={handlePass}
-                  className="w-14 h-14 bg-white dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600 rounded-full flex items-center justify-center hover:border-red-300 dark:hover:border-red-600 transition-all shadow-lg"
-                >
-                  <X className="w-7 h-7 text-red-500" />
-                </button>
-
-                <button 
-                  onClick={handleSuperLike}
-                  className="w-14 h-14 bg-white dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600 rounded-full flex items-center justify-center hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-lg"
-                >
-                  <Star className="w-6 h-6 text-blue-500" />
-                </button>
-
-                <button 
-                  onClick={handleLike}
-                  className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
-                >
-                  <Heart className="w-8 h-8 text-white fill-white" />
-                </button>
-
-                <button 
-                  onClick={handleMessage}
-                  className="w-14 h-14 bg-white dark:bg-gray-700 border-4 border-gray-200 dark:border-gray-600 rounded-full flex items-center justify-center hover:border-purple-300 dark:hover:border-purple-600 transition-all shadow-lg"
-                >
-                  <MessageCircle className="w-6 h-6 text-purple-500" />
-                </button>
               </div>
 
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {currentIndex + 1} of {profiles.length}
+              {/* Interests */}
+              <div>
+                <h3 className="font-bold text-foreground mb-3">Interests</h3>
+                <div className="flex flex-wrap gap-2">
+                  {currentProfile.interests.map((interest, idx) => (
+                    <Badge key={idx} className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 px-3 py-1">
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Match Reasons */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl p-5 border border-green-200/50 dark:border-green-800/50">
+                <h3 className="font-bold text-foreground mb-4 flex items-center">
+                  <Sparkles className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" />
+                  Why You Match
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0" />
+                    <span className="text-foreground">Shared {currentProfile.faith} faith</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0" />
+                    <span className="text-foreground">Similar family values</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0" />
+                    <span className="text-foreground">Compatible life goals</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Looking For */}
+              <div className="bg-purple-50 dark:bg-purple-950/30 rounded-xl p-4 border border-purple-200/50 dark:border-purple-800/50">
+                <p className="text-foreground">
+                  <span className="font-bold text-purple-900 dark:text-purple-100">Looking for: </span>
+                  <span>{currentProfile.lookingFor}</span>
                 </p>
               </div>
+            </div>
+          </Card>
+
+          {/* Action Buttons - Desktop */}
+          <div className="hidden md:flex items-center justify-center space-x-6 mt-8">
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-20 h-20 rounded-full border-4 border-red-200 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all shadow-lg group"
+              onClick={() => handleSwipe('left')}
+            >
+              <X className="w-10 h-10 text-red-400 group-hover:text-red-500 transition-colors" />
+            </Button>
+
+            <Button
+              size="lg"
+              className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 hover:shadow-2xl transition-all shadow-lg"
+              onClick={handleSuperLike}
+            >
+              <Star className="w-9 h-9 text-white" />
+            </Button>
+
+            <Button
+              size="lg"
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 hover:shadow-2xl transition-all shadow-xl transform hover:scale-110"
+              onClick={() => handleSwipe('right')}
+            >
+              <Heart className="w-12 h-12 text-white fill-white" />
+            </Button>
+
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-20 h-20 rounded-full border-4 border-purple-200 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-all shadow-lg group"
+              onClick={() => navigate(`/inbox?user=${currentProfile.id}`)}
+            >
+              <MessageCircle className="w-9 h-9 text-purple-400 group-hover:text-purple-500 transition-colors" />
+            </Button>
+          </div>
+
+          {/* Action Buttons - Mobile (Fixed Bottom) */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4 z-50">
+            <div className="flex items-center justify-center space-x-4 max-w-md mx-auto">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-16 h-16 rounded-full border-2 border-red-200 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
+                onClick={() => handleSwipe('left')}
+              >
+                <X className="w-8 h-8 text-red-400" />
+              </Button>
+
+              <Button
+                size="lg"
+                className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500"
+                onClick={handleSuperLike}
+              >
+                <Star className="w-7 h-7 text-white" />
+              </Button>
+
+              <Button
+                size="lg"
+                className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 shadow-xl"
+                onClick={() => handleSwipe('right')}
+              >
+                <Heart className="w-10 h-10 text-white fill-white" />
+              </Button>
+
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-16 h-16 rounded-full border-2 border-purple-200 hover:border-purple-400"
+                onClick={() => navigate(`/inbox?user=${currentProfile.id}`)}
+              >
+                <MessageCircle className="w-7 h-7 text-purple-400" />
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Match Notification */}
-      {showMatchNotification && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-xl flex items-center space-x-4 z-50 animate-in slide-in-from-top-5">
-          <Heart className="w-8 h-8 fill-current" />
-          <div>
-            <p className="font-bold text-lg">It's a Match! 🎉</p>
-            <p className="text-sm opacity-90">You have a new connection!</p>
-          </div>
-        </div>
-      )}
-
-      <MatchBottomNav />
+      {/* Tips Section */}
+      <div className="container mx-auto px-4 pb-24 md:pb-8 max-w-2xl">
+        <Card className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-200 dark:border-blue-800">
+          <h3 className="font-bold text-foreground mb-3 flex items-center">
+            <Sparkles className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+            Tips for Better Matches
+          </h3>
+          <ul className="space-y-2 text-sm text-foreground">
+            <li>• Complete your profile to increase compatibility scores</li>
+            <li>• Use filters to find people who share your values</li>
+            <li>• Super likes get you noticed faster</li>
+          </ul>
+        </Card>
+      </div>
     </div>
   );
-}
+};
+
+// Filter Panel Component
+const FilterPanel = ({ filters, setFilters }: { 
+  filters: Filters; 
+  setFilters: (filters: Filters) => void;
+}) => {
+  return (
+    <div className="space-y-6 py-6">
+      {/* Age Range */}
+      <div>
+        <label className="text-sm font-semibold mb-3 block">
+          Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}
+        </label>
+        <Slider
+          value={filters.ageRange}
+          onValueChange={(value) => setFilters({ ...filters, ageRange: value as [number, number] })}
+          min={18}
+          max={60}
+          step={1}
+          className="mb-2"
+        />
+      </div>
+
+      {/* Location */}
+      <div>
+        <label className="text-sm font-semibold mb-2 block">Location</label>
+        <Select value={filters.location} onValueChange={(value) => setFilters({ ...filters, location: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Locations</SelectItem>
+            <SelectItem value="us-east">USA - East Coast</SelectItem>
+            <SelectItem value="us-west">USA - West Coast</SelectItem>
+            <SelectItem value="canada">Canada</SelectItem>
+            <SelectItem value="uk">United Kingdom</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Faith */}
+      <div>
+        <label className="text-sm font-semibold mb-2 block">Faith</label>
+        <Select value={filters.faith} onValueChange={(value) => setFilters({ ...filters, faith: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Faiths</SelectItem>
+            <SelectItem value="orthodox">Orthodox Christian</SelectItem>
+            <SelectItem value="catholic">Catholic</SelectItem>
+            <SelectItem value="protestant">Protestant</SelectItem>
+            <SelectItem value="muslim">Muslim</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Education */}
+      <div>
+        <label className="text-sm font-semibold mb-2 block">Education Level</label>
+        <Select value={filters.education} onValueChange={(value) => setFilters({ ...filters, education: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Any Education</SelectItem>
+            <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+            <SelectItem value="masters">Master's Degree</SelectItem>
+            <SelectItem value="doctorate">Doctorate</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Distance */}
+      <div>
+        <label className="text-sm font-semibold mb-3 block">
+          Maximum Distance: {filters.distance} miles
+        </label>
+        <Slider
+          value={[filters.distance]}
+          onValueChange={(value) => setFilters({ ...filters, distance: value[0] })}
+          min={5}
+          max={500}
+          step={5}
+          className="mb-2"
+        />
+      </div>
+
+      {/* Reset Button */}
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={() => setFilters({
+          ageRange: [22, 35],
+          location: 'all',
+          faith: 'all',
+          education: 'all',
+          distance: 50,
+        })}
+      >
+        Reset Filters
+      </Button>
+    </div>
+  );
+};
+
+export default MatchDiscover;
