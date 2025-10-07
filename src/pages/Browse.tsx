@@ -123,6 +123,10 @@ export default function Browse() {
     localStorage.getItem('hn.filter.postedToday') === 'true'
   );
 
+  // Dropdown states
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [subcategoryOpen, setSubcategoryOpen] = useState(false);
+
   // Mentor-specific filters
   const [mentorVerifiedOnly, setMentorVerifiedOnly] = useState(() =>
     localStorage.getItem('hn.mentor.verifiedOnly') === 'true'
@@ -887,12 +891,12 @@ export default function Browse() {
         )}
 
         {/* Filter Controls Bar */}
-        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border sticky top-0 z-10 hidden md:block">
+        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border sticky top-0 z-[50] hidden md:block">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 {/* Category Toggle */}
-                <Popover modal={false}>
+                <Popover modal={false} open={categoryOpen} onOpenChange={setCategoryOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-1">
                       {filters.category 
@@ -905,21 +909,27 @@ export default function Browse() {
                   <PopoverContent 
                     side="bottom" 
                     align="start" 
-                    className="w-56 p-1"
+                    className="w-56 p-1 bg-background z-[51]"
                     collisionPadding={8}
                   >
                     <div className="space-y-1">
                       <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => updateFilters({ category: undefined, subcategory: undefined })}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                        onClick={() => {
+                          updateFilters({ category: undefined, subcategory: undefined });
+                          setCategoryOpen(false);
+                        }}
                       >
                         All categories
                       </button>
                       {Object.entries(TAXONOMY).map(([key, value]) => (
                         <button
                           key={key}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                          onClick={() => updateFilters({ category: key, subcategory: undefined })}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                          onClick={() => {
+                            updateFilters({ category: key, subcategory: undefined });
+                            setCategoryOpen(false);
+                          }}
                         >
                           {value.name[language.toLowerCase() as 'en' | 'ti']}
                         </button>
@@ -929,7 +939,7 @@ export default function Browse() {
                 </Popover>
 
                 {/* Subcategory Toggle */}
-                <Popover modal={false}>
+                <Popover modal={false} open={subcategoryOpen} onOpenChange={setSubcategoryOpen}>
                   <PopoverTrigger asChild>
                     <Button 
                       variant="outline" 
@@ -947,21 +957,27 @@ export default function Browse() {
                   <PopoverContent 
                     side="bottom" 
                     align="start" 
-                    className="w-56 p-1"
+                    className="w-56 p-1 bg-background z-[51]"
                     collisionPadding={8}
                   >
                     <div className="space-y-1">
                       <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => updateFilter('subcategory', undefined)}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                        onClick={() => {
+                          updateFilter('subcategory', undefined);
+                          setSubcategoryOpen(false);
+                        }}
                       >
                         All subcategories
                       </button>
                       {filters.category && TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
                         <button
                           key={sub}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                          onClick={() => updateFilter('subcategory', sub)}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-sm transition-colors"
+                          onClick={() => {
+                            updateFilter('subcategory', sub);
+                            setSubcategoryOpen(false);
+                          }}
                         >
                           {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
                         </button>
