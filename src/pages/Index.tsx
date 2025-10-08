@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -78,10 +79,10 @@ const Index = () => {
 
   // Quick stats
   const platformStats = [
-    { label: 'Active Members', value: '25K+', icon: Users, color: 'text-blue-600 dark:text-blue-400' },
-    { label: 'Success Stories', value: '3.5K+', icon: Heart, color: 'text-pink-600 dark:text-pink-400' },
-    { label: 'Events Hosted', value: '850+', icon: Calendar, color: 'text-green-600 dark:text-green-400' },
-    { label: 'Active Listings', value: '5.2K+', icon: ShoppingBag, color: 'text-purple-600 dark:text-purple-400' }
+    { label: 'Active Members', value: 25000, suffix: 'K+', icon: Users, color: 'text-blue-600 dark:text-blue-400' },
+    { label: 'Success Stories', value: 3500, suffix: 'K+', icon: Heart, color: 'text-pink-600 dark:text-pink-400' },
+    { label: 'Events Hosted', value: 850, suffix: '+', icon: Calendar, color: 'text-green-600 dark:text-green-400' },
+    { label: 'Active Listings', value: 5200, suffix: 'K+', icon: ShoppingBag, color: 'text-purple-600 dark:text-purple-400' }
   ];
 
   // Featured success stories
@@ -237,7 +238,10 @@ const Index = () => {
               return (
                 <div key={index} className="text-center">
                   <Icon className={`w-8 h-8 md:w-10 md:h-10 ${stat.color} mx-auto mb-3`} />
-                  <div className="text-2xl md:text-4xl font-bold mb-1">{stat.value}</div>
+                  <div className="text-2xl md:text-4xl font-bold mb-1">
+                    <AnimatedCounter value={stat.value} />
+                    <span className="text-lg">{stat.suffix}</span>
+                  </div>
                   <div className="text-sm md:text-base text-muted-foreground">{stat.label}</div>
                 </div>
               );

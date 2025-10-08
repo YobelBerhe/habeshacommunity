@@ -262,7 +262,7 @@ const MentorHome = () => {
               </Button>
 
               <Button
-                onClick={() => navigate('/mentor/become')}
+                onClick={() => navigate('/mentor/onboarding')}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 w-full sm:w-auto"
               >
                 <Award className="w-4 h-4 mr-2" />
@@ -423,7 +423,7 @@ const MentorHome = () => {
           </p>
           <Button
             size="lg"
-            onClick={() => navigate('/mentor/become')}
+            onClick={() => navigate('/mentor/onboarding')}
             className="bg-white text-purple-600 hover:bg-gray-100"
           >
             <Award className="w-5 h-5 mr-2" />

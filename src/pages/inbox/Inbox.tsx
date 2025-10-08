@@ -5,6 +5,9 @@ import {
   Video, Info, Archive, Star, Trash2, Image, Check,
   CheckCheck, Clock, Pin, Filter, ArrowLeft
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { getOrCreateConversation } from '@/utils/conversations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -186,12 +189,51 @@ const Inbox = () => {
   const activeConversation = conversations.find(c => c.id === selectedConversation);
   const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
 
-  const handleSendMessage = () => {
-    if (!messageText.trim()) return;
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !selectedConversation) return;
     
-    // TODO: Send message via Supabase
-    console.log('Sending message:', messageText);
-    setMessageText('');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please sign in to send messages');
+        return;
+      }
+
+      // Get conversation to find the other participant
+      const activeConv = conversations.find(c => c.id === selectedConversation);
+      if (!activeConv) return;
+
+      // Create or get conversation from database
+      const { conversationId } = await getOrCreateConversation(
+        activeConv.id, // Using conversation ID as user ID for demo
+        messageText
+      );
+
+      toast.success('Message sent!');
+      setMessageText('');
+      
+      // Reload the conversation (in production, would use real-time subscription)
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+    }
+  };
+
+  const handleAttachment = () => {
+    toast.info('File upload coming soon!', {
+      description: 'This feature is under development'
+    });
+  };
+
+  const handleVideoCall = () => {
+    if (!selectedConversation) return;
+    navigate(`/video/${selectedConversation}`);
+  };
+
+  const handleAudioCall = () => {
+    toast.info('Audio calls coming soon!', {
+      description: 'This feature is under development'
+    });
   };
 
   return (
@@ -357,10 +399,10 @@ const Inbox = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={handleAudioCall}>
                   <Phone className="w-5 h-5" />
                 </Button>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={handleVideoCall}>
                   <Video className="w-5 h-5" />
                 </Button>
                 <Button variant="ghost" size="icon">
@@ -454,10 +496,10 @@ const Inbox = () => {
             <div className="p-4 border-t bg-background/95 backdrop-blur">
               <div className="flex items-end gap-2 max-w-4xl mx-auto">
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
                     <Paperclip className="w-5 h-5" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
                     <Image className="w-5 h-5" />
                   </Button>
                 </div>
