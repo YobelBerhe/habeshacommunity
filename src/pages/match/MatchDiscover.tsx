@@ -1,492 +1,653 @@
-import { useState, useEffect } from 'react';
-import { Heart, X, Star, MapPin, Briefcase, GraduationCap, Church, Users, Sliders, ArrowLeft, Info, Sparkles, Filter, MessageCircle } from 'lucide-react';
+import { useState } from 'react';
+import { 
+  Heart, X, Star, MapPin, Briefcase, GraduationCap,
+  Info, Filter, Zap, Sparkles, ArrowLeft,
+  ChevronLeft, ChevronRight
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { likeUser, passUser } from '@/utils/matchActions';
-import { FilterPanel } from '@/components/match/FilterPanel';
 
-interface MatchProfile {
+interface Profile {
   id: string;
-  user_id?: string;
   name: string;
   age: number;
+  avatar: string;
   location: string;
-  origin: string;
-  profession: string;
+  occupation: string;
   education: string;
-  faith: string;
-  languages: string[];
-  interests: string[];
   bio: string;
-  compatibility: number;
-  verified: boolean;
-  photos: string[];
-  lookingFor: string;
-}
-
-interface Filters {
-  ageRange: [number, number];
-  location: string;
-  faith: string;
-  education: string;
+  interests: string[];
+  photos: number;
   distance: number;
+  matchScore: number;
+  religion: string;
+  height: string;
+  verified: boolean;
 }
 
 const MatchDiscover = () => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [profiles, setProfiles] = useState<MatchProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<Filters>({
-    ageRange: [22, 35],
-    location: 'all',
-    faith: 'all',
-    education: 'all',
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Filter states
+  const [filters, setFilters] = useState({
+    ageRange: [22, 35] as [number, number],
     distance: 50,
+    education: 'any',
+    religion: 'any',
+    verified: false,
+    hasPhotos: false
   });
 
-  useEffect(() => {
-    loadProfiles();
-  }, [filters]);
+  // All profiles (simulated database)
+  const allProfiles: Profile[] = [
+    {
+      id: '1',
+      name: 'Sara Mehretab',
+      age: 27,
+      avatar: 'SM',
+      location: 'Washington DC',
+      occupation: 'Software Engineer',
+      education: 'Masters Degree',
+      bio: 'Love hiking, coffee, and meaningful conversations. Looking for someone who values family and has ambition.',
+      interests: ['Hiking', 'Coffee', 'Travel', 'Music'],
+      photos: 5,
+      distance: 5,
+      matchScore: 94,
+      religion: 'Orthodox',
+      height: '5\'6"',
+      verified: true
+    },
+    {
+      id: '2',
+      name: 'Meron Kidane',
+      age: 29,
+      avatar: 'MK',
+      location: 'Silver Spring, MD',
+      occupation: 'Marketing Manager',
+      education: 'Bachelors Degree',
+      bio: 'Passionate about fitness, food, and family. Seeking genuine connection.',
+      interests: ['Fitness', 'Cooking', 'Reading', 'Yoga'],
+      photos: 6,
+      distance: 12,
+      matchScore: 89,
+      religion: 'Orthodox',
+      height: '5\'5"',
+      verified: true
+    },
+    {
+      id: '3',
+      name: 'Rahel Woldu',
+      age: 26,
+      avatar: 'RW',
+      location: 'Arlington, VA',
+      occupation: 'Product Designer',
+      education: 'Bachelors Degree',
+      bio: 'Creative soul who loves art, music, and good food. Looking for someone authentic.',
+      interests: ['Art', 'Design', 'Music', 'Photography'],
+      photos: 4,
+      distance: 8,
+      matchScore: 87,
+      religion: 'Catholic',
+      height: '5\'7"',
+      verified: false
+    },
+    {
+      id: '4',
+      name: 'Senait Tesfay',
+      age: 31,
+      avatar: 'ST',
+      location: 'Bethesda, MD',
+      occupation: 'Doctor',
+      education: 'Doctorate',
+      bio: 'Healthcare professional who values compassion and intelligence. Love traveling and trying new restaurants.',
+      interests: ['Travel', 'Medicine', 'Food', 'Volunteering'],
+      photos: 5,
+      distance: 15,
+      matchScore: 92,
+      religion: 'Orthodox',
+      height: '5\'8"',
+      verified: true
+    },
+    {
+      id: '5',
+      name: 'Hanna Berhe',
+      age: 24,
+      avatar: 'HB',
+      location: 'Alexandria, VA',
+      occupation: 'Teacher',
+      education: 'Bachelors Degree',
+      bio: 'Educator with a passion for making a difference. Looking for kindness and humor.',
+      interests: ['Teaching', 'Books', 'Dance', 'Community Service'],
+      photos: 3,
+      distance: 10,
+      matchScore: 85,
+      religion: 'Protestant',
+      height: '5\'4"',
+      verified: false
+    },
+    {
+      id: '6',
+      name: 'Eden Haile',
+      age: 28,
+      avatar: 'EH',
+      location: 'Rockville, MD',
+      occupation: 'Financial Analyst',
+      education: 'Masters Degree',
+      bio: 'Numbers by day, adventurer by night. Seeking someone ambitious and fun-loving.',
+      interests: ['Finance', 'Hiking', 'Wine', 'Traveling'],
+      photos: 5,
+      distance: 18,
+      matchScore: 88,
+      religion: 'Orthodox',
+      height: '5\'6"',
+      verified: true
+    },
+    {
+      id: '7',
+      name: 'Liya Solomon',
+      age: 32,
+      avatar: 'LS',
+      location: 'Washington DC',
+      occupation: 'Lawyer',
+      education: 'Doctorate',
+      bio: 'Advocate for justice with a soft heart. Love deep conversations and good wine.',
+      interests: ['Law', 'Reading', 'Wine', 'Politics'],
+      photos: 4,
+      distance: 3,
+      matchScore: 91,
+      religion: 'Catholic',
+      height: '5\'7"',
+      verified: true
+    },
+    {
+      id: '8',
+      name: 'Nardos Gebre',
+      age: 25,
+      avatar: 'NG',
+      location: 'Falls Church, VA',
+      occupation: 'Nurse',
+      education: 'Bachelors Degree',
+      bio: 'Caring professional who loves helping others. Looking for genuine connection.',
+      interests: ['Healthcare', 'Fitness', 'Family', 'Church'],
+      photos: 6,
+      distance: 14,
+      matchScore: 86,
+      religion: 'Orthodox',
+      height: '5\'5"',
+      verified: false
+    }
+  ];
 
-  const loadProfiles = async () => {
-    setLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error('Please sign in to view matches');
-        navigate('/auth/login');
-        return;
+  // Apply filters to profiles
+  const filteredProfiles = allProfiles.filter(profile => {
+    // Age filter
+    if (profile.age < filters.ageRange[0] || profile.age > filters.ageRange[1]) {
+      return false;
+    }
+
+    // Distance filter
+    if (profile.distance > filters.distance) {
+      return false;
+    }
+
+    // Education filter
+    if (filters.education !== 'any') {
+      if (filters.education === 'bachelors' && !profile.education.includes('Bachelors')) {
+        return false;
       }
-
-      // Build query with filters
-      let query = supabase
-        .from('match_profiles')
-        .select('*')
-        .eq('active', true)
-        .neq('user_id', user.id) // Don't show own profile
-        .gte('age', filters.ageRange[0])
-        .lte('age', filters.ageRange[1]);
-
-      // Apply location filter
-      if (filters.location !== 'all') {
-        query = query.eq('city', filters.location);
+      if (filters.education === 'masters' && !profile.education.includes('Masters')) {
+        return false;
       }
-
-      // Apply faith filter (would need to add to match_profiles if not exists)
-      if (filters.faith !== 'all') {
-        query = query.contains('interests', [filters.faith]);
+      if (filters.education === 'doctorate' && !profile.education.includes('Doctorate')) {
+        return false;
       }
+    }
 
-      const { data, error } = await query.limit(20);
+    // Religion filter
+    if (filters.religion !== 'any' && profile.religion.toLowerCase() !== filters.religion.toLowerCase()) {
+      return false;
+    }
 
-      if (error) throw error;
+    // Verified filter
+    if (filters.verified && !profile.verified) {
+      return false;
+    }
 
-      // Transform database data to MatchProfile format
-      const transformedProfiles: MatchProfile[] = (data || []).map(profile => ({
-        id: profile.id,
-        user_id: profile.user_id,
-        name: profile.name,
-        age: profile.age || 25,
-        location: `${profile.city}, ${profile.country || 'Unknown'}`,
-        origin: profile.city,
-        profession: 'Professional', // Would need to add to DB
-        education: 'University Graduate', // Would need to add to DB
-        faith: 'Christian', // Would need to add to DB
-        languages: ['English'], // Would use profile data if available
-        interests: profile.interests || [],
-        bio: profile.bio || 'No bio available',
-        compatibility: Math.floor(Math.random() * 20) + 80, // TODO: Calculate real compatibility
-        verified: false, // Would need verification system
-        photos: profile.photos || [],
-        lookingFor: profile.looking_for || 'Meaningful connection'
-      }));
+    // Has photos filter
+    if (filters.hasPhotos && profile.photos < 3) {
+      return false;
+    }
 
-      setProfiles(transformedProfiles);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading profiles:', error);
-      toast.error('Failed to load profiles');
-      setLoading(false);
+    return true;
+  });
+
+  const currentProfile = filteredProfiles[currentIndex];
+
+  const handleLike = () => {
+    if (!currentProfile) return;
+
+    toast.success('Liked!', {
+      description: `You liked ${currentProfile.name}`
+    });
+
+    if (currentIndex < filteredProfiles.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      toast('No more profiles', {
+        description: 'Check back later for new matches!'
+      });
     }
   };
 
-  const handleSwipe = async (direction: 'left' | 'right') => {
-    setSwipeDirection(direction);
-    
-    try {
-      if (direction === 'right') {
-        const result = await likeUser(currentProfile.user_id || currentProfile.id);
-        
-        if (result.isMatch) {
-          toast.success("It's a Match! 🎉", {
-            description: `You and ${currentProfile.name} liked each other!`
-          });
-        } else {
-          toast.success('Like sent! 💙', {
-            description: `We'll let you know if ${currentProfile.name} likes you back`
-          });
-        }
-      } else {
-        await passUser(currentProfile.user_id || currentProfile.id);
-      }
-      
-      setTimeout(() => {
-        if (currentIndex < profiles.length - 1) {
-          setCurrentIndex(currentIndex + 1);
-        } else {
-          // Reload profiles when we run out
-          loadProfiles();
-          setCurrentIndex(0);
-        }
-        setSwipeDirection(null);
-      }, 300);
-    } catch (error) {
-      console.error('Error handling swipe:', error);
-      toast.error('Something went wrong');
-      setSwipeDirection(null);
+  const handlePass = () => {
+    if (!currentProfile) return;
+
+    if (currentIndex < filteredProfiles.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      toast('No more profiles', {
+        description: 'Check back later for new matches!'
+      });
     }
   };
 
   const handleSuperLike = () => {
-    toast.success('Super Like sent! ⭐', {
-      description: `${currentProfile.name} will see you liked them`
+    if (!currentProfile) return;
+
+    toast.success('Super Like! ⭐', {
+      description: `You sent a Super Like to ${currentProfile.name}`
     });
-    handleSwipe('right');
+
+    if (currentIndex < filteredProfiles.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
   };
 
-  const currentProfile = profiles[currentIndex];
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Finding your matches...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleNext = () => {
+    if (currentIndex < filteredProfiles.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const applyFilters = () => {
+    setCurrentIndex(0); // Reset to first profile
+    setFiltersOpen(false);
+    toast.success('Filters applied!', {
+      description: `Found ${filteredProfiles.length} matches`
+    });
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      ageRange: [22, 35],
+      distance: 50,
+      education: 'any',
+      religion: 'any',
+      verified: false,
+      hasPhotos: false
+    });
+    setCurrentIndex(0);
+    toast.success('Filters reset');
+  };
 
   if (!currentProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="p-8 text-center max-w-md">
-          <Sparkles className="w-16 h-16 text-primary mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">No more profiles</h2>
-          <p className="text-muted-foreground mb-4">
-            Check back later for new matches, or adjust your filters to see more people.
+        <Card className="p-12 text-center max-w-md">
+          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <Heart className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">No More Profiles</h2>
+          <p className="text-muted-foreground mb-6">
+            Try adjusting your filters or check back later for new matches!
           </p>
-          <Button onClick={() => setShowFilters(true)} className="w-full">
-            <Sliders className="w-4 h-4 mr-2" />
-            Adjust Filters
-          </Button>
+          <div className="flex gap-3">
+            <Button onClick={resetFilters} variant="outline" className="flex-1">
+              Reset Filters
+            </Button>
+            <Button onClick={() => navigate('/match')} className="flex-1">
+              Go Back
+            </Button>
+          </div>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/30 dark:via-blue-950/10 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-pink-950/20 dark:via-purple-950/20 dark:to-blue-950/20 pb-20 md:pb-0">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/match/matches')}
-              className="lg:hidden"
-            >
-              <ArrowLeft className="w-5 h-5" />
+            <Button variant="ghost" onClick={() => navigate('/match')}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
             </Button>
 
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white fill-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Discover</h1>
-                <p className="text-xs text-muted-foreground">Find your match</p>
-              </div>
-            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">
+                {currentIndex + 1} / {filteredProfiles.length}
+              </Badge>
 
-            <Sheet open={showFilters} onOpenChange={setShowFilters}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="relative">
-                  <Filter className="w-4 h-4" />
-                  {(filters.faith !== 'all' || filters.education !== 'all') && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full" />
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                </SheetHeader>
-                <FilterPanel filters={filters} setFilters={setFilters} />
-              </SheetContent>
-            </Sheet>
+              {/* Filter Button */}
+              <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Filter className="w-4 h-4 mr-2" />
+                    Filters
+                    {(filters.education !== 'any' || filters.religion !== 'any' || filters.verified || filters.hasPhotos) && (
+                      <span className="ml-2 w-2 h-2 bg-primary rounded-full" />
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Discovery Filters</SheetTitle>
+                    <SheetDescription>
+                      Customize your match preferences
+                    </SheetDescription>
+                  </SheetHeader>
+
+                  <div className="space-y-6 mt-6">
+                    {/* Age Range */}
+                    <div>
+                      <Label className="mb-3 block">
+                        Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}
+                      </Label>
+                      <Slider
+                        min={18}
+                        max={50}
+                        step={1}
+                        value={filters.ageRange}
+                        onValueChange={(value) => setFilters({ ...filters, ageRange: value as [number, number] })}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Distance */}
+                    <div>
+                      <Label className="mb-3 block">
+                        Maximum Distance: {filters.distance} miles
+                      </Label>
+                      <Slider
+                        min={5}
+                        max={100}
+                        step={5}
+                        value={[filters.distance]}
+                        onValueChange={(value) => setFilters({ ...filters, distance: value[0] })}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Education Level */}
+                    <div>
+                      <Label htmlFor="education" className="mb-2 block">Education Level</Label>
+                      <Select value={filters.education} onValueChange={(value) => setFilters({ ...filters, education: value })}>
+                        <SelectTrigger id="education">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Any Education</SelectItem>
+                          <SelectItem value="bachelors">Bachelors Degree</SelectItem>
+                          <SelectItem value="masters">Masters Degree</SelectItem>
+                          <SelectItem value="doctorate">Doctorate</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Religion */}
+                    <div>
+                      <Label htmlFor="religion" className="mb-2 block">Religion</Label>
+                      <Select value={filters.religion} onValueChange={(value) => setFilters({ ...filters, religion: value })}>
+                        <SelectTrigger id="religion">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Any Religion</SelectItem>
+                          <SelectItem value="orthodox">Orthodox</SelectItem>
+                          <SelectItem value="catholic">Catholic</SelectItem>
+                          <SelectItem value="protestant">Protestant</SelectItem>
+                          <SelectItem value="muslim">Muslim</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Verified Only */}
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <Label htmlFor="verified" className="font-semibold">Verified Only</Label>
+                        <p className="text-xs text-muted-foreground">Show only verified profiles</p>
+                      </div>
+                      <Switch
+                        id="verified"
+                        checked={filters.verified}
+                        onCheckedChange={(checked) => setFilters({ ...filters, verified: checked })}
+                      />
+                    </div>
+
+                    {/* Has Photos */}
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <Label htmlFor="hasPhotos" className="font-semibold">Has Photos</Label>
+                        <p className="text-xs text-muted-foreground">Show profiles with 3+ photos</p>
+                      </div>
+                      <Switch
+                        id="hasPhotos"
+                        checked={filters.hasPhotos}
+                        onCheckedChange={(checked) => setFilters({ ...filters, hasPhotos: checked })}
+                      />
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 pt-4">
+                      <Button variant="outline" onClick={resetFilters} className="flex-1">
+                        Reset
+                      </Button>
+                      <Button onClick={applyFilters} className="flex-1">
+                        Apply Filters
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
+      <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Profile Card */}
-        <div className={`relative transition-all duration-300 ${
-          swipeDirection === 'left' ? 'animate-slide-out-left' : 
-          swipeDirection === 'right' ? 'animate-slide-out-right' : 
-          'animate-scale-in'
-        }`}>
-          <Card className="overflow-hidden shadow-xl border-2">
-            {/* Image Section */}
-            <div className="relative h-96 bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 flex items-center justify-center">
-              {/* Compatibility Badge */}
-              <div className="absolute top-4 left-4 z-10">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2">
-                  <Sparkles className="w-5 h-5" />
-                  <span className="font-bold text-lg">{currentProfile.compatibility}% Match</span>
-                </div>
-              </div>
-
-              {/* Verified Badge */}
-              {currentProfile.verified && (
-                <div className="absolute top-4 right-4 bg-white dark:bg-card rounded-full px-4 py-2 flex items-center space-x-2 shadow-lg z-10">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">Verified</span>
-                </div>
-              )}
-
-              {/* Profile Photo Placeholder */}
-              <div className="w-48 h-48 bg-white dark:bg-card rounded-full shadow-2xl flex items-center justify-center">
-                <Users className="w-24 h-24 text-muted-foreground" />
-              </div>
+        <Card className="overflow-hidden shadow-2xl">
+          {/* Profile Image Area */}
+          <div className="relative h-96 bg-gradient-to-br from-blue-400 to-purple-400">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Avatar className="w-64 h-64 border-4 border-white">
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-6xl font-bold">
+                  {currentProfile.avatar}
+                </AvatarFallback>
+              </Avatar>
             </div>
 
-            {/* Profile Info */}
-            <div className="p-6 space-y-6">
-              {/* Name & Basic Info */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-3xl font-bold">{currentProfile.name}, {currentProfile.age}</h2>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => navigate(`/match/profile/${currentProfile.id}`)}
-                  >
-                    <Info className="w-5 h-5" />
-                  </Button>
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  <span>{currentProfile.location}</span>
-                </div>
-              </div>
-
-              {/* Info Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl p-4 border border-blue-200/50 dark:border-blue-800/50">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Briefcase className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-xs font-semibold text-blue-900 dark:text-blue-100">Profession</span>
-                  </div>
-                  <p className="font-medium text-sm text-foreground">{currentProfile.profession}</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-xl p-4 border border-purple-200/50 dark:border-purple-800/50">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <GraduationCap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-xs font-semibold text-purple-900 dark:text-purple-100">Education</span>
-                  </div>
-                  <p className="font-medium text-sm text-foreground">{currentProfile.education}</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-4 border border-amber-200/50 dark:border-amber-800/50">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Church className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span className="text-xs font-semibold text-amber-900 dark:text-amber-100">Faith</span>
-                  </div>
-                  <p className="font-medium text-sm text-foreground">{currentProfile.faith}</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-teal-50 to-green-50 dark:from-teal-950/30 dark:to-green-950/30 rounded-xl p-4 border border-teal-200/50 dark:border-teal-800/50">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <MapPin className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                    <span className="text-xs font-semibold text-teal-900 dark:text-teal-100">Origin</span>
-                  </div>
-                  <p className="font-medium text-sm text-foreground">{currentProfile.origin}</p>
-                </div>
-              </div>
-
-              {/* Bio */}
-              <div>
-                <h3 className="font-bold text-foreground mb-3 flex items-center">
-                  <Info className="w-5 h-5 mr-2 text-muted-foreground" />
-                  About
-                </h3>
-                <p className="text-foreground leading-relaxed bg-muted/50 rounded-xl p-4 border border-border">
-                  {currentProfile.bio}
-                </p>
-              </div>
-
-              {/* Languages */}
-              <div>
-                <h3 className="font-bold text-foreground mb-3">Languages</h3>
-                <div className="flex flex-wrap gap-2">
-                  {currentProfile.languages.map((lang, idx) => (
-                    <Badge key={idx} variant="secondary" className="px-3 py-1">
-                      {lang}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Interests */}
-              <div>
-                <h3 className="font-bold text-foreground mb-3">Interests</h3>
-                <div className="flex flex-wrap gap-2">
-                  {currentProfile.interests.map((interest, idx) => (
-                    <Badge key={idx} className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 px-3 py-1">
-                      {interest}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Match Reasons */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl p-5 border border-green-200/50 dark:border-green-800/50">
-                <h3 className="font-bold text-foreground mb-4 flex items-center">
-                  <Sparkles className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" />
-                  Why You Match
-                </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0" />
-                    <span className="text-foreground">Shared {currentProfile.faith} faith</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0" />
-                    <span className="text-foreground">Similar family values</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0" />
-                    <span className="text-foreground">Compatible life goals</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Looking For */}
-              <div className="bg-purple-50 dark:bg-purple-950/30 rounded-xl p-4 border border-purple-200/50 dark:border-purple-800/50">
-                <p className="text-foreground">
-                  <span className="font-bold text-purple-900 dark:text-purple-100">Looking for: </span>
-                  <span>{currentProfile.lookingFor}</span>
-                </p>
-              </div>
+            {/* Match Score */}
+            <div className="absolute top-4 right-4">
+              <Badge className="bg-gradient-to-r from-green-500 to-teal-500 text-white text-lg px-4 py-2">
+                <Sparkles className="w-5 h-5 mr-2" />
+                {currentProfile.matchScore}% Match
+              </Badge>
             </div>
-          </Card>
 
-          {/* Action Buttons - Desktop */}
-          <div className="hidden md:flex items-center justify-center space-x-6 mt-8">
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-20 h-20 rounded-full border-4 border-red-200 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all shadow-lg group"
-              onClick={() => handleSwipe('left')}
-            >
-              <X className="w-10 h-10 text-red-400 group-hover:text-red-500 transition-colors" />
-            </Button>
+            {/* Verified Badge */}
+            {currentProfile.verified && (
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-blue-500 text-white">
+                  <Zap className="w-3 h-3 mr-1" />
+                  Verified
+                </Badge>
+              </div>
+            )}
 
-            <Button
-              size="lg"
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 hover:shadow-2xl transition-all shadow-lg"
-              onClick={handleSuperLike}
-            >
-              <Star className="w-9 h-9 text-white" />
-            </Button>
-
-            <Button
-              size="lg"
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 hover:shadow-2xl transition-all shadow-xl transform hover:scale-110"
-              onClick={() => handleSwipe('right')}
-            >
-              <Heart className="w-12 h-12 text-white fill-white" />
-            </Button>
-
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-20 h-20 rounded-full border-4 border-purple-200 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-all shadow-lg group"
-              onClick={() => navigate(`/inbox?user=${currentProfile.id}`)}
-            >
-              <MessageCircle className="w-9 h-9 text-purple-400 group-hover:text-purple-500 transition-colors" />
-            </Button>
-          </div>
-
-          {/* Action Buttons - Mobile (Fixed Bottom) */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4 z-50">
-            <div className="flex items-center justify-center space-x-4 max-w-md mx-auto">
+            {/* Navigation Arrows */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4">
               <Button
-                size="lg"
-                variant="outline"
-                className="w-16 h-16 rounded-full border-2 border-red-200 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
-                onClick={() => handleSwipe('left')}
+                variant="secondary"
+                size="icon"
+                className="rounded-full shadow-lg"
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
               >
-                <X className="w-8 h-8 text-red-400" />
+                <ChevronLeft className="w-5 h-5" />
               </Button>
-
               <Button
-                size="lg"
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500"
-                onClick={handleSuperLike}
+                variant="secondary"
+                size="icon"
+                className="rounded-full shadow-lg"
+                onClick={handleNext}
+                disabled={currentIndex === filteredProfiles.length - 1}
               >
-                <Star className="w-7 h-7 text-white" />
+                <ChevronRight className="w-5 h-5" />
               </Button>
+            </div>
 
-              <Button
-                size="lg"
-                className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 shadow-xl"
-                onClick={() => handleSwipe('right')}
-              >
-                <Heart className="w-10 h-10 text-white fill-white" />
-              </Button>
-
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-16 h-16 rounded-full border-2 border-purple-200 hover:border-purple-400"
-                onClick={() => navigate(`/inbox?user=${currentProfile.id}`)}
-              >
-                <MessageCircle className="w-7 h-7 text-purple-400" />
-              </Button>
+            {/* Photo Counter */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+              <div className="flex gap-1">
+                {Array.from({ length: currentProfile.photos }).map((_, i) => (
+                  <div key={i} className="w-2 h-2 bg-white rounded-full opacity-70" />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Tips Section */}
-      <div className="container mx-auto px-4 pb-24 md:pb-8 max-w-2xl">
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-200 dark:border-blue-800">
-          <h3 className="font-bold text-foreground mb-3 flex items-center">
-            <Sparkles className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
-            Tips for Better Matches
-          </h3>
-          <ul className="space-y-2 text-sm text-foreground">
-            <li>• Complete your profile to increase compatibility scores</li>
-            <li>• Use filters to find people who share your values</li>
-            <li>• Super likes get you noticed faster</li>
-          </ul>
+          {/* Profile Info */}
+          <div className="p-6">
+            <div className="mb-4">
+              <h2 className="text-3xl font-bold mb-2">
+                {currentProfile.name}, {currentProfile.age}
+              </h2>
+              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {currentProfile.location} ({currentProfile.distance} mi)
+                </div>
+                <div className="flex items-center gap-1">
+                  <Briefcase className="w-4 h-4" />
+                  {currentProfile.occupation}
+                </div>
+                <div className="flex items-center gap-1">
+                  <GraduationCap className="w-4 h-4" />
+                  {currentProfile.education}
+                </div>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">About</h3>
+              <p className="text-sm text-muted-foreground">{currentProfile.bio}</p>
+            </div>
+
+            {/* Interests */}
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">Interests</h3>
+              <div className="flex flex-wrap gap-2">
+                {currentProfile.interests.map((interest, index) => (
+                  <Badge key={index} variant="secondary">
+                    {interest}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Additional Details */}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-muted-foreground">Height:</span>
+                <p className="font-semibold">{currentProfile.height}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Religion:</span>
+                <p className="font-semibold">{currentProfile.religion}</p>
+              </div>
+            </div>
+          </div>
         </Card>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-center gap-4 mt-6">
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={handlePass}
+            className="w-16 h-16 rounded-full border-2"
+          >
+            <X className="w-8 h-8 text-red-500" />
+          </Button>
+
+          <Button
+            size="lg"
+            onClick={handleSuperLike}
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+          >
+            <Star className="w-8 h-8" />
+          </Button>
+
+          <Button
+            size="lg"
+            onClick={handleLike}
+            className="w-20 h-20 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+          >
+            <Heart className="w-10 h-10" />
+          </Button>
+
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => navigate(`/match/profile/${currentProfile.id}`)}
+            className="w-16 h-16 rounded-full border-2"
+          >
+            <Info className="w-8 h-8 text-blue-500" />
+          </Button>
+        </div>
+
+        {/* Button Labels */}
+        <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+          <span className="w-16 text-center">Pass</span>
+          <span className="w-16 text-center">Super Like</span>
+          <span className="w-20 text-center">Like</span>
+          <span className="w-16 text-center">Info</span>
+        </div>
       </div>
     </div>
   );
