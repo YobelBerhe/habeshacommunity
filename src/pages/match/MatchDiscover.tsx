@@ -489,6 +489,7 @@ const MatchDiscover = () => {
         </Card>
       </div>
     </div>
+  );
 };
 
 export default MatchDiscover;
