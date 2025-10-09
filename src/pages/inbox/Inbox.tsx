@@ -3,9 +3,11 @@ import {
   Search, MessageCircle, Heart, Award, ShoppingBag,
   Users, Send, Paperclip, Smile, MoreVertical, Phone,
   Video, Info, Archive, Star, Trash2, Image, Check,
-  CheckCheck, Clock, Pin, Filter, ArrowLeft, X, FileText,
-  Download
+  CheckCheck, Clock, Pin, Filter, ArrowLeft
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { getOrCreateConversation } from '@/utils/conversations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -20,7 +22,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -29,8 +30,6 @@ interface Message {
   timestamp: string;
   read: boolean;
   type?: 'text' | 'image' | 'file';
-  fileName?: string;
-  fileUrl?: string;
 }
 
 interface Conversation {
@@ -56,10 +55,9 @@ const Inbox = () => {
   );
   const [messageText, setMessageText] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
-  const [isTyping, setIsTyping] = useState(false);
 
-  // Demo conversations with messages
-  const [conversations, setConversations] = useState<Conversation[]>([
+  // Demo conversations
+  const conversations: Conversation[] = [
     {
       id: '1',
       name: 'Sara Mehretab',
@@ -96,8 +94,71 @@ const Inbox = () => {
         { id: '3', text: "Perfect! Yes, 2 PM works great for me", sender: 'me', timestamp: 'Yesterday', read: true },
         { id: '4', text: "Your session is confirmed for tomorrow at 2 PM", sender: 'other', timestamp: '1 hour ago', read: true }
       ]
+    },
+    {
+      id: '3',
+      name: 'Rahel Woldu',
+      avatar: 'RW',
+      lastMessage: "Is the coffee set still available?",
+      timestamp: '3 hours ago',
+      unread: 1,
+      online: true,
+      type: 'marketplace',
+      verified: false,
+      pinned: false,
+      messages: [
+        { id: '1', text: "Hi! I'm interested in your Traditional Coffee Set listing", sender: 'other', timestamp: '4 hours ago', read: true },
+        { id: '2', text: "Hello! Yes, it's still available. Would you like to see more photos?", sender: 'me', timestamp: '3:30 PM', read: true },
+        { id: '3', text: "Is the coffee set still available?", sender: 'other', timestamp: '3 hours ago', read: false }
+      ]
+    },
+    {
+      id: '4',
+      name: 'Young Professionals Group',
+      avatar: 'YP',
+      lastMessage: "Michael: The networking event is this Friday!",
+      timestamp: '5 hours ago',
+      unread: 5,
+      online: false,
+      type: 'community',
+      verified: true,
+      pinned: false,
+      messages: [
+        { id: '1', text: "Hey everyone! Don't forget about the networking event", sender: 'other', timestamp: '5 hours ago', read: false }
+      ]
+    },
+    {
+      id: '5',
+      name: 'Meron Tekle',
+      avatar: 'MT',
+      lastMessage: "Thanks for the great conversation!",
+      timestamp: '1 day ago',
+      unread: 0,
+      online: false,
+      type: 'match',
+      verified: true,
+      pinned: false,
+      messages: [
+        { id: '1', text: "It was nice chatting with you", sender: 'other', timestamp: '1 day ago', read: true },
+        { id: '2', text: "Thanks for the great conversation!", sender: 'other', timestamp: '1 day ago', read: true }
+      ]
+    },
+    {
+      id: '6',
+      name: 'Solomon Ghebre',
+      avatar: 'SG',
+      lastMessage: "You: Looking forward to the session!",
+      timestamp: '2 days ago',
+      unread: 0,
+      online: false,
+      type: 'mentor',
+      verified: true,
+      pinned: false,
+      messages: [
+        { id: '1', text: "Looking forward to the session!", sender: 'me', timestamp: '2 days ago', read: true }
+      ]
     }
-  ]);
+  ];
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -128,138 +189,51 @@ const Inbox = () => {
   const activeConversation = conversations.find(c => c.id === selectedConversation);
   const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
 
-  // Handle sending text message
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedConversation) return;
     
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: messageText,
-      sender: 'me',
-      timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      read: true,
-      type: 'text'
-    };
-
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === selectedConversation) {
-        return {
-          ...conv,
-          messages: [...conv.messages, newMessage],
-          lastMessage: messageText,
-          timestamp: 'Just now'
-        };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please sign in to send messages');
+        return;
       }
-      return conv;
-    }));
 
-    setMessageText('');
-    toast.success('Message sent!');
+      // Get conversation to find the other participant
+      const activeConv = conversations.find(c => c.id === selectedConversation);
+      if (!activeConv) return;
 
-    // Simulate typing indicator
-    setTimeout(() => {
-      setIsTyping(true);
-      setTimeout(() => {
-        setIsTyping(false);
-        // Simulate reply
-        const reply: Message = {
-          id: (Date.now() + 1).toString(),
-          text: "Thanks for your message! I'll get back to you soon 😊",
-          sender: 'other',
-          timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          type: 'text'
-        };
-        
-        setConversations(prev => prev.map(conv => {
-          if (conv.id === selectedConversation) {
-            return {
-              ...conv,
-              messages: [...conv.messages, reply],
-              lastMessage: reply.text,
-              timestamp: 'Just now',
-              unread: conv.unread + 1
-            };
-          }
-          return conv;
-        }));
-      }, 2000);
-    }, 1000);
-  };
+      // Create or get conversation from database
+      const { conversationId } = await getOrCreateConversation(
+        activeConv.id, // Using conversation ID as user ID for demo
+        messageText
+      );
 
-  // Handle file upload
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !selectedConversation) return;
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: `Sent a file: ${file.name}`,
-      sender: 'me',
-      timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      read: true,
-      type: 'file',
-      fileName: file.name,
-      fileUrl: URL.createObjectURL(file)
-    };
-
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === selectedConversation) {
-        return {
-          ...conv,
-          messages: [...conv.messages, newMessage],
-          lastMessage: `📎 ${file.name}`,
-          timestamp: 'Just now'
-        };
-      }
-      return conv;
-    }));
-
-    toast.success('File sent!');
-  };
-
-  // Handle image upload
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !selectedConversation) return;
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: `Sent an image`,
-      sender: 'me',
-      timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      read: true,
-      type: 'image',
-      fileName: file.name,
-      fileUrl: URL.createObjectURL(file)
-    };
-
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === selectedConversation) {
-        return {
-          ...conv,
-          messages: [...conv.messages, newMessage],
-          lastMessage: '📷 Photo',
-          timestamp: 'Just now'
-        };
-      }
-      return conv;
-    }));
-
-    toast.success('Image sent!');
-  };
-
-  // Handle video call
-  const handleVideoCall = () => {
-    if (activeConversation) {
-      toast.success('Starting video call...');
-      navigate(`/video/${selectedConversation}`);
+      toast.success('Message sent!');
+      setMessageText('');
+      
+      // Reload the conversation (in production, would use real-time subscription)
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
     }
   };
 
-  // Handle phone call
-  const handlePhoneCall = () => {
-    toast.success('Starting phone call...');
+  const handleAttachment = () => {
+    toast.info('File upload coming soon!', {
+      description: 'This feature is under development'
+    });
+  };
+
+  const handleVideoCall = () => {
+    if (!selectedConversation) return;
+    navigate(`/video/${selectedConversation}`);
+  };
+
+  const handleAudioCall = () => {
+    toast.info('Audio calls coming soon!', {
+      description: 'This feature is under development'
+    });
   };
 
   return (
@@ -425,7 +399,7 @@ const Inbox = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={handlePhoneCall}>
+                <Button variant="ghost" size="icon" onClick={handleAudioCall}>
                   <Phone className="w-5 h-5" />
                 </Button>
                 <Button variant="ghost" size="icon" onClick={handleVideoCall}>
@@ -476,40 +450,15 @@ const Inbox = () => {
                       )}
 
                       <div>
-                        {message.type === 'image' && message.fileUrl ? (
-                          <div className="rounded-2xl overflow-hidden">
-                            <img src={message.fileUrl} alt={message.fileName} className="max-w-full h-auto" />
-                          </div>
-                        ) : message.type === 'file' && message.fileUrl ? (
-                          <div className={`rounded-2xl px-4 py-3 border ${
+                        <div
+                          className={`rounded-2xl px-4 py-2 ${
                             message.sender === 'me'
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : 'bg-muted border-border'
-                          }`}>
-                            <div className="flex items-center gap-3">
-                              <FileText className="w-8 h-8" />
-                              <div className="flex-1">
-                                <p className="font-semibold text-sm">{message.fileName}</p>
-                                <p className="text-xs opacity-70">Click to download</p>
-                              </div>
-                              <a href={message.fileUrl} download={message.fileName}>
-                                <Button variant="ghost" size="icon">
-                                  <Download className="w-4 h-4" />
-                                </Button>
-                              </a>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            className={`rounded-2xl px-4 py-2 ${
-                              message.sender === 'me'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted'
-                            }`}
-                          >
-                            <p className="text-sm">{message.text}</p>
-                          </div>
-                        )}
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted'
+                          }`}
+                        >
+                          <p className="text-sm">{message.text}</p>
+                        </div>
                         <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${message.sender === 'me' ? 'justify-end' : ''}`}>
                           <span>{message.timestamp}</span>
                           {message.sender === 'me' && (
@@ -526,7 +475,7 @@ const Inbox = () => {
                 ))}
 
                 {/* Typing Indicator */}
-                {isTyping && (
+                {activeConversation.online && Math.random() > 0.7 && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Avatar className="w-6 h-6">
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs">
@@ -547,34 +496,12 @@ const Inbox = () => {
             <div className="p-4 border-t bg-background/95 backdrop-blur">
               <div className="flex items-end gap-2 max-w-4xl mx-auto">
                 <div className="flex gap-2">
-                  <input
-                    type="file"
-                    id="file-upload"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                  />
-                  <label htmlFor="file-upload">
-                    <Button variant="ghost" size="icon" className="cursor-pointer" asChild>
-                      <div>
-                        <Paperclip className="w-5 h-5" />
-                      </div>
-                    </Button>
-                  </label>
-
-                  <input
-                    type="file"
-                    id="image-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                  <label htmlFor="image-upload">
-                    <Button variant="ghost" size="icon" className="cursor-pointer" asChild>
-                      <div>
-                        <Image className="w-5 h-5" />
-                      </div>
-                    </Button>
-                  </label>
+                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
+                    <Paperclip className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
+                    <Image className="w-5 h-5" />
+                  </Button>
                 </div>
 
                 <div className="flex-1">
@@ -620,8 +547,19 @@ const Inbox = () => {
           </div>
         )}
       </div>
+
+      <style>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };
 
 export default Inbox;
+
