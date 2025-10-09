@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
-import { AnimatedCounter } from '@/components/AnimatedCounter';
+import AnimatedCounter from '@/components/AnimatedCounter';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -239,7 +239,7 @@ const Index = () => {
                 <div key={index} className="text-center">
                   <Icon className={`w-8 h-8 md:w-10 md:h-10 ${stat.color} mx-auto mb-3`} />
                   <div className="text-2xl md:text-4xl font-bold mb-1">
-                    <AnimatedCounter value={stat.value} />
+                    <AnimatedCounter end={stat.value} />
                     <span className="text-lg">{stat.suffix}</span>
                   </div>
                   <div className="text-sm md:text-base text-muted-foreground">{stat.label}</div>

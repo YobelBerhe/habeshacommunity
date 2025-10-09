@@ -5,13 +5,14 @@ export default function LanguageToggle({
 }: { value: Lang; onChange: (v: Lang) => void }) {
   return (
     <select
-      className="field w-[92px]"
+      className="field w-[70px] text-sm"
       value={value}
       onChange={(e) => onChange(e.target.value as Lang)}
       title="Language"
     >
       <option value="EN">EN</option>
-      <option value="TI">ትግ</option>
+      <option value="TI">TI</option>
+      <option value="AM">AM</option>
     </select>
   );
 }

@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { ShareMentorProfile } from '@/components/ShareMentorProfile';
-import { AnimatedCounter } from '@/components/AnimatedCounter';
+import AnimatedCounter from '@/components/AnimatedCounter';
 import { ScrollReveal } from '@/components/ScrollReveal';
 
 type DateRange = {
@@ -342,7 +342,7 @@ export default function MentorDashboard() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-3xl font-bold">
-                  <AnimatedCounter value={stats.total} />
+                  <AnimatedCounter end={stats.total} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">All time sessions</p>
               </CardContent>
@@ -366,7 +366,7 @@ export default function MentorDashboard() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
-                  <AnimatedCounter value={stats.pending} />
+                  <AnimatedCounter end={stats.pending} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Awaiting response</p>
               </CardContent>
@@ -390,7 +390,7 @@ export default function MentorDashboard() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                  <AnimatedCounter value={stats.confirmed} />
+                  <AnimatedCounter end={stats.confirmed} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Upcoming sessions</p>
               </CardContent>
@@ -413,7 +413,7 @@ export default function MentorDashboard() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                  <AnimatedCounter value={stats.completed} />
+                  <AnimatedCounter end={stats.completed} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Total sessions done</p>
               </CardContent>

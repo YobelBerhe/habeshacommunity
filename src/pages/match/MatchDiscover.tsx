@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { likeUser, passUser } from '@/utils/matchActions';
+import { FilterPanel } from '@/components/match/FilterPanel';
 
 interface MatchProfile {
   id: string;
@@ -488,112 +489,6 @@ const MatchDiscover = () => {
         </Card>
       </div>
     </div>
-  );
-};
-
-// Filter Panel Component
-const FilterPanel = ({ filters, setFilters }: { 
-  filters: Filters; 
-  setFilters: (filters: Filters) => void;
-}) => {
-  return (
-    <div className="space-y-6 py-6">
-      {/* Age Range */}
-      <div>
-        <label className="text-sm font-semibold mb-3 block">
-          Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}
-        </label>
-        <Slider
-          value={filters.ageRange}
-          onValueChange={(value) => setFilters({ ...filters, ageRange: value as [number, number] })}
-          min={18}
-          max={60}
-          step={1}
-          className="mb-2"
-        />
-      </div>
-
-      {/* Location */}
-      <div>
-        <label className="text-sm font-semibold mb-2 block">Location</label>
-        <Select value={filters.location} onValueChange={(value) => setFilters({ ...filters, location: value })}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Locations</SelectItem>
-            <SelectItem value="us-east">USA - East Coast</SelectItem>
-            <SelectItem value="us-west">USA - West Coast</SelectItem>
-            <SelectItem value="canada">Canada</SelectItem>
-            <SelectItem value="uk">United Kingdom</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Faith */}
-      <div>
-        <label className="text-sm font-semibold mb-2 block">Faith</label>
-        <Select value={filters.faith} onValueChange={(value) => setFilters({ ...filters, faith: value })}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Faiths</SelectItem>
-            <SelectItem value="orthodox">Orthodox Christian</SelectItem>
-            <SelectItem value="catholic">Catholic</SelectItem>
-            <SelectItem value="protestant">Protestant</SelectItem>
-            <SelectItem value="muslim">Muslim</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Education */}
-      <div>
-        <label className="text-sm font-semibold mb-2 block">Education Level</label>
-        <Select value={filters.education} onValueChange={(value) => setFilters({ ...filters, education: value })}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Any Education</SelectItem>
-            <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-            <SelectItem value="masters">Master's Degree</SelectItem>
-            <SelectItem value="doctorate">Doctorate</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Distance */}
-      <div>
-        <label className="text-sm font-semibold mb-3 block">
-          Maximum Distance: {filters.distance} miles
-        </label>
-        <Slider
-          value={[filters.distance]}
-          onValueChange={(value) => setFilters({ ...filters, distance: value[0] })}
-          min={5}
-          max={500}
-          step={5}
-          className="mb-2"
-        />
-      </div>
-
-      {/* Reset Button */}
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={() => setFilters({
-          ageRange: [22, 35],
-          location: 'all',
-          faith: 'all',
-          education: 'all',
-          distance: 50,
-        })}
-      >
-        Reset Filters
-      </Button>
-    </div>
-  );
 };
 
 export default MatchDiscover;
