@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import AppSwitcher from './nav/AppSwitcher';
 import MobileDrawer from './nav/MobileDrawer';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,7 +83,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14 md:h-16">
-          {/* Left: Mobile Menu + Logo + App Switcher */}
+          {/* Left: Hamburger Menu + Logo */}
           <div className="flex items-center space-x-2 md:space-x-3">
             <MobileDrawer />
             
@@ -96,10 +95,6 @@ const Header = () => {
               <span className="hidden sm:inline">HabeshaCommunity</span>
               <span className="sm:hidden">Habesha</span>
             </Button>
-            
-            <div className="hidden lg:block">
-              <AppSwitcher />
-            </div>
           </div>
 
           {/* Right: Actions */}
