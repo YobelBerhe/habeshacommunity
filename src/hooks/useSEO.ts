@@ -10,8 +10,8 @@ interface SEOProps {
 }
 
 export function useSEO({
-  title = 'DayAI - Your AI for an Intentional Day',
-  description = 'AI-powered daily operating system that optimizes every hour from wake to sleep. Master your day with intelligent coaching.',
+  title = 'HabeshaCommunity - Connect Worldwide',
+  description = 'Connect with the Habesha community worldwide. Find housing, jobs, mentors, and more.',
   image = '/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png',
   url = window.location.href,
   type = 'website',
@@ -47,7 +47,7 @@ export function useSEO({
     updateMetaTag('og:image', image.startsWith('http') ? image : `${window.location.origin}${image}`);
     updateMetaTag('og:url', url);
     updateMetaTag('og:type', type);
-    updateMetaTag('og:site_name', 'DayAI');
+    updateMetaTag('og:site_name', 'HabeshaCommunity');
 
     // Twitter Card tags
     updateMetaTag('twitter:card', 'summary_large_image', true);
