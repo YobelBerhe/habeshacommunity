@@ -172,7 +172,7 @@ const Dashboard = () => {
                   Welcome back, {user.firstName}! 👋
                 </h1>
                 <p className="text-base md:text-lg opacity-90">
-                  Here's what's happening with your account
+                  Let's optimize your day with DayAI
                 </p>
               </div>
             </div>
