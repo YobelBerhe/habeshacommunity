@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
   Menu, Heart, GraduationCap, ShoppingBag, Users,
   Home, MessageSquare, Calendar, Briefcase, Wrench,
-  ChevronRight
+  ChevronRight, Award
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -39,7 +39,8 @@ const MobileDrawer = () => {
       gradient: 'from-blue-500 to-cyan-500',
       items: [
         { name: 'Find Mentors', path: '/mentor' },
-        { name: 'My Sessions', path: '/mentor/sessions' }
+        { name: 'My Sessions', path: '/mentor/sessions' },
+        { name: 'Become a Mentor', path: '/mentor/onboarding', icon: Award }
       ]
     },
     {
