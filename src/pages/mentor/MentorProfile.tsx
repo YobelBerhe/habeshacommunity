@@ -129,7 +129,7 @@ Whether you're starting your coding journey, preparing for interviews, or lookin
   ];
 
   const handleBookSession = () => {
-    navigate(`/mentor/${mentor.id}/book`);
+    navigate(`/mentor/profile/${mentor.id}/book`);
   };
 
   const handleMessage = () => {
@@ -151,14 +151,14 @@ Whether you're starting your coding journey, preparing for interviews, or lookin
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white py-8">
         <div className="container mx-auto px-4">
-          <Button
-            variant="ghost"
-            className="text-white hover:bg-white/20 mb-4"
-            onClick={() => navigate('/mentor')}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Mentors
-          </Button>
+            <Button
+              variant="ghost"
+              className="text-white hover:bg-white/20 mb-4"
+              onClick={() => navigate('/mentor')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Mentors
+            </Button>
 
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
             {/* Avatar */}

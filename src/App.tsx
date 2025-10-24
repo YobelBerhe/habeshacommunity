@@ -195,6 +195,7 @@ const App = () => {
                 <Route path="/mentor" element={<MentorHome />} />
                 <Route path="/mentor/list" element={<MentorList />} />
                 <Route path="/mentor/profile/:id" element={<MentorProfile />} />
+                <Route path="/mentor/profile/:id/book" element={<BookSession />} />
                 <Route path="/mentor/sessions" element={<MySessions />} />
                 <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
                 <Route path="/mentor/dashboard" element={<MentorDashboard />} />
@@ -205,7 +206,6 @@ const App = () => {
                 <Route path="/mentor/verify" element={<VerifyProfile />} />
                 <Route path="/mentor/availability" element={<ManageAvailability />} />
                 <Route path="/mentor/:id" element={<MentorDetail />} />
-                <Route path="/mentor/:id/book" element={<BookSession />} /> {/* NEW ROUTE */}
                 
                 {/* Badges */}
                 <Route path="/badges" element={<BadgesInfo />} />

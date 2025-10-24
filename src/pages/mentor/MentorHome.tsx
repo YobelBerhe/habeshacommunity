@@ -164,11 +164,33 @@ const MentorHome = () => {
     return matchesSearch && matchesCategory;
   });
 
+  // Sort mentors based on selected criteria
+  const sortedMentors = [...filteredMentors].sort((a, b) => {
+    switch (sortBy) {
+      case 'popular':
+        return b.sessionsCompleted - a.sessionsCompleted;
+      case 'rating':
+        return b.rating - a.rating;
+      case 'price-low':
+        return a.pricePerHour - b.pricePerHour;
+      case 'price-high':
+        return b.pricePerHour - a.pricePerHour;
+      case 'available':
+        if (a.availability === 'Available today') return -1;
+        if (b.availability === 'Available today') return 1;
+        if (a.availability === 'Available this week') return -1;
+        if (b.availability === 'Available this week') return 1;
+        return 0;
+      default:
+        return 0;
+    }
+  });
+
   // Pagination calculations
-  const totalPages = Math.ceil(filteredMentors.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedMentors.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentMentors = filteredMentors.slice(startIndex, endIndex);
+  const currentMentors = sortedMentors.slice(startIndex, endIndex);
 
   // Reset to page 1 when filters change
   const handleFilterChange = (callback: () => void) => {
@@ -254,7 +276,7 @@ const MentorHome = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="text-sm text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filteredMentors.length}</span> mentors
+              Showing <span className="font-semibold text-foreground">{sortedMentors.length}</span> mentors
             </div>
             
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
@@ -295,7 +317,7 @@ const MentorHome = () => {
               <Card
                 key={mentor.id}
                 className="group overflow-hidden hover:shadow-2xl transition-all cursor-pointer"
-                onClick={() => navigate(`/mentor/${mentor.id}`)}
+                onClick={() => navigate(`/mentor/profile/${mentor.id}`)}
               >
                 <div className="p-4 md:p-6 space-y-4">
                   {/* Header */}
@@ -408,7 +430,7 @@ const MentorHome = () => {
           </div>
 
           {/* Empty State */}
-          {filteredMentors.length === 0 && (
+          {sortedMentors.length === 0 && (
             <Card className="p-12 text-center">
               <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-2">No mentors found</h3>

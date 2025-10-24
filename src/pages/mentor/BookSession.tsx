@@ -184,7 +184,7 @@ const BookSession = () => {
           <Button
             variant="ghost"
             className="text-white hover:bg-white/20 mb-4"
-            onClick={() => navigate(`/mentor/${mentor.id}`)}
+            onClick={() => navigate(`/mentor/profile/${mentor.id}`)}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Profile
