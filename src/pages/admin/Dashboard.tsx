@@ -77,17 +77,17 @@ export default function AdminDashboard() {
       ] = await Promise.all([
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('matches').select('id', { count: 'exact', head: true }),
-        supabase.from('mentor_profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('mentor_profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
+        supabase.from('mentors').select('id', { count: 'exact', head: true }),
+        supabase.from('mentors').select('id', { count: 'exact', head: true }).eq('is_verified', true),
         supabase.from('mentor_verifications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-        supabase.from('mentor_bookings').select('total_price_cents, status'),
+        supabase.from('mentor_bookings').select('status'),
         supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'active')
       ]);
 
       // Calculate revenue and stats
-      const completedBookings = bookingsRes.data?.filter(b => b.status === 'completed') || [];
-      const revenue = completedBookings.reduce((sum, b) => sum + (b.total_price_cents || 0), 0) / 100;
+      const completedBookings = bookingsRes.data?.filter(b => b.status === 'confirmed') || [];
+      const revenue = 0; // Revenue calculation would require payment data from separate table
       const avgPrice = completedBookings.length > 0 
         ? revenue / completedBookings.length 
         : 0;

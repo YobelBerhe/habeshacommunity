@@ -81,6 +81,9 @@ const MyListings = lazy(() => import("./pages/marketplace/MyListings"));
 const Inbox = lazy(() => import("./pages/inbox/Inbox"));
 const AdminSeed = lazy(() => import("./pages/admin/Seed"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
+const DisputeResolution = lazy(() => import("./pages/admin/DisputeResolution"));
+const RoleManagement = lazy(() => import("./pages/admin/RoleManagement"));
 const DonateSuccess = lazy(() => import("./pages/donate/Success"));
 const DonateCancel = lazy(() => import("./pages/donate/Cancel"));
 const ListingDetail = lazy(() => import("./pages/ListingDetail"));
@@ -218,8 +221,11 @@ const App = () => {
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/verifications" element={<VerificationReview />} />
-                <Route path="/admin/metrics" element={<AdminMetrics />} />
                 <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/roles" element={<RoleManagement />} />
+                <Route path="/admin/disputes" element={<DisputeResolution />} />
+                <Route path="/admin/audit-logs" element={<AuditLogs />} />
+                <Route path="/admin/metrics" element={<AdminMetrics />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/content" element={<AdminContent />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />

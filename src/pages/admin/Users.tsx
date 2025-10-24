@@ -41,7 +41,7 @@ import { toast } from 'sonner';
 interface UserProfile {
   id: string;
   display_name: string;
-  email: string;
+  email?: string; // Email comes from auth.users, not profiles
   avatar_url?: string;
   bio?: string;
   city?: string;

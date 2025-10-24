@@ -3,13 +3,14 @@ import {
   CheckCircle, XCircle, Eye, Download, Calendar,
   User, Mail, Phone, Briefcase, DollarSign, Shield,
   Clock, AlertCircle, FileText, Video, ExternalLink,
-  MessageSquare, Flag, Search, Filter, ChevronRight
+  MessageSquare, Flag, Search, Filter, ChevronRight, Award
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -146,7 +147,7 @@ const VerificationReview = () => {
         app.id === selectedApplication.id 
           ? { 
               ...app, 
-              status: reviewAction, 
+              status: reviewAction === 'approve' ? 'approved' : 'rejected', 
               reviewedAt: new Date().toISOString(),
               reviewedBy: 'Admin',
               rejectionReason: reviewAction === 'reject' ? rejectionReason : undefined
