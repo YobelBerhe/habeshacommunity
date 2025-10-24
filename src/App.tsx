@@ -4,7 +4,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { PageLoader } from "@/components/LoadingStates";
 import { SkipLink } from "@/components/SkipLink";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
@@ -22,6 +22,7 @@ import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { MatchFlowGuard } from "@/components/match/MatchFlowGuard";
 import { MatchBottomNav } from "@/components/match/MatchBottomNav";
 import Header from "@/components/Header";
+import BootstrapAuth from "@/components/BootstrapAuth";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
@@ -144,6 +145,7 @@ const App = () => {
       <SkipLink />
       <ConnectionStatus />
       <PresenceTracker />
+      <BootstrapAuth />
       {user && <SyncStatus />}
       <InstallBanner />
       <PerformanceDebug />
@@ -198,6 +200,8 @@ const App = () => {
                 <Route path="/mentor/profile/:id/book" element={<BookSession />} />
                 <Route path="/mentor/sessions" element={<MySessions />} />
                 <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
+                {/* Alias route to handle common casing mistake */}
+                <Route path="/mentor/MentorOnboarding" element={<Navigate to="/mentor/onboarding" replace />} />
                 <Route path="/mentor/dashboard" element={<MentorDashboard />} />
                 <Route path="/mentor/requests" element={<MentorRequests />} />
                 <Route path="/mentor/bookings" element={<MyBookings />} />

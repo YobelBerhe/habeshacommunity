@@ -301,7 +301,7 @@ const MentorHome = () => {
                 onClick={() => navigate('/mentor/onboarding')}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 w-full sm:w-auto"
               >
-                <Award className="w-4 h-4 mr-2" />
+                {/* No icon before label per request */}
                 Become a Mentor
               </Button>
             </div>

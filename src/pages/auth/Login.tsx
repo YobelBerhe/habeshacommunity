@@ -109,7 +109,7 @@ export default function Login() {
         {!magicLinkSent && (
           <div className="text-sm mt-6 space-y-2 text-center">
             <div className="text-muted-foreground">
-              Don't have an account? <Link to="/auth/register" className="text-primary hover:underline">Create one</Link>
+              Don't have an account? <Link to={`/auth/register${returnTo !== '/' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`} className="text-primary hover:underline">Create one</Link>
             </div>
           </div>
         )}

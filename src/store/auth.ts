@@ -35,22 +35,22 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   init: async () => {
     logger.info('🔄 Auth init starting...');
-    
-    // First, check for session in URL (magic link redirect)
-    const { data: sessionData } = await supabase.auth.getSession();
-    logger.info('📋 Initial session:', sessionData.session);
-    logger.info('👤 Initial user:', sessionData.session?.user);
-    
-    // Set initial state
-    set({ user: sessionData.session?.user ?? null, loading: false });
 
-    // Set up auth state listener for future changes
-    supabase.auth.onAuthStateChange((event, session) => {
+    // Set up auth state listener FIRST to avoid missing events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       logger.info('🔔 Auth state change:', event, session);
       const u = (session as Session | null)?.user ?? null;
       logger.info('👤 User after auth change:', u);
       set({ user: u, loading: false, authOpen: false });
     });
+    
+    // THEN check for existing session
+    const { data: sessionData } = await supabase.auth.getSession();
+    logger.info('📋 Initial session:', sessionData.session);
+    logger.info('👤 Initial user:', sessionData.session?.user);
+
+    // Set initial state
+    set({ user: sessionData.session?.user ?? null, loading: false });
   },
 
   refresh: async () => {
