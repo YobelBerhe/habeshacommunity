@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
   Menu, Heart, GraduationCap, ShoppingBag, Users,
   Home, MessageSquare, Calendar, Briefcase, Wrench,
-  ChevronRight, Award
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -40,7 +40,7 @@ const MobileDrawer = () => {
       items: [
         { name: 'Find Mentors', path: '/mentor' },
         { name: 'My Sessions', path: '/mentor/sessions' },
-        { name: 'Become a Mentor', path: '/mentor/onboarding', icon: Award }
+        { name: 'Become a Mentor', path: '/mentor/onboarding' }
       ]
     },
     {

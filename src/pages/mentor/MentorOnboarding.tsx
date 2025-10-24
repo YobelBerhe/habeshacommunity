@@ -70,10 +70,8 @@ export default function MentorOnboarding() {
   });
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth/login');
-    }
-  }, [user, navigate]);
+    // Keep onboarding page accessible when logged out; show in-page auth prompt instead
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,7 +202,20 @@ export default function MentorOnboarding() {
       
       <div className="container max-w-3xl mx-auto px-4 py-8">
 
-        {!createdMentorId ? (
+        {!user ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Sign in to become a mentor</CardTitle>
+              <CardDescription>You need an account to continue onboarding.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-3">
+                <Button onClick={() => navigate('/auth/login')}>Sign In</Button>
+                <Button variant="outline" onClick={() => navigate('/auth/register')}>Create Account</Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : !createdMentorId ? (
           <Card>
             <CardHeader>
               <CardTitle>Become a Mentor</CardTitle>
