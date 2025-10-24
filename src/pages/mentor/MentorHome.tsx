@@ -3,7 +3,7 @@ import {
   Search, Filter, Star, MapPin, DollarSign, Clock,
   Briefcase, GraduationCap, Heart, Code, TrendingUp,
   Globe, Video, MessageSquare, Award, ChevronDown,
-  Sparkles, Users, BookOpen
+  Sparkles, Users, BookOpen, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +41,8 @@ const MentorHome = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   const categories = [
     { id: 'all', name: 'All Categories', name_ti: 'ኩሉ', icon: Users, color: 'from-blue-500 to-cyan-500' },
@@ -162,6 +164,18 @@ const MentorHome = () => {
     return matchesSearch && matchesCategory;
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredMentors.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentMentors = filteredMentors.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = (callback: () => void) => {
+    callback();
+    setCurrentPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background pb-20 md:pb-8">
       {/* Hero Section */}
@@ -222,7 +236,7 @@ const MentorHome = () => {
                 <Button
                   key={category.id}
                   variant={isActive ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.id)}
+                  onClick={() => handleFilterChange(() => setSelectedCategory(category.id))}
                   className={`flex-shrink-0 ${isActive ? `bg-gradient-to-r ${category.color}` : ''}`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
@@ -277,7 +291,7 @@ const MentorHome = () => {
       <section className="py-6 md:py-8">
         <div className="container mx-auto px-4">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {filteredMentors.map((mentor) => (
+            {currentMentors.map((mentor) => (
               <Card
                 key={mentor.id}
                 className="group overflow-hidden hover:shadow-2xl transition-all cursor-pointer"
@@ -404,10 +418,69 @@ const MentorHome = () => {
               <Button onClick={() => {
                 setSearchQuery('');
                 setSelectedCategory('all');
+                setCurrentPage(1);
               }}>
                 Clear Filters
               </Button>
             </Card>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show first page, last page, current page, and pages around current
+                  const showPage = 
+                    page === 1 || 
+                    page === totalPages || 
+                    (page >= currentPage - 1 && page <= currentPage + 1);
+                  
+                  const showEllipsis = 
+                    (page === currentPage - 2 && currentPage > 3) ||
+                    (page === currentPage + 2 && currentPage < totalPages - 2);
+
+                  if (showEllipsis) {
+                    return <span key={page} className="px-2 text-muted-foreground">...</span>;
+                  }
+
+                  if (!showPage) return null;
+
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => {
+                        setCurrentPage(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className={currentPage === page ? "bg-gradient-to-r from-blue-500 to-cyan-500" : ""}
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           )}
         </div>
       </section>
