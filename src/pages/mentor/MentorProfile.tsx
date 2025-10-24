@@ -168,8 +168,8 @@ Whether you're starting your coding journey, preparing for interviews, or lookin
                   {mentor.avatar}
                 </AvatarFallback>
               </Avatar>
-              {mentor.verified && (
-                <div className="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-2">
+            {mentor.verified && (
+                <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 shadow-lg">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
               )}
@@ -215,40 +215,43 @@ Whether you're starting your coding journey, preparing for interviews, or lookin
                 </Badge>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3">
                 <Button 
                   size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-100"
+                  className="bg-white text-blue-600 hover:bg-gray-100 w-full"
                   onClick={handleBookSession}
                 >
                   <Calendar className="w-5 h-5 mr-2" />
                   Book Session - ${mentor.hourlyRate}/hr
                 </Button>
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/20"
-                  onClick={handleMessage}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Message
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/20"
-                  onClick={handleSave}
-                >
-                  <Heart className={`w-5 h-5 ${isSaved ? 'fill-white' : ''}`} />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/20"
-                  onClick={handleShare}
-                >
-                  <Share2 className="w-5 h-5" />
-                </Button>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    className="flex-1 border-white bg-blue-600 text-white hover:bg-blue-700 hover:text-white"
+                    onClick={handleMessage}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Message
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white bg-blue-600 text-white hover:bg-blue-700 hover:text-white"
+                    onClick={handleSave}
+                  >
+                    <Heart className={`w-5 h-5 ${isSaved ? 'fill-white' : ''}`} />
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white bg-blue-600 text-white hover:bg-blue-700 hover:text-white"
+                    onClick={handleShare}
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -475,8 +478,7 @@ Whether you're starting your coding journey, preparing for interviews, or lookin
                         Message {mentor.name.split(' ')[0]} to request custom availability
                       </p>
                     </div>
-                    <Button onClick={handleMessage}>
-                      <MessageCircle className="w-4 h-4 mr-2" />
+                    <Button onClick={handleMessage} size="lg">
                       Message
                     </Button>
                   </div>

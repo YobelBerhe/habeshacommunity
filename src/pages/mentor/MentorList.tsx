@@ -329,9 +329,66 @@ export default function MentorList() {
       }
     });
 
-  const formatPrice = (cents: number, currency: string) => {
-    const amount = cents / 100;
-    return `${currency} ${amount.toFixed(0)}`;
+  const handleMessage = async (mentor: Mentor) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate('/auth/login');
+      return;
+    }
+
+    // Prevent messaging yourself
+    if (mentor.user_id === user.id) {
+      toast.error('Cannot message yourself');
+      return;
+    }
+
+    try {
+      // Check if conversation already exists
+      const { data: existingConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`and(participant1_id.eq.${user.id},participant2_id.eq.${mentor.user_id}),and(participant1_id.eq.${mentor.user_id},participant2_id.eq.${user.id})`)
+        .limit(1)
+        .maybeSingle();
+
+      if (existingConv) {
+        // Navigate to inbox with conversation
+        navigate('/inbox', { state: { openConversationId: existingConv.id, mentorName: mentor.display_name } });
+        return;
+      }
+
+      // Create new conversation
+      const participants = [user.id, mentor.user_id].sort();
+      const { data: newConv, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          participant1_id: participants[0],
+          participant2_id: participants[1],
+        } as any)
+        .select()
+        .single();
+
+      if (convError) throw convError;
+
+      // Send initial greeting message
+      const { error: msgError } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: newConv.id,
+          sender_id: user.id,
+          content: `Hi ${mentor.display_name}, I'm interested in your mentorship. Looking forward to connecting with you!`,
+        } as any);
+
+      if (msgError) throw msgError;
+
+      toast.success('Conversation started');
+      
+      // Navigate to inbox with the new conversation
+      navigate('/inbox', { state: { openConversationId: newConv.id, mentorName: mentor.display_name } });
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      toast.error('Failed to start conversation');
+    }
   };
 
   return (
@@ -628,8 +685,7 @@ export default function MentorList() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedMentor(mentor);
-                      setMessageModalOpen(true);
+                      handleMessage(mentor);
                     }}
                     className="flex-1"
                   >
@@ -652,20 +708,6 @@ export default function MentorList() {
           />
         )}
       </div>
-
-      {/* Message Modal */}
-      {selectedMentor && (
-        <MessageMentorModal
-          isOpen={messageModalOpen}
-          onClose={() => {
-            setMessageModalOpen(false);
-            setSelectedMentor(null);
-          }}
-          mentorId={selectedMentor.id}
-          mentorName={selectedMentor.display_name}
-          mentorUserId={selectedMentor.user_id}
-        />
-      )}
 
       {/* Mobile CTA */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t shadow-lg z-50">

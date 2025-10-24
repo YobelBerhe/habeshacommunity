@@ -84,6 +84,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
 const DisputeResolution = lazy(() => import("./pages/admin/DisputeResolution"));
 const RoleManagement = lazy(() => import("./pages/admin/RoleManagement"));
+const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const DonateSuccess = lazy(() => import("./pages/donate/Success"));
 const DonateCancel = lazy(() => import("./pages/donate/Cancel"));
 const ListingDetail = lazy(() => import("./pages/ListingDetail"));
@@ -230,8 +231,15 @@ const App = () => {
                 <Route path="/admin/content" element={<AdminContent />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/seed" element={<AdminSeed />} />
-                
-                {/* Match Routes - Protected with Flow Guard */}
+              </Route>
+
+              {/* Coming Soon fallback */}
+              <Route path="/coming-soon" element={<ComingSoon />} />
+              
+              {/* Match Routes - Protected with Flow Guard */}
+              <Route
+                path="/match/*"
+                element={
                 <Route path="/match/*" element={
                   <MatchFlowGuard>
                     <>

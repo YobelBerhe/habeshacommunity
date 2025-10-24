@@ -493,23 +493,33 @@ const VerificationReview = () => {
               <TabsContent value="documents" className="space-y-4 mt-4">
                 <div>
                   <h4 className="font-semibold mb-3">Identity Documents</h4>
+                  <p className="text-sm text-muted-foreground mb-4">View verification documents inline. Click to download.</p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <Card className="p-4">
                       <h5 className="text-sm font-semibold mb-2">ID Front</h5>
-                      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                        <FileText className="w-12 h-12 text-muted-foreground" />
+                      <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-2">
+                        {/* In production, replace with actual image URL from storage */}
+                        <img 
+                          src="https://via.placeholder.com/400x250?text=ID+Front" 
+                          alt="ID Front"
+                          className="w-full h-full object-contain"
+                        />
                       </div>
-                      <Button variant="outline" size="sm" className="w-full mt-2">
+                      <Button variant="outline" size="sm" className="w-full">
                         <Download className="w-4 h-4 mr-2" />
                         Download
                       </Button>
                     </Card>
                     <Card className="p-4">
                       <h5 className="text-sm font-semibold mb-2">ID Back</h5>
-                      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                        <FileText className="w-12 h-12 text-muted-foreground" />
+                      <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-2">
+                        <img 
+                          src="https://via.placeholder.com/400x250?text=ID+Back" 
+                          alt="ID Back"
+                          className="w-full h-full object-contain"
+                        />
                       </div>
-                      <Button variant="outline" size="sm" className="w-full mt-2">
+                      <Button variant="outline" size="sm" className="w-full">
                         <Download className="w-4 h-4 mr-2" />
                         Download
                       </Button>
@@ -521,20 +531,29 @@ const VerificationReview = () => {
               <TabsContent value="video" className="space-y-4 mt-4">
                 <div>
                   <h4 className="font-semibold mb-3">Verification Video</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Watch the selfie verification video inline. Click to download.</p>
                   <Card className="p-4">
-                    <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3">
-                      <Video className="w-12 h-12 text-muted-foreground" />
+                    <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-3">
+                      {/* In production, replace with actual video from storage */}
+                      <video 
+                        controls 
+                        className="w-full h-full"
+                        poster="https://via.placeholder.com/800x450?text=Verification+Video"
+                      >
+                        <source src="#" type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
                     </div>
                     <Button variant="outline" size="sm" className="w-full">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Watch Verification Video
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Video
                     </Button>
                   </Card>
                 </div>
 
                 {selectedApplication.youtubeIntroVideo && (
                   <div>
-                    <h4 className="font-semibold mb-3">Introduction Video</h4>
+                    <h4 className="font-semibold mb-3">Introduction Video (YouTube)</h4>
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <iframe
                         width="100%"
