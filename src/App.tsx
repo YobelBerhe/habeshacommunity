@@ -48,6 +48,7 @@ const MentorDashboard = lazy(() => import("./pages/mentor/MentorDashboard"));
 const MentorRequests = lazy(() => import("./pages/mentor/MentorRequests"));
 const MyBookings = lazy(() => import("./pages/mentor/MyBookings"));
 const BookingSuccess = lazy(() => import("./pages/mentor/BookingSuccess"));
+const BookSession = lazy(() => import("./pages/mentor/BookSession")); // NEW IMPORT
 const CommunityHome = lazy(() => import("./pages/community/CommunityHome"));
 const Forums = lazy(() => import("./pages/community/Forums"));
 const Events = lazy(() => import("./pages/community/Events"));
@@ -162,96 +163,120 @@ const App = () => {
             <HeaderWrapper />
             <Suspense fallback={<PageLoader />}>
               <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/browse" element={<Browse />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/l/:id" element={<ListingDetail />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/register" element={<Register />} />
-              <Route path="/auth/reset" element={<Reset />} />
-              <Route path="/account/saved" element={<Saved />} />
-              <Route path="/account/listings" element={<Listings />} />
-              <Route path="/account/settings" element={<Settings />} />
-              <Route path="/account/payouts" element={<Payouts />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/profile" element={<Profile />} />
-              <Route path="/dashboard/settings" element={<DashboardSettings />} />
-              <Route path="/forums" element={<ForumsBoards />} />
-              <Route path="/forums/:boardKey" element={<BoardTopics />} />
-              <Route path="/forums/topic/:id" element={<TopicView />} />
-              <Route path="/mentor" element={<MentorHome />} />
-              <Route path="/mentor/list" element={<MentorList />} />
-              <Route path="/mentor/profile/:id" element={<MentorProfile />} />
-              <Route path="/mentor/sessions" element={<MySessions />} />
-              <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
-              <Route path="/mentor/dashboard" element={<MentorDashboard />} />
-              <Route path="/mentor/:id" element={<MentorDetail />} />
-              <Route path="/mentor/requests" element={<MentorRequests />} />
-              <Route path="/mentor/bookings" element={<MyBookings />} />
-              <Route path="/mentor/booking-success" element={<BookingSuccess />} />
-              <Route path="/mentor/payouts" element={<MentorPayouts />} />
-              <Route path="/mentor/verify" element={<VerifyProfile />} />
-              <Route path="/mentor/availability" element={<ManageAvailability />} />
-              <Route path="/badges" element={<BadgesInfo />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/verifications" element={<VerificationReview />} />
-              <Route path="/admin/metrics" element={<AdminMetrics />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/reports" element={<AdminReports />} />
-              <Route path="/admin/content" element={<AdminContent />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              
-              {/* Match Routes - Protected with Flow Guard */}
-              <Route path="/match/*" element={
-                <MatchFlowGuard>
-                  <>
-                    <Routes>
-                      <Route path="" element={<MatchHome />} />
-                      <Route path="home" element={<MatchHome />} />
-                      <Route path="onboarding" element={<MatchOnboarding />} />
-                      <Route path="quiz" element={<MatchQuiz />} />
-                      <Route path="discover" element={<MatchDiscover />} />
-                      <Route path="matches" element={<MatchList />} />
-                      <Route path="profile/:id" element={<MatchProfile />} />
-                      <Route path="family-mode/:id" element={<MatchFamilyMode />} />
-                      <Route path="success" element={<MatchSuccess />} />
-                      <Route path="dates" element={<MatchDates />} />
-                    </Routes>
-                    <MatchBottomNav />
-                  </>
-                </MatchFlowGuard>
-              } />
-              
-              {/* Marketplace Routes */}
-              <Route path="/market" element={<Marketplace />} />
-              <Route path="/market/:id" element={<MarketplaceDetail />} />
-              <Route path="/marketplace" element={<MarketplaceHome />} />
-              <Route path="/marketplace/create" element={<CreateListing />} />
-              <Route path="/marketplace/my-listings" element={<MyListings />} />
-              <Route path="/marketplace/:type/:id" element={<ListingDetail />} />
-              <Route path="/marketplace/products" element={<MarketplaceHome />} />
-              <Route path="/marketplace/housing" element={<MarketplaceHome />} />
-              <Route path="/marketplace/jobs" element={<MarketplaceHome />} />
-              <Route path="/marketplace/services" element={<MarketplaceHome />} />
-              
-              {/* Community Routes */}
-              <Route path="/community" element={<CommunityHome />} />
-              <Route path="/community/forums" element={<Forums />} />
-              <Route path="/community/events" element={<Events />} />
-              <Route path="/community/groups" element={<Groups />} />
-              
-              <Route path="/inbox" element={<Inbox />} />
-              <Route path="/video/:id" element={<VideoCall />} />
-              <Route path="/payment/checkout" element={<PaymentCheckout />} />
-              <Route path="/payment/billing" element={<BillingHistory />} />
-              <Route path="/admin/seed" element={<AdminSeed />} />
-              <Route path="/donate/success" element={<DonateSuccess />} />
-              <Route path="/donate/cancel" element={<DonateCancel />} />
-              <Route path="/notifications" element={<Notifications />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<div>Page not found</div>} />
+                {/* Main Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/browse" element={<Browse />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/l/:id" element={<ListingDetail />} />
+                
+                {/* Auth Routes */}
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/auth/register" element={<Register />} />
+                <Route path="/auth/reset" element={<Reset />} />
+                
+                {/* Account Routes */}
+                <Route path="/account/saved" element={<Saved />} />
+                <Route path="/account/listings" element={<Listings />} />
+                <Route path="/account/settings" element={<Settings />} />
+                <Route path="/account/payouts" element={<Payouts />} />
+                
+                {/* Dashboard Routes */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard/profile" element={<Profile />} />
+                <Route path="/dashboard/settings" element={<DashboardSettings />} />
+                
+                {/* Forums Routes */}
+                <Route path="/forums" element={<ForumsBoards />} />
+                <Route path="/forums/:boardKey" element={<BoardTopics />} />
+                <Route path="/forums/topic/:id" element={<TopicView />} />
+                
+                {/* Mentor Routes */}
+                <Route path="/mentor" element={<MentorHome />} />
+                <Route path="/mentor/list" element={<MentorList />} />
+                <Route path="/mentor/profile/:id" element={<MentorProfile />} />
+                <Route path="/mentor/sessions" element={<MySessions />} />
+                <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
+                <Route path="/mentor/dashboard" element={<MentorDashboard />} />
+                <Route path="/mentor/requests" element={<MentorRequests />} />
+                <Route path="/mentor/bookings" element={<MyBookings />} />
+                <Route path="/mentor/booking-success" element={<BookingSuccess />} />
+                <Route path="/mentor/payouts" element={<MentorPayouts />} />
+                <Route path="/mentor/verify" element={<VerifyProfile />} />
+                <Route path="/mentor/availability" element={<ManageAvailability />} />
+                <Route path="/mentor/:id" element={<MentorDetail />} />
+                <Route path="/mentor/:id/book" element={<BookSession />} /> {/* NEW ROUTE */}
+                
+                {/* Badges */}
+                <Route path="/badges" element={<BadgesInfo />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/verifications" element={<VerificationReview />} />
+                <Route path="/admin/metrics" element={<AdminMetrics />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
+                <Route path="/admin/content" element={<AdminContent />} />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route path="/admin/seed" element={<AdminSeed />} />
+                
+                {/* Match Routes - Protected with Flow Guard */}
+                <Route path="/match/*" element={
+                  <MatchFlowGuard>
+                    <>
+                      <Routes>
+                        <Route path="" element={<MatchHome />} />
+                        <Route path="home" element={<MatchHome />} />
+                        <Route path="onboarding" element={<MatchOnboarding />} />
+                        <Route path="quiz" element={<MatchQuiz />} />
+                        <Route path="discover" element={<MatchDiscover />} />
+                        <Route path="matches" element={<MatchList />} />
+                        <Route path="profile/:id" element={<MatchProfile />} />
+                        <Route path="family-mode/:id" element={<MatchFamilyMode />} />
+                        <Route path="success" element={<MatchSuccess />} />
+                        <Route path="dates" element={<MatchDates />} />
+                      </Routes>
+                      <MatchBottomNav />
+                    </>
+                  </MatchFlowGuard>
+                } />
+                
+                {/* Marketplace Routes */}
+                <Route path="/market" element={<Marketplace />} />
+                <Route path="/market/:id" element={<MarketplaceDetail />} />
+                <Route path="/marketplace" element={<MarketplaceHome />} />
+                <Route path="/marketplace/create" element={<CreateListing />} />
+                <Route path="/marketplace/my-listings" element={<MyListings />} />
+                <Route path="/marketplace/:type/:id" element={<ListingDetail />} />
+                <Route path="/marketplace/products" element={<MarketplaceHome />} />
+                <Route path="/marketplace/housing" element={<MarketplaceHome />} />
+                <Route path="/marketplace/jobs" element={<MarketplaceHome />} />
+                <Route path="/marketplace/services" element={<MarketplaceHome />} />
+                
+                {/* Community Routes */}
+                <Route path="/community" element={<CommunityHome />} />
+                <Route path="/community/forums" element={<Forums />} />
+                <Route path="/community/events" element={<Events />} />
+                <Route path="/community/groups" element={<Groups />} />
+                
+                {/* Messaging & Video */}
+                <Route path="/inbox" element={<Inbox />} />
+                <Route path="/video/:id" element={<VideoCall />} />
+                
+                {/* Payment Routes */}
+                <Route path="/payment/checkout" element={<PaymentCheckout />} />
+                <Route path="/payment/billing" element={<BillingHistory />} />
+                
+                {/* Donation Routes */}
+                <Route path="/donate/success" element={<DonateSuccess />} />
+                <Route path="/donate/cancel" element={<DonateCancel />} />
+                
+                {/* Notifications */}
+                <Route path="/notifications" element={<Notifications />} />
+                
+                {/* 404 Catch-all - MUST BE LAST */}
+                <Route path="*" element={<div>Page not found</div>} />
               </Routes>
             </Suspense>
           </BrowserRouter>
@@ -262,3 +287,5 @@ const App = () => {
 };
 
 export default App;
+```
+
