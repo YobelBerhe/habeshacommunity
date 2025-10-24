@@ -391,6 +391,17 @@ export default function MentorList() {
     }
   };
 
+  const formatPrice = (cents: number, currency: string): string => {
+    const amount = cents / 100;
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+    return formatter.format(amount);
+  };
+
   return (
     <PageTransition>
     <div className="min-h-screen bg-background">

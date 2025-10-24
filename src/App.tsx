@@ -231,7 +231,6 @@ const App = () => {
                 <Route path="/admin/content" element={<AdminContent />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/seed" element={<AdminSeed />} />
-              </Route>
 
               {/* Coming Soon fallback */}
               <Route path="/coming-soon" element={<ComingSoon />} />
@@ -240,7 +239,6 @@ const App = () => {
               <Route
                 path="/match/*"
                 element={
-                <Route path="/match/*" element={
                   <MatchFlowGuard>
                     <>
                       <Routes>
@@ -258,7 +256,8 @@ const App = () => {
                       <MatchBottomNav />
                     </>
                   </MatchFlowGuard>
-                } />
+                }
+              />
                 
                 {/* Marketplace Routes */}
                 <Route path="/market" element={<Marketplace />} />
