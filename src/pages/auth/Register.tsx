@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import CitySearchBar from "@/components/CitySearchBar";
 import { AnimatedInput } from "@/components/AnimatedInput";
 import { AnimatedButton } from "@/components/AnimatedButton";
@@ -13,6 +13,8 @@ export default function Register() {
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/';
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ export default function Register() {
       password,
       options: { 
         data: { display_name: name, city },
-        emailRedirectTo: "https://habeshacommunity.com/auth/callback"
+        emailRedirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
       },
     });
     
@@ -81,7 +83,7 @@ export default function Register() {
               <p className="text-sm mt-1">Check your email to confirm your account, then sign in.</p>
             </div>
             <Link 
-              to="/auth/login" 
+              to={`/auth/login${returnTo !== '/' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
               className="block w-full bg-primary text-primary-foreground rounded-md p-3 font-medium text-center hover:bg-primary/90 transition-colors"
             >
               Go to Sign In
@@ -144,7 +146,7 @@ export default function Register() {
         
         {!done && (
           <div className="text-sm mt-6 text-center text-muted-foreground">
-            Already have an account? <Link className="text-primary hover:underline" to="/auth/login">Sign in</Link>
+            Already have an account? <Link className="text-primary hover:underline" to={`/auth/login${returnTo !== '/' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}>Sign in</Link>
           </div>
         )}
       </div>

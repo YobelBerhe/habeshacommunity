@@ -210,8 +210,8 @@ export default function MentorOnboarding() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-3">
-                <Button onClick={() => navigate('/auth/login')}>Sign In</Button>
-                <Button variant="outline" onClick={() => navigate('/auth/register')}>Create Account</Button>
+                <Button onClick={() => navigate('/auth/login?returnTo=/mentor/onboarding')}>Sign In</Button>
+                <Button variant="outline" onClick={() => navigate('/auth/register?returnTo=/mentor/onboarding')}>Create Account</Button>
               </div>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { AnimatedInput } from "@/components/AnimatedInput";
 import { AnimatedButton } from "@/components/AnimatedButton";
 
@@ -12,6 +12,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/';
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ export default function Login() {
     if (magicLinkMode) {
       const { error } = await supabase.auth.signInWithOtp({ 
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}` }
       });
       setLoading(false);
       if (error) return setErr(error.message);
@@ -30,7 +32,7 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (error) return setErr(error.message);
-      navigate("/");
+      navigate(returnTo);
     }
   };
 
