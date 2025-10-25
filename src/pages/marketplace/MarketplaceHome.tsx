@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
+import { MatchBottomNav } from '@/components/match/MatchBottomNav';
 
 interface Listing {
   id: string;
@@ -431,6 +432,8 @@ const MarketplaceHome = () => {
           </Button>
         </div>
       </section>
+
+      <MatchBottomNav />
 
       <style>{`
         .scrollbar-hide {
