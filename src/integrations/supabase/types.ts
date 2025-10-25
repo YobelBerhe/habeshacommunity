@@ -1456,47 +1456,6 @@ export type Database = {
         }
         Relationships: []
       }
-      session_logs: {
-        Row: {
-          created_at: string | null
-          duration_seconds: number | null
-          ended_at: string | null
-          id: string
-          proof_recorded: boolean | null
-          recording_url: string | null
-          session_id: string | null
-          started_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          duration_seconds?: number | null
-          ended_at?: string | null
-          id?: string
-          proof_recorded?: boolean | null
-          recording_url?: string | null
-          session_id?: string | null
-          started_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          duration_seconds?: number | null
-          ended_at?: string | null
-          id?: string
-          proof_recorded?: boolean | null
-          recording_url?: string | null
-          session_id?: string | null
-          started_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "session_logs_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "mentor_bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_answers: {
         Row: {
           answer: string
@@ -1555,7 +1514,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      award_badges: { Args: { mentor_id: string }; Returns: undefined }
+      award_badges: {
+        Args: { mentor_id: string }
+        Returns: undefined
+      }
       calculate_match_score: {
         Args: { profile_user_id: string; viewer_id: string }
         Returns: {
@@ -1574,7 +1536,7 @@ export type Database = {
         }[]
       }
       get_listing_counts: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           category: string
           count: number
@@ -1587,9 +1549,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      increment_views: { Args: { listing_id: string }; Returns: undefined }
+      increment_views: {
+        Args: { listing_id: string }
+        Returns: undefined
+      }
       top_referrers: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           display_name: string
           email: string
