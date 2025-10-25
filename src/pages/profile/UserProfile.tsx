@@ -173,7 +173,7 @@ export default function UserProfile() {
                   )}
                 </Avatar>
                 {profile.is_verified && (
-                  <div className="absolute bottom-2 right-2 bg-green-500 rounded-full p-2 border-4 border-background">
+                  <div className="absolute bottom-2 right-2 bg-green-600 rounded-full p-2 border-4 border-background">
                     <CheckCircle className="w-5 h-5 text-white" />
                   </div>
                 )}

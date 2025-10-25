@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar, DollarSign, MessageSquare, Settings, CheckCircle2, Clock, Users, CalendarIcon, TrendingUp, Star, Zap, Award, BarChart3 } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
 import VerificationCelebration from '@/components/VerificationCelebration';
-import { VerificationBadge } from '@/components/VerificationBadge';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import MentorSkillsEditor from '@/components/MentorSkillsEditor';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -226,7 +226,7 @@ export default function MentorDashboard() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <h1 className="text-3xl font-bold">Dashboard</h1>
-                {mentor?.is_verified && <VerificationBadge isVerified={true} />}
+                {mentor?.is_verified && <VerifiedBadge isVerified={true} />}
               </div>
               <p className="text-muted-foreground">Welcome back, {mentor?.display_name}</p>
             </div>

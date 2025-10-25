@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Upload, Loader2 } from 'lucide-react';
-import { VerificationBadge } from '@/components/VerificationBadge';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 
 export default function VerifyProfile() {
   const navigate = useNavigate();
@@ -163,10 +163,9 @@ export default function VerifyProfile() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 Current Status
-                <VerificationBadge 
+                <VerifiedBadge 
                   isVerified={existingVerification.status === 'approved'} 
-                  status={existingVerification.status}
-                  showText
+                  showLabel={true}
                 />
               </CardTitle>
             </CardHeader>

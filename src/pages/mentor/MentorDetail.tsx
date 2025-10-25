@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, MapPin, Globe, Star, MessageCircle, Calendar as CalendarIcon, Ticket, ArrowUpFromLine, Heart } from 'lucide-react';
 import MentorHeader from '@/components/MentorHeader';
-import { VerificationBadge } from '@/components/VerificationBadge';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { BundlePurchase } from '@/components/BundlePurchase';
 import { CreditsDisplay } from '@/components/CreditsDisplay';
 import MentorReviews from '@/components/MentorReviews';
@@ -339,11 +339,7 @@ export default function MentorDetail() {
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
-                      {mentor.is_verified && (
-                        <Badge className="bg-green-600 hover:bg-green-700 text-white">
-                          ✓ Verified
-                        </Badge>
-                      )}
+                      <VerifiedBadge isVerified={mentor.is_verified} />
                     </div>
                     
                     {mentor.title && (

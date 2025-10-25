@@ -15,7 +15,7 @@ import MentorHeader from '@/components/MentorHeader';
 import CountryFlag from '@/components/CountryFlag';
 import ImageBox from '@/components/ImageBox';
 import MessageMentorModal from '@/components/MessageMentorModal';
-import { VerificationBadge } from '@/components/VerificationBadge';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import MentorCardSkeleton from '@/components/MentorCardSkeleton';
 import { VirtualizedGrid } from '@/components/VirtualizedGrid';
 import { useResponsiveColumns } from '@/hooks/useResponsiveColumns';
@@ -90,7 +90,7 @@ const MentorCard = memo(({
         <CardTitle className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
             <span className="truncate">{mentor.display_name}</span>
-            {mentor.is_verified && <VerificationBadge isVerified={true} />}
+            <VerifiedBadge isVerified={mentor.is_verified} />
             {mentor.country && <CountryFlag country={mentor.country} className="w-5 h-4 shrink-0" />}
           </div>
           {(mentor.rating_avg ?? 0) > 0 && (
@@ -599,7 +599,7 @@ export default function MentorList() {
                   <CardTitle className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <span className="truncate">{mentor.display_name}</span>
-                      {mentor.is_verified && <VerificationBadge isVerified={true} />}
+                      <VerifiedBadge isVerified={mentor.is_verified} />
                       {mentor.country && <CountryFlag country={mentor.country} className="w-5 h-4 shrink-0" />}
                     </div>
                     {(mentor.rating_avg ?? 0) > 0 && (
