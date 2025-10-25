@@ -236,7 +236,7 @@ const Events = () => {
       {/* Categories */}
       <section className="py-6 border-b bg-background/95 backdrop-blur sticky top-14 md:top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
             {categories.map((category) => {
               const Icon = category.icon;
               const isActive = selectedCategory === category.id;
@@ -246,7 +246,7 @@ const Events = () => {
                   key={category.id}
                   variant={isActive ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category.id)}
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 snap-start whitespace-nowrap"
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {category.name}
@@ -432,6 +432,10 @@ const Events = () => {
         }
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
+        }
+        .touch-pan-x {
+          touch-action: pan-x;
+          -webkit-overflow-scrolling: touch;
         }
         .line-clamp-2 {
           display: -webkit-box;

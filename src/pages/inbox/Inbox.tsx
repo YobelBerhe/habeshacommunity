@@ -275,12 +275,12 @@ const Inbox = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
               <Button
                 variant={filterType === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('all')}
-                className="flex-shrink-0 snap-start"
+                className="flex-shrink-0 snap-start whitespace-nowrap"
               >
                 All
               </Button>
@@ -288,7 +288,7 @@ const Inbox = () => {
                 variant={filterType === 'personal' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('personal')}
-                className="flex-shrink-0 snap-start"
+                className="flex-shrink-0 snap-start whitespace-nowrap"
               >
                 Personal
               </Button>
@@ -296,7 +296,7 @@ const Inbox = () => {
                 variant={filterType === 'health' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('health')}
-                className="flex-shrink-0 snap-start"
+                className="flex-shrink-0 snap-start whitespace-nowrap"
               >
                 Health
               </Button>
@@ -304,7 +304,7 @@ const Inbox = () => {
                 variant={filterType === 'match' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('match')}
-                className="flex-shrink-0 snap-start"
+                className="flex-shrink-0 snap-start whitespace-nowrap"
               >
                 Matches
               </Button>
@@ -312,7 +312,7 @@ const Inbox = () => {
                 variant={filterType === 'mentor' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('mentor')}
-                className="flex-shrink-0 snap-start"
+                className="flex-shrink-0 snap-start whitespace-nowrap"
               >
                 Mentors
               </Button>
@@ -320,7 +320,7 @@ const Inbox = () => {
                 variant={filterType === 'marketplace' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('marketplace')}
-                className="flex-shrink-0 snap-start"
+                className="flex-shrink-0 snap-start whitespace-nowrap"
               >
                 Market
               </Button>
@@ -328,7 +328,7 @@ const Inbox = () => {
                 variant={filterType === 'community' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('community')}
-                className="flex-shrink-0 snap-start"
+                className="flex-shrink-0 snap-start whitespace-nowrap"
               >
                 Community
               </Button>
@@ -587,6 +587,10 @@ const Inbox = () => {
         }
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
+        }
+        .touch-pan-x {
+          touch-action: pan-x;
+          -webkit-overflow-scrolling: touch;
         }
       `}</style>
     </div>

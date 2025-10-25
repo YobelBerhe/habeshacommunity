@@ -275,12 +275,12 @@ export default function Chat() {
 
         {/* Board tabs */}
         <div className="bg-background">
-          <div className="flex overflow-x-auto">
+          <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-x">
             {CHAT_BOARDS.map((board) => (
               <button
                 key={board.id}
                 onClick={() => setActiveBoard(board.id)}
-                className={`flex-shrink-0 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                   activeBoard === board.id
                     ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -461,6 +461,20 @@ export default function Chat() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .touch-pan-x {
+          touch-action: pan-x;
+          -webkit-overflow-scrolling: touch;
+        }
+      `}</style>
     </div>
   );
 }

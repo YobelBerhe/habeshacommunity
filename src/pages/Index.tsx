@@ -187,12 +187,12 @@ const Index = () => {
             </form>
 
             {/* Quick Actions */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
               <Button 
                 variant="outline" 
                 size="lg"
                 onClick={() => navigate('/match')}
-                className="rounded-full"
+                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
               >
                 <Heart className="w-4 h-4 mr-2" />
                 Find Match
@@ -201,7 +201,7 @@ const Index = () => {
                 variant="outline" 
                 size="lg"
                 onClick={() => navigate('/mentor')}
-                className="rounded-full"
+                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
               >
                 <Award className="w-4 h-4 mr-2" />
                 Get Mentored
@@ -210,7 +210,7 @@ const Index = () => {
                 variant="outline" 
                 size="lg"
                 onClick={() => navigate('/marketplace')}
-                className="rounded-full"
+                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
               >
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Browse Market
@@ -219,7 +219,7 @@ const Index = () => {
                 variant="outline" 
                 size="lg"
                 onClick={() => navigate('/community')}
-                className="rounded-full"
+                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
               >
                 <Users className="w-4 h-4 mr-2" />
                 Join Community
@@ -491,6 +491,20 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <style>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .touch-pan-x {
+          touch-action: pan-x;
+          -webkit-overflow-scrolling: touch;
+        }
+      `}</style>
     </div>
   );
 };
