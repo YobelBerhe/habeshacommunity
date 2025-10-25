@@ -185,7 +185,14 @@ export function ChatWindow({ conversationId, participantName, participantId, par
       <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-4">
         <div className="flex items-center justify-between text-white">
           {onBack && (
-            <button onClick={onBack} className="hover:opacity-80 transition-opacity">
+            <button 
+              onClick={() => {
+                onBack();
+                console.log('Back button clicked in ChatWindow');
+              }} 
+              className="hover:opacity-80 transition-opacity"
+              aria-label="Back"
+            >
               <ChevronLeft className="w-6 h-6" />
             </button>
           )}

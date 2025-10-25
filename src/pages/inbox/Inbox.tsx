@@ -281,13 +281,16 @@ const Inbox = () => {
 
             {/* Search */}
             <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <Input
                 type="text"
                 placeholder="Search conversations..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  console.log('Search query:', e.target.value);
+                }}
+                className="pl-10 w-full"
               />
             </div>
 
@@ -434,7 +437,11 @@ const Inbox = () => {
                   variant="ghost"
                   size="icon"
                   className="md:hidden"
-                  onClick={() => setSelectedConversation(null)}
+                  onClick={() => {
+                    setSelectedConversation(null);
+                    console.log('Back to conversations list');
+                  }}
+                  aria-label="Back to conversations"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </Button>

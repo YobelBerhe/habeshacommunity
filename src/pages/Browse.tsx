@@ -730,7 +730,7 @@ export default function Browse() {
           <div className="container mx-auto px-4 py-3">
               <div className="flex items-center justify-between gap-4">
                 {/* Left: Logo and City Search */}
-                <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-4">
                   <button 
                     className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
                     onClick={() => navigate('/')}
@@ -745,12 +745,24 @@ export default function Browse() {
                     <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
                   </button>
                   
-                  <CitySearchBar 
-                    value={filters.city}
-                    onCitySelect={handleCityChange}
-                    placeholder="Enter city or location"
-                    className="w-80"
-                  />
+                  <div className="flex gap-2">
+                    <CitySearchBar 
+                      value={filters.city}
+                      onCitySelect={handleCityChange}
+                      placeholder="Enter city or location"
+                      className="w-80"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Search listings..."
+                      value={filters.query || ''}
+                      onChange={(e) => {
+                        updateFilter('query', e.target.value);
+                        console.log('Browse search query:', e.target.value);
+                      }}
+                      className="w-64"
+                    />
+                  </div>
                 </div>
 
                 {/* Right: Controls */}
@@ -1189,7 +1201,23 @@ export default function Browse() {
         <MobileHeader />
 
         {/* Mobile City Search Bar with Clear Button */}
-        <div className="px-4 py-2 border-b bg-background">
+        <div className="px-4 py-2 border-b bg-background space-y-2">
+          {/* General Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="text"
+              placeholder={language === 'EN' ? "Search listings..." : "ዝርዝር ኣሰላስል..."}
+              value={filters.query || ''}
+              onChange={(e) => {
+                updateFilter('query', e.target.value);
+                console.log('Mobile browse search:', e.target.value);
+              }}
+              className="pl-10 w-full"
+            />
+          </div>
+          
+          {/* City Search */}
           <div className="flex gap-2">
             <div className="flex-1">
               <CitySearchBar 
