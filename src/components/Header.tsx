@@ -108,7 +108,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Left: Hamburger Menu + Logo */}
@@ -221,7 +221,7 @@ const Header = () => {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-[100]">
+                  <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium truncate">{profile?.display_name || user.email}</p>
                       <p className="text-xs text-muted-foreground">Manage account</p>
@@ -273,3 +273,4 @@ const Header = () => {
 };
 
 export default Header;
+

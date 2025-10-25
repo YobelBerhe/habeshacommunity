@@ -247,8 +247,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-2 md:px-4 py-6 md:py-8">
-        <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Profile Completion */}
