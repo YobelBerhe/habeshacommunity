@@ -1,6 +1,6 @@
 import { Moon, Sun, Globe, Bell, MessageSquare, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -20,13 +20,20 @@ const Header = () => {
   const { theme, setTheme } = useTheme();
   const [language, setLanguage] = useState('ti');
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [notifications, setNotifications] = useState(0);
 
   useEffect(() => {
     checkUser();
+  }, []);
+
+  useEffect(() => {
     if (user) {
       fetchCounts();
+      loadProfile();
+    } else {
+      setProfile(null);
     }
   }, [user]);
 
