@@ -246,7 +246,9 @@ const Events = () => {
                   key={category.id}
                   variant={isActive ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category.id)}
-                  className="flex-shrink-0 snap-start whitespace-nowrap"
+                  className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                    isActive ? 'bg-primary text-primary-foreground' : ''
+                  }`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {category.name}

@@ -259,7 +259,7 @@ const MentorHome = () => {
                   key={category.id}
                   variant={isActive ? "default" : "outline"}
                   onClick={() => handleFilterChange(() => setSelectedCategory(category.id))}
-                  className={`flex-shrink-0 snap-start whitespace-nowrap ${isActive ? `bg-gradient-to-r ${category.color}` : ''}`}
+                  className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${isActive ? `bg-gradient-to-r ${category.color} text-white` : ''}`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {category.name}

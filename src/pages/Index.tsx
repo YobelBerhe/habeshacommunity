@@ -186,43 +186,56 @@ const Index = () => {
               </Button>
             </form>
 
-            {/* Quick Actions */}
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
+            {/* Quick Actions - Headway Style */}
+            <div className="text-xl font-semibold mb-4">I want to</div>
+            <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
               <Button 
                 variant="outline" 
-                size="lg"
-                onClick={() => navigate('/match')}
-                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Find Match
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/mentor')}
-                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
-              >
-                <Award className="w-4 h-4 mr-2" />
-                Get Mentored
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/marketplace')}
-                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
-              >
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Browse Market
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
                 onClick={() => navigate('/community')}
-                className="rounded-full flex-shrink-0 snap-start whitespace-nowrap"
+                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
               >
-                <Users className="w-4 h-4 mr-2" />
-                Join Community
+                <Users className="w-6 h-6" />
+                <span className="text-sm font-medium">Personal</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/community')}
+                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+              >
+                <Heart className="w-6 h-6" />
+                <span className="text-sm font-medium">Get Healthy</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/match')}
+                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+              >
+                <Heart className="w-6 h-6" />
+                <span className="text-sm font-medium">Find Match</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/mentor')}
+                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+              >
+                <Award className="w-6 h-6" />
+                <span className="text-sm font-medium">Get Mentored</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/marketplace')}
+                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+              >
+                <ShoppingBag className="w-6 h-6" />
+                <span className="text-sm font-medium">Browse Market</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/community')}
+                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+              >
+                <Users className="w-6 h-6" />
+                <span className="text-sm font-medium">Join Community</span>
               </Button>
             </div>
           </div>

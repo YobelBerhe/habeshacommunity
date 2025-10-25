@@ -280,7 +280,9 @@ const Inbox = () => {
                 variant={filterType === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('all')}
-                className="flex-shrink-0 snap-start whitespace-nowrap"
+                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                  filterType === 'all' ? 'bg-primary text-primary-foreground' : ''
+                }`}
               >
                 All
               </Button>
@@ -288,7 +290,9 @@ const Inbox = () => {
                 variant={filterType === 'personal' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('personal')}
-                className="flex-shrink-0 snap-start whitespace-nowrap"
+                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                  filterType === 'personal' ? 'bg-primary text-primary-foreground' : ''
+                }`}
               >
                 Personal
               </Button>
@@ -296,7 +300,9 @@ const Inbox = () => {
                 variant={filterType === 'health' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('health')}
-                className="flex-shrink-0 snap-start whitespace-nowrap"
+                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                  filterType === 'health' ? 'bg-primary text-primary-foreground' : ''
+                }`}
               >
                 Health
               </Button>
@@ -304,7 +310,9 @@ const Inbox = () => {
                 variant={filterType === 'match' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('match')}
-                className="flex-shrink-0 snap-start whitespace-nowrap"
+                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                  filterType === 'match' ? 'bg-primary text-primary-foreground' : ''
+                }`}
               >
                 Matches
               </Button>
@@ -312,7 +320,9 @@ const Inbox = () => {
                 variant={filterType === 'mentor' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('mentor')}
-                className="flex-shrink-0 snap-start whitespace-nowrap"
+                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                  filterType === 'mentor' ? 'bg-primary text-primary-foreground' : ''
+                }`}
               >
                 Mentors
               </Button>
@@ -320,7 +330,9 @@ const Inbox = () => {
                 variant={filterType === 'marketplace' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('marketplace')}
-                className="flex-shrink-0 snap-start whitespace-nowrap"
+                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                  filterType === 'marketplace' ? 'bg-primary text-primary-foreground' : ''
+                }`}
               >
                 Market
               </Button>
@@ -328,7 +340,9 @@ const Inbox = () => {
                 variant={filterType === 'community' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('community')}
-                className="flex-shrink-0 snap-start whitespace-nowrap"
+                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
+                  filterType === 'community' ? 'bg-primary text-primary-foreground' : ''
+                }`}
               >
                 Community
               </Button>
