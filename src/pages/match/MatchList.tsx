@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { MatchBottomNav } from '@/components/match/MatchBottomNav';
 
 interface Match {
   id: string;
@@ -314,7 +315,7 @@ const MatchList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background pb-20 lg:pb-0">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -439,6 +440,9 @@ const MatchList = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Bottom Navigation */}
+      <MatchBottomNav />
     </div>
   );
 };

@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { MatchBottomNav } from '@/components/match/MatchBottomNav';
 
 const MatchHome = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const MatchHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background pb-20 lg:pb-0">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-pink-950/20 dark:via-purple-950/20 dark:to-blue-950/20 opacity-50" />
@@ -447,6 +448,9 @@ const MatchHome = () => {
           }
         }
       `}</style>
+
+      {/* Bottom Navigation */}
+      <MatchBottomNav />
     </div>
   );
 };

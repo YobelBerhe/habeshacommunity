@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { MatchBottomNav } from '@/components/match/MatchBottomNav';
 
 interface Profile {
   id: string;
@@ -649,6 +650,9 @@ const MatchDiscover = () => {
           <span className="w-16 text-center">Info</span>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <MatchBottomNav />
     </div>
   );
 };
