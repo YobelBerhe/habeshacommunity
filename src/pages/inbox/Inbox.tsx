@@ -3,7 +3,7 @@ import {
   Search, MessageCircle, Heart, Award, ShoppingBag,
   Users, Send, Paperclip, Smile, MoreVertical, Phone,
   Video, Info, Archive, Star, Trash2, Image, Check,
-  CheckCheck, Clock, Pin, Filter, ArrowLeft
+  CheckCheck, Clock, Pin, Filter, ArrowLeft, Activity, User
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -258,10 +258,20 @@ const Inbox = () => {
           {/* Header */}
           <div className="p-4 border-b bg-background/95 backdrop-blur">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold flex items-center">
-                <MessageCircle className="w-6 h-6 mr-2" />
-                Messages
-              </h1>
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate(-1)}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <h1 className="text-2xl font-bold flex items-center">
+                  <MessageCircle className="w-6 h-6 mr-2" />
+                  Messages
+                </h1>
+              </div>
               {totalUnread > 0 && (
                 <Badge className="bg-red-500 text-white">
                   {totalUnread}
@@ -282,11 +292,12 @@ const Inbox = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
               <Button
                 variant={filterType === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('all')}
+                className="rounded-full flex-shrink-0"
               >
                 All
               </Button>
@@ -294,6 +305,7 @@ const Inbox = () => {
                 variant={filterType === 'match' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('match')}
+                className="rounded-full flex-shrink-0"
               >
                 <Heart className="w-4 h-4 mr-1" />
                 Matches
@@ -302,6 +314,7 @@ const Inbox = () => {
                 variant={filterType === 'mentor' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('mentor')}
+                className="rounded-full flex-shrink-0"
               >
                 <Award className="w-4 h-4 mr-1" />
                 Mentors
@@ -310,9 +323,28 @@ const Inbox = () => {
                 variant={filterType === 'marketplace' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('marketplace')}
+                className="rounded-full flex-shrink-0"
               >
                 <ShoppingBag className="w-4 h-4 mr-1" />
                 Market
+              </Button>
+              <Button
+                variant={filterType === 'health' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('health')}
+                className="rounded-full flex-shrink-0"
+              >
+                <Activity className="w-4 h-4 mr-1" />
+                Health
+              </Button>
+              <Button
+                variant={filterType === 'personal' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('personal')}
+                className="rounded-full flex-shrink-0"
+              >
+                <User className="w-4 h-4 mr-1" />
+                Personal
               </Button>
             </div>
           </div>
