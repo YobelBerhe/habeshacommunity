@@ -292,60 +292,74 @@ const Inbox = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x flex-nowrap whitespace-nowrap -mx-2 px-2">
-              <Button
-                variant={filterType === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('all')}
-                className="rounded-full flex-shrink-0"
-              >
-                All
-              </Button>
-              <Button
-                variant={filterType === 'match' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('match')}
-                className="rounded-full flex-shrink-0"
-              >
-                <Heart className="w-4 h-4 mr-1" />
-                Matches
-              </Button>
-              <Button
-                variant={filterType === 'mentor' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('mentor')}
-                className="rounded-full flex-shrink-0"
-              >
-                <Award className="w-4 h-4 mr-1" />
-                Mentors
-              </Button>
-              <Button
-                variant={filterType === 'marketplace' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('marketplace')}
-                className="rounded-full flex-shrink-0"
-              >
-                <ShoppingBag className="w-4 h-4 mr-1" />
-                Market
-              </Button>
-              <Button
-                variant={filterType === 'health' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('health')}
-                className="rounded-full flex-shrink-0"
-              >
-                <Activity className="w-4 h-4 mr-1" />
-                Health
-              </Button>
-              <Button
-                variant={filterType === 'personal' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('personal')}
-                className="rounded-full flex-shrink-0"
-              >
-                <User className="w-4 h-4 mr-1" />
-                Personal
-              </Button>
+            <div className="overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x -mx-4 px-4">
+              <div className="inline-flex flex-nowrap items-center space-x-2 whitespace-nowrap">
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('all')}
+                    className="rounded-full"
+                  >
+                    All
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'match' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('match')}
+                    className="rounded-full"
+                  >
+                    <Heart className="w-4 h-4 mr-1" />
+                    Matches
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'mentor' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('mentor')}
+                    className="rounded-full"
+                  >
+                    <Award className="w-4 h-4 mr-1" />
+                    Mentors
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'marketplace' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('marketplace')}
+                    className="rounded-full"
+                  >
+                    <ShoppingBag className="w-4 h-4 mr-1" />
+                    Market
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'health' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('health')}
+                    className="rounded-full"
+                  >
+                    <Activity className="w-4 h-4 mr-1" />
+                    Health
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'personal' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('personal')}
+                    className="rounded-full"
+                  >
+                    <User className="w-4 h-4 mr-1" />
+                    Personal
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
