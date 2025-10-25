@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { MatchBottomNav } from '@/components/match/MatchBottomNav';
 
 const MatchHome = () => {
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ const MatchHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-pink-950/20 dark:via-purple-950/20 dark:to-blue-950/20 opacity-50" />
@@ -92,31 +91,31 @@ const MatchHome = () => {
               </Button>
             </div>
 
-            {/* Stats - Horizontal Scroll */}
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x pb-2 max-w-4xl mx-auto">
-              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+              <Card className="p-4 bg-card/50 backdrop-blur">
                 <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                   {stats.activeMembers}
                 </div>
-                <div className="text-sm text-muted-foreground whitespace-nowrap">Active Members</div>
+                <div className="text-sm text-muted-foreground">Active Members</div>
               </Card>
-              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
+              <Card className="p-4 bg-card/50 backdrop-blur">
                 <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
                   {stats.matchesMade}
                 </div>
-                <div className="text-sm text-muted-foreground whitespace-nowrap">Matches Made</div>
+                <div className="text-sm text-muted-foreground">Matches Made</div>
               </Card>
-              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
+              <Card className="p-4 bg-card/50 backdrop-blur">
                 <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">
                   {stats.successStories}
                 </div>
-                <div className="text-sm text-muted-foreground whitespace-nowrap">Success Stories</div>
+                <div className="text-sm text-muted-foreground">Success Stories</div>
               </Card>
-              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
+              <Card className="p-4 bg-card/50 backdrop-blur">
                 <div className="text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">
                   {stats.avgCompatibility}
                 </div>
-                <div className="text-sm text-muted-foreground whitespace-nowrap">Avg. Match Score</div>
+                <div className="text-sm text-muted-foreground">Avg. Match Score</div>
               </Card>
             </div>
           </div>
@@ -438,20 +437,7 @@ const MatchHome = () => {
         </div>
       </section>
 
-      <MatchBottomNav />
-
       <style>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .touch-pan-x {
-          touch-action: pan-x;
-          -webkit-overflow-scrolling: touch;
-        }
         @keyframes float {
           0%, 100% {
             transform: translateY(0px) rotate(0deg);

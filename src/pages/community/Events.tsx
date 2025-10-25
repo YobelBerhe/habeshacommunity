@@ -236,20 +236,20 @@ const Events = () => {
       {/* Categories */}
       <section className="py-6 border-b bg-background/95 backdrop-blur sticky top-14 md:top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x pb-2">
-            {categories.map((cat) => {
-              const isActive = selectedCategory === cat.id;
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              const isActive = selectedCategory === category.id;
               
               return (
                 <Button
-                  key={cat.id}
+                  key={category.id}
                   variant={isActive ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex-shrink-0 snap-start whitespace-nowrap rounded-full ${
-                    isActive ? 'bg-primary text-primary-foreground' : ''
-                  }`}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="flex-shrink-0"
                 >
-                  {cat.name}
+                  <Icon className="w-4 h-4 mr-2" />
+                  {category.name}
                 </Button>
               );
             })}
@@ -432,10 +432,6 @@ const Events = () => {
         }
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
-        }
-        .touch-pan-x {
-          touch-action: pan-x;
-          -webkit-overflow-scrolling: touch;
         }
         .line-clamp-2 {
           display: -webkit-box;

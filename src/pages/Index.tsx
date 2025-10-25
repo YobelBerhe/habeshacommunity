@@ -186,50 +186,43 @@ const Index = () => {
               </Button>
             </form>
 
-            {/* Quick Actions - Categories Horizontal Scroll */}
-            <div className="text-xl font-semibold mb-4">Categories</div>
-            <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x pb-2 max-w-4xl mx-auto">
+            {/* Quick Actions */}
+            <div className="flex flex-wrap items-center justify-center gap-3">
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/community')}
-                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                size="lg"
+                onClick={() => navigate('/match')}
+                className="rounded-full"
               >
-                All Categories
+                <Heart className="w-4 h-4 mr-2" />
+                Find Match
               </Button>
               <Button 
                 variant="outline" 
+                size="lg"
+                onClick={() => navigate('/mentor')}
+                className="rounded-full"
+              >
+                <Award className="w-4 h-4 mr-2" />
+                Get Mentored
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
                 onClick={() => navigate('/marketplace')}
-                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                className="rounded-full"
               >
-                Business & Entrepreneurship
+                <ShoppingBag className="w-4 h-4 mr-2" />
+                Browse Market
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/mentor')}
-                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
-              >
-                Technology & Software
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/mentor')}
-                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
-              >
-                Career Development
-              </Button>
-              <Button 
-                variant="outline" 
+                size="lg"
                 onClick={() => navigate('/community')}
-                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+                className="rounded-full"
               >
-                Education & Learning
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/community')}
-                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
-              >
-                Life & Personal Growth
+                <Users className="w-4 h-4 mr-2" />
+                Join Community
               </Button>
             </div>
           </div>
@@ -498,20 +491,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      <style>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .touch-pan-x {
-          touch-action: pan-x;
-          -webkit-overflow-scrolling: touch;
-        }
-      `}</style>
     </div>
   );
 };

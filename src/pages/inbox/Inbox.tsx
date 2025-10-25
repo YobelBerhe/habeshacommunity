@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, MessageCircle, Heart, Award, ShoppingBag,
   Users, Send, Paperclip, Smile, MoreVertical, Phone,
@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -40,7 +40,7 @@ interface Conversation {
   timestamp: string;
   unread: number;
   online: boolean;
-  type: 'match' | 'mentor' | 'marketplace' | 'community' | 'personal' | 'health';
+  type: 'match' | 'mentor' | 'marketplace' | 'community';
   verified?: boolean;
   pinned?: boolean;
   messages: Message[];
@@ -48,6 +48,7 @@ interface Conversation {
 
 const Inbox = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<string | null>(
@@ -55,6 +56,19 @@ const Inbox = () => {
   );
   const [messageText, setMessageText] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
+
+  // Handle incoming conversation from navigation state
+  useEffect(() => {
+    if (location.state?.openConversationId) {
+      setSelectedConversation(location.state.openConversationId);
+      
+      // Show a welcome message if mentor name is provided
+      if (location.state.mentorName) {
+        toast.success(`Conversation with ${location.state.mentorName} opened`);
+      }
+    }
+  }, [location.state]);
+
 
   // Demo conversations
   const conversations: Conversation[] = [
@@ -244,17 +258,10 @@ const Inbox = () => {
           {/* Header */}
           <div className="p-4 border-b bg-background/95 backdrop-blur">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate(-1)}
-                  className="flex-shrink-0"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <h1 className="text-2xl font-bold">Messages</h1>
-              </div>
+              <h1 className="text-2xl font-bold flex items-center">
+                <MessageCircle className="w-6 h-6 mr-2" />
+                Messages
+              </h1>
               {totalUnread > 0 && (
                 <Badge className="bg-red-500 text-white">
                   {totalUnread}
@@ -275,76 +282,37 @@ const Inbox = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
               <Button
                 variant={filterType === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('all')}
-                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
-                  filterType === 'all' ? 'bg-primary text-primary-foreground' : ''
-                }`}
               >
                 All
-              </Button>
-              <Button
-                variant={filterType === 'personal' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('personal')}
-                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
-                  filterType === 'personal' ? 'bg-primary text-primary-foreground' : ''
-                }`}
-              >
-                Personal
-              </Button>
-              <Button
-                variant={filterType === 'health' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('health')}
-                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
-                  filterType === 'health' ? 'bg-primary text-primary-foreground' : ''
-                }`}
-              >
-                Health
               </Button>
               <Button
                 variant={filterType === 'match' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('match')}
-                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
-                  filterType === 'match' ? 'bg-primary text-primary-foreground' : ''
-                }`}
               >
+                <Heart className="w-4 h-4 mr-1" />
                 Matches
               </Button>
               <Button
                 variant={filterType === 'mentor' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('mentor')}
-                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
-                  filterType === 'mentor' ? 'bg-primary text-primary-foreground' : ''
-                }`}
               >
+                <Award className="w-4 h-4 mr-1" />
                 Mentors
               </Button>
               <Button
                 variant={filterType === 'marketplace' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('marketplace')}
-                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
-                  filterType === 'marketplace' ? 'bg-primary text-primary-foreground' : ''
-                }`}
               >
+                <ShoppingBag className="w-4 h-4 mr-1" />
                 Market
-              </Button>
-              <Button
-                variant={filterType === 'community' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('community')}
-                className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${
-                  filterType === 'community' ? 'bg-primary text-primary-foreground' : ''
-                }`}
-              >
-                Community
               </Button>
             </div>
           </div>
@@ -602,15 +570,10 @@ const Inbox = () => {
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        .touch-pan-x {
-          touch-action: pan-x;
-          -webkit-overflow-scrolling: touch;
-        }
       `}</style>
     </div>
   );
 };
 
 export default Inbox;
-
 
