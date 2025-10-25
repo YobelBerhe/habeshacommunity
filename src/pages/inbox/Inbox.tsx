@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, MessageCircle, Heart, Award, ShoppingBag,
   Users, Send, Paperclip, Smile, MoreVertical, Phone,
@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -48,6 +48,7 @@ interface Conversation {
 
 const Inbox = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<string | null>(
@@ -55,6 +56,19 @@ const Inbox = () => {
   );
   const [messageText, setMessageText] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
+
+  // Handle incoming conversation from navigation state
+  useEffect(() => {
+    if (location.state?.openConversationId) {
+      setSelectedConversation(location.state.openConversationId);
+      
+      // Show a welcome message if mentor name is provided
+      if (location.state.mentorName) {
+        toast.success(`Conversation with ${location.state.mentorName} opened`);
+      }
+    }
+  }, [location.state]);
+
 
   // Demo conversations
   const conversations: Conversation[] = [

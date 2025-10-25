@@ -325,28 +325,7 @@ export default function MentorDetail() {
             {/* Profile Header Card */}
             <ScrollReveal direction="up">
               <Card>
-                <CardContent className="pt-6 relative">
-                {/* Action buttons in top right corner */}
-                <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleToggleFavorite}
-                    title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                  >
-                    <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleShareProfile}
-                    className="hidden lg:inline-flex"
-                    title="Share profile"
-                  >
-                    <ArrowUpFromLine className="w-4 h-4" />
-                  </Button>
-                </div>
-
+                <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   {/* Larger profile photo on mobile */}
                   <Avatar className="w-32 h-32 lg:w-24 lg:h-24 rounded-lg">
@@ -361,8 +340,8 @@ export default function MentorDetail() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
                       {mentor.is_verified && (
-                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900 dark:text-emerald-100">
-                          ✓ Quick Responder
+                        <Badge className="bg-green-600 hover:bg-green-700 text-white">
+                          ✓ Verified
                         </Badge>
                       )}
                     </div>
@@ -458,20 +437,47 @@ export default function MentorDetail() {
             {/* YouTube Intro Video */}
             <MentorIntroVideo youtubeLink={mentor.youtube_link} />
 
-            {/* Inquiries */}
+            {/* Three Action Buttons in One Row */}
             <Card>
               <CardContent className="pt-6">
-                <h3 className="font-semibold text-lg mb-2">Open to inquiries</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  You can message {mentor.display_name || mentor.name} to ask questions before booking a session.
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleMessageMentor}
+                    variant="outline"
+                    className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Message
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleToggleFavorite}
+                    className={isFavorite ? "text-red-500 hover:text-red-600 border-red-200" : "text-blue-600 hover:text-blue-700 border-blue-200"}
+                  >
+                    <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleShareProfile}
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                  >
+                    <ArrowUpFromLine className="w-4 h-4" />
+                  </Button>
+                </div>
+                
+                <p className="text-xs text-center text-muted-foreground mt-3">
+                  Need a different time?
                 </p>
                 <Button
                   onClick={handleMessageMentor}
-                  variant="default"
-                  className="w-full sm:w-auto"
+                  variant="outline"
+                  className="w-full mt-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
                 >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Get in touch
+                  Message
                 </Button>
               </CardContent>
             </Card>

@@ -42,6 +42,26 @@ const Header = () => {
     setUser(user);
   };
 
+  const loadProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading profile:', error);
+      } else {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
   const fetchCounts = async () => {
     if (!user) return;
 
@@ -77,6 +97,7 @@ const Header = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setProfile(null);
     navigate('/');
   };
 
@@ -191,26 +212,31 @@ const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-9 w-9 md:h-10 md:w-10 rounded-full p-0">
                       <Avatar className="h-9 w-9 md:h-10 md:w-10">
+                        {profile?.avatar_url ? (
+                          <AvatarImage src={profile.avatar_url} alt={profile.display_name || user.email} />
+                        ) : null}
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold text-sm">
-                          {user.email?.[0].toUpperCase() || 'U'}
+                          {(profile?.display_name || user.email)?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
                     <div className="px-2 py-1.5">
-                      <p className="text-sm font-medium truncate">{user.email}</p>
+                      <p className="text-sm font-medium truncate">{profile?.display_name || user.email}</p>
                       <p className="text-xs text-muted-foreground">Manage account</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/account/dashboard')}>
+                    <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                       <User className="w-4 h-4 mr-2" />
                       Dashboard
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/match/profile/me')}>
+                    <DropdownMenuItem onClick={() => navigate('/dashboard/profile')}>
+                      <User className="w-4 h-4 mr-2" />
                       Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/account/settings')}>
+                      <User className="w-4 h-4 mr-2" />
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

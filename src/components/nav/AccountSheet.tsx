@@ -24,7 +24,19 @@ export function AccountSheet({ children }:{ children?: React.ReactNode }) {
         .maybeSingle();
       setHasMentorProfile(!!data);
     };
+    
+    const loadProfile = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+      setUserProfile(data);
+    };
+    
     checkMentorProfile();
+    loadProfile();
   }, [user]);
 
   const signOut = async () => {
@@ -41,7 +53,7 @@ export function AccountSheet({ children }:{ children?: React.ReactNode }) {
         side="bottom" 
         align="end" 
         sideOffset={8}
-        className="w-56 p-1"
+        className="w-56 p-1 bg-background border shadow-lg z-[100]"
       >
         <div className="space-y-1">
           {user ? (
@@ -52,7 +64,7 @@ export function AccountSheet({ children }:{ children?: React.ReactNode }) {
               </div>
 
               <Link 
-                to="/dashboard/dashboard" 
+                to="/dashboard" 
                 className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-accent rounded-sm"
               >
                 <LayoutDashboard className="w-4 h-4" />
