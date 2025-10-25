@@ -292,7 +292,7 @@ const Inbox = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x flex-nowrap whitespace-nowrap -mx-2 px-2">
               <Button
                 variant={filterType === 'all' ? 'default' : 'outline'}
                 size="sm"
