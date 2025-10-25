@@ -63,8 +63,8 @@ export function MatchBottomNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border z-50 lg:hidden">
-      <div className="grid grid-cols-4 gap-1 p-2">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border z-50 lg:hidden safe-area-inset-bottom">
+      <div className="flex items-center justify-around px-2 py-3 max-w-md mx-auto">
         {items.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -74,28 +74,28 @@ export function MatchBottomNav() {
               key={item.id}
               onClick={() => navigate(item.path)}
               className={`
-                flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors relative
+                flex flex-col items-center justify-center gap-1 min-w-[60px] transition-colors relative
                 ${active 
-                  ? 'text-primary bg-primary/10' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  ? 'text-primary' 
+                  : 'text-muted-foreground hover:text-foreground'
                 }
               `}
             >
               <div className="relative">
-                <Icon className={`w-6 h-6 mb-1 ${active ? 'fill-primary/20' : ''}`} />
+                <Icon className={`w-6 h-6 ${active ? 'fill-primary/20' : ''}`} />
                 {item.badge !== null && item.badge > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 hover:bg-red-500">
+                  <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] bg-red-500 hover:bg-red-500 border-2 border-background">
                     {item.badge > 9 ? '9+' : item.badge}
                   </Badge>
                 )}
               </div>
-              <span className={`text-xs font-medium ${active ? 'font-bold' : ''}`}>
+              <span className={`text-[11px] ${active ? 'font-semibold' : 'font-medium'}`}>
                 {item.label}
               </span>
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
