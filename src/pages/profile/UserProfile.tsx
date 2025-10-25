@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 interface UserProfileData {
   id: string;
   display_name: string;
-  email: string;
+  email?: string; // optional; profiles table doesn't include email
   avatar_url?: string;
   bio?: string;
   city?: string;
@@ -66,22 +66,28 @@ export default function UserProfile() {
 
       if (error) throw error;
 
-      // Load additional stats
-      const [matchesRes, sessionsRes, listingsRes] = await Promise.all([
-        supabase.from('matches').select('id', { count: 'exact', head: true }).eq('user_id', id),
-        supabase.from('mentor_bookings').select('id', { count: 'exact', head: true }).eq('mentee_id', id),
-        supabase.from('listings').select('id', { count: 'exact', head: true }).eq('user_id', id)
-      ]);
+      // Load additional stats (cast to any to avoid TS deep instantiation)
+      const { count: matchesCount } = await ((supabase
+        .from('matches')
+        .select('id', { count: 'exact', head: true }) as any)
+        .or(`user1_id.eq.${id},user2_id.eq.${id}`));
+
+      const { count: sessionsCount } = await ((supabase
+        .from('mentor_bookings')
+        .select('id', { count: 'exact', head: true }) as any)
+        .eq('user_id', id));
+
+      const { count: listingsCount } = await ((supabase
+        .from('listings')
+        .select('id', { count: 'exact', head: true }) as any)
+        .eq('user_id', id));
 
       setProfile({
-        ...data,
-        totalMatches: matchesRes.count || 0,
-        totalSessions: sessionsRes.count || 0,
-        totalListings: listingsRes.count || 0,
-        memberSince: new Date(data.created_at).toLocaleDateString('en-US', { 
-          month: 'long', 
-          year: 'numeric' 
-        })
+        ...(data as any),
+        totalMatches: matchesCount || 0,
+        totalSessions: sessionsCount || 0,
+        totalListings: listingsCount || 0,
+        memberSince: new Date(data.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
       });
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -139,7 +145,7 @@ export default function UserProfile() {
     );
   }
 
-  const displayName = profile.display_name || profile.email;
+  const displayName = profile.display_name || (isOwnProfile ? user?.email || 'User' : 'User');
   const initials = displayName.charAt(0).toUpperCase();
 
   return (
@@ -285,34 +291,16 @@ export default function UserProfile() {
             </Card>
 
             {/* Contact Info */}
-            {(profile.email || profile.phone || profile.website) && (
+            {(isOwnProfile && user?.email) && (
               <Card className="p-6">
                 <h2 className="font-bold text-lg mb-4">Contact Information</h2>
                 <div className="space-y-3">
-                  {profile.email && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <a href={`mailto:${profile.email}`} className="text-blue-600 hover:underline">
-                        {profile.email}
-                      </a>
-                    </div>
-                  )}
-                  {profile.phone && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <a href={`tel:${profile.phone}`} className="text-blue-600 hover:underline">
-                        {profile.phone}
-                      </a>
-                    </div>
-                  )}
-                  {profile.website && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Globe className="w-4 h-4 text-muted-foreground" />
-                      <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        {profile.website}
-                      </a>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3 text-sm">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    <a href={`mailto:${user.email}`} className="text-blue-600 hover:underline">
+                      {user.email}
+                    </a>
+                  </div>
                 </div>
               </Card>
             )}

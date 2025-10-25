@@ -1,0 +1,52 @@
+/* Mobile overrides: prevent horizontal scroll and improve touch targets */
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Ensure containers don't overflow */
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Mobile-friendly grid */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* No horizontal scroll for flex items */
+  .flex {
+    flex-wrap: wrap;
+  }
+  
+  /* Make tables responsive */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Touch-friendly buttons on mobile */
+@media (max-width: 768px) {
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Responsive text */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+  }
+}
