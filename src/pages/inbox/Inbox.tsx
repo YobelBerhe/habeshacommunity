@@ -1,579 +1,412 @@
 import { useState, useEffect } from 'react';
-import { 
-  Search, MessageCircle, Heart, Award, ShoppingBag,
-  Users, Send, Paperclip, Smile, MoreVertical, Phone,
-  Video, Info, Archive, Star, Trash2, Image, Check,
-  CheckCheck, Clock, Pin, Filter, ArrowLeft
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/store/auth';
+import {
+  ArrowLeft, Search, Send, Filter, Phone, Video, Info,
+  Heart, Users, Award, ShoppingBag, Home, Stethoscope
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { getOrCreateConversation } from '@/utils/conversations';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'me' | 'other';
-  timestamp: string;
-  read: boolean;
-  type?: 'text' | 'image' | 'file';
-}
 
 interface Conversation {
   id: string;
+  userId: string;
   name: string;
-  avatar: string;
+  avatar?: string;
   lastMessage: string;
   timestamp: string;
   unread: number;
   online: boolean;
-  type: 'match' | 'mentor' | 'marketplace' | 'community';
-  verified?: boolean;
-  pinned?: boolean;
-  messages: Message[];
+  category: 'all' | 'personal' | 'health' | 'match' | 'mentor' | 'market' | 'community';
 }
 
-const Inbox = () => {
+export default function Inbox() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const userId = searchParams.get('user');
+  const userName = searchParams.get('name');
+
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [messageInput, setMessageInput] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(
-    searchParams.get('conversation') || null
-  );
-  const [messageText, setMessageText] = useState('');
-  const [filterType, setFilterType] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false); // Toggle filters
 
-  // Handle incoming conversation from navigation state
-  useEffect(() => {
-    if (location.state?.openConversationId) {
-      setSelectedConversation(location.state.openConversationId);
-      
-      // Show a welcome message if mentor name is provided
-      if (location.state.mentorName) {
-        toast.success(`Conversation with ${location.state.mentorName} opened`);
-      }
-    }
-  }, [location.state]);
+  // Categories with icons
+  const categories = [
+    { id: 'all', label: 'All', icon: Users, color: 'text-gray-500' },
+    { id: 'personal', label: 'Personal', icon: Home, color: 'text-purple-500' },
+    { id: 'health', label: 'Health', icon: Stethoscope, color: 'text-green-500' },
+    { id: 'match', label: 'Matches', icon: Heart, color: 'text-pink-500' },
+    { id: 'mentor', label: 'Mentors', icon: Award, color: 'text-blue-500' },
+    { id: 'market', label: 'Market', icon: ShoppingBag, color: 'text-orange-500' }
+  ];
 
-
-  // Demo conversations
-  const conversations: Conversation[] = [
+  // Mock conversations
+  const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: '1',
-      name: 'Sara Mehretab',
-      avatar: 'SM',
-      lastMessage: "Hey! I'd love to know more about you 😊",
-      timestamp: '2 min ago',
+      userId: 'user1',
+      name: 'Sara Woldu',
+      lastMessage: 'Hey! How are you doing?',
+      timestamp: '2m ago',
       unread: 2,
       online: true,
-      type: 'match',
-      verified: true,
-      pinned: true,
-      messages: [
-        { id: '1', text: 'Hi! I saw your profile and we seem to have a lot in common', sender: 'other', timestamp: '10:30 AM', read: true },
-        { id: '2', text: 'Hello! Yes, I noticed that too. I love that you enjoy hiking!', sender: 'me', timestamp: '10:32 AM', read: true },
-        { id: '3', text: "Yes! I try to go every weekend. Have you been to any good trails recently?", sender: 'other', timestamp: '10:35 AM', read: true },
-        { id: '4', text: "I went to Shenandoah last month, it was beautiful! Where do you usually go?", sender: 'me', timestamp: '10:38 AM', read: true },
-        { id: '5', text: "Hey! I'd love to know more about you 😊", sender: 'other', timestamp: '10:40 AM', read: false }
-      ]
+      category: 'match'
     },
     {
       id: '2',
-      name: 'Daniel Kidane',
-      avatar: 'DK',
-      lastMessage: "Your session is confirmed for tomorrow at 2 PM",
-      timestamp: '1 hour ago',
+      userId: 'user2',
+      name: 'Daniel Tesfay',
+      lastMessage: 'Thanks for the session!',
+      timestamp: '1h ago',
       unread: 0,
       online: false,
-      type: 'mentor',
-      verified: true,
-      pinned: false,
-      messages: [
-        { id: '1', text: "Hi! I'd like to book a career guidance session", sender: 'me', timestamp: 'Yesterday', read: true },
-        { id: '2', text: "Of course! I have availability tomorrow afternoon. Does 2 PM work?", sender: 'other', timestamp: 'Yesterday', read: true },
-        { id: '3', text: "Perfect! Yes, 2 PM works great for me", sender: 'me', timestamp: 'Yesterday', read: true },
-        { id: '4', text: "Your session is confirmed for tomorrow at 2 PM", sender: 'other', timestamp: '1 hour ago', read: true }
-      ]
+      category: 'mentor'
     },
     {
       id: '3',
-      name: 'Rahel Woldu',
-      avatar: 'RW',
-      lastMessage: "Is the coffee set still available?",
-      timestamp: '3 hours ago',
+      userId: 'user3',
+      name: 'Meron Kidane',
+      lastMessage: 'Is the item still available?',
+      timestamp: '3h ago',
       unread: 1,
       online: true,
-      type: 'marketplace',
-      verified: false,
-      pinned: false,
-      messages: [
-        { id: '1', text: "Hi! I'm interested in your Traditional Coffee Set listing", sender: 'other', timestamp: '4 hours ago', read: true },
-        { id: '2', text: "Hello! Yes, it's still available. Would you like to see more photos?", sender: 'me', timestamp: '3:30 PM', read: true },
-        { id: '3', text: "Is the coffee set still available?", sender: 'other', timestamp: '3 hours ago', read: false }
-      ]
+      category: 'market'
     },
     {
       id: '4',
-      name: 'Young Professionals Group',
-      avatar: 'YP',
-      lastMessage: "Michael: The networking event is this Friday!",
-      timestamp: '5 hours ago',
-      unread: 5,
-      online: false,
-      type: 'community',
-      verified: true,
-      pinned: false,
-      messages: [
-        { id: '1', text: "Hey everyone! Don't forget about the networking event", sender: 'other', timestamp: '5 hours ago', read: false }
-      ]
-    },
-    {
-      id: '5',
-      name: 'Meron Tekle',
-      avatar: 'MT',
-      lastMessage: "Thanks for the great conversation!",
-      timestamp: '1 day ago',
+      userId: 'user4',
+      name: 'Health Coach',
+      lastMessage: 'Your workout plan is ready!',
+      timestamp: '5h ago',
       unread: 0,
-      online: false,
-      type: 'match',
-      verified: true,
-      pinned: false,
-      messages: [
-        { id: '1', text: "It was nice chatting with you", sender: 'other', timestamp: '1 day ago', read: true },
-        { id: '2', text: "Thanks for the great conversation!", sender: 'other', timestamp: '1 day ago', read: true }
-      ]
-    },
-    {
-      id: '6',
-      name: 'Solomon Ghebre',
-      avatar: 'SG',
-      lastMessage: "You: Looking forward to the session!",
-      timestamp: '2 days ago',
-      unread: 0,
-      online: false,
-      type: 'mentor',
-      verified: true,
-      pinned: false,
-      messages: [
-        { id: '1', text: "Looking forward to the session!", sender: 'me', timestamp: '2 days ago', read: true }
-      ]
+      online: true,
+      category: 'health'
     }
-  ];
+  ]);
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'match': return Heart;
-      case 'mentor': return Award;
-      case 'marketplace': return ShoppingBag;
-      case 'community': return Users;
-      default: return MessageCircle;
-    }
-  };
+  const [messages, setMessages] = useState([
+    { id: '1', senderId: 'user1', text: 'Hey! How are you?', timestamp: '10:30 AM', isOwn: false },
+    { id: '2', senderId: user?.id, text: 'Hi! I\'m good, thanks!', timestamp: '10:32 AM', isOwn: true },
+    { id: '3', senderId: 'user1', text: 'Great to hear! Want to grab coffee?', timestamp: '10:33 AM', isOwn: false }
+  ]);
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'match': return 'text-pink-600 bg-pink-100 dark:bg-pink-900/30';
-      case 'mentor': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
-      case 'marketplace': return 'text-green-600 bg-green-100 dark:bg-green-900/30';
-      case 'community': return 'text-purple-600 bg-purple-100 dark:bg-purple-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
+  useEffect(() => {
+    if (userId && userName) {
+      const existingConv = conversations.find(c => c.userId === userId);
+      if (existingConv) {
+        setSelectedConversation(existingConv.id);
+      } else {
+        const newConv: Conversation = {
+          id: `new-${userId}`,
+          userId: userId,
+          name: userName,
+          avatar: userName[0],
+          lastMessage: 'Start a conversation...',
+          timestamp: 'Now',
+          unread: 0,
+          online: true,
+          category: 'all'
+        };
+        setConversations(prev => [newConv, ...prev]);
+        setSelectedConversation(newConv.id);
+      }
     }
-  };
+  }, [userId, userName]);
 
   const filteredConversations = conversations.filter(conv => {
-    const matchesSearch = conv.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === 'all' || conv.type === filterType;
-    return matchesSearch && matchesType;
+    const matchesCategory = activeCategory === 'all' || conv.category === activeCategory;
+    const matchesSearch = searchQuery === '' || 
+      conv.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
   });
 
-  const activeConversation = conversations.find(c => c.id === selectedConversation);
-  const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
+  const selectedConv = conversations.find(c => c.id === selectedConversation);
 
-  const handleSendMessage = async () => {
-    if (!messageText.trim() || !selectedConversation) return;
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Please sign in to send messages');
-        return;
-      }
+  const handleSendMessage = () => {
+    if (!messageInput.trim()) return;
 
-      // Get conversation to find the other participant
-      const activeConv = conversations.find(c => c.id === selectedConversation);
-      if (!activeConv) return;
+    const newMessage = {
+      id: `msg-${Date.now()}`,
+      senderId: user?.id || '',
+      text: messageInput,
+      timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      isOwn: true
+    };
 
-      // Create or get conversation from database
-      const { conversationId } = await getOrCreateConversation(
-        activeConv.id, // Using conversation ID as user ID for demo
-        messageText
-      );
-
-      toast.success('Message sent!');
-      setMessageText('');
-      
-      // Reload the conversation (in production, would use real-time subscription)
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
-    }
-  };
-
-  const handleAttachment = () => {
-    toast.info('File upload coming soon!', {
-      description: 'This feature is under development'
-    });
-  };
-
-  const handleVideoCall = () => {
-    if (!selectedConversation) return;
-    navigate(`/video/${selectedConversation}`);
-  };
-
-  const handleAudioCall = () => {
-    toast.info('Audio calls coming soon!', {
-      description: 'This feature is under development'
-    });
+    setMessages(prev => [...prev, newMessage]);
+    setMessageInput('');
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)]">
-        {/* Conversations List */}
-        <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 border-r`}>
-          {/* Header */}
-          <div className="p-4 border-b bg-background/95 backdrop-blur">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold flex items-center">
-                <MessageCircle className="w-6 h-6 mr-2" />
-                Messages
-              </h1>
-              {totalUnread > 0 && (
-                <Badge className="bg-red-500 text-white">
-                  {totalUnread}
-                </Badge>
-              )}
-            </div>
-
-            {/* Search */}
-            <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search conversations..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <Button
-                variant={filterType === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('all')}
-              >
-                All
-              </Button>
-              <Button
-                variant={filterType === 'match' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('match')}
-              >
-                <Heart className="w-4 h-4 mr-1" />
-                Matches
-              </Button>
-              <Button
-                variant={filterType === 'mentor' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('mentor')}
-              >
-                <Award className="w-4 h-4 mr-1" />
-                Mentors
-              </Button>
-              <Button
-                variant={filterType === 'marketplace' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterType('marketplace')}
-              >
-                <ShoppingBag className="w-4 h-4 mr-1" />
-                Market
-              </Button>
-            </div>
+    <div className="h-screen flex flex-col bg-background">
+      {/* CLEAN HEADER - Minimal like old design */}
+      <div className="sticky top-0 z-50 bg-background border-b">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="md:hidden"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-xl font-bold">Messages</h1>
           </div>
 
-          {/* Conversations */}
-          <ScrollArea className="flex-1">
-            <div className="divide-y">
-              {filteredConversations.map((conversation) => {
-                const TypeIcon = getTypeIcon(conversation.type);
-                
-                return (
-                  <div
-                    key={conversation.id}
-                    onClick={() => setSelectedConversation(conversation.id)}
-                    className={`p-4 hover:bg-muted/50 cursor-pointer transition-colors ${
-                      selectedConversation === conversation.id ? 'bg-muted' : ''
-                    }`}
+          <div className="flex items-center gap-2">
+            {/* Search Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Search className="w-5 h-5" />
+            </Button>
+
+            {/* Filter Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="w-5 h-5" />
+              {activeCategory !== 'all' && (
+                <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-blue-500 rounded-full" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* COLLAPSIBLE FILTERS - Only show when toggled */}
+        {showFilters && (
+          <div className="border-t animate-in slide-in-from-top">
+            {/* Search Bar */}
+            <div className="px-4 pt-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Category Pills - Horizontal Scroll */}
+            <div className="overflow-x-auto hide-scrollbar px-4 py-3">
+              <div className="flex gap-2">
+                {categories.map((category) => (
+                  <Button
+                    key={category.id}
+                    variant={activeCategory === category.id ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveCategory(category.id)}
+                    className="whitespace-nowrap flex-shrink-0 gap-2"
                   >
-                    <div className="flex gap-3">
+                    <category.icon className={`w-4 h-4 ${activeCategory === category.id ? '' : category.color}`} />
+                    {category.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content - Same as before */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Conversations List */}
+        <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 border-r`}>
+          <div className="flex-1 overflow-y-auto">
+            {filteredConversations.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                <Search className="w-12 h-12 text-muted-foreground mb-3" />
+                <p className="text-muted-foreground mb-2">No conversations found</p>
+                <Button
+                  variant="link"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setActiveCategory('all');
+                  }}
+                >
+                  Clear filters
+                </Button>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {filteredConversations.map((conv) => {
+                  const category = categories.find(c => c.id === conv.category);
+                  return (
+                    <div
+                      key={conv.id}
+                      className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted transition-colors ${
+                        selectedConversation === conv.id ? 'bg-muted' : ''
+                      }`}
+                      onClick={() => setSelectedConversation(conv.id)}
+                    >
                       <div className="relative">
-                        <Avatar className="w-12 h-12 border-2 border-primary/20">
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
-                            {conversation.avatar}
-                          </AvatarFallback>
+                        <Avatar className="w-12 h-12">
+                          {conv.avatar ? (
+                            <AvatarImage src={conv.avatar} />
+                          ) : (
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
+                              {conv.name.charAt(0)}
+                            </AvatarFallback>
+                          )}
                         </Avatar>
-                        {conversation.online && (
+                        {conv.online && (
                           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
                         )}
-                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center ${getTypeColor(conversation.type)}`}>
-                          <TypeIcon className="w-3 h-3" />
-                        </div>
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <h4 className="font-semibold truncate">{conversation.name}</h4>
-                            {conversation.pinned && (
-                              <Pin className="w-3 h-3 text-primary" />
+                            <p className="font-semibold truncate">{conv.name}</p>
+                            {/* Small category indicator */}
+                            {category && activeCategory === 'all' && (
+                              <category.icon className={`w-3.5 h-3.5 ${category.color} flex-shrink-0`} />
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground flex-shrink-0">
-                            {conversation.timestamp}
-                          </span>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">{conv.timestamp}</span>
                         </div>
-
-                        <div className="flex items-center justify-between">
-                          <p className={`text-sm truncate ${conversation.unread > 0 ? 'font-semibold' : 'text-muted-foreground'}`}>
-                            {conversation.lastMessage}
-                          </p>
-                          {conversation.unread > 0 && (
-                            <Badge className="ml-2 bg-primary text-primary-foreground flex-shrink-0">
-                              {conversation.unread}
-                            </Badge>
-                          )}
-                        </div>
+                        <p className="text-sm text-muted-foreground truncate">{conv.lastMessage}</p>
                       </div>
+
+                      {conv.unread > 0 && (
+                        <Badge className="bg-blue-500 flex-shrink-0">{conv.unread}</Badge>
+                      )}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Chat Area */}
-        {selectedConversation && activeConversation ? (
-          <div className="flex flex-col flex-1">
+        {/* Chat Area - Same as before */}
+        {selectedConversation ? (
+          <div className="flex-1 flex flex-col">
             {/* Chat Header */}
-            <div className="p-4 border-b bg-background/95 backdrop-blur flex items-center justify-between">
+            <div className="flex items-center justify-between p-4 border-b bg-background">
               <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden"
                   onClick={() => setSelectedConversation(null)}
+                  className="md:hidden"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
 
-                <Avatar className="w-10 h-10 border-2 border-primary/20">
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
-                    {activeConversation.avatar}
-                  </AvatarFallback>
+                <Avatar className="w-10 h-10">
+                  {selectedConv?.avatar ? (
+                    <AvatarImage src={selectedConv.avatar} />
+                  ) : (
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
+                      {selectedConv?.name.charAt(0)}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
 
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold">{activeConversation.name}</h3>
-                    {activeConversation.verified && (
-                      <Badge variant="secondary" className="text-xs">Verified</Badge>
-                    )}
-                  </div>
+                  <p className="font-semibold">{selectedConv?.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {activeConversation.online ? 'Online' : 'Offline'}
+                    {selectedConv?.online ? 'Online' : 'Offline'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={handleAudioCall}>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="icon">
                   <Phone className="w-5 h-5" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={handleVideoCall}>
+                <Button variant="ghost" size="icon">
                   <Video className="w-5 h-5" />
                 </Button>
                 <Button variant="ghost" size="icon">
                   <Info className="w-5 h-5" />
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="w-5 h-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Star className="w-4 h-4 mr-2" />
-                      Star Conversation
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Archive className="w-4 h-4 mr-2" />
-                      Archive
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4 max-w-4xl mx-auto">
-                {activeConversation.messages.map((message) => (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+                >
                   <div
-                    key={message.id}
-                    className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+                    className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                      message.isOwn
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-muted'
+                    }`}
                   >
-                    <div className={`flex gap-2 max-w-[70%] ${message.sender === 'me' ? 'flex-row-reverse' : ''}`}>
-                      {message.sender === 'other' && (
-                        <Avatar className="w-8 h-8 flex-shrink-0">
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs font-bold">
-                            {activeConversation.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-
-                      <div>
-                        <div
-                          className={`rounded-2xl px-4 py-2 ${
-                            message.sender === 'me'
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted'
-                          }`}
-                        >
-                          <p className="text-sm">{message.text}</p>
-                        </div>
-                        <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${message.sender === 'me' ? 'justify-end' : ''}`}>
-                          <span>{message.timestamp}</span>
-                          {message.sender === 'me' && (
-                            message.read ? (
-                              <CheckCheck className="w-3 h-3 text-blue-500" />
-                            ) : (
-                              <Check className="w-3 h-3" />
-                            )
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-sm">{message.text}</p>
+                    <p className={`text-xs mt-1 ${message.isOwn ? 'text-blue-100' : 'text-muted-foreground'}`}>
+                      {message.timestamp}
+                    </p>
                   </div>
-                ))}
-
-                {/* Typing Indicator */}
-                {activeConversation.online && Math.random() > 0.7 && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Avatar className="w-6 h-6">
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs">
-                        {activeConversation.avatar}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
+                </div>
+              ))}
+            </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t bg-background/95 backdrop-blur">
-              <div className="flex items-end gap-2 max-w-4xl mx-auto">
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
-                    <Paperclip className="w-5 h-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
-                    <Image className="w-5 h-5" />
-                  </Button>
-                </div>
+            <div className="border-t p-4 bg-background">
+              <div className="flex items-end gap-2">
+                <Textarea
+                  placeholder="Type a message..."
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+                  className="flex-1 min-h-[40px] max-h-[120px] resize-none"
+                  rows={1}
+                />
 
-                <div className="flex-1">
-                  <Textarea
-                    placeholder="Type a message..."
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    className="min-h-[44px] max-h-32 resize-none"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon">
-                    <Smile className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={handleSendMessage}
-                    disabled={!messageText.trim()}
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                  >
-                    <Send className="w-5 h-5" />
-                  </Button>
-                </div>
+                <Button
+                  size="icon"
+                  onClick={handleSendMessage}
+                  disabled={!messageInput.trim()}
+                  className="flex-shrink-0"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
               </div>
             </div>
           </div>
         ) : (
           <div className="hidden md:flex flex-1 items-center justify-center bg-muted/20">
             <div className="text-center">
-              <MessageCircle className="w-24 h-24 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mb-2">Select a conversation</h3>
-              <p className="text-muted-foreground">
-                Choose a conversation from the list to start messaging
-              </p>
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Select a conversation</h3>
+              <p className="text-muted-foreground">Choose from your messages on the left</p>
             </div>
           </div>
         )}
       </div>
 
       <style>{`
-        .scrollbar-hide {
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
         }
       `}</style>
     </div>
   );
-};
-
-export default Inbox;
-
+}
