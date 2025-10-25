@@ -19,9 +19,9 @@ export default function MentorFilters({
   onSortByChange,
 }: MentorFiltersProps) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 overflow-x-auto flex-nowrap scrollbar-hide -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
       {/* Verified Only Toggle */}
-      <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-md border border-border hover:bg-accent transition-colors">
+      <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-md border border-border hover:bg-accent transition-colors shrink-0">
         <input 
           type="checkbox" 
           checked={verifiedOnly} 
@@ -34,7 +34,7 @@ export default function MentorFilters({
 
       {/* Minimum Rating Filter */}
       <Select value={minRating} onValueChange={onMinRatingChange}>
-        <SelectTrigger className="w-[140px] bg-background">
+        <SelectTrigger className="w-[140px] bg-background shrink-0">
           <SelectValue placeholder="Min Rating" />
         </SelectTrigger>
         <SelectContent className="bg-background z-50">
@@ -47,7 +47,7 @@ export default function MentorFilters({
 
       {/* Sort By Filter */}
       <Select value={sortBy} onValueChange={onSortByChange}>
-        <SelectTrigger className="w-[160px] bg-background">
+        <SelectTrigger className="w-[160px] bg-background shrink-0">
           <SelectValue placeholder="Sort By" />
         </SelectTrigger>
         <SelectContent className="bg-background z-50">

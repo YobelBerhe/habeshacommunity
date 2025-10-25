@@ -249,7 +249,7 @@ const MentorHome = () => {
       {/* Categories */}
       <section className="py-6 md:py-8 border-b bg-background/95 backdrop-blur sticky top-14 md:top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide flex-nowrap snap-x snap-mandatory -mx-4 px-4 touch-pan-x">
             {categories.map((category) => {
               const Icon = category.icon;
               const isActive = selectedCategory === category.id;
@@ -259,7 +259,7 @@ const MentorHome = () => {
                   key={category.id}
                   variant={isActive ? "default" : "outline"}
                   onClick={() => handleFilterChange(() => setSelectedCategory(category.id))}
-                  className={`flex-shrink-0 ${isActive ? `bg-gradient-to-r ${category.color}` : ''}`}
+                  className={`flex-shrink-0 snap-start whitespace-nowrap min-w-max ${isActive ? `bg-gradient-to-r ${category.color}` : ''}`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   <span className="hidden md:inline">{category.name}</span>
