@@ -40,7 +40,7 @@ interface Conversation {
   timestamp: string;
   unread: number;
   online: boolean;
-  type: 'match' | 'mentor' | 'marketplace' | 'community';
+  type: 'match' | 'mentor' | 'marketplace' | 'community' | 'personal' | 'health';
   verified?: boolean;
   pinned?: boolean;
   messages: Message[];
@@ -244,10 +244,17 @@ const Inbox = () => {
           {/* Header */}
           <div className="p-4 border-b bg-background/95 backdrop-blur">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold flex items-center">
-                <MessageCircle className="w-6 h-6 mr-2" />
-                Messages
-              </h1>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate(-1)}
+                  className="flex-shrink-0"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <h1 className="text-2xl font-bold">Messages</h1>
+              </div>
               {totalUnread > 0 && (
                 <Badge className="bg-red-500 text-white">
                   {totalUnread}
@@ -268,37 +275,62 @@ const Inbox = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
               <Button
                 variant={filterType === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('all')}
+                className="flex-shrink-0 snap-start"
               >
                 All
+              </Button>
+              <Button
+                variant={filterType === 'personal' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('personal')}
+                className="flex-shrink-0 snap-start"
+              >
+                Personal
+              </Button>
+              <Button
+                variant={filterType === 'health' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('health')}
+                className="flex-shrink-0 snap-start"
+              >
+                Health
               </Button>
               <Button
                 variant={filterType === 'match' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('match')}
+                className="flex-shrink-0 snap-start"
               >
-                <Heart className="w-4 h-4 mr-1" />
                 Matches
               </Button>
               <Button
                 variant={filterType === 'mentor' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('mentor')}
+                className="flex-shrink-0 snap-start"
               >
-                <Award className="w-4 h-4 mr-1" />
                 Mentors
               </Button>
               <Button
                 variant={filterType === 'marketplace' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('marketplace')}
+                className="flex-shrink-0 snap-start"
               >
-                <ShoppingBag className="w-4 h-4 mr-1" />
                 Market
+              </Button>
+              <Button
+                variant={filterType === 'community' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('community')}
+                className="flex-shrink-0 snap-start"
+              >
+                Community
               </Button>
             </div>
           </div>
