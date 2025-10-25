@@ -698,7 +698,7 @@ export default function MentorList() {
                       e.stopPropagation();
                       handleMessage(mentor);
                     }}
-                    className="flex-1"
+                    className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
                   >
                     <MessageCircle className="w-4 h-4 mr-1.5" />
                     Message

@@ -3,7 +3,7 @@ import {
   CheckCircle, XCircle, Eye, Download, Calendar,
   User, Mail, Phone, Briefcase, DollarSign, Shield,
   Clock, AlertCircle, FileText, Video, ExternalLink,
-  MessageSquare, Flag, Search, Filter, ChevronRight, Award
+  MessageSquare, Flag, Search, Filter, ChevronRight, Award, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -108,6 +108,7 @@ const VerificationReview = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewingDocument, setViewingDocument] = useState<{type: 'image' | 'video', url: string, title: string} | null>(null);
 
   const filteredApplications = applications.filter(app => {
     const matchesStatus = filterStatus === 'all' || app.status === filterStatus;
@@ -493,36 +494,78 @@ const VerificationReview = () => {
               <TabsContent value="documents" className="space-y-4 mt-4">
                 <div>
                   <h4 className="font-semibold mb-3">Identity Documents</h4>
-                  <p className="text-sm text-muted-foreground mb-4">View verification documents inline. Click to download.</p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <Card className="p-4">
                       <h5 className="text-sm font-semibold mb-2">ID Front</h5>
-                      <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-2">
-                        {/* In production, replace with actual image URL from storage */}
+                      <div 
+                        className="aspect-video bg-muted rounded-lg overflow-hidden mb-3 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => setViewingDocument({
+                          type: 'image',
+                          url: 'https://via.placeholder.com/800x600?text=ID+Front+Document',
+                          title: 'ID Front'
+                        })}
+                      >
                         <img 
                           src="https://via.placeholder.com/400x250?text=ID+Front" 
                           alt="ID Front"
                           className="w-full h-full object-contain"
                         />
                       </div>
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => setViewingDocument({
+                            type: 'image',
+                            url: 'https://via.placeholder.com/800x600?text=ID+Front+Document',
+                            title: 'ID Front'
+                          })}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
                     </Card>
                     <Card className="p-4">
                       <h5 className="text-sm font-semibold mb-2">ID Back</h5>
-                      <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-2">
+                      <div 
+                        className="aspect-video bg-muted rounded-lg overflow-hidden mb-3 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => setViewingDocument({
+                          type: 'image',
+                          url: 'https://via.placeholder.com/800x600?text=ID+Back+Document',
+                          title: 'ID Back'
+                        })}
+                      >
                         <img 
                           src="https://via.placeholder.com/400x250?text=ID+Back" 
                           alt="ID Back"
                           className="w-full h-full object-contain"
                         />
                       </div>
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => setViewingDocument({
+                            type: 'image',
+                            url: 'https://via.placeholder.com/800x600?text=ID+Back+Document',
+                            title: 'ID Back'
+                          })}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
                     </Card>
                   </div>
                 </div>
@@ -531,30 +574,43 @@ const VerificationReview = () => {
               <TabsContent value="video" className="space-y-4 mt-4">
                 <div>
                   <h4 className="font-semibold mb-3">Verification Video</h4>
-                  <p className="text-sm text-muted-foreground mb-4">Watch the selfie verification video inline. Click to download.</p>
                   <Card className="p-4">
-                    <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-3">
-                      {/* In production, replace with actual video from storage */}
+                    <div className="aspect-video bg-black rounded-lg overflow-hidden mb-3">
                       <video 
                         controls 
                         className="w-full h-full"
-                        poster="https://via.placeholder.com/800x450?text=Verification+Video"
+                        poster="https://via.placeholder.com/800x450?text=Click+to+Play"
                       >
-                        <source src="#" type="video/mp4" />
+                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download Video
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => setViewingDocument({
+                          type: 'video',
+                          url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                          title: 'Verification Video'
+                        })}
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        View Fullscreen
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
                   </Card>
                 </div>
 
                 {selectedApplication.youtubeIntroVideo && (
                   <div>
                     <h4 className="font-semibold mb-3">Introduction Video (YouTube)</h4>
-                    <div className="aspect-video rounded-lg overflow-hidden">
+                    <div className="aspect-video rounded-lg overflow-hidden bg-black">
                       <iframe
                         width="100%"
                         height="100%"
@@ -598,6 +654,44 @@ const VerificationReview = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Document/Video Viewer Modal */}
+      <Dialog open={!!viewingDocument} onOpenChange={() => setViewingDocument(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{viewingDocument?.title}</DialogTitle>
+          </DialogHeader>
+
+          <div className="w-full flex items-center justify-center bg-black rounded-lg overflow-hidden min-h-[60vh]">
+            {viewingDocument?.type === 'image' ? (
+              <img 
+                src={viewingDocument.url} 
+                alt={viewingDocument.title}
+                className="max-w-full max-h-[70vh] object-contain"
+              />
+            ) : viewingDocument?.type === 'video' ? (
+              <video 
+                src={viewingDocument.url}
+                controls
+                autoPlay
+                className="max-w-full max-h-[70vh]"
+              >
+                Your browser does not support video playback.
+              </video>
+            ) : null}
+          </div>
+
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setViewingDocument(null)}>
+              Close
+            </Button>
+            <Button>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

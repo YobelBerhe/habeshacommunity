@@ -84,6 +84,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
 const DisputeResolution = lazy(() => import("./pages/admin/DisputeResolution"));
 const RoleManagement = lazy(() => import("./pages/admin/RoleManagement"));
+const SessionRoom = lazy(() => import("./pages/mentor/SessionRoom"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const DonateSuccess = lazy(() => import("./pages/donate/Success"));
 const DonateCancel = lazy(() => import("./pages/donate/Cancel"));
@@ -214,6 +215,7 @@ const App = () => {
                 <Route path="/mentor/verify" element={<VerifyProfile />} />
                 <Route path="/mentor/availability" element={<ManageAvailability />} />
                 <Route path="/mentor/:id" element={<MentorDetail />} />
+                <Route path="/session/:sessionId" element={<SessionRoom />} />
                 
                 {/* Badges */}
                 <Route path="/badges" element={<BadgesInfo />} />

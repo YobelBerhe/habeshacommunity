@@ -12,6 +12,7 @@ export function AccountSheet({ children }:{ children?: React.ReactNode }) {
   const { user, refresh } = useAuth();
   const { language } = useLanguage();
   const [hasMentorProfile, setHasMentorProfile] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
     const checkMentorProfile = async () => {
