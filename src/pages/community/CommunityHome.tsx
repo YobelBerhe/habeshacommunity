@@ -268,33 +268,35 @@ const CommunityHome = () => {
       {/* Quick Actions */}
       <section className="py-6 border-b bg-background/95 backdrop-blur sticky top-14 md:top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
-            <Button
-              onClick={() => navigate('/community/forums')}
-              className="flex-shrink-0 snap-start whitespace-nowrap bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Browse Forums
-            </Button>
-            <Button
-              onClick={() => navigate('/community/events')}
-              className="flex-shrink-0 snap-start whitespace-nowrap bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              Find Events
-            </Button>
-            <Button
-              onClick={() => navigate('/community/groups')}
-              className="flex-shrink-0 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Join Groups
-            </Button>
+          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x pb-2">
             <Button
               variant="outline"
-              className="flex-shrink-0"
+              onClick={() => navigate('/community/forums')}
+              className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              Browse Forums
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => navigate('/community/events')}
+              className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+            >
+              Find Events
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => navigate('/community/groups')}
+              className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+            >
+              Join Groups
+            </Button>
+
+            <Button
+              variant="outline"
+              className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+            >
               Create Post
             </Button>
           </div>

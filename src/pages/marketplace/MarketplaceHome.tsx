@@ -222,23 +222,20 @@ const MarketplaceHome = () => {
       {/* Categories */}
       <section className="py-6 md:py-8 border-b bg-background/95 backdrop-blur sticky top-14 md:top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === category.id;
+          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x pb-2">
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat.id;
               
               return (
                 <Button
-                  key={category.id}
+                  key={cat.id}
                   variant={isActive ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`flex-shrink-0 snap-start whitespace-nowrap transition-all ${isActive ? `bg-gradient-to-r ${category.color} text-white` : ''}`}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex-shrink-0 snap-start whitespace-nowrap rounded-full ${
+                    isActive ? 'bg-primary text-primary-foreground' : ''
+                  }`}
                 >
-                  <Icon className="w-4 h-4 mr-2" />
-                  {category.name}
-                  <Badge variant="secondary" className="ml-2">
-                    {category.count}
-                  </Badge>
+                  {cat.name} {cat.count}
                 </Button>
               );
             })}

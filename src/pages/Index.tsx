@@ -186,56 +186,50 @@ const Index = () => {
               </Button>
             </form>
 
-            {/* Quick Actions - Headway Style */}
-            <div className="text-xl font-semibold mb-4">I want to</div>
-            <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
+            {/* Quick Actions - Categories Horizontal Scroll */}
+            <div className="text-xl font-semibold mb-4">Categories</div>
+            <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x pb-2 max-w-4xl mx-auto">
               <Button 
                 variant="outline" 
                 onClick={() => navigate('/community')}
-                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
               >
-                <Users className="w-6 h-6" />
-                <span className="text-sm font-medium">Personal</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/community')}
-                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
-              >
-                <Heart className="w-6 h-6" />
-                <span className="text-sm font-medium">Get Healthy</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/match')}
-                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
-              >
-                <Heart className="w-6 h-6" />
-                <span className="text-sm font-medium">Find Match</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/mentor')}
-                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
-              >
-                <Award className="w-6 h-6" />
-                <span className="text-sm font-medium">Get Mentored</span>
+                All Categories
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => navigate('/marketplace')}
-                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
               >
-                <ShoppingBag className="w-6 h-6" />
-                <span className="text-sm font-medium">Browse Market</span>
+                Business & Entrepreneurship
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/mentor')}
+                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+              >
+                Technology & Software
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/mentor')}
+                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+              >
+                Career Development
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => navigate('/community')}
-                className="h-24 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 hover:bg-accent hover:border-primary transition-all"
+                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
               >
-                <Users className="w-6 h-6" />
-                <span className="text-sm font-medium">Join Community</span>
+                Education & Learning
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/community')}
+                className="flex-shrink-0 snap-start whitespace-nowrap rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all"
+              >
+                Life & Personal Growth
               </Button>
             </div>
           </div>

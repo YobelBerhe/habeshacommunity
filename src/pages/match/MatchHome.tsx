@@ -91,31 +91,31 @@ const MatchHome = () => {
               </Button>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              <Card className="p-4 bg-card/50 backdrop-blur">
+            {/* Stats - Horizontal Scroll */}
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x pb-2 max-w-4xl mx-auto">
+              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
                 <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                   {stats.activeMembers}
                 </div>
-                <div className="text-sm text-muted-foreground">Active Members</div>
+                <div className="text-sm text-muted-foreground whitespace-nowrap">Active Members</div>
               </Card>
-              <Card className="p-4 bg-card/50 backdrop-blur">
+              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
                 <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
                   {stats.matchesMade}
                 </div>
-                <div className="text-sm text-muted-foreground">Matches Made</div>
+                <div className="text-sm text-muted-foreground whitespace-nowrap">Matches Made</div>
               </Card>
-              <Card className="p-4 bg-card/50 backdrop-blur">
+              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
                 <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">
                   {stats.successStories}
                 </div>
-                <div className="text-sm text-muted-foreground">Success Stories</div>
+                <div className="text-sm text-muted-foreground whitespace-nowrap">Success Stories</div>
               </Card>
-              <Card className="p-4 bg-card/50 backdrop-blur">
+              <Card className="flex-shrink-0 snap-start p-4 bg-card/50 backdrop-blur min-w-[180px]">
                 <div className="text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">
                   {stats.avgCompatibility}
                 </div>
-                <div className="text-sm text-muted-foreground">Avg. Match Score</div>
+                <div className="text-sm text-muted-foreground whitespace-nowrap">Avg. Match Score</div>
               </Card>
             </div>
           </div>
