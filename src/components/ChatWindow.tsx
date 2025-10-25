@@ -243,7 +243,7 @@ export function ChatWindow({ conversationId, participantName, participantId, par
       )}
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800">
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 bg-gray-50 dark:bg-gray-800">
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             No messages yet. Start the conversation!
@@ -257,7 +257,7 @@ export function ChatWindow({ conversationId, participantName, participantId, par
               }`}
             >
               <div
-                className={`rounded-2xl p-3 max-w-[75%] shadow-sm transition-opacity ${
+                className={`rounded-2xl p-3 max-w-[70%] shadow-sm transition-opacity ${
                   message.sender_id === user?.id
                     ? 'bg-gradient-to-r from-pink-500 to-purple-600 rounded-tr-sm'
                     : 'bg-white dark:bg-gray-700 rounded-tl-sm'
