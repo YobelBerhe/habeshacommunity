@@ -1,498 +1,393 @@
-import { useState } from 'react';
-import { 
-  Heart, Users, ShoppingBag, MessageCircle, Search,
-  MapPin, TrendingUp, Sparkles, ArrowRight, Star,
-  Calendar, Briefcase, Home, Award, Globe, Clock,
-  CheckCircle, Zap
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/store/auth';
+import {
+  Search, Heart, Users, Award, ShoppingBag, MessageSquare,
+  Briefcase, Home, Stethoscope, Video, MapPin, TrendingUp,
+  Calendar, ChevronRight, ArrowRight, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useNavigate } from 'react-router-dom';
-import AnimatedCounter from '@/components/AnimatedCounter';
+import { Input } from '@/components/ui/input';
 
-const Index = () => {
+export default function Index() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Main action categories
+  const mainActions = [
+    { 
+      id: 'personal', 
+      icon: Home, 
+      label: 'Personal', 
+      color: 'from-purple-500 to-pink-500',
+      path: '/personal'
+    },
+    { 
+      id: 'health', 
+      icon: Stethoscope, 
+      label: 'Get Healthy', 
+      color: 'from-green-500 to-teal-500',
+      path: '/health'
+    },
+    { 
+      id: 'match', 
+      icon: Heart, 
+      label: 'Find Match', 
+      color: 'from-pink-500 to-rose-500',
+      path: '/match'
+    },
+    { 
+      id: 'mentor', 
+      icon: Award, 
+      label: 'Get Mentored', 
+      color: 'from-blue-500 to-cyan-500',
+      path: '/mentor'
+    },
+    { 
+      id: 'market', 
+      icon: ShoppingBag, 
+      label: 'Browse Market', 
+      color: 'from-orange-500 to-amber-500',
+      path: '/marketplace'
+    },
+    { 
+      id: 'community', 
+      icon: Users, 
+      label: 'Join Community', 
+      color: 'from-indigo-500 to-purple-500',
+      path: '/community'
+    }
+  ];
+
+  // Platform features with sub-categories
+  const platforms = [
+    {
+      title: 'Find Your Match',
+      icon: Heart,
+      color: 'from-pink-500 to-rose-500',
+      description: 'Connect with compatible Habesha singles',
+      subcategories: [
+        { label: 'Discover', path: '/match/discover' },
+        { label: 'My Matches', path: '/match/matches' },
+        { label: 'My Profile', path: '/match/profile' },
+        { label: 'Take Quiz', path: '/match/quiz' },
+        { label: 'Go Live', path: 'https://habeshalive.com', external: true }
+      ]
+    },
+    {
+      title: 'Get Mentored',
+      icon: Award,
+      color: 'from-blue-500 to-cyan-500',
+      description: 'Learn from experienced professionals',
+      subcategories: [
+        { label: 'Find Mentors', path: '/mentor/list' },
+        { label: 'My Sessions', path: '/mentor/sessions' },
+        { label: 'Become a Mentor', path: '/mentor/onboarding' }
+      ]
+    },
+    {
+      title: 'Buy & Sell',
+      icon: ShoppingBag,
+      color: 'from-orange-500 to-amber-500',
+      description: 'Marketplace for the community',
+      subcategories: [
+        { label: 'Products', path: '/marketplace/products' },
+        { label: 'Housing', path: '/marketplace/housing' },
+        { label: 'Jobs & Gigs', path: '/marketplace/jobs' },
+        { label: 'Services', path: '/marketplace/services' }
+      ]
+    },
+    {
+      title: 'Join Community',
+      icon: Users,
+      color: 'from-indigo-500 to-purple-500',
+      description: 'Connect with Habesha worldwide',
+      subcategories: [
+        { label: 'Forums', path: '/community/forums' },
+        { label: 'Events', path: '/community/events' },
+        { label: 'Groups', path: '/community/groups' }
+      ]
+    }
+  ];
+
+  // Success stories
+  const stories = [
+    {
+      id: 1,
+      title: 'Sara & Michael Found Perfect Match!',
+      description: 'Met through our matchmaking platform',
+      image: '/stories/story1.jpg',
+      category: 'Match'
+    },
+    {
+      id: 2,
+      title: 'Daniel T. Landed Dream Job',
+      description: 'Through our mentorship program',
+      image: '/stories/story2.jpg',
+      category: 'Career'
+    },
+    {
+      id: 3,
+      title: 'Meron Started Successful Business',
+      description: 'Using marketplace connections',
+      image: '/stories/story3.jpg',
+      category: 'Business'
+    },
+    {
+      id: 4,
+      title: 'Community Event: 500+ Attendees',
+      description: 'Annual Habesha gathering',
+      image: '/stories/story4.jpg',
+      category: 'Community'
+    }
+  ];
+
+  // Countries
+  const countries = [
+    { name: 'USA', flag: '🇺🇸', members: '12.5K' },
+    { name: 'UK', flag: '🇬🇧', members: '3.2K' },
+    { name: 'Canada', flag: '🇨🇦', members: '4.1K' },
+    { name: 'Germany', flag: '🇩🇪', members: '2.8K' },
+    { name: 'UAE', flag: '🇦🇪', members: '1.9K' },
+    { name: 'Sweden', flag: '🇸🇪', members: '1.5K' },
+    { name: 'Norway', flag: '🇳🇴', members: '1.2K' },
+    { name: 'Australia', flag: '🇦🇺', members: '890' },
+    { name: 'Netherlands', flag: '🇳🇱', members: '750' },
+    { name: 'Italy', flag: '🇮🇹', members: '620' }
+  ];
+
+  const stats = [
+    { icon: Users, value: '25K+', label: 'Active Members' },
+    { icon: Heart, value: '3.5K+', label: 'Success Stories' },
+    { icon: Calendar, value: '850+', label: 'Events Hosted' },
+    { icon: ShoppingBag, value: '5.2K+', label: 'Active Listings' }
+  ];
+
+  const handleSearch = () => {
     if (searchQuery.trim()) {
-      // Route to appropriate section based on search context
-      navigate(`/community/forums?search=${encodeURIComponent(searchQuery)}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  // Main platform features
-  const mainApps = [
-    {
-      id: 'matchmaking',
-      title: 'Find Your Match',
-      title_ti: 'ርኸብ መጻምድኻ',
-      description: 'Connect with compatible Habesha singles for meaningful relationships',
-      icon: Heart,
-      color: 'from-pink-500 to-rose-500',
-      gradient: 'from-pink-500/10 to-rose-500/10',
-      stats: { active: '5.2K+', success: '1.2K+' },
-      path: '/match',
-      features: ['Personality Quiz', 'Smart Matching', 'Family Mode', 'Video Dates']
-    },
-    {
-      id: 'mentorship',
-      title: 'Get Mentored',
-      title_ti: 'ርከብ መምህር',
-      description: 'Learn from experienced Habesha professionals and experts',
-      icon: Award,
-      color: 'from-blue-500 to-cyan-500',
-      gradient: 'from-blue-500/10 to-cyan-500/10',
-      stats: { mentors: '350+', sessions: '2.1K+' },
-      path: '/mentor',
-      features: ['Expert Mentors', 'Career Guidance', 'Tech Interviews', '1-on-1 Sessions']
-    },
-    {
-      id: 'marketplace',
-      title: 'Buy & Sell',
-      title_ti: 'ግዛእን ሽመትን',
-      description: 'Trade products, find housing, jobs, and services in the community',
-      icon: ShoppingBag,
-      color: 'from-green-500 to-emerald-500',
-      gradient: 'from-green-500/10 to-emerald-500/10',
-      stats: { listings: '5.2K+', deals: '8.5K+' },
-      path: '/marketplace',
-      features: ['Products', 'Housing', 'Jobs', 'Services']
-    },
-    {
-      id: 'community',
-      title: 'Join Community',
-      title_ti: 'ተሳተፍ',
-      description: 'Connect through forums, events, and groups with Habesha worldwide',
-      icon: Users,
-      color: 'from-purple-500 to-pink-500',
-      gradient: 'from-purple-500/10 to-pink-500/10',
-      stats: { members: '12.5K+', events: '850+' },
-      path: '/community',
-      features: ['Forums', 'Events', 'Groups', 'Discussions']
+  const handleSubcategoryClick = (path: string, external?: boolean) => {
+    if (external) {
+      window.open(path, '_blank');
+    } else {
+      navigate(path);
     }
-  ];
-
-  // Quick stats
-  const platformStats = [
-    { label: 'Active Members', value: 25000, suffix: 'K+', icon: Users, color: 'text-blue-600 dark:text-blue-400' },
-    { label: 'Success Stories', value: 3500, suffix: 'K+', icon: Heart, color: 'text-pink-600 dark:text-pink-400' },
-    { label: 'Events Hosted', value: 850, suffix: '+', icon: Calendar, color: 'text-green-600 dark:text-green-400' },
-    { label: 'Active Listings', value: 5200, suffix: 'K+', icon: ShoppingBag, color: 'text-purple-600 dark:text-purple-400' }
-  ];
-
-  // Featured success stories
-  const successStories = [
-    {
-      id: '1',
-      type: 'match',
-      title: 'Found My Perfect Match!',
-      story: 'Met through Habesha Connect and now planning our wedding. Forever grateful!',
-      author: 'Sara & Michael',
-      location: 'Washington DC',
-      avatar: 'SM'
-    },
-    {
-      id: '2',
-      type: 'mentor',
-      title: 'Landed My Dream Job',
-      story: 'My mentor helped me prepare for FAANG interviews. Now at Google!',
-      author: 'Daniel T.',
-      location: 'San Francisco',
-      avatar: 'DT'
-    },
-    {
-      id: '3',
-      type: 'marketplace',
-      title: 'Found Perfect Apartment',
-      story: 'Found an amazing apartment near the Habesha community through the marketplace.',
-      author: 'Rahel W.',
-      location: 'Seattle',
-      avatar: 'RW'
-    }
-  ];
-
-  // Trending locations
-  const trendingLocations = [
-    { city: 'Washington DC', members: 2341, growth: '+12%' },
-    { city: 'Oakland, CA', members: 1876, growth: '+8%' },
-    { city: 'Seattle, WA', members: 1654, growth: '+15%' },
-    { city: 'Toronto, Canada', members: 1432, growth: '+10%' },
-    { city: 'London, UK', members: 987, growth: '+18%' },
-    { city: 'Atlanta, GA', members: 876, growth: '+7%' }
-  ];
-
-  // Recent activity feed
-  const recentActivity = [
-    { type: 'match', text: 'New match made in Oakland, CA', time: '2 min ago', icon: Heart },
-    { type: 'event', text: 'Coffee Ceremony event starting soon', time: '5 min ago', icon: Calendar },
-    { type: 'marketplace', text: 'New job posting: Tigrinya Translator', time: '12 min ago', icon: Briefcase },
-    { type: 'mentor', text: 'Sarah booked a mentorship session', time: '18 min ago', icon: Award },
-    { type: 'community', text: 'New discussion in Culture & Traditions', time: '23 min ago', icon: MessageCircle }
-  ];
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+    <div className="min-h-screen bg-background">
+      {/* Sticky Header - Will be in Header component */}
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 20px 20px, hsl(var(--primary) / 0.05) 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
+      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white pt-20 pb-12 px-4">
+        <div className="container mx-auto max-w-4xl">
+          {/* Title */}
+          <h1 className="text-2xl md:text-4xl font-bold text-center mb-2">
+            Welcome to Habesha Community
+          </h1>
+          <p className="text-base md:text-xl text-center mb-8 opacity-90">
+            Connect, Learn, Trade & Grow Together
+          </p>
 
-        <div className="container mx-auto px-4 py-12 md:py-20 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <Badge className="mb-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Welcome to Habesha Connect
-            </Badge>
-
-            {/* Main Heading */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Your Habesha Community Hub
-            </h1>
-            
-            <p className="text-lg md:text-2xl text-muted-foreground mb-4">
-              Connect, Learn, Trade & Grow Together
-            </p>
-            
-            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              ማሕበረሰብና ኣብ ሓደ ቦታ • ንርኽበልና • ንምሃረልና • ንሕግዝልና
-            </p>
-
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-8">
-              <Search className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
+          {/* Search Bar - Headway Style */}
+          <div className="mb-6">
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                <Search className="w-5 h-5 text-gray-400" />
+              </div>
               <Input
                 type="text"
-                placeholder="Search for matches, mentors, items, events, groups..."
+                placeholder="Search for matches, mentors, products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-14 md:h-16 pl-12 md:pl-16 pr-32 md:pr-36 text-base md:text-lg rounded-full border-2 shadow-xl"
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="w-full h-14 pl-12 pr-4 text-base rounded-2xl bg-white/95 backdrop-blur border-0 shadow-lg"
               />
-              <Button 
-                type="submit"
-                size="lg" 
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                Search
-              </Button>
-            </form>
+            </div>
+          </div>
 
-            {/* Quick Actions */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/match')}
-                className="rounded-full"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Find Match
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/mentor')}
-                className="rounded-full"
-              >
-                <Award className="w-4 h-4 mr-2" />
-                Get Mentored
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/marketplace')}
-                className="rounded-full"
-              >
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Browse Market
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/community')}
-                className="rounded-full"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Join Community
-              </Button>
+          {/* I want to */}
+          <p className="text-sm font-semibold mb-3 px-1">I want to</p>
+
+          {/* Action Buttons - Headway Style - 2 Columns, Horizontal Scroll */}
+          <div className="overflow-x-auto hide-scrollbar -mx-4 px-4">
+            <div className="grid grid-cols-2 gap-3 min-w-max pb-2">
+              {mainActions.map((action) => (
+                <Button
+                  key={action.id}
+                  onClick={() => action.path.startsWith('http') ? window.open(action.path) : navigate(action.path)}
+                  className={`h-20 w-40 bg-gradient-to-r ${action.color} hover:opacity-90 text-white border-0 shadow-lg flex-col gap-2`}
+                >
+                  <action.icon className="w-6 h-6" />
+                  <span className="text-sm font-semibold">{action.label}</span>
+                </Button>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Platform Stats */}
-      <section className="py-8 md:py-12 border-y bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-5xl mx-auto">
-            {platformStats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div key={index} className="text-center">
-                  <Icon className={`w-8 h-8 md:w-10 md:h-10 ${stat.color} mx-auto mb-3`} />
-                  <div className="text-2xl md:text-4xl font-bold mb-1">
-                    <AnimatedCounter end={stat.value} />
-                    <span className="text-lg">{stat.suffix}</span>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Everything You Need Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+            Everything You Need in One Place
+          </h2>
+
+          <div className="space-y-6">
+            {platforms.map((platform) => (
+              <Card key={platform.title} className="p-6">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${platform.color} flex items-center justify-center flex-shrink-0`}>
+                    <platform.icon className="w-6 h-6 text-white" />
                   </div>
-                  <div className="text-sm md:text-base text-muted-foreground">{stat.label}</div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold mb-1">{platform.title}</h3>
+                    <p className="text-sm text-muted-foreground">{platform.description}</p>
+                  </div>
                 </div>
-              );
-            })}
+
+                {/* Horizontal Scrolling Subcategories */}
+                <div className="overflow-x-auto hide-scrollbar -mx-2 px-2">
+                  <div className="flex gap-2 pb-2">
+                    {platform.subcategories.map((sub) => (
+                      <Button
+                        key={sub.label}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSubcategoryClick(sub.path, sub.external)}
+                        className="whitespace-nowrap flex-shrink-0"
+                      >
+                        {sub.label}
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
-      </section>
 
-      {/* Main Apps Grid */}
-      <section className="py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need in One Place
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Four powerful platforms designed to help the Habesha community thrive
-            </p>
+        {/* Real Stories - Horizontal Scroll with Half Visible */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Real Stories from Our Community</h2>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/stories')}>
+              View All
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
-            {mainApps.map((app) => {
-              const Icon = app.icon;
-              
-              return (
+          <div className="overflow-x-auto hide-scrollbar -mx-4 px-4">
+            <div className="flex gap-4 pb-2">
+              {stories.map((story, index) => (
                 <Card
-                  key={app.id}
-                  className="group overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 hover:border-primary"
-                  onClick={() => navigate(app.path)}
+                  key={story.id}
+                  className={`flex-shrink-0 cursor-pointer hover:shadow-lg transition-all ${
+                    index === stories.length - 1 ? 'w-[280px]' : 'w-[260px]'
+                  }`}
+                  onClick={() => navigate(`/stories/${story.id}`)}
                 >
-                  <div className={`p-6 md:p-8 bg-gradient-to-br ${app.gradient}`}>
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                        <Icon className="w-8 h-8 md:w-10 md:h-10 text-white" />
-                      </div>
-                      <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                    </div>
-
-                    {/* Content */}
-                    <h3 className="text-2xl md:text-3xl font-bold mb-2 group-hover:text-primary transition-colors">
-                      {app.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3">{app.title_ti}</p>
-                    <p className="text-muted-foreground mb-4">{app.description}</p>
-
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 mb-4 text-sm">
-                      {Object.entries(app.stats).map(([key, value]) => (
-                        <div key={key}>
-                          <div className="font-bold text-lg">{value}</div>
-                          <div className="text-muted-foreground capitalize">{key}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Features */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {app.features.map((feature) => (
-                        <Badge key={feature} variant="secondary" className="text-xs">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* CTA */}
-                    <Button 
-                      className={`w-full bg-gradient-to-r ${app.color} hover:opacity-90 transition-opacity`}
-                      size="lg"
-                    >
-                      Explore {app.title}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                  <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-t-lg flex items-center justify-center">
+                    <Heart className="w-12 h-12 text-pink-500" />
+                  </div>
+                  <div className="p-4">
+                    <Badge className="mb-2" variant="secondary">
+                      {story.category}
+                    </Badge>
+                    <h3 className="font-bold mb-1">{story.title}</h3>
+                    <p className="text-sm text-muted-foreground">{story.description}</p>
                   </div>
                 </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Success Stories */}
-      <section className="py-12 md:py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-              <Star className="w-4 h-4 mr-2" />
-              Success Stories
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Real Stories from Our Community
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See how Habesha Connect is making a difference
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {successStories.map((story) => (
-              <Card key={story.id} className="p-6 hover:shadow-xl transition-all">
-                <div className="flex items-start gap-3 mb-4">
-                  <Avatar className="w-12 h-12 border-2 border-primary/20">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
-                      {story.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <h4 className="font-bold">{story.author}</h4>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {story.location}
-                    </div>
-                  </div>
-                </div>
-
-                <h3 className="font-bold text-lg mb-2">{story.title}</h3>
-                <p className="text-muted-foreground text-sm">{story.story}</p>
-
-                <div className="mt-4 pt-4 border-t">
-                  <Badge variant="secondary">
-                    {story.type === 'match' && <Heart className="w-3 h-3 mr-1" />}
-                    {story.type === 'mentor' && <Award className="w-3 h-3 mr-1" />}
-                    {story.type === 'marketplace' && <Home className="w-3 h-3 mr-1" />}
-                    {story.type.charAt(0).toUpperCase() + story.type.slice(1)}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trending Locations */}
-      <section className="py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-gradient-to-r from-green-500 to-teal-500 text-white">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Growing Communities
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Habesha Communities Worldwide
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Connect with Habesha people in major cities around the world
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {trendingLocations.map((location, index) => (
-              <Card key={index} className="p-4 hover:shadow-lg transition-all cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold">{location.city}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {location.members.toLocaleString()} members
-                      </p>
-                    </div>
-                  </div>
-                  <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    {location.growth}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Button variant="outline" size="lg" onClick={() => navigate('/community')}>
-              <Globe className="w-4 h-4 mr-2" />
-              Explore All Locations
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Live Activity Feed */}
-      <section className="py-12 md:py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-8">
-              <Badge className="mb-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
-                <Zap className="w-4 h-4 mr-2" />
-                Live Activity
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                What's Happening Now
-              </h2>
+              ))}
             </div>
-
-            <Card className="p-6">
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => {
-                  const Icon = activity.icon;
-                  return (
-                    <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{activity.text}</p>
-                      </div>
-                      <div className="flex items-center text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {activity.time}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
           </div>
         </div>
-      </section>
 
-      {/* Final CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Ready to Get Started?
+        {/* Habesha Communities Worldwide */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            Habesha Communities Worldwide
           </h2>
-          <p className="text-lg md:text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Join thousands of Habesha people connecting, learning, and growing together
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/auth/register')}
-              className="bg-white text-blue-600 hover:bg-gray-100 min-w-[200px]"
-            >
-              Create Free Account
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              onClick={() => navigate('/auth/login')}
-              className="border-white text-white hover:bg-white/10 min-w-[200px]"
-            >
-              Sign In
-            </Button>
+
+          {/* 2 Rows, Horizontal Scroll */}
+          <div className="overflow-x-auto hide-scrollbar -mx-4 px-4 mb-4">
+            <div className="grid grid-rows-2 gap-3 pb-2" style={{ gridAutoFlow: 'column', gridAutoColumns: 'minmax(140px, 1fr)' }}>
+              {countries.map((country) => (
+                <Button
+                  key={country.name}
+                  variant="outline"
+                  className="h-20 flex-col gap-1 whitespace-nowrap"
+                  onClick={() => navigate(`/community/country/${country.name.toLowerCase()}`)}
+                >
+                  <span className="text-3xl">{country.flag}</span>
+                  <span className="font-semibold text-sm">{country.name}</span>
+                  <span className="text-xs text-muted-foreground">{country.members}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate('/community/locations')}
+          >
+            <Globe className="w-4 h-4 mr-2" />
+            Explore All Locations
+          </Button>
+        </div>
+
+        {/* Live Activity Map */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            Live Activity - What's Happening Now
+          </h2>
+
+          {/* Map Placeholder */}
+          <Card className="p-0 overflow-hidden mb-6">
+            <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 relative">
+              {/* This will be replaced with actual map */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <MapPin className="w-12 h-12 text-blue-500 animate-pulse" />
+              </div>
+              <div className="absolute top-4 left-4 bg-white dark:bg-gray-800 px-3 py-1 rounded-full shadow-lg text-sm font-semibold">
+                🔴 Live
+              </div>
+            </div>
+          </Card>
+
+          {/* Stats Under Map - Compact */}
+          <div className="grid grid-cols-2 gap-3">
+            {stats.map((stat) => (
+              <Card key={stat.label} className="p-4 text-center">
+                <stat.icon className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <p className="text-2xl font-bold mb-1">{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
+              </Card>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* Hide Scrollbar CSS */}
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
-};
-
-export default Index;
+}
