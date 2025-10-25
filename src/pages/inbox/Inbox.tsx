@@ -258,10 +258,7 @@ const Inbox = () => {
           {/* Header */}
           <div className="p-4 border-b bg-background/95 backdrop-blur">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold flex items-center">
-                <MessageCircle className="w-6 h-6 mr-2" />
-                Messages
-              </h1>
+              <h1 className="text-2xl font-bold">Messages</h1>
               {totalUnread > 0 && (
                 <Badge className="bg-red-500 text-white">
                   {totalUnread}
@@ -281,38 +278,63 @@ const Inbox = () => {
               />
             </div>
 
-            {/* Filter Tabs */}
+            {/* Filter Tabs - Horizontal Scroll */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
               <Button
                 variant={filterType === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('all')}
+                className="flex-shrink-0"
               >
                 All
+              </Button>
+              <Button
+                variant={filterType === 'personal' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('personal')}
+                className="flex-shrink-0"
+              >
+                Personal
+              </Button>
+              <Button
+                variant={filterType === 'health' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('health')}
+                className="flex-shrink-0"
+              >
+                Health
               </Button>
               <Button
                 variant={filterType === 'match' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('match')}
+                className="flex-shrink-0"
               >
-                <Heart className="w-4 h-4 mr-1" />
                 Matches
               </Button>
               <Button
                 variant={filterType === 'mentor' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('mentor')}
+                className="flex-shrink-0"
               >
-                <Award className="w-4 h-4 mr-1" />
                 Mentors
               </Button>
               <Button
                 variant={filterType === 'marketplace' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterType('marketplace')}
+                className="flex-shrink-0"
               >
-                <ShoppingBag className="w-4 h-4 mr-1" />
                 Market
+              </Button>
+              <Button
+                variant={filterType === 'community' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterType('community')}
+                className="flex-shrink-0"
+              >
+                Community
               </Button>
             </div>
           </div>

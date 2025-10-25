@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useLanguage } from '@/store/language';
+import BackButton from '@/components/BackButton';
 import { 
   Search, Filter, Star, MapPin, DollarSign, Clock,
   Briefcase, GraduationCap, Heart, Code, TrendingUp,
@@ -38,6 +40,7 @@ interface Mentor {
 
 const MentorHome = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
@@ -46,11 +49,11 @@ const MentorHome = () => {
 
   const categories = [
     { id: 'all', name: 'All Categories', name_ti: 'ኩሉ', icon: Users, color: 'from-blue-500 to-cyan-500' },
-    { id: 'business', name: 'Business & Entrepreneurship', name_ti: 'ንግዲ', icon: Briefcase, color: 'from-green-500 to-emerald-500' },
-    { id: 'tech', name: 'Technology & Software', name_ti: 'ቴክኖሎጂ', icon: Code, color: 'from-purple-500 to-pink-500' },
-    { id: 'career', name: 'Career Development', name_ti: 'ስራሕ', icon: TrendingUp, color: 'from-amber-500 to-orange-500' },
-    { id: 'education', name: 'Education & Learning', name_ti: 'ትምህርቲ', icon: GraduationCap, color: 'from-blue-500 to-indigo-500' },
-    { id: 'life', name: 'Life & Personal Growth', name_ti: 'ህይወት', icon: Heart, color: 'from-rose-500 to-pink-500' },
+    { id: 'business', name: 'Business', name_ti: 'ንግዲ', icon: Briefcase, color: 'from-green-500 to-emerald-500' },
+    { id: 'tech', name: 'Technology', name_ti: 'ቴክኖሎጂ', icon: Code, color: 'from-purple-500 to-pink-500' },
+    { id: 'career', name: 'Career', name_ti: 'ስራሕ', icon: TrendingUp, color: 'from-amber-500 to-orange-500' },
+    { id: 'education', name: 'Education', name_ti: 'ትምህርቲ', icon: GraduationCap, color: 'from-blue-500 to-indigo-500' },
+    { id: 'life', name: 'Life', name_ti: 'ህይወት', icon: Heart, color: 'from-rose-500 to-pink-500' },
   ];
 
   // Demo mentor data
@@ -253,6 +256,7 @@ const MentorHome = () => {
             {categories.map((category) => {
               const Icon = category.icon;
               const isActive = selectedCategory === category.id;
+              const displayName = language !== 'EN' ? category.name_ti : category.name;
               
               return (
                 <Button
@@ -262,8 +266,7 @@ const MentorHome = () => {
                   className={`flex-shrink-0 ${isActive ? `bg-gradient-to-r ${category.color}` : ''}`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
-                  <span className="hidden md:inline">{category.name}</span>
-                  <span className="md:hidden">{category.name_ti}</span>
+                  {displayName}
                 </Button>
               );
             })}

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { 
-  Heart, Users, ShoppingBag, MessageCircle, Search,
-  MapPin, TrendingUp, Sparkles, ArrowRight, Star,
-  Calendar, Briefcase, Home, Award, Globe, Clock,
-  CheckCircle, Zap
+  Heart, Users, ShoppingBag, Search, MapPin, TrendingUp, 
+  Sparkles, ArrowRight, Star, Calendar, Briefcase, Award, 
+  CheckCircle, Home as HomeIcon, MessageCircle, BookOpen, 
+  Stethoscope, Lightbulb, Video
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,77 +20,78 @@ const Index = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Route to appropriate section based on search context
       navigate(`/community/forums?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  // Main platform features
+  // Main platform features with sub-categories
   const mainApps = [
     {
       id: 'matchmaking',
       title: 'Find Your Match',
-      title_ti: 'ርኸብ መጻምድኻ',
-      description: 'Connect with compatible Habesha singles for meaningful relationships',
       icon: Heart,
       color: 'from-pink-500 to-rose-500',
-      gradient: 'from-pink-500/10 to-rose-500/10',
-      stats: { active: '5.2K+', success: '1.2K+' },
       path: '/match',
-      features: ['Personality Quiz', 'Smart Matching', 'Family Mode', 'Video Dates']
+      subcategories: [
+        { name: 'Discover', path: '/match/discover', icon: Sparkles },
+        { name: 'My Matches', path: '/match/matches', icon: Heart },
+        { name: 'My Profile', path: '/match/profile', icon: Users },
+        { name: 'Take Quiz', path: '/match/quiz', icon: CheckCircle },
+        { name: 'Go Live', path: 'https://habeshalive.com', icon: Video, external: true }
+      ]
     },
     {
       id: 'mentorship',
       title: 'Get Mentored',
-      title_ti: 'ርከብ መምህር',
-      description: 'Learn from experienced Habesha professionals and experts',
       icon: Award,
       color: 'from-blue-500 to-cyan-500',
-      gradient: 'from-blue-500/10 to-cyan-500/10',
-      stats: { mentors: '350+', sessions: '2.1K+' },
       path: '/mentor',
-      features: ['Expert Mentors', 'Career Guidance', 'Tech Interviews', '1-on-1 Sessions']
+      subcategories: [
+        { name: 'Find Mentors', path: '/mentor', icon: Award },
+        { name: 'My Sessions', path: '/mentor/sessions', icon: Calendar },
+        { name: 'Become a Mentor', path: '/mentor/onboarding', icon: Star }
+      ]
     },
     {
       id: 'marketplace',
       title: 'Buy & Sell',
-      title_ti: 'ግዛእን ሽመትን',
-      description: 'Trade products, find housing, jobs, and services in the community',
       icon: ShoppingBag,
       color: 'from-green-500 to-emerald-500',
-      gradient: 'from-green-500/10 to-emerald-500/10',
-      stats: { listings: '5.2K+', deals: '8.5K+' },
       path: '/marketplace',
-      features: ['Products', 'Housing', 'Jobs', 'Services']
+      subcategories: [
+        { name: 'Products', path: '/marketplace?category=products', icon: ShoppingBag },
+        { name: 'Housing', path: '/marketplace?category=housing', icon: HomeIcon },
+        { name: 'Jobs & Gigs', path: '/marketplace?category=jobs', icon: Briefcase },
+        { name: 'Services', path: '/marketplace?category=services', icon: Star }
+      ]
     },
     {
       id: 'community',
       title: 'Join Community',
-      title_ti: 'ተሳተፍ',
-      description: 'Connect through forums, events, and groups with Habesha worldwide',
       icon: Users,
       color: 'from-purple-500 to-pink-500',
-      gradient: 'from-purple-500/10 to-pink-500/10',
-      stats: { members: '12.5K+', events: '850+' },
       path: '/community',
-      features: ['Forums', 'Events', 'Groups', 'Discussions']
+      subcategories: [
+        { name: 'Forums', path: '/community/forums', icon: MessageCircle },
+        { name: 'Events', path: '/community/events', icon: Calendar },
+        { name: 'Groups', path: '/community/groups', icon: Users }
+      ]
     }
   ];
 
   // Quick stats
   const platformStats = [
-    { label: 'Active Members', value: 25000, suffix: 'K+', icon: Users, color: 'text-blue-600 dark:text-blue-400' },
-    { label: 'Success Stories', value: 3500, suffix: 'K+', icon: Heart, color: 'text-pink-600 dark:text-pink-400' },
-    { label: 'Events Hosted', value: 850, suffix: '+', icon: Calendar, color: 'text-green-600 dark:text-green-400' },
-    { label: 'Active Listings', value: 5200, suffix: 'K+', icon: ShoppingBag, color: 'text-purple-600 dark:text-purple-400' }
+    { label: 'Active Members', value: 25000, suffix: 'K+', icon: Users },
+    { label: 'Success Stories', value: 3500, suffix: 'K+', icon: Heart },
+    { label: 'Events Hosted', value: 850, suffix: '+', icon: Calendar },
+    { label: 'Active Listings', value: 5200, suffix: 'K+', icon: ShoppingBag }
   ];
 
   // Featured success stories
   const successStories = [
     {
       id: '1',
-      type: 'match',
-      title: 'Found My Perfect Match!',
+      title: 'Sara & Michael Found Perfect Match!',
       story: 'Met through Habesha Connect and now planning our wedding. Forever grateful!',
       author: 'Sara & Michael',
       location: 'Washington DC',
@@ -98,8 +99,7 @@ const Index = () => {
     },
     {
       id: '2',
-      type: 'mentor',
-      title: 'Landed My Dream Job',
+      title: 'Daniel T. Landed My Dream Job',
       story: 'My mentor helped me prepare for FAANG interviews. Now at Google!',
       author: 'Daniel T.',
       location: 'San Francisco',
@@ -107,12 +107,19 @@ const Index = () => {
     },
     {
       id: '3',
-      type: 'marketplace',
-      title: 'Found Perfect Apartment',
+      title: 'Rahel W. Found Perfect Apartment',
       story: 'Found an amazing apartment near the Habesha community through the marketplace.',
       author: 'Rahel W.',
       location: 'Seattle',
       avatar: 'RW'
+    },
+    {
+      id: '4',
+      title: 'Michael Started His Business',
+      story: 'Connected with investors and partners through the community forums.',
+      author: 'Michael G.',
+      location: 'Toronto',
+      avatar: 'MG'
     }
   ];
 
@@ -123,199 +130,141 @@ const Index = () => {
     { city: 'Seattle, WA', members: 1654, growth: '+15%' },
     { city: 'Toronto, Canada', members: 1432, growth: '+10%' },
     { city: 'London, UK', members: 987, growth: '+18%' },
-    { city: 'Atlanta, GA', members: 876, growth: '+7%' }
-  ];
-
-  // Recent activity feed
-  const recentActivity = [
-    { type: 'match', text: 'New match made in Oakland, CA', time: '2 min ago', icon: Heart },
-    { type: 'event', text: 'Coffee Ceremony event starting soon', time: '5 min ago', icon: Calendar },
-    { type: 'marketplace', text: 'New job posting: Tigrinya Translator', time: '12 min ago', icon: Briefcase },
-    { type: 'mentor', text: 'Sarah booked a mentorship session', time: '18 min ago', icon: Award },
-    { type: 'community', text: 'New discussion in Culture & Traditions', time: '23 min ago', icon: MessageCircle }
+    { city: 'Atlanta, GA', members: 876, growth: '+7%' },
+    { city: 'Minneapolis, MN', members: 734, growth: '+9%' },
+    { city: 'Dallas, TX', members: 621, growth: '+11%' }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 20px 20px, hsl(var(--primary) / 0.05) 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
-
-        <div className="container mx-auto px-4 py-12 md:py-20 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <Badge className="mb-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Welcome to Habesha Connect
-            </Badge>
-
-            {/* Main Heading */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Your Habesha Community Hub
+    <div className="min-h-screen bg-background">
+      {/* Hero Section - Headway Style */}
+      <section className="bg-gradient-to-b from-muted/50 to-background pt-8 pb-12 md:pt-12 md:pb-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+              Welcome to Habesha Community
             </h1>
             
-            <p className="text-lg md:text-2xl text-muted-foreground mb-4">
+            <p className="text-lg md:text-xl text-muted-foreground mb-8">
               Connect, Learn, Trade & Grow Together
             </p>
-            
-            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              ማሕበረሰብና ኣብ ሓደ ቦታ • ንርኽበልና • ንምሃረልና • ንሕግዝልና
-            </p>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-8">
-              <Search className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search for matches, mentors, items, events, groups..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-14 md:h-16 pl-12 md:pl-16 pr-32 md:pr-36 text-base md:text-lg rounded-full border-2 shadow-xl"
-              />
-              <Button 
-                type="submit"
-                size="lg" 
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                Search
-              </Button>
+            {/* Search Bar - Headway Style */}
+            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-6">
+              <div className="relative">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search for matches, mentors, items..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-16 pl-16 pr-6 text-lg rounded-2xl border-2 shadow-lg"
+                />
+              </div>
             </form>
 
-            {/* Quick Actions */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <p className="text-sm text-muted-foreground mb-6">I want to</p>
+
+            {/* Quick Actions - Headway Style 2-Column Grid */}
+            <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto mb-4 overflow-x-auto">
               <Button 
                 variant="outline" 
-                size="lg"
+                className="h-auto py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/10"
+                onClick={() => navigate('/personal')}
+              >
+                <Lightbulb className="w-5 h-5" />
+                <span className="font-medium">Personal</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/10"
+                onClick={() => navigate('/health')}
+              >
+                <Stethoscope className="w-5 h-5" />
+                <span className="font-medium">Get Healthy</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/10"
                 onClick={() => navigate('/match')}
-                className="rounded-full"
               >
-                <Heart className="w-4 h-4 mr-2" />
-                Find Match
+                <Heart className="w-5 h-5" />
+                <span className="font-medium">Find Match</span>
               </Button>
               <Button 
                 variant="outline" 
-                size="lg"
+                className="h-auto py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/10"
                 onClick={() => navigate('/mentor')}
-                className="rounded-full"
               >
-                <Award className="w-4 h-4 mr-2" />
-                Get Mentored
+                <Award className="w-5 h-5" />
+                <span className="font-medium">Get Mentored</span>
               </Button>
               <Button 
                 variant="outline" 
-                size="lg"
+                className="h-auto py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/10"
                 onClick={() => navigate('/marketplace')}
-                className="rounded-full"
               >
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Browse Market
+                <ShoppingBag className="w-5 h-5" />
+                <span className="font-medium">Browse Market</span>
               </Button>
               <Button 
                 variant="outline" 
-                size="lg"
+                className="h-auto py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/10"
                 onClick={() => navigate('/community')}
-                className="rounded-full"
               >
-                <Users className="w-4 h-4 mr-2" />
-                Join Community
+                <Users className="w-5 h-5" />
+                <span className="font-medium">Join Community</span>
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Platform Stats */}
-      <section className="py-8 md:py-12 border-y bg-background/95 backdrop-blur">
+      {/* Main Apps with Subcategories - Headway Style */}
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-5xl mx-auto">
-            {platformStats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div key={index} className="text-center">
-                  <Icon className={`w-8 h-8 md:w-10 md:h-10 ${stat.color} mx-auto mb-3`} />
-                  <div className="text-2xl md:text-4xl font-bold mb-1">
-                    <AnimatedCounter end={stat.value} />
-                    <span className="text-lg">{stat.suffix}</span>
-                  </div>
-                  <div className="text-sm md:text-base text-muted-foreground">{stat.label}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Main Apps Grid */}
-      <section className="py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
               Everything You Need in One Place
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Four powerful platforms designed to help the Habesha community thrive
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
+          <div className="space-y-8 max-w-6xl mx-auto">
             {mainApps.map((app) => {
               const Icon = app.icon;
               
               return (
-                <Card
-                  key={app.id}
-                  className="group overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 hover:border-primary"
-                  onClick={() => navigate(app.path)}
-                >
-                  <div className={`p-6 md:p-8 bg-gradient-to-br ${app.gradient}`}>
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                        <Icon className="w-8 h-8 md:w-10 md:h-10 text-white" />
-                      </div>
-                      <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <Card key={app.id} className="p-6 hover:shadow-xl transition-all">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg`}>
+                      <Icon className="w-7 h-7 text-white" />
                     </div>
+                    <h3 className="text-xl md:text-2xl font-bold">{app.title}</h3>
+                  </div>
 
-                    {/* Content */}
-                    <h3 className="text-2xl md:text-3xl font-bold mb-2 group-hover:text-primary transition-colors">
-                      {app.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3">{app.title_ti}</p>
-                    <p className="text-muted-foreground mb-4">{app.description}</p>
-
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 mb-4 text-sm">
-                      {Object.entries(app.stats).map(([key, value]) => (
-                        <div key={key}>
-                          <div className="font-bold text-lg">{value}</div>
-                          <div className="text-muted-foreground capitalize">{key}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Features */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {app.features.map((feature) => (
-                        <Badge key={feature} variant="secondary" className="text-xs">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* CTA */}
-                    <Button 
-                      className={`w-full bg-gradient-to-r ${app.color} hover:opacity-90 transition-opacity`}
-                      size="lg"
-                    >
-                      Explore {app.title}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                  {/* Subcategory Buttons - Horizontal Scroll */}
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {app.subcategories.map((sub) => {
+                      const SubIcon = sub.icon;
+                      return (
+                        <Button
+                          key={sub.name}
+                          variant="outline"
+                          size="sm"
+                          className="flex-shrink-0 rounded-full"
+                          onClick={() => {
+                            if (sub.external) {
+                              window.open(sub.path, '_blank');
+                            } else {
+                              navigate(sub.path);
+                            }
+                          }}
+                        >
+                          <SubIcon className="w-4 h-4 mr-2" />
+                          {sub.name}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </Card>
               );
@@ -324,25 +273,25 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Success Stories */}
-      <section className="py-12 md:py-20 bg-muted/30">
+      {/* Success Stories - Horizontal Scroll */}
+      <section className="py-12 md:py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-              <Star className="w-4 h-4 mr-2" />
-              Success Stories
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
               Real Stories from Our Community
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground">
               See how Habesha Connect is making a difference
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {/* Horizontal Scroll with Half-Visible Next Item */}
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
             {successStories.map((story) => (
-              <Card key={story.id} className="p-6 hover:shadow-xl transition-all">
+              <Card 
+                key={story.id} 
+                className="flex-shrink-0 w-[85%] md:w-[45%] lg:w-[30%] p-6 hover:shadow-xl transition-all"
+              >
                 <div className="flex items-start gap-3 mb-4">
                   <Avatar className="w-12 h-12 border-2 border-primary/20">
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
@@ -350,7 +299,7 @@ const Index = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h4 className="font-bold">{story.author}</h4>
+                    <h4 className="font-bold text-sm">{story.author}</h4>
                     <div className="flex items-center text-xs text-muted-foreground">
                       <MapPin className="w-3 h-3 mr-1" />
                       {story.location}
@@ -360,54 +309,41 @@ const Index = () => {
 
                 <h3 className="font-bold text-lg mb-2">{story.title}</h3>
                 <p className="text-muted-foreground text-sm">{story.story}</p>
-
-                <div className="mt-4 pt-4 border-t">
-                  <Badge variant="secondary">
-                    {story.type === 'match' && <Heart className="w-3 h-3 mr-1" />}
-                    {story.type === 'mentor' && <Award className="w-3 h-3 mr-1" />}
-                    {story.type === 'marketplace' && <Home className="w-3 h-3 mr-1" />}
-                    {story.type.charAt(0).toUpperCase() + story.type.slice(1)}
-                  </Badge>
-                </div>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Trending Locations */}
-      <section className="py-12 md:py-20">
+      {/* Trending Locations - 2 Rows Horizontal Scroll */}
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-gradient-to-r from-green-500 to-teal-500 text-white">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Growing Communities
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
               Habesha Communities Worldwide
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground">
               Connect with Habesha people in major cities around the world
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {trendingLocations.map((location, index) => (
-              <Card key={index} className="p-4 hover:shadow-lg transition-all cursor-pointer">
+          {/* First Row */}
+          <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide mb-3">
+            {trendingLocations.slice(0, 4).map((location, index) => (
+              <Card key={index} className="flex-shrink-0 w-64 p-4 hover:shadow-lg transition-all cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-white" />
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold">{location.city}</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-bold text-sm">{location.city}</h4>
+                      <p className="text-xs text-muted-foreground">
                         {location.members.toLocaleString()} members
                       </p>
                     </div>
                   </div>
-                  <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                    <TrendingUp className="w-3 h-3 mr-1" />
+                  <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs">
                     {location.growth}
                   </Badge>
                 </div>
@@ -415,82 +351,119 @@ const Index = () => {
             ))}
           </div>
 
-          <div className="text-center mt-8">
-            <Button variant="outline" size="lg" onClick={() => navigate('/community')}>
-              <Globe className="w-4 h-4 mr-2" />
+          {/* Second Row */}
+          <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+            {trendingLocations.slice(4).map((location, index) => (
+              <Card key={index} className="flex-shrink-0 w-64 p-4 hover:shadow-lg transition-all cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm">{location.city}</h4>
+                      <p className="text-xs text-muted-foreground">
+                        {location.members.toLocaleString()} members
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs">
+                    {location.growth}
+                  </Badge>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-6">
+            <Button variant="outline" onClick={() => navigate('/community')}>
+              <MapPin className="w-4 h-4 mr-2" />
               Explore All Locations
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Live Activity Feed */}
-      <section className="py-12 md:py-20 bg-muted/30">
+      {/* Live Activity - Map & Stats */}
+      <section className="py-12 md:py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-8">
-              <Badge className="mb-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
-                <Zap className="w-4 h-4 mr-2" />
-                Live Activity
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                What's Happening Now
-              </h2>
-            </div>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+              Live Activity - What's Happening Now
+            </h2>
+          </div>
 
-            <Card className="p-6">
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => {
-                  const Icon = activity.icon;
-                  return (
-                    <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{activity.text}</p>
-                      </div>
-                      <div className="flex items-center text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {activity.time}
-                      </div>
-                    </div>
-                  );
-                })}
+          {/* Placeholder for Interactive Map */}
+          <div className="max-w-5xl mx-auto mb-8">
+            <div className="w-full h-64 md:h-96 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl border-2 flex items-center justify-center">
+              <div className="text-center">
+                <MapPin className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
+                <p className="text-muted-foreground">Interactive Global Map Coming Soon</p>
+                <p className="text-sm text-muted-foreground">Live activity across the globe</p>
               </div>
-            </Card>
+            </div>
+          </div>
+
+          {/* Compact Stats Below Map */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {platformStats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <Card key={index} className="p-4 text-center hover:shadow-lg transition-all">
+                  <Icon className="w-8 h-8 mx-auto mb-2 text-primary" />
+                  <div className="text-2xl font-bold mb-1">
+                    <AnimatedCounter end={stat.value} />
+                    <span className="text-sm">{stat.suffix}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{stat.label}</div>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
+      <section className="py-12 md:py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Ready to Get Started?
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Ready to Join Our Community?
           </h2>
           <p className="text-lg md:text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Join thousands of Habesha people connecting, learning, and growing together
+            Connect with thousands of Habesha people worldwide. Find love, get mentored, trade, and grow together.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
               size="lg" 
+              variant="secondary"
               onClick={() => navigate('/auth/register')}
-              className="bg-white text-blue-600 hover:bg-gray-100 min-w-[200px]"
+              className="text-lg px-8"
             >
-              Create Free Account
+              Sign Up Now
+              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button 
               size="lg" 
               variant="outline"
               onClick={() => navigate('/auth/login')}
-              className="border-white text-white hover:bg-white/10 min-w-[200px]"
+              className="text-lg px-8 bg-white/10 hover:bg-white/20 border-white text-white"
             >
               Sign In
             </Button>
           </div>
         </div>
       </section>
+
+      {/* Custom CSS for Horizontal Scrollbar */}
+      <style>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };
