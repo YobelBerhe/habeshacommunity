@@ -525,7 +525,16 @@ const VerificationReview = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           View
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = 'https://via.placeholder.com/800x600?text=ID+Front+Document';
+                            link.download = 'id-front.jpg';
+                            link.click();
+                          }}
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </Button>
@@ -561,7 +570,16 @@ const VerificationReview = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           View
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = 'https://via.placeholder.com/800x600?text=ID+Back+Document';
+                            link.download = 'id-back.jpg';
+                            link.click();
+                          }}
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </Button>
@@ -599,7 +617,16 @@ const VerificationReview = () => {
                         <Play className="w-4 h-4 mr-2" />
                         View Fullscreen
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+                          link.download = 'verification-video.mp4';
+                          link.click();
+                        }}
+                      >
                         <Download className="w-4 h-4 mr-2" />
                         Download
                       </Button>
@@ -685,7 +712,16 @@ const VerificationReview = () => {
             <Button variant="outline" onClick={() => setViewingDocument(null)}>
               Close
             </Button>
-            <Button>
+            <Button
+              onClick={() => {
+                if (viewingDocument) {
+                  const link = document.createElement('a');
+                  link.href = viewingDocument.url;
+                  link.download = viewingDocument.title.toLowerCase().replace(/\s+/g, '-');
+                  link.click();
+                }
+              }}
+            >
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
