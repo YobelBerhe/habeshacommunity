@@ -20,8 +20,8 @@ const Index = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Route to appropriate section based on search context
-      navigate(`/community/forums?search=${encodeURIComponent(searchQuery)}`);
+      // Route to browse page with search query
+      navigate(`/browse?query=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -186,44 +186,64 @@ const Index = () => {
               </Button>
             </form>
 
-            {/* Quick Actions */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/match')}
-                className="rounded-full"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Find Match
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/mentor')}
-                className="rounded-full"
-              >
-                <Award className="w-4 h-4 mr-2" />
-                Get Mentored
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/marketplace')}
-                className="rounded-full"
-              >
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Browse Market
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => navigate('/community')}
-                className="rounded-full"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Join Community
-              </Button>
+            {/* Quick Actions - Horizontal Scroll */}
+            <div className="w-full overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide -mx-4 px-4">
+              <div className="flex items-center gap-3 snap-x snap-mandatory touch-pan-x min-w-max">
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate('/match')}
+                  className="rounded-full shrink-0 snap-center"
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  Find Match
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate('/mentor')}
+                  className="rounded-full shrink-0 snap-center"
+                >
+                  <Award className="w-4 h-4 mr-2" />
+                  Get Mentored
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate('/marketplace')}
+                  className="rounded-full shrink-0 snap-center"
+                >
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Browse Market
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate('/community')}
+                  className="rounded-full shrink-0 snap-center"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Join Community
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate('/browse?category=personal')}
+                  className="rounded-full shrink-0 snap-center"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Personal
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate('/browse?category=health')}
+                  className="rounded-full shrink-0 snap-center"
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Health
+                </Button>
+              </div>
             </div>
           </div>
         </div>
