@@ -27,6 +27,7 @@ import BootstrapAuth from "@/components/BootstrapAuth";
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
 const Browse = lazy(() => import("./pages/Browse"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Chat = lazy(() => import("./pages/Chat"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Login = lazy(() => import("./pages/auth/Login"));
