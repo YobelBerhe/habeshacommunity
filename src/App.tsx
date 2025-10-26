@@ -98,6 +98,8 @@ const DashboardSettings = lazy(() => import("./pages/dashboard/Settings"));
 const VideoCall = lazy(() => import("./pages/video/VideoCall"));
 const PaymentCheckout = lazy(() => import("./pages/payment/PaymentCheckout"));
 const BillingHistory = lazy(() => import("./pages/payment/BillingHistory"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -297,6 +299,10 @@ const App = () => {
                 
                 {/* Notifications */}
                 <Route path="/notifications" element={<Notifications />} />
+                
+                {/* Legal Pages */}
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
                 
                 {/* 404 Catch-all - MUST BE LAST */}
                 <Route path="*" element={<div>Page not found</div>} />
