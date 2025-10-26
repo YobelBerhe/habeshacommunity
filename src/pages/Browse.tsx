@@ -204,6 +204,21 @@ export default function Browse() {
           
           if (filters.city) mentorQuery = mentorQuery.eq('city', filters.city);
           const { data: mentorData } = await mentorQuery;
+          
+          // Filter mentors by search query
+          let filteredMentors = mentorData || [];
+          if (filters.query) {
+            const lowerQ = filters.query.toLowerCase();
+            filteredMentors = mentorData?.filter((mentor: any) => {
+              const skills = mentor.mentor_skills?.map((s: any) => s.skill.toLowerCase()) || [];
+              return (
+                mentor.display_name?.toLowerCase().includes(lowerQ) ||
+                mentor.bio?.toLowerCase().includes(lowerQ) ||
+                mentor.topics?.some((t: string) => t.toLowerCase().includes(lowerQ)) ||
+                skills.some((s: string) => s.includes(lowerQ))
+              );
+            }) || [];
+          }
 
           // Fetch match profiles
           let matchQuery = supabase
@@ -213,6 +228,19 @@ export default function Browse() {
           
           if (filters.city) matchQuery = matchQuery.eq('city', filters.city);
           const { data: matchData } = await matchQuery;
+          
+          // Filter match profiles by search query
+          let filteredMatches = matchData || [];
+          if (filters.query) {
+            const lowerQ = filters.query.toLowerCase();
+            filteredMatches = matchData?.filter((profile: any) => {
+              return (
+                profile.display_name?.toLowerCase().includes(lowerQ) ||
+                profile.bio?.toLowerCase().includes(lowerQ) ||
+                profile.seeking?.toLowerCase().includes(lowerQ)
+              );
+            }) || [];
+          }
 
           // Process regular listings
           const processedRegular = regularData.map(row => ({
@@ -245,7 +273,7 @@ export default function Browse() {
           }));
 
           // Process mentors
-          const processedMentors = (mentorData || []).map(mentor => ({
+          const processedMentors = (filteredMentors || []).map(mentor => ({
             id: mentor.id,
             user_id: mentor.user_id,
             city: mentor.city,
@@ -275,7 +303,7 @@ export default function Browse() {
           }));
 
           // Process match profiles
-          const processedMatches = (matchData || []).map(profile => ({
+          const processedMatches = (filteredMatches || []).map(profile => ({
             id: profile.user_id,
             user_id: profile.user_id,
             city: profile.city,
