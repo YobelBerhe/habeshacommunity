@@ -131,15 +131,15 @@ export default function MentorHome() {
       {/* Categories - HORIZONTAL SNAP SCROLL */}
       <div className="sticky top-16 z-40 bg-background border-b">
         <div className="container mx-auto px-4 max-w-4xl py-3">
-          <div className="overflow-x-auto snap-x snap-mandatory hide-scrollbar">
-            <div className="flex gap-2 min-w-max">
+          <div className="overflow-x-auto snap-x snap-mandatory hide-scrollbar -mx-4 px-4">
+            <div className="flex gap-2 flex-nowrap">
               {categories.map((category) => (
                 <Button
                   key={category.id}
                   variant={activeCategory === category.id ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setActiveCategory(category.id)}
-                  className="snap-start whitespace-nowrap flex-shrink-0 gap-2"
+                  className="snap-center whitespace-nowrap flex-shrink-0 gap-2"
                 >
                   <category.icon className="w-4 h-4" />
                   {category.label}
@@ -299,8 +299,8 @@ export default function MentorHome() {
         .snap-x {
           scroll-snap-type: x mandatory;
         }
-        .snap-start {
-          scroll-snap-align: start;
+        .snap-center {
+          scroll-snap-align: center;
         }
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
@@ -313,5 +313,3 @@ export default function MentorHome() {
     </div>
   );
 }
-```
-
