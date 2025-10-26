@@ -33,6 +33,7 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Reset = lazy(() => import("./pages/auth/Reset"));
+const VerifyPhone = lazy(() => import("./pages/auth/VerifyPhone"));
 const Saved = lazy(() => import("./pages/account/Saved"));
 const Listings = lazy(() => import("./pages/account/Listings"));
 const Settings = lazy(() => import("./pages/account/Settings"));
