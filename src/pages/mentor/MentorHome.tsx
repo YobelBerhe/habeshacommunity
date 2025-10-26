@@ -45,12 +45,12 @@ const MentorHome = () => {
   const itemsPerPage = 6;
 
   const categories = [
-    { id: 'all', name: 'All Categories', name_ti: 'ኩሉ', icon: Users, color: 'from-blue-500 to-cyan-500' },
-    { id: 'business', name: 'Business & Entrepreneurship', name_ti: 'ንግዲ', icon: Briefcase, color: 'from-green-500 to-emerald-500' },
-    { id: 'tech', name: 'Technology & Software', name_ti: 'ቴክኖሎጂ', icon: Code, color: 'from-purple-500 to-pink-500' },
-    { id: 'career', name: 'Career Development', name_ti: 'ስራሕ', icon: TrendingUp, color: 'from-amber-500 to-orange-500' },
-    { id: 'education', name: 'Education & Learning', name_ti: 'ትምህርቲ', icon: GraduationCap, color: 'from-blue-500 to-indigo-500' },
-    { id: 'life', name: 'Life & Personal Growth', name_ti: 'ህይወት', icon: Heart, color: 'from-rose-500 to-pink-500' },
+    { id: 'all', name: 'All', icon: Users, color: 'from-blue-500 to-cyan-500' },
+    { id: 'business', name: 'Business', icon: Briefcase, color: 'from-green-500 to-emerald-500' },
+    { id: 'tech', name: 'Technology', icon: Code, color: 'from-purple-500 to-pink-500' },
+    { id: 'career', name: 'Jobs', icon: TrendingUp, color: 'from-amber-500 to-orange-500' },
+    { id: 'education', name: 'Education', icon: GraduationCap, color: 'from-blue-500 to-indigo-500' },
+    { id: 'life', name: 'Life', icon: Heart, color: 'from-rose-500 to-pink-500' },
   ];
 
   // Demo mentor data
@@ -249,24 +249,25 @@ const MentorHome = () => {
       {/* Categories */}
       <section className="py-6 md:py-8 border-b bg-background/95 backdrop-blur sticky top-14 md:top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide flex-nowrap snap-x snap-mandatory -mx-4 px-4 touch-pan-x">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === category.id;
-              
-              return (
-                <Button
-                  key={category.id}
-                  variant={isActive ? "default" : "outline"}
-                  onClick={() => handleFilterChange(() => setSelectedCategory(category.id))}
-                  className={`flex-shrink-0 snap-start whitespace-nowrap min-w-max ${isActive ? `bg-gradient-to-r ${category.color}` : ''}`}
-                >
-                  <Icon className="w-4 h-4 mr-2" />
-                  <span className="hidden md:inline">{category.name}</span>
-                  <span className="md:hidden">{category.name_ti}</span>
-                </Button>
-              );
-            })}
+          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+            <div className="flex items-center gap-2 pb-2 flex-nowrap snap-x snap-mandatory touch-pan-x">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                const isActive = selectedCategory === category.id;
+                
+                return (
+                  <Button
+                    key={category.id}
+                    variant={isActive ? "default" : "outline"}
+                    onClick={() => handleFilterChange(() => setSelectedCategory(category.id))}
+                    className={`flex-shrink-0 snap-center whitespace-nowrap ${isActive ? `bg-gradient-to-r ${category.color}` : ''}`}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {category.name}
+                  </Button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
