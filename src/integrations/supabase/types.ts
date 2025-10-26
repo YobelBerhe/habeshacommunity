@@ -77,6 +77,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bookings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_messages: {
@@ -682,6 +689,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mentor_availability_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mentor_badges: {
@@ -715,6 +729,13 @@ export type Database = {
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_badges_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
             referencedColumns: ["id"]
           },
         ]
@@ -785,6 +806,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mentor_bookings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mentor_credits: {
@@ -829,6 +857,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mentor_credits_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mentor_favorites: {
@@ -853,6 +888,13 @@ export type Database = {
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_favorites_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
             referencedColumns: ["id"]
           },
         ]
@@ -900,6 +942,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mentor_reviews_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mentor_skills: {
@@ -927,6 +976,13 @@ export type Database = {
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_skills_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
             referencedColumns: ["id"]
           },
         ]
@@ -974,6 +1030,13 @@ export type Database = {
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_verifications_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "public_mentors"
             referencedColumns: ["id"]
           },
         ]
@@ -1566,6 +1629,99 @@ export type Database = {
       }
     }
     Views: {
+      public_mentors: {
+        Row: {
+          available: boolean | null
+          avatar_url: string | null
+          badges_count: number | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          currency: string | null
+          display_name: string | null
+          expertise: string[] | null
+          hourly_rate_cents: number | null
+          id: string | null
+          industries: string[] | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          name: string | null
+          photos: string[] | null
+          price_cents: number | null
+          rating_avg: number | null
+          rating_count: number | null
+          skills: string[] | null
+          timezone: string | null
+          title: string | null
+          topics: string[] | null
+          updated_at: string | null
+          website_url: string | null
+          youtube_link: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          avatar_url?: string | null
+          badges_count?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: string | null
+          expertise?: string[] | null
+          hourly_rate_cents?: number | null
+          id?: string | null
+          industries?: string[] | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          name?: string | null
+          photos?: string[] | null
+          price_cents?: number | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          skills?: string[] | null
+          timezone?: string | null
+          title?: string | null
+          topics?: string[] | null
+          updated_at?: string | null
+          website_url?: string | null
+          youtube_link?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          avatar_url?: string | null
+          badges_count?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: string | null
+          expertise?: string[] | null
+          hourly_rate_cents?: number | null
+          id?: string | null
+          industries?: string[] | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          name?: string | null
+          photos?: string[] | null
+          price_cents?: number | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          skills?: string[] | null
+          timezone?: string | null
+          title?: string | null
+          topics?: string[] | null
+          updated_at?: string | null
+          website_url?: string | null
+          youtube_link?: string | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null
