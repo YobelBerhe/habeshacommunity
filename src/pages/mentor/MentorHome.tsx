@@ -249,8 +249,8 @@ const MentorHome = () => {
       {/* Categories */}
       <section className="py-6 md:py-8 border-b bg-background/95 backdrop-blur sticky top-14 md:top-16 z-40">
         <div className="container mx-auto px-4">
-          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-            <div className="flex items-center gap-2 pb-2 flex-nowrap snap-x snap-mandatory touch-pan-x">
+          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 snap-x snap-mandatory">
+            <div className="flex items-center gap-2 pb-2 flex-nowrap touch-pan-x">
               {categories.map((category) => {
                 const Icon = category.icon;
                 const isActive = selectedCategory === category.id;
