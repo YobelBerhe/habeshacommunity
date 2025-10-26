@@ -174,6 +174,7 @@ const App = () => {
                 {/* Main Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/browse" element={<Browse />} />
+                <Route path="/search" element={<SearchResults />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/l/:id" element={<ListingDetail />} />
                 

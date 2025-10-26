@@ -20,8 +20,8 @@ const Index = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Route to browse page with search query
-      navigate(`/browse?query=${encodeURIComponent(searchQuery)}`);
+      // Navigate to Google-style search results page
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -172,7 +172,7 @@ const Index = () => {
               <Search className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search for matches, mentors, items, events, groups..."
+                placeholder="Search for matches, mentors, products, events..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-14 md:h-16 pl-12 md:pl-16 pr-32 md:pr-36 text-base md:text-lg rounded-full border-2 shadow-xl"
