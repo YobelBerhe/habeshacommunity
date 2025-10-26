@@ -1,21 +1,35 @@
-import { useState } from 'react';
-import { 
-  Heart, Users, ShoppingBag, MessageCircle, Search,
-  MapPin, TrendingUp, Sparkles, ArrowRight, Star,
-  Calendar, Briefcase, Home, Award, Globe, Clock,
-  CheckCircle, Zap
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useNavigate } from 'react-router-dom';
-import AnimatedCounter from '@/components/AnimatedCounter';
+import { useState } from "react";
+import {
+  Heart,
+  Users,
+  ShoppingBag,
+  MessageCircle,
+  Search,
+  MapPin,
+  TrendingUp,
+  Sparkles,
+  ArrowRight,
+  Star,
+  Calendar,
+  Briefcase,
+  Home,
+  Award,
+  Globe,
+  Clock,
+  CheckCircle,
+  Zap,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,111 +42,117 @@ const Index = () => {
   // Main platform features
   const mainApps = [
     {
-      id: 'matchmaking',
-      title: 'Find Your Match',
-      title_ti: 'ርኸብ መጻምድኻ',
-      description: 'Connect with compatible Habesha singles for meaningful relationships',
+      id: "matchmaking",
+      title: "Find Your Match",
+      title_ti: "መጻምድኻ ርኸብ",
+      description: "Connect with compatible Habesha singles for meaningful relationships",
       icon: Heart,
-      color: 'from-pink-500 to-rose-500',
-      gradient: 'from-pink-500/10 to-rose-500/10',
-      stats: { active: '5.2K+', success: '1.2K+' },
-      path: '/match',
-      features: ['Personality Quiz', 'Smart Matching', 'Family Mode', 'Video Dates']
+      color: "from-pink-500 to-rose-500",
+      gradient: "from-pink-500/10 to-rose-500/10",
+      stats: { active: "5.2K+", success: "1.2K+" },
+      path: "/match",
+      features: ["Personality Quiz", "Smart Matching", "Family Mode", "Video Dates"],
     },
     {
-      id: 'mentorship',
-      title: 'Get Mentored',
-      title_ti: 'ርከብ መምህር',
-      description: 'Learn from experienced Habesha professionals and experts',
+      id: "mentorship",
+      title: "Get Mentored",
+      title_ti: "መምህር ርከብ",
+      description: "Learn from experienced Habesha professionals and experts",
       icon: Award,
-      color: 'from-blue-500 to-cyan-500',
-      gradient: 'from-blue-500/10 to-cyan-500/10',
-      stats: { mentors: '350+', sessions: '2.1K+' },
-      path: '/mentor',
-      features: ['Expert Mentors', 'Career Guidance', 'Tech Interviews', '1-on-1 Sessions']
+      color: "from-blue-500 to-cyan-500",
+      gradient: "from-blue-500/10 to-cyan-500/10",
+      stats: { mentors: "350+", sessions: "2.1K+" },
+      path: "/mentor",
+      features: ["Expert Mentors", "Career Guidance", "Tech Interviews", "1-on-1 Sessions"],
     },
     {
-      id: 'marketplace',
-      title: 'Buy & Sell',
-      title_ti: 'ግዛእን ሽመትን',
-      description: 'Trade products, find housing, jobs, and services in the community',
+      id: "marketplace",
+      title: "Buy & Sell",
+      title_ti: "ግዛእን ሽመትን",
+      description: "Trade products, find housing, jobs, and services in the community",
       icon: ShoppingBag,
-      color: 'from-green-500 to-emerald-500',
-      gradient: 'from-green-500/10 to-emerald-500/10',
-      stats: { listings: '5.2K+', deals: '8.5K+' },
-      path: '/marketplace',
-      features: ['Products', 'Housing', 'Jobs', 'Services']
+      color: "from-green-500 to-emerald-500",
+      gradient: "from-green-500/10 to-emerald-500/10",
+      stats: { listings: "5.2K+", deals: "8.5K+" },
+      path: "/marketplace",
+      features: ["Products", "Housing", "Jobs", "Services"],
     },
     {
-      id: 'community',
-      title: 'Join Community',
-      title_ti: 'ተሳተፍ',
-      description: 'Connect through forums, events, and groups with Habesha worldwide',
+      id: "community",
+      title: "Join Community",
+      title_ti: "ተሳተፍ",
+      description: "Connect through forums, events, and groups with Habesha worldwide",
       icon: Users,
-      color: 'from-purple-500 to-pink-500',
-      gradient: 'from-purple-500/10 to-pink-500/10',
-      stats: { members: '12.5K+', events: '850+' },
-      path: '/community',
-      features: ['Forums', 'Events', 'Groups', 'Discussions']
-    }
+      color: "from-purple-500 to-pink-500",
+      gradient: "from-purple-500/10 to-pink-500/10",
+      stats: { members: "12.5K+", events: "850+" },
+      path: "/community",
+      features: ["Forums", "Events", "Groups", "Discussions"],
+    },
   ];
 
   // Quick stats
   const platformStats = [
-    { label: 'Active Members', value: 25000, suffix: 'K+', icon: Users, color: 'text-blue-600 dark:text-blue-400' },
-    { label: 'Success Stories', value: 3500, suffix: 'K+', icon: Heart, color: 'text-pink-600 dark:text-pink-400' },
-    { label: 'Events Hosted', value: 850, suffix: '+', icon: Calendar, color: 'text-green-600 dark:text-green-400' },
-    { label: 'Active Listings', value: 5200, suffix: 'K+', icon: ShoppingBag, color: 'text-purple-600 dark:text-purple-400' }
+    { label: "Active Members", value: 25, suffix: "K+", icon: Users, color: "text-blue-600 dark:text-blue-400" },
+    { label: "Success Stories", value: 35, suffix: "K+", icon: Heart, color: "text-pink-600 dark:text-pink-400" },
+    { label: "Events Hosted", value: 850, suffix: "+", icon: Calendar, color: "text-green-600 dark:text-green-400" },
+    {
+      label: "Active Listings",
+      value: 52,
+      suffix: "K+",
+      icon: ShoppingBag,
+      color: "text-purple-600 dark:text-purple-400",
+    },
   ];
 
   // Featured success stories
   const successStories = [
     {
-      id: '1',
-      type: 'match',
-      title: 'Found My Perfect Match!',
-      story: 'Met through Habesha Connect and now planning our wedding. Forever grateful!',
-      author: 'Sara & Michael',
-      location: 'Washington DC',
-      avatar: 'SM'
+      id: "1",
+      type: "match",
+      title: "Found My Perfect Match!",
+      story: "Met through Habesha Connect and now planning our wedding. Forever grateful!",
+      author: "Sara & Michael",
+      location: "Washington DC",
+      avatar: "SM",
     },
     {
-      id: '2',
-      type: 'mentor',
-      title: 'Landed My Dream Job',
-      story: 'My mentor helped me prepare for FAANG interviews. Now at Google!',
-      author: 'Daniel T.',
-      location: 'San Francisco',
-      avatar: 'DT'
+      id: "2",
+      type: "mentor",
+      title: "Landed My Dream Job",
+      story: "My mentor helped me prepare for FAANG interviews. Now at Google!",
+      author: "Daniel T.",
+      location: "San Francisco",
+      avatar: "DT",
     },
     {
-      id: '3',
-      type: 'marketplace',
-      title: 'Found Perfect Apartment',
-      story: 'Found an amazing apartment near the Habesha community through the marketplace.',
-      author: 'Rahel W.',
-      location: 'Seattle',
-      avatar: 'RW'
-    }
+      id: "3",
+      type: "marketplace",
+      title: "Found Perfect Apartment",
+      story: "Found an amazing apartment near the Habesha community through the marketplace.",
+      author: "Rahel W.",
+      location: "Seattle",
+      avatar: "RW",
+    },
   ];
 
   // Trending locations
   const trendingLocations = [
-    { city: 'Washington DC', members: 2341, growth: '+12%' },
-    { city: 'Oakland, CA', members: 1876, growth: '+8%' },
-    { city: 'Seattle, WA', members: 1654, growth: '+15%' },
-    { city: 'Toronto, Canada', members: 1432, growth: '+10%' },
-    { city: 'London, UK', members: 987, growth: '+18%' },
-    { city: 'Atlanta, GA', members: 876, growth: '+7%' }
+    { city: "Washington DC", members: 2341, growth: "+12%" },
+    { city: "Oakland, CA", members: 1876, growth: "+8%" },
+    { city: "Seattle, WA", members: 1654, growth: "+15%" },
+    { city: "Toronto, Canada", members: 1432, growth: "+10%" },
+    { city: "London, UK", members: 987, growth: "+18%" },
+    { city: "Atlanta, GA", members: 876, growth: "+7%" },
   ];
 
   // Recent activity feed
   const recentActivity = [
-    { type: 'match', text: 'New match made in Oakland, CA', time: '2 min ago', icon: Heart },
-    { type: 'event', text: 'Coffee Ceremony event starting soon', time: '5 min ago', icon: Calendar },
-    { type: 'marketplace', text: 'New job posting: Tigrinya Translator', time: '12 min ago', icon: Briefcase },
-    { type: 'mentor', text: 'Sarah booked a mentorship session', time: '18 min ago', icon: Award },
-    { type: 'community', text: 'New discussion in Culture & Traditions', time: '23 min ago', icon: MessageCircle }
+    { type: "match", text: "New match made in Oakland, CA", time: "2 min ago", icon: Heart },
+    { type: "event", text: "Coffee Ceremony event starting soon", time: "5 min ago", icon: Calendar },
+    { type: "marketplace", text: "New job posting: Tigrinya Translator", time: "12 min ago", icon: Briefcase },
+    { type: "mentor", text: "Sarah booked a mentorship session", time: "18 min ago", icon: Award },
+    { type: "community", text: "New discussion in Culture & Traditions", time: "23 min ago", icon: MessageCircle },
   ];
 
   return (
@@ -141,30 +161,31 @@ const Index = () => {
       <section className="relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 20px 20px, hsl(var(--primary) / 0.05) 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "radial-gradient(circle at 20px 20px, hsl(var(--primary) / 0.05) 1px, transparent 0)",
+            backgroundSize: "40px 40px",
+          }}
+        />
 
         <div className="container mx-auto px-4 py-12 md:py-20 relative">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
             <Badge className="mb-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600">
               <Sparkles className="w-4 h-4 mr-2" />
-              Welcome to Habesha Connect
+              Welcome to Habesha Community
             </Badge>
 
             {/* Main Heading */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Your Habesha Community Hub
             </h1>
-            
-            <p className="text-lg md:text-2xl text-muted-foreground mb-4">
-              Connect, Learn, Trade & Grow Together
-            </p>
-            
+
+            <p className="text-lg md:text-2xl text-muted-foreground mb-4">Connect, Learn, Trade & Grow Together</p>
+
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              ማሕበረሰብና ኣብ ሓደ ቦታ • ንርኽበልና • ንምሃረልና • ንሕግዝልና
+              ሕብረተሰብና ኣብ ሓደ ቦታ • ንራኸበሉ • ንምሃረሉ • ንሕገዘሉ
             </p>
 
             {/* Search Bar */}
@@ -177,9 +198,9 @@ const Index = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-14 md:h-16 pl-12 md:pl-16 pr-32 md:pr-36 text-base md:text-lg rounded-full border-2 shadow-xl"
               />
-              <Button 
+              <Button
                 type="submit"
-                size="lg" 
+                size="lg"
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
                 Search
@@ -189,55 +210,55 @@ const Index = () => {
             {/* Quick Actions - Horizontal Scroll */}
             <div className="w-full overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide -mx-4 px-4">
               <div className="flex items-center gap-3 snap-x snap-mandatory touch-pan-x min-w-max">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
-                  onClick={() => navigate('/match')}
+                  onClick={() => navigate("/match")}
                   className="rounded-full shrink-0 snap-center"
                 >
                   <Heart className="w-4 h-4 mr-2" />
                   Find Match
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
-                  onClick={() => navigate('/mentor')}
+                  onClick={() => navigate("/mentor")}
                   className="rounded-full shrink-0 snap-center"
                 >
                   <Award className="w-4 h-4 mr-2" />
                   Get Mentored
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
-                  onClick={() => navigate('/marketplace')}
+                  onClick={() => navigate("/marketplace")}
                   className="rounded-full shrink-0 snap-center"
                 >
                   <ShoppingBag className="w-4 h-4 mr-2" />
                   Browse Market
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
-                  onClick={() => navigate('/community')}
+                  onClick={() => navigate("/community")}
                   className="rounded-full shrink-0 snap-center"
                 >
                   <Users className="w-4 h-4 mr-2" />
                   Join Community
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
-                  onClick={() => navigate('/browse?category=personal')}
+                  onClick={() => navigate("/browse?category=personal")}
                   className="rounded-full shrink-0 snap-center"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Personal
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
-                  onClick={() => navigate('/browse?category=health')}
+                  onClick={() => navigate("/browse?category=health")}
                   className="rounded-full shrink-0 snap-center"
                 >
                   <Zap className="w-4 h-4 mr-2" />
@@ -274,9 +295,7 @@ const Index = () => {
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need in One Place
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need in One Place</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Four powerful platforms designed to help the Habesha community thrive
             </p>
@@ -285,7 +304,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
             {mainApps.map((app) => {
               const Icon = app.icon;
-              
+
               return (
                 <Card
                   key={app.id}
@@ -295,7 +314,9 @@ const Index = () => {
                   <div className={`p-6 md:p-8 bg-gradient-to-br ${app.gradient}`}>
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
-                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                      <div
+                        className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+                      >
                         <Icon className="w-8 h-8 md:w-10 md:h-10 text-white" />
                       </div>
                       <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -329,7 +350,7 @@ const Index = () => {
                     </div>
 
                     {/* CTA */}
-                    <Button 
+                    <Button
                       className={`w-full bg-gradient-to-r ${app.color} hover:opacity-90 transition-opacity`}
                       size="lg"
                     >
@@ -352,9 +373,7 @@ const Index = () => {
               <Star className="w-4 h-4 mr-2" />
               Success Stories
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Real Stories from Our Community
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Real Stories from Our Community</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               See how Habesha Connect is making a difference
             </p>
@@ -383,9 +402,9 @@ const Index = () => {
 
                 <div className="mt-4 pt-4 border-t">
                   <Badge variant="secondary">
-                    {story.type === 'match' && <Heart className="w-3 h-3 mr-1" />}
-                    {story.type === 'mentor' && <Award className="w-3 h-3 mr-1" />}
-                    {story.type === 'marketplace' && <Home className="w-3 h-3 mr-1" />}
+                    {story.type === "match" && <Heart className="w-3 h-3 mr-1" />}
+                    {story.type === "mentor" && <Award className="w-3 h-3 mr-1" />}
+                    {story.type === "marketplace" && <Home className="w-3 h-3 mr-1" />}
                     {story.type.charAt(0).toUpperCase() + story.type.slice(1)}
                   </Badge>
                 </div>
@@ -403,9 +422,7 @@ const Index = () => {
               <TrendingUp className="w-4 h-4 mr-2" />
               Growing Communities
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Habesha Communities Worldwide
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Habesha Communities Worldwide</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Connect with Habesha people in major cities around the world
             </p>
@@ -421,9 +438,7 @@ const Index = () => {
                     </div>
                     <div>
                       <h4 className="font-bold">{location.city}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {location.members.toLocaleString()} members
-                      </p>
+                      <p className="text-sm text-muted-foreground">{location.members.toLocaleString()} members</p>
                     </div>
                   </div>
                   <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
@@ -436,7 +451,7 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-8">
-            <Button variant="outline" size="lg" onClick={() => navigate('/community')}>
+            <Button variant="outline" size="lg" onClick={() => navigate("/community")}>
               <Globe className="w-4 h-4 mr-2" />
               Explore All Locations
             </Button>
@@ -453,9 +468,7 @@ const Index = () => {
                 <Zap className="w-4 h-4 mr-2" />
                 Live Activity
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                What's Happening Now
-              </h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">What's Happening Now</h2>
             </div>
 
             <Card className="p-6">
@@ -463,7 +476,10 @@ const Index = () => {
                 {recentActivity.map((activity, index) => {
                   const Icon = activity.icon;
                   return (
-                    <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div
+                      key={index}
+                      className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                         <Icon className="w-5 h-5 text-white" />
                       </div>
@@ -486,24 +502,22 @@ const Index = () => {
       {/* Final CTA */}
       <section className="py-16 md:py-24 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Ready to Get Started?
-          </h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to Get Started?</h2>
           <p className="text-lg md:text-xl opacity-90 mb-8 max-w-2xl mx-auto">
             Join thousands of Habesha people connecting, learning, and growing together
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/auth/register')}
+            <Button
+              size="lg"
+              onClick={() => navigate("/auth/register")}
               className="bg-white text-blue-600 hover:bg-gray-100 min-w-[200px]"
             >
               Create Free Account
             </Button>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               variant="outline"
-              onClick={() => navigate('/auth/login')}
+              onClick={() => navigate("/auth/login")}
               className="border-white text-white hover:bg-white/10 min-w-[200px]"
             >
               Sign In
