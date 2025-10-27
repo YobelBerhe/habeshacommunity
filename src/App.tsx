@@ -66,6 +66,8 @@ const BookingSuccess = lazy(() => import("./pages/mentor/BookingSuccess"));
 const BookSession = lazy(() => import("./pages/mentor/BookSession")); // NEW IMPORT
 const CommunityHome = lazy(() => import("./pages/community/CommunityHome"));
 const Forums = lazy(() => import("./pages/community/Forums"));
+const ForumsNew = lazy(() => import("./pages/community/ForumsNew"));
+const BibleGroups = lazy(() => import("./pages/community/BibleGroups"));
 const Events = lazy(() => import("./pages/community/Events"));
 const Groups = lazy(() => import("./pages/community/Groups"));
 const MentorPayouts = lazy(() => import("./pages/mentor/MentorPayouts"));
@@ -311,6 +313,8 @@ const App = () => {
                 {/* Community Routes */}
                 <Route path="/community" element={<CommunityHome />} />
                 <Route path="/community/forums" element={<Forums />} />
+                <Route path="/community/forums-new" element={<ForumsNew />} />
+                <Route path="/community/bible-groups" element={<BibleGroups />} />
                 <Route path="/community/events" element={<Events />} />
                 <Route path="/community/groups" element={<Groups />} />
                 

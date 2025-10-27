@@ -3,7 +3,7 @@ import {
   MessageCircle, Calendar, Users, TrendingUp, Clock,
   MapPin, Heart, MessageSquare, User, ArrowRight,
   Sparkles, Globe, Coffee, Film, Music, Book,
-  Utensils, Dumbbell, Plus, Search, Filter, CheckCircle
+  Utensils, Dumbbell, Plus, Search, Filter, CheckCircle, BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -270,11 +270,18 @@ const CommunityHome = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Button
-              onClick={() => navigate('/community/forums')}
+              onClick={() => navigate('/community/forums-new')}
               className="flex-shrink-0 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
-              Browse Forums
+              Community Forums
+            </Button>
+            <Button
+              onClick={() => navigate('/community/bible-groups')}
+              className="flex-shrink-0 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Bible Groups
             </Button>
             <Button
               onClick={() => navigate('/community/events')}
