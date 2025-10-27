@@ -14,6 +14,176 @@ export type Database = {
   }
   public: {
     Tables: {
+      bible_books: {
+        Row: {
+          abbreviation: string | null
+          book_order: number
+          canon: string
+          chapters_count: number
+          created_at: string | null
+          id: number
+          name: string
+          usfm: string
+        }
+        Insert: {
+          abbreviation?: string | null
+          book_order: number
+          canon: string
+          chapters_count: number
+          created_at?: string | null
+          id?: number
+          name: string
+          usfm: string
+        }
+        Update: {
+          abbreviation?: string | null
+          book_order?: number
+          canon?: string
+          chapters_count?: number
+          created_at?: string | null
+          id?: number
+          name?: string
+          usfm?: string
+        }
+        Relationships: []
+      }
+      bible_chapters: {
+        Row: {
+          book_id: number | null
+          canonical: boolean | null
+          chapter_number: number
+          created_at: string | null
+          id: number
+          usfm: string
+          verses_count: number
+        }
+        Insert: {
+          book_id?: number | null
+          canonical?: boolean | null
+          chapter_number: number
+          created_at?: string | null
+          id?: number
+          usfm: string
+          verses_count: number
+        }
+        Update: {
+          book_id?: number | null
+          canonical?: boolean | null
+          chapter_number?: number
+          created_at?: string | null
+          id?: number
+          usfm?: string
+          verses_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bible_chapters_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "bible_books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bible_verses: {
+        Row: {
+          audio_url: string | null
+          chapter_id: number | null
+          created_at: string | null
+          id: number
+          text: string
+          text_searchable: unknown
+          usfm: string
+          verse_number: number
+          version_id: number | null
+        }
+        Insert: {
+          audio_url?: string | null
+          chapter_id?: number | null
+          created_at?: string | null
+          id?: number
+          text: string
+          text_searchable?: unknown
+          usfm: string
+          verse_number: number
+          version_id?: number | null
+        }
+        Update: {
+          audio_url?: string | null
+          chapter_id?: number | null
+          created_at?: string | null
+          id?: number
+          text?: string
+          text_searchable?: unknown
+          usfm?: string
+          verse_number?: number
+          version_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bible_verses_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "bible_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bible_verses_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bible_versions: {
+        Row: {
+          abbreviation: string
+          audio_available: boolean | null
+          copyright: string | null
+          created_at: string | null
+          description: string | null
+          id: number
+          language_code: string
+          language_name: string
+          name: string
+          publisher: string | null
+          text_available: boolean | null
+          updated_at: string | null
+          version_id: number
+        }
+        Insert: {
+          abbreviation: string
+          audio_available?: boolean | null
+          copyright?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          language_code: string
+          language_name: string
+          name: string
+          publisher?: string | null
+          text_available?: boolean | null
+          updated_at?: string | null
+          version_id: number
+        }
+        Update: {
+          abbreviation?: string
+          audio_available?: boolean | null
+          copyright?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          language_code?: string
+          language_name?: string
+          name?: string
+          publisher?: string | null
+          text_available?: boolean | null
+          updated_at?: string | null
+          version_id?: number
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           amount_cents: number
@@ -1396,6 +1566,215 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_plan_days: {
+        Row: {
+          created_at: string | null
+          day_number: number
+          description: string | null
+          id: number
+          plan_id: number | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_number: number
+          description?: string | null
+          id?: number
+          plan_id?: number | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_number?: number
+          description?: string | null
+          id?: number
+          plan_id?: number | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_plan_days_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "popular_reading_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_plan_days_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_plan_publishers: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          logo_url: string | null
+          name: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          logo_url?: string | null
+          name: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          logo_url?: string | null
+          name?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      reading_plan_segments: {
+        Row: {
+          content_html: string | null
+          content_text: string | null
+          created_at: string | null
+          day_id: number | null
+          id: number
+          segment_order: number
+          title: string | null
+          type: string
+          usfm: string | null
+          version_id: number | null
+          video_thumbnail: string | null
+          video_url: string | null
+        }
+        Insert: {
+          content_html?: string | null
+          content_text?: string | null
+          created_at?: string | null
+          day_id?: number | null
+          id?: number
+          segment_order: number
+          title?: string | null
+          type: string
+          usfm?: string | null
+          version_id?: number | null
+          video_thumbnail?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          content_html?: string | null
+          content_text?: string | null
+          created_at?: string | null
+          day_id?: number | null
+          id?: number
+          segment_order?: number
+          title?: string | null
+          type?: string
+          usfm?: string | null
+          version_id?: number | null
+          video_thumbnail?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_plan_segments_day_id_fkey"
+            columns: ["day_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plan_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_plan_segments_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_plans: {
+        Row: {
+          about_html: string | null
+          about_text: string | null
+          average_rating: number | null
+          categories: Json | null
+          cover_image_url: string | null
+          created_at: string | null
+          days_count: number
+          description: string | null
+          external_id: number | null
+          gradient: Json | null
+          id: number
+          languages: Json | null
+          popularity_rank: number | null
+          premium: boolean | null
+          publisher_id: number | null
+          slug: string
+          thumbnail_url: string | null
+          title: string
+          total_ratings: number | null
+          total_subscriptions: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          about_html?: string | null
+          about_text?: string | null
+          average_rating?: number | null
+          categories?: Json | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          days_count: number
+          description?: string | null
+          external_id?: number | null
+          gradient?: Json | null
+          id?: number
+          languages?: Json | null
+          popularity_rank?: number | null
+          premium?: boolean | null
+          publisher_id?: number | null
+          slug: string
+          thumbnail_url?: string | null
+          title: string
+          total_ratings?: number | null
+          total_subscriptions?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          about_html?: string | null
+          about_text?: string | null
+          average_rating?: number | null
+          categories?: Json | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          days_count?: number
+          description?: string | null
+          external_id?: number | null
+          gradient?: Json | null
+          id?: number
+          languages?: Json | null
+          popularity_rank?: number | null
+          premium?: boolean | null
+          publisher_id?: number | null
+          slug?: string
+          thumbnail_url?: string | null
+          title?: string
+          total_ratings?: number | null
+          total_subscriptions?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_plans_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plan_publishers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           created_at: string | null
@@ -1606,6 +1985,243 @@ export type Database = {
           },
         ]
       }
+      user_bible_preferences: {
+        Row: {
+          created_at: string | null
+          cross_references: boolean | null
+          daily_reminder_enabled: boolean | null
+          daily_reminder_time: string | null
+          default_version_id: number | null
+          font_size: string | null
+          red_letter_words: boolean | null
+          show_verse_numbers: boolean | null
+          theme: string | null
+          updated_at: string | null
+          user_id: string
+          verse_of_day_notification: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          cross_references?: boolean | null
+          daily_reminder_enabled?: boolean | null
+          daily_reminder_time?: string | null
+          default_version_id?: number | null
+          font_size?: string | null
+          red_letter_words?: boolean | null
+          show_verse_numbers?: boolean | null
+          theme?: string | null
+          updated_at?: string | null
+          user_id: string
+          verse_of_day_notification?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          cross_references?: boolean | null
+          daily_reminder_enabled?: boolean | null
+          daily_reminder_time?: string | null
+          default_version_id?: number | null
+          font_size?: string | null
+          red_letter_words?: boolean | null
+          show_verse_numbers?: boolean | null
+          theme?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verse_of_day_notification?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bible_preferences_default_version_id_fkey"
+            columns: ["default_version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_daily_readings: {
+        Row: {
+          chapters_read: number[] | null
+          created_at: string | null
+          id: string
+          plans_engaged: number[] | null
+          read_date: string
+          time_spent_seconds: number | null
+          user_id: string
+          verses_read: number[] | null
+        }
+        Insert: {
+          chapters_read?: number[] | null
+          created_at?: string | null
+          id?: string
+          plans_engaged?: number[] | null
+          read_date: string
+          time_spent_seconds?: number | null
+          user_id: string
+          verses_read?: number[] | null
+        }
+        Update: {
+          chapters_read?: number[] | null
+          created_at?: string | null
+          id?: string
+          plans_engaged?: number[] | null
+          read_date?: string
+          time_spent_seconds?: number | null
+          user_id?: string
+          verses_read?: number[] | null
+        }
+        Relationships: []
+      }
+      user_day_completions: {
+        Row: {
+          completed_at: string | null
+          day_id: number | null
+          id: string
+          subscription_id: string | null
+          time_spent_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          day_id?: number | null
+          id?: string
+          subscription_id?: string | null
+          time_spent_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          day_id?: number | null
+          id?: string
+          subscription_id?: string | null
+          time_spent_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_day_completions_day_id_fkey"
+            columns: ["day_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plan_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_day_completions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_active_plans_with_progress"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_day_completions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_plan_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_plan_subscriptions: {
+        Row: {
+          completed_at: string | null
+          completed_days: number[] | null
+          created_at: string | null
+          current_day: number | null
+          id: string
+          last_read_at: string | null
+          notes: string | null
+          plan_id: number | null
+          rating: number | null
+          review: string | null
+          started_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_days?: number[] | null
+          created_at?: string | null
+          current_day?: number | null
+          id?: string
+          last_read_at?: string | null
+          notes?: string | null
+          plan_id?: number | null
+          rating?: number | null
+          review?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_days?: number[] | null
+          created_at?: string | null
+          current_day?: number | null
+          id?: string
+          last_read_at?: string | null
+          notes?: string | null
+          plan_id?: number | null
+          rating?: number | null
+          review?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_plan_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "popular_reading_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_plan_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_reading_streaks: {
+        Row: {
+          created_at: string | null
+          current_streak: number | null
+          id: string
+          last_read_date: string | null
+          longest_streak: number | null
+          streak_start_date: string | null
+          total_days_read: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_read_date?: string | null
+          longest_streak?: number | null
+          streak_start_date?: string | null
+          total_days_read?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_read_date?: string | null
+          longest_streak?: number | null
+          streak_start_date?: string | null
+          total_days_read?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1627,8 +2243,144 @@ export type Database = {
         }
         Relationships: []
       }
+      user_verse_bookmarks: {
+        Row: {
+          created_at: string | null
+          id: string
+          note: string | null
+          tags: string[] | null
+          user_id: string
+          verse_id: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          note?: string | null
+          tags?: string[] | null
+          user_id: string
+          verse_id?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          note?: string | null
+          tags?: string[] | null
+          user_id?: string
+          verse_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_verse_bookmarks_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "bible_verses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_verse_highlights: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          id: string
+          is_public: boolean | null
+          note: string | null
+          updated_at: string | null
+          user_id: string
+          verse_id: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          is_public?: boolean | null
+          note?: string | null
+          updated_at?: string | null
+          user_id: string
+          verse_id?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          is_public?: boolean | null
+          note?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verse_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_verse_highlights_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "bible_verses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verse_of_the_day: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: number
+          images: Json | null
+          usfm: string
+          verse_id: number | null
+          version_id: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: number
+          images?: Json | null
+          usfm: string
+          verse_id?: number | null
+          version_id?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: number
+          images?: Json | null
+          usfm?: string
+          verse_id?: number | null
+          version_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verse_of_the_day_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "bible_verses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verse_of_the_day_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
+      popular_reading_plans: {
+        Row: {
+          average_rating: number | null
+          cover_image_url: string | null
+          days_count: number | null
+          description: string | null
+          gradient: Json | null
+          id: number | null
+          popularity_rank: number | null
+          slug: string | null
+          title: string | null
+          total_subscriptions: number | null
+        }
+        Relationships: []
+      }
       public_mentors: {
         Row: {
           available: boolean | null
@@ -1748,6 +2500,39 @@ export type Database = {
           id?: string | null
         }
         Relationships: []
+      }
+      user_active_plans_with_progress: {
+        Row: {
+          cover_image_url: string | null
+          current_day: number | null
+          days_count: number | null
+          gradient: Json | null
+          id: string | null
+          last_read_at: string | null
+          plan_id: number | null
+          progress_percentage: number | null
+          slug: string | null
+          started_at: string | null
+          status: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_plan_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "popular_reading_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_plan_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
