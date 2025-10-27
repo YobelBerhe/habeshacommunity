@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";
+import { LanguageSwitcher } from "@/components/spiritual/LanguageSwitcher";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const SpiritualHome = () => {
   useSEO({ 
@@ -13,6 +15,7 @@ const SpiritualHome = () => {
   });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { language, setLanguage, t } = useTranslation();
 
   const features = [
     {
@@ -64,6 +67,17 @@ const SpiritualHome = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Language Switcher */}
+      <div className="container mx-auto px-4 pt-4">
+        <div className="flex justify-end">
+          <LanguageSwitcher
+            currentLanguage={language}
+            onLanguageChange={setLanguage}
+            variant="compact"
+          />
+        </div>
+      </div>
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white py-20 px-4">
         <div className="absolute inset-0 bg-black/10"></div>

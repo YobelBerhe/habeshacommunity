@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/card";
 import { useSEO } from "@/hooks/useSEO";
 import { useReadingPlans } from "@/hooks/useSpiritual";
 import { PlansList } from '@/components/spiritual/PlansList';
+import { LanguageSwitcher } from "@/components/spiritual/LanguageSwitcher";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const ReadingPlans = () => {
   useSEO({ 
@@ -12,6 +14,7 @@ const ReadingPlans = () => {
 
   const [page, setPage] = useState(1);
   const { data, count, isLoading, error } = useReadingPlans({ page, per_page: 12 });
+  const { language, setLanguage, t } = useTranslation();
 
   const hasMore = data && count ? data.length < count : false;
 
@@ -19,7 +22,14 @@ const ReadingPlans = () => {
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 py-16">
-          <h1 className="text-5xl font-bold mb-4">Reading Plans</h1>
+          <div className="flex justify-end mb-4">
+            <LanguageSwitcher
+              currentLanguage={language}
+              onLanguageChange={setLanguage}
+              variant="compact"
+            />
+          </div>
+          <h1 className="text-5xl font-bold mb-4">{t('reading_plans.title', 'Reading Plans')}</h1>
           <p className="text-xl opacity-90 max-w-2xl">
             Discover guided Bible reading plans to help you grow in your faith. From daily devotionals to
             topical studies, find the perfect plan for your spiritual journey.

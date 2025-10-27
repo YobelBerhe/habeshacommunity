@@ -1566,6 +1566,57 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_plan_day_translations: {
+        Row: {
+          created_at: string | null
+          day_id: number
+          devotional_content: string | null
+          id: number
+          language_code: string
+          prayer_prompt: string | null
+          reflection_questions: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_id: number
+          devotional_content?: string | null
+          id?: number
+          language_code: string
+          prayer_prompt?: string | null
+          reflection_questions?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_id?: number
+          devotional_content?: string | null
+          id?: number
+          language_code?: string
+          prayer_prompt?: string | null
+          reflection_questions?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_plan_day_translations_day_id_fkey"
+            columns: ["day_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plan_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_plan_day_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "supported_languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       reading_plan_days: {
         Row: {
           created_at: string | null
@@ -1691,6 +1742,58 @@ export type Database = {
             columns: ["version_id"]
             isOneToOne: false
             referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_plan_translations: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          language_code: string
+          plan_id: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          language_code: string
+          plan_id: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          language_code?: string
+          plan_id?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_plan_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "supported_languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "reading_plan_translations_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "popular_reading_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_plan_translations_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "reading_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -1953,6 +2056,80 @@ export type Database = {
           },
         ]
       }
+      supported_languages: {
+        Row: {
+          code: string
+          created_at: string | null
+          direction: string | null
+          display_order: number | null
+          flag_emoji: string | null
+          id: number
+          is_active: boolean | null
+          name: string
+          native_name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          direction?: string | null
+          display_order?: number | null
+          flag_emoji?: string | null
+          id?: number
+          is_active?: boolean | null
+          name: string
+          native_name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          direction?: string | null
+          display_order?: number | null
+          flag_emoji?: string | null
+          id?: number
+          is_active?: boolean | null
+          name?: string
+          native_name?: string
+        }
+        Relationships: []
+      }
+      ui_translations: {
+        Row: {
+          context: string | null
+          created_at: string | null
+          id: number
+          language_code: string
+          translation_key: string
+          translation_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string | null
+          id?: number
+          language_code: string
+          translation_key: string
+          translation_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string | null
+          id?: number
+          language_code?: string
+          translation_key?: string
+          translation_text?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ui_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "supported_languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       user_answers: {
         Row: {
           answer: string
@@ -2117,6 +2294,41 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_plan_subscriptions"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_language_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          preferred_bible_version_id: number | null
+          preferred_language: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          preferred_bible_version_id?: number | null
+          preferred_language: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          preferred_bible_version_id?: number | null
+          preferred_language?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_language_preferences_preferred_language_fkey"
+            columns: ["preferred_language"]
+            isOneToOne: false
+            referencedRelation: "supported_languages"
+            referencedColumns: ["code"]
           },
         ]
       }
