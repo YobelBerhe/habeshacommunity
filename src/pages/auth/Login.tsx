@@ -70,8 +70,8 @@ export default function Login() {
     }
   };
 
-  // OAuth Sign In
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+  // OAuth Sign In - Google only
+  const handleOAuthSignIn = async (provider: 'google') => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -139,17 +139,6 @@ export default function Login() {
                 Continue with Google
               </button>
 
-              {/* Facebook */}
-              <button
-                type="button"
-                onClick={() => handleOAuthSignIn('facebook')}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-medium shadow-sm hover:shadow-md"
-              >
-                <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                Continue with Facebook
-              </button>
             </div>
 
             <div className="relative mb-6">
@@ -279,36 +268,37 @@ export default function Login() {
                 )}
               </button>
               
-              <div className="flex items-center justify-between text-sm">
-                {loginMode === 'email' && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setLoginMode('magic')}
-                      className="text-blue-600 hover:underline font-medium"
-                    >
-                      Use magic link
-                    </button>
-                    
-                    <Link
-                      to={`/auth/reset${returnTo !== '/' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
-                      className="text-blue-600 hover:underline font-medium"
-                    >
-                      Forgot password?
-                    </Link>
-                  </>
-                )}
-                
-                {loginMode === 'magic' && (
+              {/* Bottom Links - Properly Aligned */}
+              {loginMode === 'email' && (
+                <div className="flex items-center justify-between text-sm">
+                  <button
+                    type="button"
+                    onClick={() => setLoginMode('magic')}
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline"
+                  >
+                    Use magic link
+                  </button>
+                  
+                  <Link
+                    to={`/auth/reset${returnTo !== '/' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
+              
+              {loginMode === 'magic' && (
+                <div className="text-center">
                   <button
                     type="button"
                     onClick={() => setLoginMode('email')}
-                    className="text-blue-600 hover:underline font-medium mx-auto"
+                    className="text-blue-600 hover:underline font-medium"
                   >
                     Use password instead
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </form>
           </>
         )}

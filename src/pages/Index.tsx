@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AnimatedCounter from "@/components/AnimatedCounter";
 
 const Index = () => {
@@ -525,6 +525,36 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Footer with Privacy Link */}
+      <footer className="bg-background border-t py-8 mt-16">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">H</span>
+              </div>
+              <span className="font-bold text-lg">HabeshaCommunity</span>
+            </div>
+
+            {/* Links */}
+            <div className="flex items-center gap-6 text-sm">
+              <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                Terms of Service
+              </Link>
+            </div>
+
+            {/* Copyright */}
+            <p className="text-sm text-muted-foreground">
+              © 2025 HabeshaCommunity
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
