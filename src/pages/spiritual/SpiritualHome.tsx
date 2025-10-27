@@ -136,6 +136,31 @@ const SpiritualHome = () => {
         </div>
       </section>
 
+      {/* Prayer & Saints Quick Links */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-xl font-bold mb-4">Prayer & Saints</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/daily-prayers")}>
+              <BookOpen className="w-5 h-5 mr-3 text-blue-600 dark:text-blue-400" />
+              <span className="font-semibold">Daily Prayers</span>
+            </Button>
+            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/fasting")}>
+              <Calendar className="w-5 h-5 mr-3 text-amber-600 dark:text-amber-400" />
+              <span className="font-semibold">Fasting Calendar</span>
+            </Button>
+            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/saints")}>
+              <Users className="w-5 h-5 mr-3 text-purple-600 dark:text-purple-400" />
+              <span className="font-semibold">Saints Calendar</span>
+            </Button>
+            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/prayers")}>
+              <Heart className="w-5 h-5 mr-3 text-rose-600 dark:text-rose-400" />
+              <span className="font-semibold">Prayer Requests</span>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Main Features */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">

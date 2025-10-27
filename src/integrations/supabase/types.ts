@@ -85,6 +85,199 @@ export type Database = {
           },
         ]
       }
+      bible_study_discussion_replies: {
+        Row: {
+          content: string
+          created_at: string | null
+          discussion_id: string
+          id: string
+          like_count: number | null
+          parent_reply_id: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          discussion_id: string
+          id?: string
+          like_count?: number | null
+          parent_reply_id?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          discussion_id?: string
+          id?: string
+          like_count?: number | null
+          parent_reply_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bible_study_discussion_replies_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "bible_study_discussions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bible_study_discussion_replies_parent_reply_id_fkey"
+            columns: ["parent_reply_id"]
+            isOneToOne: false
+            referencedRelation: "bible_study_discussion_replies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bible_study_discussions: {
+        Row: {
+          book: string | null
+          chapter: number | null
+          content: string
+          created_at: string | null
+          group_id: string
+          id: string
+          is_pinned: boolean | null
+          like_count: number | null
+          passage_reference: string | null
+          reply_count: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          book?: string | null
+          chapter?: number | null
+          content: string
+          created_at?: string | null
+          group_id: string
+          id?: string
+          is_pinned?: boolean | null
+          like_count?: number | null
+          passage_reference?: string | null
+          reply_count?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          book?: string | null
+          chapter?: number | null
+          content?: string
+          created_at?: string | null
+          group_id?: string
+          id?: string
+          is_pinned?: boolean | null
+          like_count?: number | null
+          passage_reference?: string | null
+          reply_count?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bible_study_discussions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "bible_study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bible_study_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string | null
+          role: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bible_study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "bible_study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bible_study_groups: {
+        Row: {
+          created_at: string | null
+          current_book: string | null
+          current_chapter: number | null
+          description: string
+          discussion_count: number | null
+          group_type: string | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          language_code: string | null
+          leader_id: string
+          meeting_schedule: string | null
+          member_count: number | null
+          name: string
+          slug: string
+          study_focus: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_book?: string | null
+          current_chapter?: number | null
+          description: string
+          discussion_count?: number | null
+          group_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          language_code?: string | null
+          leader_id: string
+          meeting_schedule?: string | null
+          member_count?: number | null
+          name: string
+          slug: string
+          study_focus?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_book?: string | null
+          current_chapter?: number | null
+          description?: string
+          discussion_count?: number | null
+          group_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          language_code?: string | null
+          leader_id?: string
+          meeting_schedule?: string | null
+          member_count?: number | null
+          name?: string
+          slug?: string
+          study_focus?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       bible_verses: {
         Row: {
           audio_url: string | null
@@ -833,6 +1026,130 @@ export type Database = {
           },
         ]
       }
+      forum_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: number
+          is_active: boolean | null
+          is_locked: boolean | null
+          language_code: string | null
+          name: string
+          parent_category_id: number | null
+          post_count: number | null
+          requires_approval: boolean | null
+          slug: string
+          topic_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: number
+          is_active?: boolean | null
+          is_locked?: boolean | null
+          language_code?: string | null
+          name: string
+          parent_category_id?: number | null
+          post_count?: number | null
+          requires_approval?: boolean | null
+          slug: string
+          topic_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: number
+          is_active?: boolean | null
+          is_locked?: boolean | null
+          language_code?: string | null
+          name?: string
+          parent_category_id?: number | null
+          post_count?: number | null
+          requires_approval?: boolean | null
+          slug?: string
+          topic_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "forum_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_likes: {
+        Row: {
+          created_at: string | null
+          discussion_id: string | null
+          id: string
+          post_id: string | null
+          reply_id: string | null
+          topic_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          discussion_id?: string | null
+          id?: string
+          post_id?: string | null
+          reply_id?: string | null
+          topic_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          discussion_id?: string | null
+          id?: string
+          post_id?: string | null
+          reply_id?: string | null
+          topic_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_likes_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "bible_study_discussions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_likes_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "bible_study_discussion_replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_likes_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       forum_messages: {
         Row: {
           author_id: string | null
@@ -858,9 +1175,52 @@ export type Database = {
           id?: string
           topic_id?: string
         }
+        Relationships: []
+      }
+      forum_posts: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_best_answer: boolean | null
+          like_count: number | null
+          parent_post_id: string | null
+          topic_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_best_answer?: boolean | null
+          like_count?: number | null
+          parent_post_id?: string | null
+          topic_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_best_answer?: boolean | null
+          like_count?: number | null
+          parent_post_id?: string | null
+          topic_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "forum_messages_topic_id_fkey"
+            foreignKeyName: "forum_posts_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_posts_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: false
             referencedRelation: "forum_topics"
@@ -870,39 +1230,68 @@ export type Database = {
       }
       forum_topics: {
         Row: {
-          author_id: string | null
-          author_name: string | null
-          board: Database["public"]["Enums"]["forum_board"]
-          city: string
-          created_at: string
+          category_id: number
+          content: string
+          created_at: string | null
           id: string
-          replies_count: number | null
+          is_locked: boolean | null
+          is_pinned: boolean | null
+          last_activity_at: string | null
+          like_count: number | null
+          reply_count: number | null
+          slug: string
+          tags: string[] | null
           title: string
-          updated_at: string
+          topic_type: string | null
+          updated_at: string | null
+          user_id: string
+          view_count: number | null
         }
         Insert: {
-          author_id?: string | null
-          author_name?: string | null
-          board: Database["public"]["Enums"]["forum_board"]
-          city: string
-          created_at?: string
-          id: string
-          replies_count?: number | null
+          category_id: number
+          content: string
+          created_at?: string | null
+          id?: string
+          is_locked?: boolean | null
+          is_pinned?: boolean | null
+          last_activity_at?: string | null
+          like_count?: number | null
+          reply_count?: number | null
+          slug: string
+          tags?: string[] | null
           title: string
-          updated_at?: string
+          topic_type?: string | null
+          updated_at?: string | null
+          user_id: string
+          view_count?: number | null
         }
         Update: {
-          author_id?: string | null
-          author_name?: string | null
-          board?: Database["public"]["Enums"]["forum_board"]
-          city?: string
-          created_at?: string
+          category_id?: number
+          content?: string
+          created_at?: string | null
           id?: string
-          replies_count?: number | null
+          is_locked?: boolean | null
+          is_pinned?: boolean | null
+          last_activity_at?: string | null
+          like_count?: number | null
+          reply_count?: number | null
+          slug?: string
+          tags?: string[] | null
           title?: string
-          updated_at?: string
+          topic_type?: string | null
+          updated_at?: string | null
+          user_id?: string
+          view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "forum_topics_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "forum_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fulfillments: {
         Row: {
@@ -2893,6 +3282,45 @@ export type Database = {
             columns: ["default_version_id"]
             isOneToOne: false
             referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_bookmarks: {
+        Row: {
+          created_at: string | null
+          discussion_id: string | null
+          id: string
+          topic_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          discussion_id?: string | null
+          id?: string
+          topic_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          discussion_id?: string | null
+          id?: string
+          topic_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bookmarks_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "bible_study_discussions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_bookmarks_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
             referencedColumns: ["id"]
           },
         ]
