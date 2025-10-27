@@ -34,6 +34,10 @@ const VerseOfTheDayPage = lazy(() => import("./pages/spiritual/VerseOfTheDay"));
 const PlanDetail = lazy(() => import("./pages/spiritual/PlanDetail"));
 const BookmarksPage = lazy(() => import("./pages/spiritual/Bookmarks"));
 const HighlightsPage = lazy(() => import("./pages/spiritual/Highlights"));
+const PrayerRequests = lazy(() => import("./pages/spiritual/PrayerRequests"));
+const DailyPrayers = lazy(() => import("./pages/spiritual/DailyPrayers"));
+const FastingCalendar = lazy(() => import("./pages/spiritual/FastingCalendar"));
+const SaintsCalendar = lazy(() => import("./pages/spiritual/SaintsCalendar"));
 const Browse = lazy(() => import("./pages/Browse"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Chat = lazy(() => import("./pages/Chat"));
@@ -201,6 +205,10 @@ const App = () => {
                 <Route path="/spiritual/bookmarks" element={<BookmarksPage />} />
                 <Route path="/spiritual/highlights" element={<HighlightsPage />} />
                 <Route path="/spiritual/progress" element={<SpiritualProgress />} />
+                <Route path="/spiritual/prayers" element={<PrayerRequests />} />
+                <Route path="/spiritual/daily-prayers" element={<DailyPrayers />} />
+                <Route path="/spiritual/fasting" element={<FastingCalendar />} />
+                <Route path="/spiritual/saints" element={<SaintsCalendar />} />
                 
                 {/* Auth Routes */}
                 <Route path="/auth/callback" element={<AuthCallback />} />
