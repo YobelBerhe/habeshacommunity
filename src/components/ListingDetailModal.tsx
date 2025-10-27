@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Listing } from "@/types";
 import { trackListingView } from "@/repo/contacts";
 import MapMini from "./MapMini";
+import { sanitizePhone } from "@/utils/sanitize";
 
 interface Props {
   open: boolean;
@@ -96,21 +97,27 @@ export default function ListingDetailModal({ open, listing, onClose, onSavedChan
     const buttons = [];
     
     if (listing.contact_phone) {
-      buttons.push({
-        icon: Phone,
-        label: "Call",
-        href: `tel:${listing.contact_phone}`,
-        variant: "default" as const
-      });
+      const sanitized = sanitizePhone(listing.contact_phone);
+      if (sanitized.length >= 10 && sanitized.length <= 15 && /^\+?\d{10,15}$/.test(sanitized)) {
+        buttons.push({
+          icon: Phone,
+          label: "Call",
+          href: `tel:${sanitized}`,
+          variant: "default" as const
+        });
+      }
     }
     
     if (listing.contact_whatsapp) {
-      buttons.push({
-        icon: MessageCircle,
-        label: "WhatsApp",
-        href: `https://wa.me/${listing.contact_whatsapp.replace(/\D/g, '')}`,
-        variant: "default" as const
-      });
+      const sanitized = sanitizePhone(listing.contact_whatsapp);
+      if (sanitized.length >= 10 && sanitized.length <= 15 && /^\+?\d{10,15}$/.test(sanitized)) {
+        buttons.push({
+          icon: MessageCircle,
+          label: "WhatsApp",
+          href: `https://wa.me/${encodeURIComponent(sanitized.replace(/^\+/, ''))}`,
+          variant: "default" as const
+        });
+      }
     }
     
     if (listing.contact_telegram) {

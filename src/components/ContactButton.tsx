@@ -1,5 +1,6 @@
 import { Phone, MessageCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { sanitizePhone } from '@/utils/sanitize';
 
 interface ContactButtonProps {
   contact?: string;
@@ -7,8 +8,16 @@ interface ContactButtonProps {
 }
 
 function normalizeDigits(s: string) {
-  const only = s.replace(/[^\d+]/g, '');
-  return only.startsWith('+') ? only : `+${only}`;
+  const sanitized = sanitizePhone(s);
+  // Validate length (international max is 15 digits)
+  if (sanitized.length < 10 || sanitized.length > 15) {
+    return null;
+  }
+  // Validate format
+  if (!/^\+?\d{10,15}$/.test(sanitized)) {
+    return null;
+  }
+  return sanitized.startsWith('+') ? sanitized : `+${sanitized}`;
 }
 
 export default function ContactButton({ contact, className = "" }: ContactButtonProps) {
@@ -27,11 +36,14 @@ export default function ContactButton({ contact, className = "" }: ContactButton
     label = 'Telegram';
   } else if (c.includes('whatsapp') || c.includes('wa.me')) {
     const digits = normalizeDigits(c);
-    href = `https://wa.me/${digits.replace('+','')}`;
+    if (!digits) return null; // Invalid phone number
+    href = `https://wa.me/${encodeURIComponent(digits.replace(/^\+/, ''))}`;
     icon = <MessageCircle className="w-4 h-4" />;
     label = 'WhatsApp';
   } else if (/^\+?\d[\d\s\-().]{5,}$/.test(c)) {
-    href = `tel:${normalizeDigits(c)}`;
+    const digits = normalizeDigits(c);
+    if (!digits) return null; // Invalid phone number
+    href = `tel:${digits}`;
     icon = <Phone className="w-4 h-4" />;
     label = 'Call';
   } else if (c.startsWith('http') || c.includes('.')) {
@@ -39,7 +51,9 @@ export default function ContactButton({ contact, className = "" }: ContactButton
     icon = <ExternalLink className="w-4 h-4" />;
     label = 'Visit';
   } else {
-    href = `tel:${c}`;
+    const digits = normalizeDigits(c);
+    if (!digits) return null; // Invalid phone number
+    href = `tel:${digits}`;
     icon = <Phone className="w-4 h-4" />;
     label = 'Call';
   }

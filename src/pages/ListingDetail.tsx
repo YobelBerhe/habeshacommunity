@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Heart, Share2, MoreHorizontal, MapPin, Calendar, Phone, Mail, MessageCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { sanitizePhone } from "@/utils/sanitize";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -307,21 +308,27 @@ export default function ListingDetail() {
     const buttons = [];
     
     if (listing.contact_phone) {
-      buttons.push({
-        icon: Phone,
-        label: "Call",
-        href: `tel:${listing.contact_phone}`,
-        variant: "default" as const,
-      });
+      const sanitized = sanitizePhone(listing.contact_phone);
+      if (sanitized.length >= 10 && sanitized.length <= 15 && /^\+?\d{10,15}$/.test(sanitized)) {
+        buttons.push({
+          icon: Phone,
+          label: "Call",
+          href: `tel:${sanitized}`,
+          variant: "default" as const,
+        });
+      }
     }
     
     if (listing.contact_whatsapp) {
-      buttons.push({
-        icon: MessageCircle,
-        label: "WhatsApp",
-        href: `https://wa.me/${listing.contact_whatsapp.replace(/\D/g, '')}`,
-        variant: "outline" as const,
-      });
+      const sanitized = sanitizePhone(listing.contact_whatsapp);
+      if (sanitized.length >= 10 && sanitized.length <= 15 && /^\+?\d{10,15}$/.test(sanitized)) {
+        buttons.push({
+          icon: MessageCircle,
+          label: "WhatsApp",
+          href: `https://wa.me/${encodeURIComponent(sanitized.replace(/^\+/, ''))}`,
+          variant: "outline" as const,
+        });
+      }
     }
     
     if (listing.contact_telegram) {
