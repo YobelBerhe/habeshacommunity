@@ -328,7 +328,9 @@ export interface UpdatePlanSubscriptionInput {
 }
 
 export interface CompleteDayInput {
+  subscription_id: string;
   day_id: number;
+  day_number: number;
   time_spent_seconds?: number;
 }
 
