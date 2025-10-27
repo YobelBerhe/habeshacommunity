@@ -377,6 +377,337 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_authors: {
+        Row: {
+          avatar_url: string | null
+          bio_am: string | null
+          bio_en: string | null
+          bio_ti: string | null
+          created_at: string | null
+          display_name: string
+          email: string | null
+          id: string
+          is_verified: boolean | null
+          post_count: number | null
+          social_media: Json | null
+          updated_at: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio_am?: string | null
+          bio_en?: string | null
+          bio_ti?: string | null
+          created_at?: string | null
+          display_name: string
+          email?: string | null
+          id?: string
+          is_verified?: boolean | null
+          post_count?: number | null
+          social_media?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio_am?: string | null
+          bio_en?: string | null
+          bio_ti?: string | null
+          created_at?: string | null
+          display_name?: string
+          email?: string | null
+          id?: string
+          is_verified?: boolean | null
+          post_count?: number | null
+          social_media?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      blog_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description_am: string | null
+          description_en: string | null
+          description_ti: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name_am: string | null
+          name_en: string
+          name_ti: string | null
+          parent_category_id: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_am?: string | null
+          name_en: string
+          name_ti?: string | null
+          parent_category_id?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_am?: string | null
+          name_en?: string
+          name_ti?: string | null
+          parent_category_id?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          is_highlighted: boolean | null
+          like_count: number | null
+          parent_comment_id: string | null
+          post_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_highlighted?: boolean | null
+          like_count?: number | null
+          parent_comment_id?: string | null
+          post_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_highlighted?: boolean | null
+          like_count?: number | null
+          parent_comment_id?: string | null
+          post_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "blog_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          allow_comments: boolean | null
+          audio_url: string | null
+          author_id: string | null
+          category_id: string | null
+          comment_count: number | null
+          content_am: string | null
+          content_en: string | null
+          content_ti: string | null
+          created_at: string | null
+          excerpt_am: string | null
+          excerpt_en: string | null
+          excerpt_ti: string | null
+          featured_image: string | null
+          gallery_images: string[] | null
+          id: string
+          is_featured: boolean | null
+          is_pinned: boolean | null
+          like_count: number | null
+          meta_description: string | null
+          meta_keywords: string[] | null
+          meta_title: string | null
+          post_type: string | null
+          published_at: string | null
+          reading_time_minutes: number | null
+          scheduled_for: string | null
+          scripture_references: string[] | null
+          share_count: number | null
+          slug: string
+          status: string | null
+          tags: string[] | null
+          title_am: string | null
+          title_en: string
+          title_ti: string | null
+          updated_at: string | null
+          video_url: string | null
+          view_count: number | null
+          word_count: number | null
+        }
+        Insert: {
+          allow_comments?: boolean | null
+          audio_url?: string | null
+          author_id?: string | null
+          category_id?: string | null
+          comment_count?: number | null
+          content_am?: string | null
+          content_en?: string | null
+          content_ti?: string | null
+          created_at?: string | null
+          excerpt_am?: string | null
+          excerpt_en?: string | null
+          excerpt_ti?: string | null
+          featured_image?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_featured?: boolean | null
+          is_pinned?: boolean | null
+          like_count?: number | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          meta_title?: string | null
+          post_type?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          scheduled_for?: string | null
+          scripture_references?: string[] | null
+          share_count?: number | null
+          slug: string
+          status?: string | null
+          tags?: string[] | null
+          title_am?: string | null
+          title_en: string
+          title_ti?: string | null
+          updated_at?: string | null
+          video_url?: string | null
+          view_count?: number | null
+          word_count?: number | null
+        }
+        Update: {
+          allow_comments?: boolean | null
+          audio_url?: string | null
+          author_id?: string | null
+          category_id?: string | null
+          comment_count?: number | null
+          content_am?: string | null
+          content_en?: string | null
+          content_ti?: string | null
+          created_at?: string | null
+          excerpt_am?: string | null
+          excerpt_en?: string | null
+          excerpt_ti?: string | null
+          featured_image?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_featured?: boolean | null
+          is_pinned?: boolean | null
+          like_count?: number | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          meta_title?: string | null
+          post_type?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          scheduled_for?: string | null
+          scripture_references?: string[] | null
+          share_count?: number | null
+          slug?: string
+          status?: string | null
+          tags?: string[] | null
+          title_am?: string | null
+          title_en?: string
+          title_ti?: string | null
+          updated_at?: string | null
+          video_url?: string | null
+          view_count?: number | null
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "blog_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           amount_cents: number
@@ -948,6 +1279,284 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      event_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description_am: string | null
+          description_en: string | null
+          description_ti: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name_am: string | null
+          name_en: string
+          name_ti: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_am?: string | null
+          name_en: string
+          name_ti?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_am?: string | null
+          name_en?: string
+          name_ti?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      event_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          event_id: string
+          id: string
+          is_approved: boolean | null
+          parent_comment_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          is_approved?: boolean | null
+          parent_comment_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          is_approved?: boolean | null
+          parent_comment_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "event_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_rsvps: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          notes: string | null
+          number_of_guests: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          notes?: string | null
+          number_of_guests?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          notes?: string | null
+          number_of_guests?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          address: string | null
+          category_id: string | null
+          church_id: number | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          description_am: string | null
+          description_en: string | null
+          description_ti: string | null
+          end_date: string
+          event_type: string | null
+          featured_image: string | null
+          gallery_images: string[] | null
+          id: string
+          is_all_day: boolean | null
+          is_featured: boolean | null
+          latitude: number | null
+          location_type: string | null
+          longitude: number | null
+          max_attendees: number | null
+          meeting_password: string | null
+          meeting_url: string | null
+          organizer_id: string | null
+          postal_code: string | null
+          recurrence_rule: string | null
+          registration_deadline: string | null
+          registration_url: string | null
+          requires_registration: boolean | null
+          start_date: string
+          state: string | null
+          status: string | null
+          tags: string[] | null
+          timezone: string | null
+          title_am: string | null
+          title_en: string
+          title_ti: string | null
+          updated_at: string | null
+          venue_name: string | null
+          view_count: number | null
+        }
+        Insert: {
+          address?: string | null
+          category_id?: string | null
+          church_id?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          end_date: string
+          event_type?: string | null
+          featured_image?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_all_day?: boolean | null
+          is_featured?: boolean | null
+          latitude?: number | null
+          location_type?: string | null
+          longitude?: number | null
+          max_attendees?: number | null
+          meeting_password?: string | null
+          meeting_url?: string | null
+          organizer_id?: string | null
+          postal_code?: string | null
+          recurrence_rule?: string | null
+          registration_deadline?: string | null
+          registration_url?: string | null
+          requires_registration?: boolean | null
+          start_date: string
+          state?: string | null
+          status?: string | null
+          tags?: string[] | null
+          timezone?: string | null
+          title_am?: string | null
+          title_en: string
+          title_ti?: string | null
+          updated_at?: string | null
+          venue_name?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          address?: string | null
+          category_id?: string | null
+          church_id?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          end_date?: string
+          event_type?: string | null
+          featured_image?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_all_day?: boolean | null
+          is_featured?: boolean | null
+          latitude?: number | null
+          location_type?: string | null
+          longitude?: number | null
+          max_attendees?: number | null
+          meeting_password?: string | null
+          meeting_url?: string | null
+          organizer_id?: string | null
+          postal_code?: string | null
+          recurrence_rule?: string | null
+          registration_deadline?: string | null
+          registration_url?: string | null
+          requires_registration?: boolean | null
+          start_date?: string
+          state?: string | null
+          status?: string | null
+          tags?: string[] | null
+          timezone?: string | null
+          title_am?: string | null
+          title_en?: string
+          title_ti?: string | null
+          updated_at?: string | null
+          venue_name?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "event_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fasting_calendar: {
         Row: {
@@ -2526,6 +3135,77 @@ export type Database = {
           },
         ]
       }
+      preachers: {
+        Row: {
+          bio_am: string | null
+          bio_en: string | null
+          bio_ti: string | null
+          church_id: number | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_featured: boolean | null
+          name_am: string | null
+          name_en: string
+          name_ti: string | null
+          phone: string | null
+          photo_url: string | null
+          sermon_count: number | null
+          social_media: Json | null
+          title: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          bio_am?: string | null
+          bio_en?: string | null
+          bio_ti?: string | null
+          church_id?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name_am?: string | null
+          name_en: string
+          name_ti?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          sermon_count?: number | null
+          social_media?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          bio_am?: string | null
+          bio_en?: string | null
+          bio_ti?: string | null
+          church_id?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name_am?: string | null
+          name_en?: string
+          name_ti?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          sermon_count?: number | null
+          social_media?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preachers_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -3061,6 +3741,337 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sermon_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          like_count: number | null
+          parent_comment_id: string | null
+          sermon_id: string
+          timestamp_seconds: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          like_count?: number | null
+          parent_comment_id?: string | null
+          sermon_id: string
+          timestamp_seconds?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          like_count?: number | null
+          parent_comment_id?: string | null
+          sermon_id?: string
+          timestamp_seconds?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sermon_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "sermon_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sermon_comments_sermon_id_fkey"
+            columns: ["sermon_id"]
+            isOneToOne: false
+            referencedRelation: "sermons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sermon_downloads: {
+        Row: {
+          download_type: string
+          downloaded_at: string | null
+          id: string
+          ip_address: unknown
+          sermon_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          download_type: string
+          downloaded_at?: string | null
+          id?: string
+          ip_address?: unknown
+          sermon_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          download_type?: string
+          downloaded_at?: string | null
+          id?: string
+          ip_address?: unknown
+          sermon_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sermon_downloads_sermon_id_fkey"
+            columns: ["sermon_id"]
+            isOneToOne: false
+            referencedRelation: "sermons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sermon_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          sermon_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          sermon_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          sermon_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sermon_likes_sermon_id_fkey"
+            columns: ["sermon_id"]
+            isOneToOne: false
+            referencedRelation: "sermons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sermon_series: {
+        Row: {
+          church_id: number | null
+          created_at: string | null
+          description_am: string | null
+          description_en: string | null
+          description_ti: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          sermon_count: number | null
+          slug: string
+          start_date: string | null
+          thumbnail_url: string | null
+          title_am: string | null
+          title_en: string
+          title_ti: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          church_id?: number | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          sermon_count?: number | null
+          slug: string
+          start_date?: string | null
+          thumbnail_url?: string | null
+          title_am?: string | null
+          title_en: string
+          title_ti?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          church_id?: number | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          sermon_count?: number | null
+          slug?: string
+          start_date?: string | null
+          thumbnail_url?: string | null
+          title_am?: string | null
+          title_en?: string
+          title_ti?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sermon_series_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sermons: {
+        Row: {
+          allow_downloads: boolean | null
+          audio_duration_seconds: number | null
+          audio_file_size_mb: number | null
+          audio_url: string | null
+          church_id: number | null
+          created_at: string | null
+          description_am: string | null
+          description_en: string | null
+          description_ti: string | null
+          download_count: number | null
+          id: string
+          is_featured: boolean | null
+          like_count: number | null
+          preacher_id: string | null
+          primary_scripture: string | null
+          secondary_scriptures: string[] | null
+          series_id: string | null
+          sermon_date: string
+          sermon_notes_url: string | null
+          sermon_type: string | null
+          share_count: number | null
+          slug: string
+          status: string | null
+          study_guide_url: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title_am: string | null
+          title_en: string
+          title_ti: string | null
+          topics: string[] | null
+          transcript_am: string | null
+          transcript_en: string | null
+          transcript_ti: string | null
+          updated_at: string | null
+          video_duration_seconds: number | null
+          video_file_size_mb: number | null
+          video_url: string | null
+          view_count: number | null
+        }
+        Insert: {
+          allow_downloads?: boolean | null
+          audio_duration_seconds?: number | null
+          audio_file_size_mb?: number | null
+          audio_url?: string | null
+          church_id?: number | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          download_count?: number | null
+          id?: string
+          is_featured?: boolean | null
+          like_count?: number | null
+          preacher_id?: string | null
+          primary_scripture?: string | null
+          secondary_scriptures?: string[] | null
+          series_id?: string | null
+          sermon_date: string
+          sermon_notes_url?: string | null
+          sermon_type?: string | null
+          share_count?: number | null
+          slug: string
+          status?: string | null
+          study_guide_url?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title_am?: string | null
+          title_en: string
+          title_ti?: string | null
+          topics?: string[] | null
+          transcript_am?: string | null
+          transcript_en?: string | null
+          transcript_ti?: string | null
+          updated_at?: string | null
+          video_duration_seconds?: number | null
+          video_file_size_mb?: number | null
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          allow_downloads?: boolean | null
+          audio_duration_seconds?: number | null
+          audio_file_size_mb?: number | null
+          audio_url?: string | null
+          church_id?: number | null
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          description_ti?: string | null
+          download_count?: number | null
+          id?: string
+          is_featured?: boolean | null
+          like_count?: number | null
+          preacher_id?: string | null
+          primary_scripture?: string | null
+          secondary_scriptures?: string[] | null
+          series_id?: string | null
+          sermon_date?: string
+          sermon_notes_url?: string | null
+          sermon_type?: string | null
+          share_count?: number | null
+          slug?: string
+          status?: string | null
+          study_guide_url?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title_am?: string | null
+          title_en?: string
+          title_ti?: string | null
+          topics?: string[] | null
+          transcript_am?: string | null
+          transcript_en?: string | null
+          transcript_ti?: string | null
+          updated_at?: string | null
+          video_duration_seconds?: number | null
+          video_file_size_mb?: number | null
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sermons_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sermons_preacher_id_fkey"
+            columns: ["preacher_id"]
+            isOneToOne: false
+            referencedRelation: "preachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sermons_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "sermon_series"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       session_logs: {
         Row: {
@@ -4143,6 +5154,7 @@ export type Database = {
           total_questions: number
         }[]
       }
+      calculate_reading_time: { Args: { content: string }; Returns: number }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
