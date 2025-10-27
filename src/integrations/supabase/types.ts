@@ -714,6 +714,99 @@ export type Database = {
           },
         ]
       }
+      daily_prayers: {
+        Row: {
+          author: string | null
+          created_at: string | null
+          display_order: number | null
+          id: number
+          is_active: boolean | null
+          language_code: string
+          occasion: string
+          prayer_text: string
+          prayer_type: string
+          source: string | null
+          title: string
+        }
+        Insert: {
+          author?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: number
+          is_active?: boolean | null
+          language_code: string
+          occasion: string
+          prayer_text: string
+          prayer_type: string
+          source?: string | null
+          title: string
+        }
+        Update: {
+          author?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: number
+          is_active?: boolean | null
+          language_code?: string
+          occasion?: string
+          prayer_text?: string
+          prayer_type?: string
+          source?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      fasting_calendar: {
+        Row: {
+          allowed_foods: string[] | null
+          created_at: string | null
+          denomination_category: string | null
+          description: string | null
+          end_date: string
+          fast_name: string
+          fast_type: string
+          fasting_level: string | null
+          id: number
+          is_recurring: boolean | null
+          language_code: string
+          recurrence_rule: string | null
+          restricted_foods: string[] | null
+          start_date: string
+        }
+        Insert: {
+          allowed_foods?: string[] | null
+          created_at?: string | null
+          denomination_category?: string | null
+          description?: string | null
+          end_date: string
+          fast_name: string
+          fast_type: string
+          fasting_level?: string | null
+          id?: number
+          is_recurring?: boolean | null
+          language_code: string
+          recurrence_rule?: string | null
+          restricted_foods?: string[] | null
+          start_date: string
+        }
+        Update: {
+          allowed_foods?: string[] | null
+          created_at?: string | null
+          denomination_category?: string | null
+          description?: string | null
+          end_date?: string
+          fast_name?: string
+          fast_type?: string
+          fasting_level?: string | null
+          id?: number
+          is_recurring?: boolean | null
+          language_code?: string
+          recurrence_rule?: string | null
+          restricted_foods?: string[] | null
+          start_date?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -1911,6 +2004,139 @@ export type Database = {
         }
         Relationships: []
       }
+      prayer_comments: {
+        Row: {
+          comment_text: string
+          created_at: string | null
+          id: string
+          is_anonymous: boolean | null
+          is_approved: boolean | null
+          is_flagged: boolean | null
+          prayer_request_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_approved?: boolean | null
+          is_flagged?: boolean | null
+          prayer_request_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_approved?: boolean | null
+          is_flagged?: boolean | null
+          prayer_request_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_comments_prayer_request_id_fkey"
+            columns: ["prayer_request_id"]
+            isOneToOne: false
+            referencedRelation: "prayer_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_requests: {
+        Row: {
+          answered_at: string | null
+          answered_description: string | null
+          category: string | null
+          comment_count: number | null
+          created_at: string | null
+          description: string
+          expires_at: string | null
+          id: string
+          is_anonymous: boolean | null
+          is_public: boolean | null
+          prayer_count: number | null
+          search_vector: unknown
+          status: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string | null
+          answered_description?: string | null
+          category?: string | null
+          comment_count?: number | null
+          created_at?: string | null
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_public?: boolean | null
+          prayer_count?: number | null
+          search_vector?: unknown
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          answered_at?: string | null
+          answered_description?: string | null
+          category?: string | null
+          comment_count?: number | null
+          created_at?: string | null
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_public?: boolean | null
+          prayer_count?: number | null
+          search_vector?: unknown
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prayer_responses: {
+        Row: {
+          id: string
+          message: string | null
+          prayed_at: string | null
+          prayer_request_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message?: string | null
+          prayed_at?: string | null
+          prayer_request_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message?: string | null
+          prayed_at?: string | null
+          prayer_request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_responses_prayer_request_id_fkey"
+            columns: ["prayer_request_id"]
+            isOneToOne: false
+            referencedRelation: "prayer_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -2354,6 +2580,48 @@ export type Database = {
           reporter_id?: string | null
           status?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      saints_calendar: {
+        Row: {
+          biography: string | null
+          created_at: string | null
+          denomination_category: string | null
+          feast_date: string
+          icon_url: string | null
+          id: number
+          is_recurring: boolean | null
+          language_code: string
+          saint_name: string
+          significance: string | null
+          title: string | null
+        }
+        Insert: {
+          biography?: string | null
+          created_at?: string | null
+          denomination_category?: string | null
+          feast_date: string
+          icon_url?: string | null
+          id?: number
+          is_recurring?: boolean | null
+          language_code: string
+          saint_name: string
+          significance?: string | null
+          title?: string | null
+        }
+        Update: {
+          biography?: string | null
+          created_at?: string | null
+          denomination_category?: string | null
+          feast_date?: string
+          icon_url?: string | null
+          id?: number
+          is_recurring?: boolean | null
+          language_code?: string
+          saint_name?: string
+          significance?: string | null
+          title?: string | null
         }
         Relationships: []
       }
@@ -2840,6 +3108,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_prayer_journal: {
+        Row: {
+          created_at: string | null
+          entry_date: string
+          entry_text: string
+          gratitude_items: string[] | null
+          id: string
+          mood: string | null
+          prayer_topics: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          entry_date: string
+          entry_text: string
+          gratitude_items?: string[] | null
+          id?: string
+          mood?: string | null
+          prayer_topics?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          entry_date?: string
+          entry_text?: string
+          gratitude_items?: string[] | null
+          id?: string
+          mood?: string | null
+          prayer_topics?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_prayer_list: {
+        Row: {
+          answer_notes: string | null
+          answered_at: string | null
+          category: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          prayer_item: string
+          reminder_enabled: boolean | null
+          reminder_frequency: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          answer_notes?: string | null
+          answered_at?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          prayer_item: string
+          reminder_enabled?: boolean | null
+          reminder_frequency?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          answer_notes?: string | null
+          answered_at?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          prayer_item?: string
+          reminder_enabled?: boolean | null
+          reminder_frequency?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_reading_streaks: {
         Row: {
