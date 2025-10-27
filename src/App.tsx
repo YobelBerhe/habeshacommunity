@@ -30,6 +30,10 @@ const SpiritualHome = lazy(() => import("./pages/spiritual/SpiritualHome"));
 const BibleReader = lazy(() => import("./pages/spiritual/BibleReader"));
 const ReadingPlans = lazy(() => import("./pages/spiritual/ReadingPlans"));
 const SpiritualProgress = lazy(() => import("./pages/spiritual/Progress"));
+const VerseOfTheDayPage = lazy(() => import("./pages/spiritual/VerseOfTheDay"));
+const PlanDetail = lazy(() => import("./pages/spiritual/PlanDetail"));
+const BookmarksPage = lazy(() => import("./pages/spiritual/Bookmarks"));
+const HighlightsPage = lazy(() => import("./pages/spiritual/Highlights"));
 const Browse = lazy(() => import("./pages/Browse"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Chat = lazy(() => import("./pages/Chat"));
@@ -189,6 +193,10 @@ const App = () => {
                 <Route path="/spiritual" element={<SpiritualHome />} />
                 <Route path="/spiritual/reader" element={<BibleReader />} />
                 <Route path="/spiritual/plans" element={<ReadingPlans />} />
+                <Route path="/spiritual/plans/:slug" element={<PlanDetail />} />
+                <Route path="/spiritual/votd" element={<VerseOfTheDayPage />} />
+                <Route path="/spiritual/bookmarks" element={<BookmarksPage />} />
+                <Route path="/spiritual/highlights" element={<HighlightsPage />} />
                 <Route path="/spiritual/progress" element={<SpiritualProgress />} />
                 
                 {/* Auth Routes */}

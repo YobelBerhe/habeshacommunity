@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Search, Settings, BookMarked, Heart } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
+import { getBibleBooks, getBibleVersions, getChapterVerses, searchVerses } from "@/lib/api/spiritual/bible";
+import type { BibleBook, BibleVersion, BibleVerse } from "@/types/spiritual";
 
 const BibleReader = () => {
   useSEO({ 
@@ -14,26 +16,17 @@ const BibleReader = () => {
     description: "Read the Holy Bible in multiple translations" 
   });
   const navigate = useNavigate();
-  const [selectedBook, setSelectedBook] = useState("Genesis");
+  const [selectedBookUsfm, setSelectedBookUsfm] = useState<string>("");
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [selectedVersion, setSelectedVersion] = useState("KJV");
   const [fontSize, setFontSize] = useState("medium");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const versions = [
-    { id: "KJV", name: "King James Version" },
-    { id: "NIV", name: "New International Version" },
-    { id: "ESV", name: "English Standard Version" },
-    { id: "AMH", name: "Amharic Bible" },
-    { id: "TIG", name: "Tigrinya Bible" },
-  ];
-
-  const books = [
-    "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
-    "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
-    "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles",
-    "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs",
-  ];
+  const [books, setBooks] = useState<BibleBook[]>([]);
+  const [versions, setVersions] = useState<BibleVersion[]>([]);
+  const [verses, setVerses] = useState<BibleVerse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<BibleVerse[] | null>(null);
 
   const fontSizes = [
     { id: "small", label: "Small" },
@@ -42,12 +35,68 @@ const BibleReader = () => {
     { id: "x-large", label: "Extra Large" },
   ];
 
-  // Sample verse data (placeholder)
-  const sampleVerses = [
-    { number: 1, text: "In the beginning God created the heaven and the earth." },
-    { number: 2, text: "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters." },
-    { number: 3, text: "And God said, Let there be light: and there was light." },
-  ];
+  const selectedBook = useMemo(() => books.find((b) => b.usfm === selectedBookUsfm), [books, selectedBookUsfm]);
+  const selectedVersionObj = useMemo(() => versions.find((v) => v.abbreviation === selectedVersion), [versions, selectedVersion]);
+  const selectedVersionId = selectedVersionObj?.version_id;
+  const maxChapter = selectedBook?.chapters_count || 150;
+
+  // Load books and versions on mount
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const [booksData, versionsData] = await Promise.all([
+          getBibleBooks(),
+          getBibleVersions(),
+        ]);
+        if (!isMounted) return;
+        setBooks(booksData);
+        setVersions(versionsData);
+        // Default to first book if none selected
+        if (!selectedBookUsfm && booksData.length > 0) {
+          setSelectedBookUsfm(booksData[0].usfm);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Fetch verses when selection changes
+  useEffect(() => {
+    if (!selectedBookUsfm) return;
+    let isActive = true;
+    (async () => {
+      try {
+        setIsLoading(true);
+        const data = await getChapterVerses(selectedBookUsfm, selectedChapter, selectedVersionId);
+        if (!isActive) return;
+        setVerses(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (isActive) setIsLoading(false);
+      }
+    })();
+  }, [selectedBookUsfm, selectedChapter, selectedVersionId]);
+
+  // Search verses (debounced)
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    const t = setTimeout(async () => {
+      try {
+        const res = await searchVerses(searchQuery.trim(), selectedVersionId || undefined, 50);
+        setSearchResults(res);
+      } catch (e) {
+        console.error(e);
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchQuery, selectedVersionId]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,14 +118,14 @@ const BibleReader = () => {
             {/* Book Selection */}
             <div>
               <label className="text-sm font-semibold mb-2 block">Book</label>
-              <Select value={selectedBook} onValueChange={setSelectedBook}>
+              <Select value={selectedBookUsfm} onValueChange={(val) => { setSelectedBookUsfm(val); setSelectedChapter(1); }}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={selectedBook?.name || "Select book"} />
                 </SelectTrigger>
                 <SelectContent>
                   {books.map((book) => (
-                    <SelectItem key={book} value={book}>
-                      {book}
+                    <SelectItem key={book.usfm} value={book.usfm}>
+                      {book.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -100,12 +149,12 @@ const BibleReader = () => {
               <label className="text-sm font-semibold mb-2 block">Translation</label>
               <Select value={selectedVersion} onValueChange={setSelectedVersion}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={selectedVersionObj?.name || "Select version"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {versions.map((version) => (
-                    <SelectItem key={version.id} value={version.id}>
-                      {version.name}
+                  {versions.map((v) => (
+                    <SelectItem key={v.abbreviation} value={v.abbreviation}>
+                      {v.name} ({v.language_name})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -149,45 +198,46 @@ const BibleReader = () => {
           {/* Chapter Header */}
           <div className="mb-8 pb-4 border-b">
             <h2 className="text-3xl font-bold mb-2">
-              {selectedBook} {selectedChapter}
+              {selectedBook?.name} {selectedChapter}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {versions.find(v => v.id === selectedVersion)?.name}
+              {selectedVersionObj?.name}
             </p>
           </div>
 
-          {/* Verses */}
-          <div className={`space-y-4 ${
-            fontSize === 'small' ? 'text-base' :
-            fontSize === 'medium' ? 'text-lg' :
-            fontSize === 'large' ? 'text-xl' :
-            'text-2xl'
-          } leading-relaxed`}>
-            {sampleVerses.map((verse) => (
-              <div
-                key={verse.number}
-                className="group hover:bg-muted/50 p-2 rounded-lg cursor-pointer transition-colors"
-              >
-                <sup className="text-primary font-bold mr-2 select-none">
-                  {verse.number}
-                </sup>
-                <span>{verse.text}</span>
-                
-                {/* Verse Actions (show on hover) */}
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-                  <button className="inline-flex items-center justify-center w-6 h-6 text-xs hover:text-yellow-500 transition-colors" title="Highlight">
-                    ✨
-                  </button>
-                  <button className="inline-flex items-center justify-center w-6 h-6 text-xs hover:text-blue-500 transition-colors" title="Bookmark">
-                    🔖
-                  </button>
-                  <button className="inline-flex items-center justify-center w-6 h-6 text-xs hover:text-green-500 transition-colors" title="Share">
-                    🔗
-                  </button>
-                </span>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">Loading...</div>
+            ) : (
+              <div className={`space-y-4 ${
+                fontSize === 'small' ? 'text-base' :
+                fontSize === 'medium' ? 'text-lg' :
+                fontSize === 'large' ? 'text-xl' :
+                'text-2xl'
+              } leading-relaxed`}>
+                {(searchResults ?? verses).map((verse) => (
+                  <div
+                    key={verse.id}
+                    className="group hover:bg-muted/50 p-2 rounded-lg cursor-pointer transition-colors"
+                  >
+                    <sup className="text-primary font-bold mr-2 select-none">
+                      {verse.verse_number}
+                    </sup>
+                    <span>{verse.text}</span>
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                      <button className="inline-flex items-center justify-center w-6 h-6 text-xs hover:text-yellow-500 transition-colors" title="Highlight">
+                        ✨
+                      </button>
+                      <button className="inline-flex items-center justify-center w-6 h-6 text-xs hover:text-blue-500 transition-colors" title="Bookmark">
+                        🔖
+                      </button>
+                      <button className="inline-flex items-center justify-center w-6 h-6 text-xs hover:text-green-500 transition-colors" title="Share">
+                        🔗
+                      </button>
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
 
           {/* Coming Soon Notice */}
           <div className="mt-8 p-6 bg-muted/30 rounded-xl">
@@ -225,10 +275,10 @@ const BibleReader = () => {
 
           {/* Navigation */}
           <div className="flex justify-between items-center mt-8 pt-4 border-t">
-            <Button variant="outline" disabled={selectedChapter <= 1}>
+            <Button variant="outline" disabled={selectedChapter <= 1} onClick={() => setSelectedChapter((c) => Math.max(1, c - 1))}>
               ← Previous Chapter
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" disabled={selectedChapter >= maxChapter} onClick={() => setSelectedChapter((c) => Math.min(maxChapter, c + 1))}>
               Next Chapter →
             </Button>
           </div>
@@ -236,13 +286,13 @@ const BibleReader = () => {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-3 gap-4">
-          <Card className="p-6 text-center cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="p-6 text-center cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/spiritual/bookmarks")}>
             <BookMarked className="w-10 h-10 mx-auto mb-3 text-primary" />
             <h3 className="font-semibold mb-1">My Bookmarks</h3>
             <p className="text-sm text-muted-foreground">View saved verses</p>
           </Card>
           
-          <Card className="p-6 text-center cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="p-6 text-center cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/spiritual/highlights")}>
             <Heart className="w-10 h-10 mx-auto mb-3 text-primary" />
             <h3 className="font-semibold mb-1">Highlights</h3>
             <p className="text-sm text-muted-foreground">See all highlights</p>
