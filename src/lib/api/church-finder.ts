@@ -128,7 +128,7 @@ export async function findNearbyChurches(
 ): Promise<{ churches: ChurchWithDistance[]; total_count: number }> {
   const { latitude, longitude, radius_meters, limit = 20 } = params;
 
-  const { data, error } = await supabase.rpc('find_nearby_churches', {
+  const { data, error } = await supabase.rpc('find_nearby_churches' as any, {
     lat: latitude,
     lng: longitude,
     radius: radius_meters,
@@ -137,9 +137,11 @@ export async function findNearbyChurches(
 
   if (error) throw error;
 
+  const churchData = (data || []) as unknown as ChurchWithDistance[];
+
   return {
-    churches: (data || []) as ChurchWithDistance[],
-    total_count: data?.length || 0,
+    churches: churchData,
+    total_count: churchData.length,
   };
 }
 

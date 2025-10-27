@@ -108,6 +108,9 @@ const PaymentCheckout = lazy(() => import("./pages/payment/PaymentCheckout"));
 const BillingHistory = lazy(() => import("./pages/payment/BillingHistory"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
+const ChurchHome = lazy(() => import("./pages/church/ChurchHome"));
+const ChurchList = lazy(() => import("./pages/church/ChurchList"));
+const ChurchDetail = lazy(() => import("./pages/church/ChurchDetail"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -302,6 +305,12 @@ const App = () => {
                 <Route path="/community/forums" element={<Forums />} />
                 <Route path="/community/events" element={<Events />} />
                 <Route path="/community/groups" element={<Groups />} />
+                
+                {/* Church Finder Routes */}
+                <Route path="/churches" element={<ChurchHome />} />
+                <Route path="/churches/search" element={<ChurchList />} />
+                <Route path="/churches/near-me" element={<ChurchList />} />
+                <Route path="/churches/:slug" element={<ChurchDetail />} />
                 
                 {/* Messaging & Video */}
                 <Route path="/inbox" element={<Inbox />} />

@@ -3402,6 +3402,48 @@ export type Database = {
           }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      find_nearby_churches: {
+        Args: {
+          lat: number
+          lng: number
+          radius: number
+          result_limit?: number
+        }
+        Returns: {
+          address: string
+          city: string
+          country: string
+          country_code: string
+          denomination_id: number
+          description: string
+          distance_km: number
+          distance_meters: number
+          email: string
+          favorite_count: number
+          has_livestream: boolean
+          has_parking: boolean
+          has_sunday_school: boolean
+          has_wheelchair_access: boolean
+          has_youth_ministry: boolean
+          id: number
+          is_active: boolean
+          is_verified: boolean
+          languages: string[]
+          latitude: number
+          longitude: number
+          main_image_url: string
+          name: string
+          phone: string
+          postal_code: string
+          primary_language: string
+          rating_average: number
+          rating_count: number
+          slug: string
+          state_province: string
+          view_count: number
+          website: string
+        }[]
+      }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }
@@ -3654,6 +3696,7 @@ export type Database = {
               maxdecimaldigits?: number
               nprefix?: string
               options?: number
+              version: number
             }
             Returns: string
           }
@@ -3664,7 +3707,6 @@ export type Database = {
               maxdecimaldigits?: number
               nprefix?: string
               options?: number
-              version: number
             }
             Returns: string
           }
@@ -3855,11 +3897,11 @@ export type Database = {
         Returns: unknown
       }
       st_generatepoints:
+        | { Args: { area: unknown; npoints: number }; Returns: unknown }
         | {
             Args: { area: unknown; npoints: number; seed: number }
             Returns: unknown
           }
-        | { Args: { area: unknown; npoints: number }; Returns: unknown }
       st_geogfromtext: { Args: { "": string }; Returns: unknown }
       st_geographyfromtext: { Args: { "": string }; Returns: unknown }
       st_geohash:
@@ -4086,8 +4128,8 @@ export type Database = {
         Returns: Record<string, unknown>[]
       }
       st_srid:
-        | { Args: { geog: unknown }; Returns: number }
         | { Args: { geom: unknown }; Returns: number }
+        | { Args: { geog: unknown }; Returns: number }
       st_subdivide: {
         Args: { geom: unknown; gridsize?: number; maxvertices?: number }
         Returns: unknown[]
@@ -4127,11 +4169,11 @@ export type Database = {
           }
       st_triangulatepolygon: { Args: { g1: unknown }; Returns: unknown }
       st_union:
+        | { Args: { geom1: unknown; geom2: unknown }; Returns: unknown }
         | {
             Args: { geom1: unknown; geom2: unknown; gridsize: number }
             Returns: unknown
           }
-        | { Args: { geom1: unknown; geom2: unknown }; Returns: unknown }
       st_voronoilines: {
         Args: { extend_to?: unknown; g1: unknown; tolerance?: number }
         Returns: unknown

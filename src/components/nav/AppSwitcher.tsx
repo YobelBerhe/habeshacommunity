@@ -1,4 +1,4 @@
-import { Heart, GraduationCap, ShoppingBag, Users, Grid3x3, BookOpen } from 'lucide-react';
+import { Heart, GraduationCap, ShoppingBag, Users, Grid3x3, BookOpen, Church } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -48,6 +48,15 @@ const AppSwitcher = () => {
       icon: ShoppingBag,
       gradient: 'from-green-500 to-emerald-500',
       description: 'Buy & sell items'
+    },
+    {
+      id: 'churches',
+      name: 'Churches',
+      name_ti: 'ቤተክርስትያን',
+      path: '/churches',
+      icon: Church,
+      gradient: 'from-amber-500 to-orange-500',
+      description: 'Find churches near you'
     },
     {
       id: 'community',
