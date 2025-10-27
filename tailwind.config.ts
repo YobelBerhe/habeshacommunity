@@ -41,10 +41,25 @@ export default {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'
 				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
-				},
+			accent: {
+				DEFAULT: 'hsl(var(--accent))',
+				foreground: 'hsl(var(--accent-foreground))',
+				50: '#ECFDF5',
+				500: '#10B981',
+				700: '#059669',
+				900: '#064E3B',
+			},
+			spiritual: {
+				50: '#F5F3FF',
+				500: '#8B5CF6',
+				700: '#7C3AED',
+				900: '#581C87',
+			},
+			bronze: '#CD7F32',
+			silver: '#C0C0C0',
+			gold: '#FFD700',
+			platinum: '#E5E4E2',
+			diamond: '#B9F2FF',
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
 					foreground: 'hsl(var(--popover-foreground))'
