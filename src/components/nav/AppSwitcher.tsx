@@ -1,4 +1,4 @@
-import { Heart, GraduationCap, ShoppingBag, Users, Grid3x3 } from 'lucide-react';
+import { Heart, GraduationCap, ShoppingBag, Users, Grid3x3, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -13,6 +13,15 @@ const AppSwitcher = () => {
   const location = useLocation();
 
   const apps = [
+    {
+      id: 'spiritual',
+      name: 'Spiritual',
+      name_ti: 'መንፈሳዊ',
+      path: '/spiritual',
+      icon: BookOpen,
+      gradient: 'from-purple-500 to-indigo-500',
+      description: 'Read & grow in faith'
+    },
     {
       id: 'matchmaking',
       name: 'Matchmaking',

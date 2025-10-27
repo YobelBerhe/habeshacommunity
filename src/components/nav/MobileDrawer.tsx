@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { 
-  Menu, Heart, GraduationCap, ShoppingBag, Users,
+  Menu, Heart, GraduationCap, ShoppingBag, Users, BookOpen,
   Home, MessageSquare, Calendar, Briefcase, Wrench,
   ChevronRight
 } from 'lucide-react';
@@ -18,6 +18,18 @@ const MobileDrawer = () => {
   };
 
   const mainApps = [
+    {
+      name: 'Spiritual',
+      name_ti: 'መንፈሳዊ',
+      icon: BookOpen,
+      path: '/spiritual',
+      gradient: 'from-purple-500 to-indigo-500',
+      items: [
+        { name: 'Bible Reader', path: '/spiritual/reader' },
+        { name: 'Reading Plans', path: '/spiritual/plans' },
+        { name: 'My Progress', path: '/spiritual/progress' }
+      ]
+    },
     {
       name: 'Matchmaking',
       name_ti: 'መስዋእቲ',

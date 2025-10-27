@@ -2,6 +2,10 @@ export function preloadRoute(routePath: string) {
   // Map routes to their lazy components
   const routeMap: Record<string, () => Promise<any>> = {
     '/': () => import('../pages/Index'),
+    '/spiritual': () => import('../pages/spiritual/SpiritualHome'),
+    '/spiritual/reader': () => import('../pages/spiritual/BibleReader'),
+    '/spiritual/plans': () => import('../pages/spiritual/ReadingPlans'),
+    '/spiritual/progress': () => import('../pages/spiritual/Progress'),
     '/browse': () => import('../pages/Browse'),
     '/chat': () => import('../pages/Chat'),
     '/mentor': () => import('../pages/mentor/MentorList'),

@@ -26,6 +26,10 @@ import BootstrapAuth from "@/components/BootstrapAuth";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
+const SpiritualHome = lazy(() => import("./pages/spiritual/SpiritualHome"));
+const BibleReader = lazy(() => import("./pages/spiritual/BibleReader"));
+const ReadingPlans = lazy(() => import("./pages/spiritual/ReadingPlans"));
+const SpiritualProgress = lazy(() => import("./pages/spiritual/Progress"));
 const Browse = lazy(() => import("./pages/Browse"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Chat = lazy(() => import("./pages/Chat"));
@@ -180,6 +184,12 @@ const App = () => {
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/l/:id" element={<ListingDetail />} />
+                
+                {/* Spiritual Routes */}
+                <Route path="/spiritual" element={<SpiritualHome />} />
+                <Route path="/spiritual/reader" element={<BibleReader />} />
+                <Route path="/spiritual/plans" element={<ReadingPlans />} />
+                <Route path="/spiritual/progress" element={<SpiritualProgress />} />
                 
                 {/* Auth Routes */}
                 <Route path="/auth/callback" element={<AuthCallback />} />

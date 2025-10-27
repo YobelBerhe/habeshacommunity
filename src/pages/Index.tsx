@@ -18,6 +18,7 @@ import {
   Clock,
   CheckCircle,
   Zap,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,18 @@ const Index = () => {
 
   // Main platform features
   const mainApps = [
+    {
+      id: "spiritual",
+      title: "Grow Spiritually",
+      title_ti: "መንፈሳዊ ዕብየት",
+      description: "Read the Bible, join reading plans, and track your spiritual journey",
+      icon: BookOpen,
+      color: "from-purple-500 to-indigo-500",
+      gradient: "from-purple-500/10 to-indigo-500/10",
+      stats: { versions: "9+", plans: "Featured" },
+      path: "/spiritual",
+      features: ["Bible Reader", "Reading Plans", "Track Progress", "Multiple Languages"],
+    },
     {
       id: "matchmaking",
       title: "Find Your Match",
