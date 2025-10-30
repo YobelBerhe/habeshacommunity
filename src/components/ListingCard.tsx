@@ -51,18 +51,12 @@ const ListingCard = ({ listing, onSelect, showJustPosted, viewMode = "list" }: L
   // Use optimistic favorite hook
   const { isFavorited, toggleFavorite: optimisticToggle, isPending } = useOptimisticFavorite(
     listing.id,
-    user?.id || '',
+    user?.id,
     initialFavoriteState
   );
 
   const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    if (!user) {
-      sonnerToast.error('Please log in to save favorites');
-      return;
-    }
-    
     await optimisticToggle();
   };
 

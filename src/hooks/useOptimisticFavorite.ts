@@ -9,12 +9,23 @@ import { useOfflineQueue } from './useOfflineQueue';
  */
 export function useOptimisticFavorite(
   listingId: string, 
-  userId: string, 
+  userId: string | undefined, 
   initialIsFavorited: boolean
 ) {
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isPending, setIsPending] = useState(false);
   const { queueAction } = useOfflineQueue();
+
+  // Don't attempt operations if no userId
+  if (!userId) {
+    return { 
+      isFavorited: false, 
+      toggleFavorite: async () => {
+        toast.error('Please log in to save favorites');
+      }, 
+      isPending: false 
+    };
+  }
 
   const toggleFavorite = async () => {
     const previousState = isFavorited;
@@ -55,9 +66,9 @@ export function useOptimisticFavorite(
       await performAction();
       toast.success(willFavorite ? 'Added to favorites' : 'Removed from favorites');
     } catch (error) {
-      // Queue if fails
-      queueAction('favorite', performAction, { listingId, userId, willFavorite });
-      toast.error('Action queued - will retry when online');
+      // Revert on error
+      setIsFavorited(previousState);
+      toast.error('Failed to update favorites');
       console.error('Favorite error:', error);
     } finally {
       setIsPending(false);
