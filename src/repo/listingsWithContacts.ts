@@ -98,7 +98,7 @@ export async function updateListingWithContact(
   
   const { data: listingData, error: listingError } = await supabase
     .from('listings')
-    .update(listing)
+    .update(listing as any)
     .eq('id', listingId)
     .select('*')
     .single();

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
   ArrowLeft, Upload, X, DollarSign, MapPin, 
   ShoppingBag, Home, Briefcase, Wrench, CheckCircle,
-  Image as ImageIcon, Info
+  Image as ImageIcon, Info, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
@@ -20,11 +19,15 @@ import {
 } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { uploadListingImages } from '@/utils/upload';
 
 const CreateListing = () => {
   const navigate = useNavigate();
   const [listingType, setListingType] = useState<'product' | 'housing' | 'job' | 'service'>('product');
-  const [images, setImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -32,11 +35,12 @@ const CreateListing = () => {
     category: '',
     price: '',
     location: '',
+    city: '',
+    country: '',
     condition: '',
     bedrooms: '',
     bathrooms: '',
     salary: '',
-    salaryType: '',
     jobType: '',
     experience: '',
     phone: '',
@@ -50,18 +54,19 @@ const CreateListing = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      // In production, upload to storage and get URLs
-      // For demo, just add placeholder
-      const newImages = Array.from(files).map(() => 
-        `https://via.placeholder.com/400x300?text=Uploaded+Image`
-      );
-      setImages(prev => [...prev, ...newImages].slice(0, 5));
-    }
+    if (!files) return;
+
+    const newFiles = Array.from(files).slice(0, 5 - imageFiles.length);
+    const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+
+    setImageFiles(prev => [...prev, ...newFiles].slice(0, 5));
+    setImagePreviews(prev => [...prev, ...newPreviews].slice(0, 5));
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,23 +78,95 @@ const CreateListing = () => {
       return;
     }
 
-    if (listingType === 'product' && !formData.price) {
-      toast.error('Please set a price for your product');
+    if ((listingType === 'product' || listingType === 'service' || listingType === 'housing') && !formData.price) {
+      toast.error('Please set a price');
       return;
     }
 
+    if (listingType === 'job' && !formData.salary) {
+      toast.error('Please set salary information');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      // TODO: Submit to Supabase
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        toast.error('You must be logged in to create a listing');
+        navigate('/auth/login');
+        return;
+      }
+
+      // Upload images if any
+      let imageUrls: string[] = [];
+      if (imageFiles.length > 0) {
+        toast.loading('Uploading images...', { id: 'upload' });
+        imageUrls = await uploadListingImages(imageFiles, user.id);
+        toast.success('Images uploaded', { id: 'upload' });
+      }
+
+      // Parse location
+      const locationParts = formData.location.split(',').map(s => s.trim());
+      const city = formData.city || locationParts[0] || 'Unknown';
+      const country = formData.country || locationParts[locationParts.length - 1] || 'Unknown';
+
+      // Map UI category to DB category
+      const categoryMap: Record<string, string> = {
+        'product': 'forsale',
+        'housing': 'housing',
+        'job': 'jobs',
+        'service': 'services'
+      };
+
+      // Prepare listing data
+      const listingData = {
+        user_id: user.id,
+        category: categoryMap[listingType],
+        subcategory: formData.category,
+        title: formData.title,
+        description: formData.description,
+        city,
+        country,
+        price_cents: formData.price ? Math.round(parseFloat(formData.price) * 100) : null,
+        currency: 'USD',
+        images: imageUrls,
+        condition: formData.condition || null,
+        bedrooms: formData.bedrooms || null,
+        bathrooms: formData.bathrooms || null,
+        salary: formData.salary || null,
+        job_type: formData.jobType || null,
+        experience: formData.experience || null,
+        phone: formData.phone || null,
+        email: formData.email || null,
+        featured: formData.featured,
+        status: 'active'
+      };
+
+      // Insert listing - cast to any to bypass type checking for new fields
+      const { data: listing, error: insertError } = await supabase
+        .from('listings')
+        .insert(listingData as any)
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
       toast.success('Listing created successfully! 🎉', {
         description: 'Your listing is now live on the marketplace'
       });
 
       setTimeout(() => {
         navigate('/marketplace');
-      }, 2000);
-    } catch (error) {
+      }, 1500);
+    } catch (error: any) {
       console.error('Error creating listing:', error);
-      toast.error('Failed to create listing. Please try again.');
+      toast.error('Failed to create listing', {
+        description: error.message || 'Please try again'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -164,12 +241,12 @@ const CreateListing = () => {
       <div className="sticky top-14 md:top-16 z-40 bg-background/95 backdrop-blur-lg border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => navigate(-1)}>
+            <Button variant="ghost" onClick={() => navigate(-1)} disabled={isSubmitting}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
             <h1 className="text-lg md:text-xl font-bold">Create Listing</h1>
-            <div className="w-20" /> {/* Spacer for alignment */}
+            <div className="w-20" />
           </div>
         </div>
       </div>
@@ -186,12 +263,12 @@ const CreateListing = () => {
               return (
                 <div
                   key={type.value}
-                  onClick={() => setListingType(type.value as any)}
+                  onClick={() => !isSubmitting && setListingType(type.value as any)}
                   className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                     isSelected
                       ? 'border-primary bg-primary/5 shadow-lg'
                       : 'border-border hover:border-primary/50'
-                  }`}
+                  } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${type.color} flex items-center justify-center mb-3`}>
                     <Icon className="w-6 h-6 text-white" />
@@ -226,6 +303,8 @@ const CreateListing = () => {
                 value={formData.title}
                 onChange={(e) => updateFormData('title', e.target.value)}
                 className="mt-1"
+                disabled={isSubmitting}
+                required
               />
             </div>
 
@@ -237,6 +316,8 @@ const CreateListing = () => {
                 value={formData.description}
                 onChange={(e) => updateFormData('description', e.target.value)}
                 className="mt-1 min-h-[150px]"
+                disabled={isSubmitting}
+                required
               />
               <p className="text-xs text-muted-foreground mt-2">
                 {formData.description.length} characters
@@ -245,7 +326,12 @@ const CreateListing = () => {
 
             <div>
               <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => updateFormData('category', value)}>
+              <Select 
+                value={formData.category} 
+                onValueChange={(value) => updateFormData('category', value)}
+                disabled={isSubmitting}
+                required
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -267,6 +353,8 @@ const CreateListing = () => {
                   value={formData.location}
                   onChange={(e) => updateFormData('location', e.target.value)}
                   className="pl-10"
+                  disabled={isSubmitting}
+                  required
                 />
               </div>
             </div>
@@ -294,17 +382,24 @@ const CreateListing = () => {
                       <Input
                         id="price"
                         type="number"
+                        step="0.01"
                         placeholder="0.00"
                         value={formData.price}
                         onChange={(e) => updateFormData('price', e.target.value)}
                         className="pl-10"
+                        disabled={isSubmitting}
+                        required
                       />
                     </div>
                   </div>
 
                   <div>
                     <Label htmlFor="condition">Condition</Label>
-                    <Select value={formData.condition} onValueChange={(value) => updateFormData('condition', value)}>
+                    <Select 
+                      value={formData.condition} 
+                      onValueChange={(value) => updateFormData('condition', value)}
+                      disabled={isSubmitting}
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select condition" />
                       </SelectTrigger>
@@ -332,17 +427,24 @@ const CreateListing = () => {
                       <Input
                         id="price"
                         type="number"
+                        step="0.01"
                         placeholder="1500"
                         value={formData.price}
                         onChange={(e) => updateFormData('price', e.target.value)}
                         className="pl-10"
+                        disabled={isSubmitting}
+                        required
                       />
                     </div>
                   </div>
 
                   <div>
                     <Label htmlFor="bedrooms">Bedrooms</Label>
-                    <Select value={formData.bedrooms} onValueChange={(value) => updateFormData('bedrooms', value)}>
+                    <Select 
+                      value={formData.bedrooms} 
+                      onValueChange={(value) => updateFormData('bedrooms', value)}
+                      disabled={isSubmitting}
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -358,7 +460,11 @@ const CreateListing = () => {
 
                   <div>
                     <Label htmlFor="bathrooms">Bathrooms</Label>
-                    <Select value={formData.bathrooms} onValueChange={(value) => updateFormData('bathrooms', value)}>
+                    <Select 
+                      value={formData.bathrooms} 
+                      onValueChange={(value) => updateFormData('bathrooms', value)}
+                      disabled={isSubmitting}
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -387,12 +493,18 @@ const CreateListing = () => {
                       value={formData.salary}
                       onChange={(e) => updateFormData('salary', e.target.value)}
                       className="mt-1"
+                      disabled={isSubmitting}
+                      required
                     />
                   </div>
 
                   <div>
                     <Label htmlFor="jobType">Job Type</Label>
-                    <Select value={formData.jobType} onValueChange={(value) => updateFormData('jobType', value)}>
+                    <Select 
+                      value={formData.jobType} 
+                      onValueChange={(value) => updateFormData('jobType', value)}
+                      disabled={isSubmitting}
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
@@ -409,7 +521,11 @@ const CreateListing = () => {
 
                 <div>
                   <Label htmlFor="experience">Required Experience</Label>
-                  <Select value={formData.experience} onValueChange={(value) => updateFormData('experience', value)}>
+                  <Select 
+                    value={formData.experience} 
+                    onValueChange={(value) => updateFormData('experience', value)}
+                    disabled={isSubmitting}
+                  >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
@@ -434,17 +550,24 @@ const CreateListing = () => {
                     <Input
                       id="price"
                       type="number"
+                      step="0.01"
                       placeholder="30"
                       value={formData.price}
                       onChange={(e) => updateFormData('price', e.target.value)}
                       className="pl-10"
+                      disabled={isSubmitting}
+                      required
                     />
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="experience">Years of Experience</Label>
-                  <Select value={formData.experience} onValueChange={(value) => updateFormData('experience', value)}>
+                  <Select 
+                    value={formData.experience} 
+                    onValueChange={(value) => updateFormData('experience', value)}
+                    disabled={isSubmitting}
+                  >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select years" />
                     </SelectTrigger>
@@ -463,41 +586,59 @@ const CreateListing = () => {
 
         {/* Step 4: Images */}
         <Card className="p-6 md:p-8 mb-6">
-          <h2 className="text-2xl font-bold mb-2">Photos</h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            Add up to 5 photos to showcase your listing
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
-            {images.map((image, index) => (
-              <div key={index} className="relative aspect-square rounded-lg overflow-hidden border-2 border-border">
-                <img src={image} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2 w-6 h-6"
-                  onClick={() => removeImage(index)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-            
-            {images.length < 5 && (
-              <label className="aspect-square rounded-lg border-2 border-dashed border-border hover:border-primary cursor-pointer flex flex-col items-center justify-center transition-colors">
+          <h2 className="text-2xl font-bold mb-6">Images</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="images">Upload Images (Up to 5)</Label>
+              <div className="mt-2 flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 hover:border-primary transition-colors">
+                <ImageIcon className="w-12 h-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-4">
+                  Click to upload or drag and drop
+                </p>
                 <Input
+                  id="images"
                   type="file"
                   accept="image/*"
                   multiple
-                  className="hidden"
                   onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={isSubmitting || imageFiles.length >= 5}
                 />
-                <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                <span className="text-xs text-muted-foreground text-center px-2">
-                  Add Photo
-                </span>
-              </label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('images')?.click()}
+                  disabled={isSubmitting || imageFiles.length >= 5}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Choose Files
+                </Button>
+              </div>
+            </div>
+
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeImage(index)}
+                      disabled={isSubmitting}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </Card>
@@ -508,19 +649,20 @@ const CreateListing = () => {
           
           <div className="space-y-4">
             <div>
-              <Label htmlFor="phone">Phone Number *</Label>
+              <Label htmlFor="phone">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+1 (555) 000-0000"
+                placeholder="+1 (555) 123-4567"
                 value={formData.phone}
                 onChange={(e) => updateFormData('phone', e.target.value)}
                 className="mt-1"
+                disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -528,41 +670,39 @@ const CreateListing = () => {
                 value={formData.email}
                 onChange={(e) => updateFormData('email', e.target.value)}
                 className="mt-1"
+                disabled={isSubmitting}
               />
             </div>
-
-            <Card className="p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="text-sm">
-                  <p className="text-foreground">
-                    Your contact information will only be visible to interested buyers/seekers 
-                    after they express interest in your listing.
-                  </p>
-                </div>
-              </div>
-            </Card>
           </div>
         </Card>
 
         {/* Submit */}
-        <div className="flex gap-4">
+        <div className="flex items-center justify-between gap-4">
           <Button
             type="button"
             variant="outline"
-            size="lg"
-            className="flex-1"
             onClick={() => navigate(-1)}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
             type="submit"
             size="lg"
-            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+            disabled={isSubmitting}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
           >
-            <CheckCircle className="w-5 h-5 mr-2" />
-            Publish Listing
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-5 h-5 mr-2" />
+                Publish Listing
+              </>
+            )}
           </Button>
         </div>
       </form>

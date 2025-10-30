@@ -2460,10 +2460,39 @@ export type Database = {
           },
         ]
       }
+      listing_favorites: {
+        Row: {
+          created_at: string | null
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
+          bathrooms: string | null
+          bedrooms: string | null
           category: Database["public"]["Enums"]["listing_category"]
           city: string
+          condition: string | null
           contact_hidden: boolean | null
           country: string | null
           created_at: string
@@ -2474,16 +2503,24 @@ export type Database = {
           delivery_url: string | null
           description: string
           dims_cm: Json | null
+          email: string | null
+          experience: string | null
+          favorite_count: number | null
+          featured: boolean | null
           featured_until: string | null
           hs_code: string | null
           id: string
           images: string[] | null
           inventory: number | null
           is_featured: boolean | null
+          job_type: string | null
           location_lat: number | null
           location_lng: number | null
+          message_count: number | null
           origin_country: string | null
+          phone: string | null
           price_cents: number | null
+          salary: string | null
           status: Database["public"]["Enums"]["listing_status"] | null
           subcategory: string | null
           tags: string[] | null
@@ -2491,13 +2528,18 @@ export type Database = {
           type: string | null
           updated_at: string
           user_id: string
+          video_url: string | null
+          view_count: number | null
           views: number | null
           website_url: string | null
           weight_grams: number | null
         }
         Insert: {
+          bathrooms?: string | null
+          bedrooms?: string | null
           category: Database["public"]["Enums"]["listing_category"]
           city: string
+          condition?: string | null
           contact_hidden?: boolean | null
           country?: string | null
           created_at?: string
@@ -2508,16 +2550,24 @@ export type Database = {
           delivery_url?: string | null
           description: string
           dims_cm?: Json | null
+          email?: string | null
+          experience?: string | null
+          favorite_count?: number | null
+          featured?: boolean | null
           featured_until?: string | null
           hs_code?: string | null
           id: string
           images?: string[] | null
           inventory?: number | null
           is_featured?: boolean | null
+          job_type?: string | null
           location_lat?: number | null
           location_lng?: number | null
+          message_count?: number | null
           origin_country?: string | null
+          phone?: string | null
           price_cents?: number | null
+          salary?: string | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           subcategory?: string | null
           tags?: string[] | null
@@ -2525,13 +2575,18 @@ export type Database = {
           type?: string | null
           updated_at?: string
           user_id: string
+          video_url?: string | null
+          view_count?: number | null
           views?: number | null
           website_url?: string | null
           weight_grams?: number | null
         }
         Update: {
+          bathrooms?: string | null
+          bedrooms?: string | null
           category?: Database["public"]["Enums"]["listing_category"]
           city?: string
+          condition?: string | null
           contact_hidden?: boolean | null
           country?: string | null
           created_at?: string
@@ -2542,16 +2597,24 @@ export type Database = {
           delivery_url?: string | null
           description?: string
           dims_cm?: Json | null
+          email?: string | null
+          experience?: string | null
+          favorite_count?: number | null
+          featured?: boolean | null
           featured_until?: string | null
           hs_code?: string | null
           id?: string
           images?: string[] | null
           inventory?: number | null
           is_featured?: boolean | null
+          job_type?: string | null
           location_lat?: number | null
           location_lng?: number | null
+          message_count?: number | null
           origin_country?: string | null
+          phone?: string | null
           price_cents?: number | null
+          salary?: string | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           subcategory?: string | null
           tags?: string[] | null
@@ -2559,6 +2622,8 @@ export type Database = {
           type?: string | null
           updated_at?: string
           user_id?: string
+          video_url?: string | null
+          view_count?: number | null
           views?: number | null
           website_url?: string | null
           weight_grams?: number | null

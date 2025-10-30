@@ -46,7 +46,7 @@ export async function createListing(input: Omit<ListingRow, 'id' | 'created_at' 
 }
 
 export async function updateListing(id: string, patch: Partial<ListingRow>) {
-  const { data, error } = await supabase.from('listings').update(patch).eq('id', id).select('*').single();
+  const { data, error } = await supabase.from('listings').update(patch as any).eq('id', id).select('*').single();
   if (error) throw error;
   return data as ListingRow;
 }

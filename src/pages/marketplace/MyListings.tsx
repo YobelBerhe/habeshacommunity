@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, MoreVertical,
   TrendingUp, DollarSign, Heart, MessageSquare,
   CheckCircle, Clock, XCircle, Copy, Share2,
-  ShoppingBag, Home, Briefcase, Wrench
+  ShoppingBag, Home, Briefcase, Wrench, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -27,114 +27,56 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
-interface Listing {
-  id: string;
-  type: 'product' | 'housing' | 'job' | 'service';
-  title: string;
-  description: string;
-  price?: number;
-  salary?: string;
-  location: string;
-  status: 'active' | 'pending' | 'sold' | 'expired';
-  views: number;
-  favorites: number;
-  messages: number;
-  postedAt: string;
-  featured: boolean;
-}
+import { supabase } from '@/integrations/supabase/client';
+import type { ListingRow } from '@/types/db';
 
 const MyListings = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('active');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<string | null>(null);
+  const [listings, setListings] = useState<ListingRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Demo listings
-  const listings: Listing[] = [
-    {
-      id: '1',
-      type: 'product',
-      title: 'Traditional Ethiopian Coffee Set',
-      description: 'Authentic jebena and cups, perfect for coffee ceremonies',
-      price: 85,
-      location: 'Washington DC',
-      status: 'active',
-      views: 127,
-      favorites: 15,
-      messages: 8,
-      postedAt: '2024-12-15',
-      featured: true
-    },
-    {
-      id: '2',
-      type: 'housing',
-      title: '2BR Apartment near Community Center',
-      description: 'Spacious apartment in safe neighborhood',
-      price: 1800,
-      location: 'Oakland, CA',
-      status: 'active',
-      views: 89,
-      favorites: 12,
-      messages: 5,
-      postedAt: '2024-12-10',
-      featured: false
-    },
-    {
-      id: '3',
-      type: 'service',
-      title: 'Tigrinya Language Tutor',
-      description: 'Experienced teacher offering online lessons',
-      price: 30,
-      location: 'Remote',
-      status: 'active',
-      views: 56,
-      favorites: 8,
-      messages: 3,
-      postedAt: '2024-12-05',
-      featured: false
-    },
-    {
-      id: '4',
-      type: 'product',
-      title: 'Traditional Habesha Dress',
-      description: 'Beautiful handmade dress',
-      price: 250,
-      location: 'Seattle, WA',
-      status: 'sold',
-      views: 234,
-      favorites: 34,
-      messages: 18,
-      postedAt: '2024-11-20',
-      featured: false
-    },
-    {
-      id: '5',
-      type: 'job',
-      title: 'Restaurant Staff Wanted',
-      description: 'Ethiopian/Eritrean restaurant seeking servers',
-      salary: '$18-22/hr',
-      location: 'Atlanta, GA',
-      status: 'expired',
-      views: 145,
-      favorites: 23,
-      messages: 12,
-      postedAt: '2024-11-01',
-      featured: false
+  useEffect(() => {
+    fetchMyListings();
+  }, []);
+
+  const fetchMyListings = async () => {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        navigate('/auth/login');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setListings(data || []);
+    } catch (error: any) {
+      console.error('Error fetching listings:', error);
+      toast.error('Failed to load listings');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const activeListings = listings.filter(l => l.status === 'active');
-  const soldListings = listings.filter(l => l.status === 'sold');
-  const expiredListings = listings.filter(l => l.status === 'expired');
+  const soldListings = listings.filter(l => l.status === 'archived'); // archived = sold
+  const pausedListings = listings.filter(l => l.status === 'paused');
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
-      case 'pending': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
-      case 'sold': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300';
-      case 'expired': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
-      default: return 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300';
+      case 'paused': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
+      case 'archived': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'; // archived = sold
+      case 'flagged': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -153,19 +95,65 @@ const MyListings = () => {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    toast.success('Listing deleted successfully');
-    setDeleteDialogOpen(false);
-    setSelectedListing(null);
+  const confirmDelete = async () => {
+    if (!selectedListing) return;
+
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .delete()
+        .eq('id', selectedListing);
+
+      if (error) throw error;
+
+      toast.success('Listing deleted successfully');
+      setListings(prev => prev.filter(l => l.id !== selectedListing));
+      setDeleteDialogOpen(false);
+      setSelectedListing(null);
+    } catch (error: any) {
+      console.error('Error deleting listing:', error);
+      toast.error('Failed to delete listing');
+    }
   };
 
-  const handleToggleStatus = (listingId: string, currentStatus: string) => {
+  const handleToggleStatus = async (listingId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-    toast.success(`Listing ${newStatus === 'active' ? 'activated' : 'paused'}`);
+    
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .update({ status: newStatus })
+        .eq('id', listingId);
+
+      if (error) throw error;
+
+      toast.success(`Listing ${newStatus === 'active' ? 'activated' : 'paused'}`);
+      setListings(prev => prev.map(l => 
+        l.id === listingId ? { ...l, status: newStatus as any } : l
+      ));
+    } catch (error: any) {
+      console.error('Error updating listing:', error);
+      toast.error('Failed to update listing');
+    }
   };
 
-  const handleMarkAsSold = (listingId: string) => {
-    toast.success('Listing marked as sold');
+  const handleMarkAsSold = async (listingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .update({ status: 'archived' } as any) // Use archived instead of sold
+        .eq('id', listingId);
+
+      if (error) throw error;
+
+      toast.success('Listing marked as sold');
+      setListings(prev => prev.map(l => 
+        l.id === listingId ? { ...l, status: 'archived' as any } : l
+      ));
+    } catch (error: any) {
+      console.error('Error updating listing:', error);
+      toast.error('Failed to update listing');
+    }
   };
 
   const handleCopyLink = (listingId: string) => {
@@ -173,15 +161,20 @@ const MyListings = () => {
     toast.success('Link copied to clipboard');
   };
 
-  const ListingCard = ({ listing }: { listing: Listing }) => {
-    const TypeIcon = getTypeIcon(listing.type);
+  const ListingCard = ({ listing }: { listing: ListingRow }) => {
+    const TypeIcon = getTypeIcon(listing.category);
+    const firstImage = listing.images?.[0];
     
     return (
       <Card className="p-4 md:p-6 hover:shadow-lg transition-all">
         <div className="flex flex-col md:flex-row gap-4">
-          {/* Image Placeholder */}
-          <div className="w-full md:w-32 h-32 bg-gradient-to-br from-muted to-muted/50 rounded-lg flex items-center justify-center flex-shrink-0">
-            <TypeIcon className="w-12 h-12 text-muted-foreground" />
+          {/* Image */}
+          <div className="w-full md:w-32 h-32 bg-gradient-to-br from-muted to-muted/50 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {firstImage ? (
+              <img src={firstImage} alt={listing.title} className="w-full h-full object-cover" />
+            ) : (
+              <TypeIcon className="w-12 h-12 text-muted-foreground" />
+            )}
           </div>
 
           {/* Content */}
@@ -191,7 +184,7 @@ const MyListings = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <h3 
                     className="font-bold text-lg hover:text-primary cursor-pointer truncate"
-                    onClick={() => navigate(`/marketplace/${listing.type}/${listing.id}`)}
+                    onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
                   >
                     {listing.title}
                   </h3>
@@ -209,13 +202,12 @@ const MyListings = () => {
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                   <Badge className={getStatusColor(listing.status)}>
                     {listing.status === 'active' && <CheckCircle className="w-3 h-3 mr-1" />}
-                    {listing.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
-                    {listing.status === 'sold' && <CheckCircle className="w-3 h-3 mr-1" />}
-                    {listing.status === 'expired' && <XCircle className="w-3 h-3 mr-1" />}
-                    {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
+                    {listing.status === 'paused' && <Clock className="w-3 h-3 mr-1" />}
+                    {listing.status === 'archived' && <CheckCircle className="w-3 h-3 mr-1" />}
+                    {listing.status === 'archived' ? 'Sold' : listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
                   </Badge>
-                  <span>{listing.location}</span>
-                  <span>Posted {new Date(listing.postedAt).toLocaleDateString()}</span>
+                  <span>{listing.city}, {listing.country}</span>
+                  <span>Posted {new Date(listing.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
 
@@ -226,16 +218,12 @@ const MyListings = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate(`/marketplace/${listing.type}/${listing.id}`)}>
+                  <DropdownMenuItem onClick={() => navigate(`/marketplace/listing/${listing.id}`)}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Listing
                   </DropdownMenuItem>
                   {listing.status === 'active' && (
                     <>
-                      <DropdownMenuItem onClick={() => navigate(`/marketplace/edit/${listing.id}`)}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleToggleStatus(listing.id, listing.status)}>
                         <EyeOff className="w-4 h-4 mr-2" />
                         Pause Listing
@@ -246,13 +234,15 @@ const MyListings = () => {
                       </DropdownMenuItem>
                     </>
                   )}
+                  {listing.status === 'paused' && (
+                    <DropdownMenuItem onClick={() => handleToggleStatus(listing.id, listing.status)}>
+                      <Eye className="w-4 h-4 mr-2" />
+                      Activate Listing
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => handleCopyLink(listing.id)}>
                     <Copy className="w-4 h-4 mr-2" />
                     Copy Link
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => handleDelete(listing.id)}
@@ -269,32 +259,49 @@ const MyListings = () => {
             <div className="flex flex-wrap items-center gap-4 pt-3 border-t text-sm">
               <div className="flex items-center text-muted-foreground">
                 <Eye className="w-4 h-4 mr-1" />
-                <span className="font-semibold">{listing.views}</span>
+                <span className="font-semibold">{listing.view_count || 0}</span>
                 <span className="ml-1">views</span>
               </div>
               <div className="flex items-center text-muted-foreground">
                 <Heart className="w-4 h-4 mr-1" />
-                <span className="font-semibold">{listing.favorites}</span>
+                <span className="font-semibold">{listing.favorite_count || 0}</span>
                 <span className="ml-1">favorites</span>
               </div>
               <div className="flex items-center text-muted-foreground">
                 <MessageSquare className="w-4 h-4 mr-1" />
-                <span className="font-semibold">{listing.messages}</span>
+                <span className="font-semibold">{listing.message_count || 0}</span>
                 <span className="ml-1">messages</span>
               </div>
-              <div className="ml-auto">
-                <div className="text-xs text-muted-foreground">Price</div>
-                <div className="text-xl font-bold text-primary">
-                  {listing.price && `$${listing.price.toLocaleString()}`}
-                  {listing.salary && listing.salary}
+              {listing.price_cents && (
+                <div className="ml-auto">
+                  <div className="text-xs text-muted-foreground">Price</div>
+                  <div className="text-xl font-bold text-primary">
+                    ${(listing.price_cents / 100).toLocaleString()}
+                  </div>
                 </div>
-              </div>
+              )}
+              {listing.salary && (
+                <div className="ml-auto">
+                  <div className="text-xs text-muted-foreground">Salary</div>
+                  <div className="text-lg font-bold text-primary">
+                    {listing.salary}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </Card>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8">
@@ -332,13 +339,13 @@ const MyListings = () => {
           </Card>
           <Card className="p-4 text-center">
             <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-              {listings.reduce((sum, l) => sum + l.views, 0)}
+              {listings.reduce((sum, l) => sum + (l.view_count || 0), 0)}
             </div>
             <div className="text-xs md:text-sm text-muted-foreground">Total Views</div>
           </Card>
           <Card className="p-4 text-center">
             <div className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">
-              {listings.reduce((sum, l) => sum + l.messages, 0)}
+              {listings.reduce((sum, l) => sum + (l.message_count || 0), 0)}
             </div>
             <div className="text-xs md:text-sm text-muted-foreground">Messages</div>
           </Card>
@@ -359,8 +366,8 @@ const MyListings = () => {
             <TabsTrigger value="sold">
               Sold ({soldListings.length})
             </TabsTrigger>
-            <TabsTrigger value="expired">
-              Expired ({expiredListings.length})
+            <TabsTrigger value="paused">
+              Paused ({pausedListings.length})
             </TabsTrigger>
           </TabsList>
 
@@ -400,17 +407,17 @@ const MyListings = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="expired" className="space-y-4">
-            {expiredListings.length > 0 ? (
-              expiredListings.map(listing => (
+          <TabsContent value="paused" className="space-y-4">
+            {pausedListings.length > 0 ? (
+              pausedListings.map(listing => (
                 <ListingCard key={listing.id} listing={listing} />
               ))
             ) : (
               <Card className="p-12 text-center">
                 <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-2xl font-bold mb-2">No expired listings</h3>
+                <h3 className="text-2xl font-bold mb-2">No paused listings</h3>
                 <p className="text-muted-foreground">
-                  Listings expire after 90 days of inactivity
+                  Paused listings will appear here
                 </p>
               </Card>
             )}
