@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, ShoppingBag, Home, Briefcase, Wrench,
   MapPin, DollarSign, Clock, Heart, Filter,
@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Listing {
   id: string;
@@ -39,119 +41,103 @@ const MarketplaceHome = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('recent');
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch listings from database
+  useEffect(() => {
+    fetchListings();
+  }, []);
+
+  const fetchListings = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Map database listings to UI format
+      const mappedListings: Listing[] = (data || []).map(listing => {
+        // Map DB category to UI type
+        const typeMap: Record<string, 'product' | 'housing' | 'job' | 'service'> = {
+          'forsale': 'product',
+          'housing': 'housing',
+          'jobs': 'job',
+          'services': 'service',
+          'product': 'product',
+          'job': 'job',
+          'service': 'service'
+        };
+
+        const type = typeMap[listing.category] || 'product';
+        
+        // Calculate time ago
+        const postedDate = new Date(listing.created_at);
+        const now = new Date();
+        const diffMs = now.getTime() - postedDate.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        let postedAt = 'Just now';
+        if (diffMins < 60) postedAt = `${diffMins} mins ago`;
+        else if (diffHours < 24) postedAt = `${diffHours} hours ago`;
+        else if (diffDays === 1) postedAt = '1 day ago';
+        else if (diffDays < 7) postedAt = `${diffDays} days ago`;
+        else postedAt = `${Math.floor(diffDays / 7)} weeks ago`;
+
+        return {
+          id: listing.id,
+          type,
+          title: listing.title,
+          description: listing.description,
+          price: listing.price_cents ? listing.price_cents / 100 : undefined,
+          salary: listing.salary || undefined,
+          location: listing.city || 'Unknown',
+          seller: 'Community Member',
+          image: listing.images?.[0],
+          postedAt,
+          featured: listing.featured || false,
+          category: listing.subcategory || 'Other'
+        };
+      });
+
+      setListings(mappedListings);
+    } catch (error: any) {
+      console.error('Error fetching listings:', error);
+      toast.error('Failed to load listings');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Calculate category counts
+  const categoryCounts = {
+    all: listings.length,
+    products: listings.filter(l => l.type === 'product').length,
+    housing: listings.filter(l => l.type === 'housing').length,
+    jobs: listings.filter(l => l.type === 'job').length,
+    services: listings.filter(l => l.type === 'service').length
+  };
 
   const categories = [
-    { id: 'all', name: 'All', name_ti: 'ኩሉ', icon: ShoppingBag, color: 'from-blue-500 to-cyan-500', count: 156 },
-    { id: 'products', name: 'Products', name_ti: 'ኣቕሑ', icon: ShoppingBag, color: 'from-green-500 to-emerald-500', count: 67 },
-    { id: 'housing', name: 'Housing', name_ti: 'ገዛ', icon: Home, color: 'from-purple-500 to-pink-500', count: 34 },
-    { id: 'jobs', name: 'Jobs & Gigs', name_ti: 'ስራሕ', icon: Briefcase, color: 'from-amber-500 to-orange-500', count: 28 },
-    { id: 'services', name: 'Services', name_ti: 'ኣገልግሎት', icon: Wrench, color: 'from-rose-500 to-red-500', count: 27 }
-  ];
-
-  // Demo listings
-  const listings: Listing[] = [
-    {
-      id: '1',
-      type: 'product',
-      title: 'Traditional Ethiopian Coffee Set',
-      description: 'Authentic jebena and cups, perfect for coffee ceremonies',
-      price: 85,
-      location: 'Washington DC',
-      seller: 'Sara M.',
-      postedAt: '2 hours ago',
-      featured: true,
-      category: 'Home & Kitchen'
-    },
-    {
-      id: '2',
-      type: 'housing',
-      title: '2BR Apartment near Eritrean Community Center',
-      description: 'Spacious 2 bedroom, 1 bath apartment in safe neighborhood',
-      price: 1800,
-      location: 'Oakland, CA',
-      seller: 'Daniel T.',
-      postedAt: '5 hours ago',
-      featured: true,
-      category: 'Apartments'
-    },
-    {
-      id: '3',
-      type: 'job',
-      title: 'Tigrinya Translator Needed',
-      description: 'Part-time remote work, flexible hours',
-      salary: '$25-35/hr',
-      location: 'Remote',
-      seller: 'Tech Solutions Inc',
-      postedAt: '1 day ago',
-      featured: false,
-      category: 'Translation'
-    },
-    {
-      id: '4',
-      type: 'service',
-      title: 'Tigrinya Language Tutor',
-      description: 'Experienced teacher offering online lessons for all ages',
-      price: 30,
-      location: 'Toronto, Canada',
-      seller: 'Meron K.',
-      postedAt: '2 days ago',
-      featured: false,
-      category: 'Education'
-    },
-    {
-      id: '5',
-      type: 'product',
-      title: 'Traditional Habesha Dress (Kemis)',
-      description: 'Beautiful handmade dress, perfect for weddings and events',
-      price: 250,
-      location: 'Asmara, Eritrea',
-      seller: 'Rahel W.',
-      postedAt: '3 days ago',
-      featured: false,
-      category: 'Clothing'
-    },
-    {
-      id: '6',
-      type: 'housing',
-      title: 'Room for Rent - Female Only',
-      description: 'Furnished room in shared house, Habesha household',
-      price: 650,
-      location: 'Seattle, WA',
-      seller: 'Sophia A.',
-      postedAt: '4 days ago',
-      featured: false,
-      category: 'Rooms'
-    },
-    {
-      id: '7',
-      type: 'job',
-      title: 'Restaurant Staff Wanted',
-      description: 'Ethiopian/Eritrean restaurant seeking servers and cooks',
-      salary: '$18-22/hr',
-      location: 'Atlanta, GA',
-      seller: 'Habesha Cuisine',
-      postedAt: '1 week ago',
-      featured: false,
-      category: 'Food Service'
-    },
-    {
-      id: '8',
-      type: 'service',
-      title: 'Immigration Consultation',
-      description: 'Experienced consultant helping with visa applications',
-      price: 100,
-      location: 'Washington DC',
-      seller: 'Michael G.',
-      postedAt: '1 week ago',
-      featured: true,
-      category: 'Legal'
-    }
+    { id: 'all', name: 'All', name_ti: 'ኩሉ', icon: ShoppingBag, color: 'from-blue-500 to-cyan-500', count: categoryCounts.all },
+    { id: 'products', name: 'Products', name_ti: 'ኣቕሑ', icon: ShoppingBag, color: 'from-green-500 to-emerald-500', count: categoryCounts.products },
+    { id: 'housing', name: 'Housing', name_ti: 'ገዛ', icon: Home, color: 'from-purple-500 to-pink-500', count: categoryCounts.housing },
+    { id: 'jobs', name: 'Jobs & Gigs', name_ti: 'ስራሕ', icon: Briefcase, color: 'from-amber-500 to-orange-500', count: categoryCounts.jobs },
+    { id: 'services', name: 'Services', name_ti: 'ኣገልግሎት', icon: Wrench, color: 'from-rose-500 to-red-500', count: categoryCounts.services }
   ];
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          listing.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || listing.type === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || 
+                           selectedCategory === 'products' && listing.type === 'product' ||
+                           listing.type === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -304,12 +290,26 @@ const MarketplaceHome = () => {
       {/* Listings Grid */}
       <section className="py-6 md:py-8">
         <div className="container mx-auto px-4">
-          <div className={`grid gap-4 md:gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-              : 'grid-cols-1'
-          }`}>
-            {filteredListings.map((listing) => {
+          {isLoading ? (
+            <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[1,2,3,4,5,6,7,8].map(i => (
+                <Card key={i} className="overflow-hidden animate-pulse">
+                  <div className="h-48 bg-muted" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-muted rounded w-1/2" />
+                    <div className="h-6 bg-muted rounded" />
+                    <div className="h-4 bg-muted rounded w-3/4" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className={`grid gap-4 md:gap-6 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                : 'grid-cols-1'
+            }`}>
+              {filteredListings.map((listing) => {
               const TypeIcon = getTypeIcon(listing.type);
               
               return (
@@ -318,11 +318,19 @@ const MarketplaceHome = () => {
                   className="group overflow-hidden hover:shadow-2xl transition-all cursor-pointer"
                   onClick={() => navigate(`/marketplace/${listing.type}/${listing.id}`)}
                 >
-                  {/* Image Placeholder */}
+                  {/* Image */}
                   <div className="relative h-48 bg-gradient-to-br from-muted to-muted/50">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <TypeIcon className="w-16 h-16 text-muted-foreground" />
-                    </div>
+                    {listing.image ? (
+                      <img 
+                        src={listing.image} 
+                        alt={listing.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <TypeIcon className="w-16 h-16 text-muted-foreground" />
+                      </div>
+                    )}
                     
                     {listing.featured && (
                       <Badge className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
@@ -394,8 +402,9 @@ const MarketplaceHome = () => {
                   </div>
                 </Card>
               );
-            })}
-          </div>
+              })}
+            </div>
+          )}
 
           {/* Empty State */}
           {filteredListings.length === 0 && (
