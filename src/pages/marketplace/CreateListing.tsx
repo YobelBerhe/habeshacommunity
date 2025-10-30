@@ -206,9 +206,57 @@ const CreateListing = () => {
   ];
 
   const productCategories = [
-    'Electronics', 'Clothing & Accessories', 'Home & Kitchen',
-    'Books & Media', 'Sports & Outdoors', 'Traditional Items',
-    'Baby & Kids', 'Furniture', 'Other'
+    // Clothing & Fashion
+    'Womenswear & Underwear',
+    'Menswear & Underwear',
+    "Kids' Fashion",
+    'Shoes',
+    'Fashion Accessories',
+    'Luggage & Bags',
+    'Jewelry & Accessories',
+
+    // Electronics & Tech
+    'Phones & Electronics',
+    'Computers & Office Equipment',
+
+    // Home & Living
+    'Furniture',
+    'Home Supplies',
+    'Kitchenware',
+    'Household Appliances',
+    'Home Improvement',
+    'Textiles & Soft Furnishings',
+    'Tools & Hardware',
+
+    // Health & Beauty
+    'Beauty & Personal Care',
+    'Health',
+
+    // Baby & Kids
+    'Baby & Maternity',
+    'Toys & Hobbies',
+
+    // Sports & Outdoors
+    'Sports & Outdoor',
+
+    // Pets
+    'Pet Supplies',
+
+    // Food & Beverages
+    'Food & Beverages',
+
+    // Media & Entertainment
+    'Books, Magazines & Audio',
+    'Collectibles',
+
+    // Automotive
+    'Automotive & Motorcycle',
+
+    // Other
+    'Virtual Products',
+    'Pre-Owned',
+    'Traditional Items',
+    'Other'
   ];
 
   const housingCategories = [

@@ -2556,7 +2556,7 @@ export type Database = {
           featured?: boolean | null
           featured_until?: string | null
           hs_code?: string | null
-          id: string
+          id?: string
           images?: string[] | null
           inventory?: number | null
           is_featured?: boolean | null
