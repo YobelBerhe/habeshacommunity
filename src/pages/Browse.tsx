@@ -788,20 +788,23 @@ export default function Browse() {
                   </button>
                   
                   <div className="flex gap-2">
+                    <div className="relative w-96">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                      <Input
+                        type="text"
+                        placeholder="Search listings..."
+                        value={filters.query || ''}
+                        onChange={(e) => {
+                          updateFilter('query', e.target.value);
+                          console.log('Browse search query:', e.target.value);
+                        }}
+                        className="pl-10 w-full"
+                      />
+                    </div>
                     <CitySearchBar 
                       value={filters.city}
                       onCitySelect={handleCityChange}
-                      placeholder="Enter city or location"
-                      className="w-80"
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Search listings..."
-                      value={filters.query || ''}
-                      onChange={(e) => {
-                        updateFilter('query', e.target.value);
-                        console.log('Browse search query:', e.target.value);
-                      }}
+                      placeholder="Filter by city (optional)"
                       className="w-64"
                     />
                   </div>
@@ -1242,34 +1245,51 @@ export default function Browse() {
         {/* Mobile Header - Compact */}
         <MobileHeader />
 
-        {/* Mobile Search - Compact */}
-        <div className="px-4 py-2 border-b bg-background space-y-2">
-          {/* General Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              type="text"
-              placeholder="Search listings..."
-              value={filters.query || ''}
-              onChange={(e) => updateFilter('query', e.target.value)}
-              className="pl-10 w-full h-9"
-            />
-          </div>
-          
-          {/* City Search + Clear */}
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <CitySearchBar 
-                value={filters.city}
-                onCitySelect={handleCityChange}
-                className="h-9"
-              />
+        {/* Mobile Search - Unified Search Bar */}
+        <div className="px-4 py-2 border-b bg-background">
+          <div className="flex gap-2 items-start">
+            {/* Unified Search */}
+            <div className="flex-1 space-y-2">
+              {/* Primary search field */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                <Input
+                  type="text"
+                  placeholder="Search listings, city, or location..."
+                  value={filters.query || ''}
+                  onChange={(e) => updateFilter('query', e.target.value)}
+                  className="pl-10 w-full h-10"
+                />
+              </div>
+              
+              {/* City filter chip - show when city is selected */}
+              {filters.city && (
+                <div className="flex gap-2 items-center">
+                  <CitySearchBar 
+                    value={filters.city}
+                    onCitySelect={handleCityChange}
+                    placeholder="Change city..."
+                    className="h-8 text-xs flex-1"
+                  />
+                </div>
+              )}
+              
+              {/* No city selected - show city search */}
+              {!filters.city && (
+                <CitySearchBar 
+                  value={filters.city}
+                  onCitySelect={handleCityChange}
+                  placeholder="Filter by city (optional)..."
+                  className="h-8 text-xs"
+                />
+              )}
             </div>
+            
             <Button
               variant="outline"
               size="sm"
               onClick={handleClearAll}
-              className="px-3 h-9 text-xs"
+              className="px-3 h-10 text-xs flex-shrink-0"
             >
               Clear
             </Button>
@@ -1278,9 +1298,10 @@ export default function Browse() {
 
         {/* Horizontal Scroll Categories - MOBILE OPTIMIZED */}
         <div className="sticky top-14 z-[35] bg-background/95 backdrop-blur-sm border-b">
-          <div className="px-4 py-2">
+          <div className="py-2">
             {/* Category Pills - Horizontal Scroll */}
-            <div className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 scrollbar-hide mb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory px-4 scrollbar-hide mb-2"
+                 style={{ WebkitOverflowScrolling: 'touch' }}>
               <button 
                 onClick={() => updateFilters({ category: undefined, subcategory: undefined })}
                 className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
@@ -1372,7 +1393,7 @@ export default function Browse() {
 
             {/* Subcategory Dropdown - Compact */}
             {filters.category && (
-              <div className="mb-2">
+              <div className="mb-2 px-4">
                 <Popover modal={false}>
                   <PopoverTrigger asChild>
                     <Button 
@@ -1416,7 +1437,7 @@ export default function Browse() {
 
             {/* Mentor Filters - Compact */}
             {filters.category === 'mentor' && (
-              <div className="mb-2 pb-2 border-t pt-2">
+              <div className="mb-2 pb-2 border-t pt-2 px-4">
                 <MentorFilters
                   verifiedOnly={mentorVerifiedOnly}
                   minRating={mentorMinRating}
@@ -1429,7 +1450,7 @@ export default function Browse() {
             )}
 
             {/* Results + View Toggle - Compact */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between px-4">
               <div className="text-xs text-muted-foreground">
                 {processedListings.length} results
                 {filters.city && ` in ${filters.city}`}
@@ -1458,7 +1479,7 @@ export default function Browse() {
               variant="minimal"
             />
           ) : viewMode === "map" ? (
-            <div className="h-[70vh] w-full">
+            <div className="h-[70vh] w-full -mx-4 rounded-none">
               <LazyMap
                 listings={processedListings}
                 onListingClick={handleListingSelect}
