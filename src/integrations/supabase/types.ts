@@ -2220,6 +2220,241 @@ export type Database = {
         }
         Relationships: []
       }
+      habesha_food_logs: {
+        Row: {
+          calories: number
+          carbs_g: number
+          created_at: string | null
+          date: string
+          fats_g: number
+          fiber_g: number | null
+          food_name: string
+          food_name_amharic: string | null
+          food_name_tigrinya: string | null
+          id: string
+          is_fasting_appropriate: boolean | null
+          is_traditional_habesha: boolean | null
+          protein_g: number
+          serving_size: string | null
+          time: string
+          user_id: string
+        }
+        Insert: {
+          calories: number
+          carbs_g: number
+          created_at?: string | null
+          date?: string
+          fats_g: number
+          fiber_g?: number | null
+          food_name: string
+          food_name_amharic?: string | null
+          food_name_tigrinya?: string | null
+          id?: string
+          is_fasting_appropriate?: boolean | null
+          is_traditional_habesha?: boolean | null
+          protein_g: number
+          serving_size?: string | null
+          time: string
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          carbs_g?: number
+          created_at?: string | null
+          date?: string
+          fats_g?: number
+          fiber_g?: number | null
+          food_name?: string
+          food_name_amharic?: string | null
+          food_name_tigrinya?: string | null
+          id?: string
+          is_fasting_appropriate?: boolean | null
+          is_traditional_habesha?: boolean | null
+          protein_g?: number
+          serving_size?: string | null
+          time?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habesha_food_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habesha_food_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_coach_bookings: {
+        Row: {
+          coach_id: string
+          created_at: string | null
+          duration_min: number
+          id: string
+          meeting_url: string | null
+          notes: string | null
+          price_cents: number
+          session_date: string
+          session_time: string
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string | null
+          duration_min: number
+          id?: string
+          meeting_url?: string | null
+          notes?: string | null
+          price_cents: number
+          session_date: string
+          session_time: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string | null
+          duration_min?: number
+          id?: string
+          meeting_url?: string | null
+          notes?: string | null
+          price_cents?: number
+          session_date?: string
+          session_time?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_coach_bookings_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "health_coaches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_coach_bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_coach_bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_coaches: {
+        Row: {
+          availability_schedule: Json | null
+          bio: string | null
+          certifications: string[] | null
+          coach_type: string
+          created_at: string | null
+          habesha_clients_count: number | null
+          habesha_community_focus: boolean | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          orthodox_fasting_expert: boolean | null
+          price_per_session_cents: number
+          rating_avg: number | null
+          rating_count: number | null
+          session_duration_min: number | null
+          speaks_amharic: boolean | null
+          speaks_tigrinya: boolean | null
+          specializations: string[] | null
+          success_stories_count: number | null
+          total_clients_count: number | null
+          traditional_foods_expert: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          availability_schedule?: Json | null
+          bio?: string | null
+          certifications?: string[] | null
+          coach_type: string
+          created_at?: string | null
+          habesha_clients_count?: number | null
+          habesha_community_focus?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          orthodox_fasting_expert?: boolean | null
+          price_per_session_cents: number
+          rating_avg?: number | null
+          rating_count?: number | null
+          session_duration_min?: number | null
+          speaks_amharic?: boolean | null
+          speaks_tigrinya?: boolean | null
+          specializations?: string[] | null
+          success_stories_count?: number | null
+          total_clients_count?: number | null
+          traditional_foods_expert?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          availability_schedule?: Json | null
+          bio?: string | null
+          certifications?: string[] | null
+          coach_type?: string
+          created_at?: string | null
+          habesha_clients_count?: number | null
+          habesha_community_focus?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          orthodox_fasting_expert?: boolean | null
+          price_per_session_cents?: number
+          rating_avg?: number | null
+          rating_count?: number | null
+          session_duration_min?: number | null
+          speaks_amharic?: boolean | null
+          speaks_tigrinya?: boolean | null
+          specializations?: string[] | null
+          success_stories_count?: number | null
+          total_clients_count?: number | null
+          traditional_foods_expert?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_coaches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_coaches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leaderboard_entries: {
         Row: {
           computed_at: string | null
@@ -3430,6 +3665,42 @@ export type Database = {
           },
         ]
       }
+      orthodox_fasting_calendar: {
+        Row: {
+          created_at: string | null
+          date: string
+          day_of_fast: number | null
+          description: string | null
+          fast_name: string | null
+          fast_type: string
+          id: string
+          strictness: string | null
+          total_days: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          day_of_fast?: number | null
+          description?: string | null
+          fast_name?: string | null
+          fast_type: string
+          id?: string
+          strictness?: string | null
+          total_days?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          day_of_fast?: number | null
+          description?: string | null
+          fast_name?: string | null
+          fast_type?: string
+          id?: string
+          strictness?: string | null
+          total_days?: number | null
+        }
+        Relationships: []
+      }
       payout_methods: {
         Row: {
           created_at: string
@@ -3735,10 +4006,17 @@ export type Database = {
           country: string | null
           created_at: string
           credits_balance: number | null
+          cultural_background: string | null
+          dietary_restrictions: string[] | null
           display_name: string | null
           email_notifications_enabled: boolean | null
+          fasting_strictness: string | null
+          fitness_level: string | null
+          follows_orthodox_fasting: boolean | null
           gender: string | null
+          health_goal: string | null
           id: string
+          primary_language: string | null
           referral_code: string | null
           updated_at: string
         }
@@ -3749,10 +4027,17 @@ export type Database = {
           country?: string | null
           created_at?: string
           credits_balance?: number | null
+          cultural_background?: string | null
+          dietary_restrictions?: string[] | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
+          fasting_strictness?: string | null
+          fitness_level?: string | null
+          follows_orthodox_fasting?: boolean | null
           gender?: string | null
+          health_goal?: string | null
           id: string
+          primary_language?: string | null
           referral_code?: string | null
           updated_at?: string
         }
@@ -3763,10 +4048,17 @@ export type Database = {
           country?: string | null
           created_at?: string
           credits_balance?: number | null
+          cultural_background?: string | null
+          dietary_restrictions?: string[] | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
+          fasting_strictness?: string | null
+          fitness_level?: string | null
+          follows_orthodox_fasting?: boolean | null
           gender?: string | null
+          health_goal?: string | null
           id?: string
+          primary_language?: string | null
           referral_code?: string | null
           updated_at?: string
         }
@@ -5306,6 +5598,63 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "user_plan_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_fasting_participation: {
+        Row: {
+          created_at: string | null
+          days_completed: number | null
+          days_missed: number | null
+          end_date: string | null
+          fast_name: string
+          fast_type: string
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          days_completed?: number | null
+          days_missed?: number | null
+          end_date?: string | null
+          fast_name: string
+          fast_type: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          days_completed?: number | null
+          days_missed?: number | null
+          end_date?: string | null
+          fast_name?: string
+          fast_type?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_fasting_participation_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_fasting_participation_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
