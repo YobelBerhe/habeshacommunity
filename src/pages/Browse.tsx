@@ -682,7 +682,11 @@ export default function Browse() {
     if (listing.category === 'mentor') {
       navigate(`/mentor/${listing.id}`);
     } else if (listing.category === 'match') {
-      navigate(`/match/profile/${listing.id}`);
+      navigate(`/match/profile/${listing.user_id}`);
+    } else if (listing.category === 'forsale') {
+      navigate(`/marketplace/products/${listing.id}`);
+    } else if (listing.category === 'housing' || listing.category === 'jobs' || listing.category === 'services') {
+      navigate(`/marketplace/${listing.category}/${listing.id}`);
     } else {
       navigate(`/l/${listing.id}`);
     }
@@ -862,8 +866,8 @@ export default function Browse() {
                 <div className="flex space-x-6">
                   <ScrollReveal direction="up" delay={0.1}>
                     <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      className={`pb-1 border-b-2 font-medium text-sm transition-colors ${
+                        filters.category === 'community' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                       onClick={() => updateFilters({ category: 'community', subcategory: undefined })}
                       aria-label="Filter by community category"
@@ -874,8 +878,8 @@ export default function Browse() {
                   </ScrollReveal>
                   <ScrollReveal direction="up" delay={0.15}>
                     <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      className={`pb-1 border-b-2 font-medium text-sm transition-colors ${
+                        filters.category === 'mentor' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                       onClick={() => updateFilters({ category: 'mentor', subcategory: undefined })}
                       aria-label="Filter by mentor category"
@@ -886,8 +890,8 @@ export default function Browse() {
                   </ScrollReveal>
                   <ScrollReveal direction="up" delay={0.2}>
                     <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      className={`pb-1 border-b-2 font-medium text-sm transition-colors ${
+                        filters.category === 'match' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                       onClick={() => updateFilters({ category: 'match', subcategory: undefined })}
                       aria-label="Filter by match category"
@@ -898,8 +902,8 @@ export default function Browse() {
                   </ScrollReveal>
                   <ScrollReveal direction="up" delay={0.25}>
                     <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      className={`pb-1 border-b-2 font-medium text-sm transition-colors ${
+                        filters.category === 'housing' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                       onClick={() => updateFilter('category', 'housing')}
                       aria-label="Filter by housing category"
@@ -910,8 +914,8 @@ export default function Browse() {
                   </ScrollReveal>
                   <ScrollReveal direction="up" delay={0.3}>
                     <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      className={`pb-1 border-b-2 font-medium text-sm transition-colors ${
+                        filters.category === 'jobs' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                       onClick={() => updateFilter('category', 'jobs')}
                       aria-label="Filter by jobs category"
@@ -922,8 +926,8 @@ export default function Browse() {
                   </ScrollReveal>
                   <ScrollReveal direction="up" delay={0.35}>
                     <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                      className={`pb-1 border-b-2 font-medium text-sm transition-colors ${
+                        filters.category === 'services' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                       onClick={() => updateFilter('category', 'services')}
                       aria-label="Filter by services category"
@@ -934,8 +938,8 @@ export default function Browse() {
                   </ScrollReveal>
                 <ScrollReveal direction="up" delay={0.4}>
                   <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'forsale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+                    className={`pb-1 border-b-2 font-medium text-sm transition-colors ${
+                      filters.category === 'forsale' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                     onClick={() => updateFilter('category', 'forsale')}
                     aria-label="Filter by marketplace category"
