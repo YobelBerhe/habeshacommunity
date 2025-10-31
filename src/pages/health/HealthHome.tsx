@@ -183,16 +183,38 @@ export default function HealthHome() {
 
       {/* Find a Health Coach */}
       <section className="container mx-auto px-4 pb-16">
-        <Card className="bg-gradient-to-r from-primary/5 to-primary/10">
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <Badge className="mb-2">New</Badge>
-              <h3 className="text-xl font-semibold mb-1">Find a Health Coach</h3>
-              <p className="text-sm text-muted-foreground">
-                Habesha experts in fitness, nutrition, sleep and wellness
-              </p>
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
+          <CardContent className="p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <Badge className="mb-3">New</Badge>
+                <h2 className="text-2xl font-bold mb-2">Find a Health Coach</h2>
+                <p className="text-muted-foreground mb-4">
+                  Habesha experts in fitness, nutrition, sleep and wellness
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    Speaks Amharic or Tigrinya
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    Expert in Orthodox fasting nutrition
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    Understands traditional Habesha foods
+                  </li>
+                </ul>
+              </div>
+              <Button 
+                size="lg"
+                onClick={() => navigate('/mentor')}
+                className="shrink-0"
+              >
+                Browse Coaches
+              </Button>
             </div>
-            <Button onClick={() => navigate('/mentor')}>Browse Coaches</Button>
           </CardContent>
         </Card>
       </section>
