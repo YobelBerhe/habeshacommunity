@@ -1,1574 +1,632 @@
-import { PageTransition } from '@/components/PageTransition';
-import { useEffect, useMemo, useState } from "react";
-import { GridSkeleton } from '@/components/LoadingStates';
-import { EmptyState } from '@/components/EmptyState';
-import { Search } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useNavigate } from "react-router-dom";
-import MobileHeader from "@/components/layout/MobileHeader";
-import Header from "@/components/Header";
-import ListingGrid from "@/components/ListingGrid";
-import { LazyMap } from "@/components/LazyMap";
-import GlobalMap from "@/components/GlobalMap";
-import StickyPostCTA from "@/components/StickyPostCTA";
-import Footer from "@/components/Footer";
-import CitySearchBar from "@/components/CitySearchBar";
-import LanguageToggle from "@/components/LanguageToggle";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useSEO } from "@/hooks/useSEO";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { setParams, getParam } from "@/lib/url";
-import { TAXONOMY, CategoryKey, LABELS } from "@/lib/taxonomy";
-import { t, Lang } from "@/lib/i18n";
-import { useLanguage } from "@/store/language";
-import type { Listing, SearchFilters, AppState } from "@/types";
-import { getAppState, saveAppState } from "@/utils/storage";
-import { fetchListings } from "@/repo/listings";
-import { supabase } from "@/integrations/supabase/client";
-import { fetchListingsWithContacts } from "@/repo/listingsWithContacts";
-import { useAuth } from '@/store/auth';
-import { getContactValue, hasContactAccess } from "@/utils/contactHelpers";
-import { Grid3X3, Map, ChevronDown, MessageCircle, Plus, Heart, X } from "lucide-react";
-import { toast } from "sonner";
-import AuthModal from "@/components/AuthModal";
-import PostModal from "@/components/PostModal";
-import ViewToggle from "@/components/ViewToggle";
-import ThemeToggle from "@/components/ThemeToggle";
-import NotifyBell from "@/components/NotifyBell";
-import AuthButtons from "@/components/AuthButtons";
-import SortDropdown from "@/components/SortDropdown";
-import MentorFilters from "@/components/search/MentorFilters";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ScrollReveal } from '@/components/ScrollReveal';
-import { Parallax } from '@/components/Parallax';
-import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
+import { useState, useEffect } from 'react';
+import { 
+  Search, MessageCircle, Heart, Award, ShoppingBag,
+  Users, Send, Paperclip, Smile, MoreVertical, Phone,
+  Video, Info, Archive, Star, Trash2, Image, Check,
+  CheckCheck, Clock, Pin, Filter, ArrowLeft, Activity, User
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { getOrCreateConversation } from '@/utils/conversations';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
-import type { ViewMode, SortKey } from "@/components/ViewToggle";
-import { sortListings, applyQuickFilters } from "@/utils/ui";
-import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
-import { useFilterPresets } from '@/hooks/useFilterPresets';
-import { FilterChips } from '@/components/FilterChips';
-import { FilterPanel } from '@/components/FilterPanel';
-import { useFilterAnalytics } from '@/hooks/useFilterAnalytics';
-import type { FilterChip } from '@/components/FilterChips';
+interface Message {
+  id: string;
+  text: string;
+  sender: 'me' | 'other';
+  timestamp: string;
+  read: boolean;
+  type?: 'text' | 'image' | 'file';
+}
 
+interface Conversation {
+  id: string;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  timestamp: string;
+  unread: number;
+  online: boolean;
+  type: 'match' | 'mentor' | 'marketplace' | 'community';
+  verified?: boolean;
+  pinned?: boolean;
+  messages: Message[];
+}
 
-export default function Browse() {
+const Inbox = () => {
   const navigate = useNavigate();
-  const { user, openAuth, openPost } = useAuth();
-  const { language, setLanguage } = useLanguage();
-  const [appState, setAppState] = useState<AppState>(() => getAppState());
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(false);
-  
-  // Advanced filter configuration
-  const {
-    filters,
-    updateFilter,
-    updateFilters,
-    resetFilters,
-    hasActiveFilters,
-  } = useAdvancedFilters<SearchFilters>([
-    { key: 'city', defaultValue: undefined },
-    { key: 'category', defaultValue: undefined },
-    { key: 'subcategory', defaultValue: undefined },
-    { key: 'query', defaultValue: '' },
-    {
-      key: 'minPrice',
-      defaultValue: undefined,
-      serialize: (v) => v?.toString() || '',
-      deserialize: (v) => v ? Number(v) : undefined,
-    },
-    {
-      key: 'maxPrice',
-      defaultValue: undefined,
-      serialize: (v) => v?.toString() || '',
-      deserialize: (v) => v ? Number(v) : undefined,
-    },
-    { key: 'jobKind', defaultValue: undefined },
-  ], {
-    persistToUrl: true,
-    persistToStorage: true,
-    storageKey: 'browse-filters',
-  });
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(
+    searchParams.get('conversation') || null
+  );
+  const [messageText, setMessageText] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
 
-  // SEO - Dynamic based on filters
-  useSEO({
-    title: filters.city 
-      ? `Browse Listings in ${filters.city} - HabeshaCommunity`
-      : filters.category
-      ? `Browse ${filters.category} - HabeshaCommunity`
-      : 'Browse Listings - HabeshaCommunity',
-    description: filters.category
-      ? `Find ${filters.category} in ${filters.city || 'your area'}. Connect with the Habesha community.`
-      : 'Browse housing, jobs, services, and more from the Habesha community worldwide.',
-    keywords: ['browse', 'listings', filters.city, filters.category].filter(Boolean) as string[],
-  });
-
-  // Filter presets
-  const { presets, savePreset, applyPreset, deletePreset } = useFilterPresets<SearchFilters>('browse-presets');
-  
-  // Track filter usage
-  useFilterAnalytics(filters);
-  
-  // Donation dialog state
-  const [donateDialogOpen, setDonateDialogOpen] = useState(false);
-  const [donateAmount, setDonateAmount] = useState<number>(500);
-  const [customAmount, setCustomAmount] = useState<string>("");
-  const [donateEmail, setDonateEmail] = useState<string>("");
-  const [donateLoading, setDonateLoading] = useState(false);
-  
-  const [viewMode, setViewMode] = useState<ViewMode>(() =>
-    (localStorage.getItem('hn.viewMode') as ViewMode) || 'list'
-  );
-  
-  const [sortKey, setSortKey] = useState<SortKey>(() =>
-    (localStorage.getItem('hn.sort') as SortKey) || 'relevance'
-  );
-  
-  // Quick filters state
-  const [hasImageFilter, setHasImageFilter] = useState(() =>
-    localStorage.getItem('hn.filter.hasImage') === 'true'
-  );
-  
-  const [postedTodayFilter, setPostedTodayFilter] = useState(() =>
-    localStorage.getItem('hn.filter.postedToday') === 'true'
-  );
-
-  // Dropdown states
-  const [categoryOpen, setCategoryOpen] = useState(false);
-  const [subcategoryOpen, setSubcategoryOpen] = useState(false);
-
-  // Mentor-specific filters
-  const [mentorVerifiedOnly, setMentorVerifiedOnly] = useState(() =>
-    localStorage.getItem('hn.mentor.verifiedOnly') === 'true'
-  );
-  const [mentorMinRating, setMentorMinRating] = useState(() =>
-    localStorage.getItem('hn.mentor.minRating') || '0'
-  );
-  const [mentorSortBy, setMentorSortBy] = useState(() =>
-    localStorage.getItem('hn.mentor.sortBy') || 'verified'
-  );
-
-  // Persist view and filter states
-  useEffect(() => localStorage.setItem('hn.viewMode', viewMode), [viewMode]);
-  useEffect(() => localStorage.setItem('hn.sort', sortKey), [sortKey]);
-  useEffect(() => localStorage.setItem('hn.filter.hasImage', hasImageFilter.toString()), [hasImageFilter]);
-  useEffect(() => localStorage.setItem('hn.filter.postedToday', postedTodayFilter.toString()), [postedTodayFilter]);
-  useEffect(() => localStorage.setItem('hn.mentor.verifiedOnly', mentorVerifiedOnly.toString()), [mentorVerifiedOnly]);
-  useEffect(() => localStorage.setItem('hn.mentor.minRating', mentorMinRating), [mentorMinRating]);
-  useEffect(() => localStorage.setItem('hn.mentor.sortBy', mentorSortBy), [mentorSortBy]);
-
-  // Update app state when city changes
+  // Handle incoming conversation from navigation state
   useEffect(() => {
-    if (filters.city && filters.city !== appState.city) {
-      const next = { ...appState, city: filters.city };
-      setAppState(next);
-      saveAppState(next);
-    }
-  }, [filters.city, appState]);
-
-  // Load data when filters change
-  useEffect(() => {
-    const loadListings = async () => {
-      setLoading(true);
-      console.log('🔍 Fetching listings with filters:', filters);
-      try {
-        // If no category filter, fetch from all sources
-        if (!filters.category) {
-          console.log('🌍 Fetching all listings (including mentors and match profiles)');
-          
-          // Fetch regular listings
-          const regularData = user 
-            ? await fetchListingsWithContacts({
-                city: filters.city,
-                q: filters.query,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-              })
-            : await fetchListings({
-                city: filters.city,
-                q: filters.query,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-              });
-
-          // Fetch mentors
-          let mentorQuery = supabase
-            .from('mentors')
-            .select(`*, mentor_skills(skill)`)
-            .eq('available', true);
-          
-          if (filters.city) mentorQuery = mentorQuery.eq('city', filters.city);
-          const { data: mentorData } = await mentorQuery;
-          
-          // Filter mentors by search query
-          let filteredMentors = mentorData || [];
-          if (filters.query) {
-            const lowerQ = filters.query.toLowerCase();
-            filteredMentors = mentorData?.filter((mentor: any) => {
-              const skills = mentor.mentor_skills?.map((s: any) => s.skill.toLowerCase()) || [];
-              return (
-                mentor.display_name?.toLowerCase().includes(lowerQ) ||
-                mentor.bio?.toLowerCase().includes(lowerQ) ||
-                mentor.topics?.some((t: string) => t.toLowerCase().includes(lowerQ)) ||
-                skills.some((s: string) => s.includes(lowerQ))
-              );
-            }) || [];
-          }
-
-          // Fetch match profiles
-          let matchQuery = supabase
-            .from('match_profiles')
-            .select('*')
-            .eq('active', true);
-          
-          if (filters.city) matchQuery = matchQuery.eq('city', filters.city);
-          const { data: matchData } = await matchQuery;
-          
-          // Filter match profiles by search query
-          let filteredMatches = matchData || [];
-          if (filters.query) {
-            const lowerQ = filters.query.toLowerCase();
-            filteredMatches = matchData?.filter((profile: any) => {
-              return (
-                profile.display_name?.toLowerCase().includes(lowerQ) ||
-                profile.bio?.toLowerCase().includes(lowerQ) ||
-                profile.seeking?.toLowerCase().includes(lowerQ)
-              );
-            }) || [];
-          }
-
-          // Process regular listings
-          const processedRegular = regularData.map(row => ({
-            id: row.id,
-            user_id: row.user_id || "",
-            city: row.city,
-            country: row.country,
-            category: row.category as string,
-            subcategory: row.subcategory,
-            title: row.title,
-            description: row.description || "",
-            price: row.price_cents ? row.price_cents / 100 : null,
-            currency: row.currency,
-            contact_phone: hasContactAccess(user, row) ? getContactValue(row.contact, 'phone') : null,
-            contact_whatsapp: hasContactAccess(user, row) ? getContactValue(row.contact, 'whatsapp') : null,
-            contact_telegram: hasContactAccess(user, row) ? getContactValue(row.contact, 'telegram') : null,
-            contact_email: hasContactAccess(user, row) ? getContactValue(row.contact, 'email') : null,
-            website_url: row.website_url,
-            tags: row.tags || [],
-            images: row.images || [],
-            lat: row.location_lat,
-            lng: row.location_lng,
-            created_at: row.created_at,
-            contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
-            photos: row.images || [],
-            lon: row.location_lng || undefined,
-            createdAt: new Date(row.created_at).getTime(),
-            updatedAt: new Date(row.updated_at).getTime(),
-            hasImage: !!(row.images?.length),
-          }));
-
-          // Process mentors
-          const processedMentors = (filteredMentors || []).map(mentor => ({
-            id: mentor.id,
-            user_id: mentor.user_id,
-            city: mentor.city,
-            country: mentor.country,
-            category: 'mentor',
-            subcategory: 'mentor',
-            title: mentor.display_name,
-            description: mentor.bio || "",
-            price: mentor.price_cents ? mentor.price_cents / 100 : null,
-            currency: mentor.currency,
-            contact_phone: null,
-            contact_whatsapp: null,
-            contact_telegram: null,
-            contact_email: null,
-            website_url: mentor.website_url,
-            tags: mentor.topics || [],
-            images: mentor.photos || [],
-            lat: null,
-            lng: null,
-            created_at: mentor.created_at,
-            contact: { phone: "" },
-            photos: mentor.photos || [],
-            lon: undefined,
-            createdAt: new Date(mentor.created_at).getTime(),
-            updatedAt: new Date(mentor.created_at).getTime(),
-            hasImage: !!(mentor.photos?.length),
-          }));
-
-          // Process match profiles
-          const processedMatches = (filteredMatches || []).map(profile => ({
-            id: profile.user_id,
-            user_id: profile.user_id,
-            city: profile.city,
-            country: profile.country,
-            category: 'match',
-            subcategory: 'networking',
-            title: profile.display_name || 'Anonymous',
-            description: profile.bio || "",
-            price: null,
-            currency: 'USD',
-            contact_phone: null,
-            contact_whatsapp: null,
-            contact_telegram: null,
-            contact_email: null,
-            website_url: null,
-            tags: profile.seeking ? [profile.seeking] : [],
-            images: profile.photos || [],
-            lat: null,
-            lng: null,
-            created_at: profile.created_at,
-            contact: { phone: "" },
-            photos: profile.photos || [],
-            lon: undefined,
-            createdAt: new Date(profile.created_at).getTime(),
-            updatedAt: new Date(profile.created_at).getTime(),
-            hasImage: !!(profile.photos?.length),
-          }));
-
-          // Combine all listings
-          const allListings = [...processedRegular, ...processedMentors, ...processedMatches];
-          console.log('✅ Combined all listings:', allListings.length);
-          setListings(allListings);
-          
-        } else if (filters.category === 'mentor') {
-          // Handle mentor category specially
-          let query = supabase
-            .from('mentors')
-            .select(`
-              *,
-              mentor_skills(skill)
-            `);
-
-          // Apply filters
-          console.log('🔍 Mentor filters:', { mentorVerifiedOnly, mentorMinRating, subcategory: filters.subcategory });
-          
-          // Only show available mentors (RLS also handles this)
-          query = query.eq('available', true);
-          
-          if (filters.city) query = query.eq('city', filters.city);
-          
-          if (mentorVerifiedOnly) {
-            query = query.eq('is_verified', true);
-          }
-
-          if (parseFloat(mentorMinRating) > 0) {
-            query = query.gte('rating_avg', parseFloat(mentorMinRating));
-          }
-
-          // Apply subcategory filter (topics)
-          if (filters.subcategory) {
-            query = query.contains('topics', [filters.subcategory]);
-          }
-
-          // Apply sorting
-          switch (mentorSortBy) {
-            case 'rating':
-              query = query.order('rating_avg', { ascending: false, nullsFirst: false });
-              break;
-            case 'newest':
-              query = query.order('created_at', { ascending: false });
-              break;
-            case 'price_low':
-              query = query.order('price_cents', { ascending: true, nullsFirst: false });
-              break;
-            case 'price_high':
-              query = query.order('price_cents', { ascending: false, nullsFirst: false });
-              break;
-            case 'verified':
-            default:
-              query = query
-                .order('is_verified', { ascending: false })
-                .order('rating_avg', { ascending: false, nullsFirst: false })
-                .order('created_at', { ascending: false });
-              break;
-          }
-
-          const { data, error } = await query;
-            
-          console.log('📊 Mentor query result:', { data, error, count: data?.length });
-          if (error) {
-            console.error('❌ Mentor query error:', error);
-            throw error;
-          }
-
-          // Filter by search query (including skills)
-          let filteredData = data;
-          if (filters.query) {
-            const lowerQ = filters.query.toLowerCase();
-            filteredData = data?.filter((mentor: any) => {
-              const skills = mentor.mentor_skills?.map((s: any) => s.skill.toLowerCase()) || [];
-              return (
-                mentor.display_name?.toLowerCase().includes(lowerQ) ||
-                mentor.bio?.toLowerCase().includes(lowerQ) ||
-                mentor.topics?.some((t: string) => t.toLowerCase().includes(lowerQ)) ||
-                skills.some((s: string) => s.includes(lowerQ))
-              );
-            });
-          }
-          
-          // Convert mentor data to listing format
-          const mentorListings = (filteredData || []).map(mentor => ({
-            id: mentor.id,
-            user_id: mentor.user_id,
-            city: mentor.city,
-            country: mentor.country,
-            category: 'mentor',
-            subcategory: 'mentor',
-            title: mentor.display_name,
-            description: mentor.bio || "",
-            price: mentor.price_cents ? mentor.price_cents / 100 : null,
-            currency: mentor.currency,
-            contact_phone: null,
-            contact_whatsapp: null,
-            contact_telegram: null,
-            contact_email: null,
-            website_url: mentor.website_url,
-            tags: mentor.topics || [],
-            images: mentor.photos || [],
-            lat: null,
-            lng: null,
-            created_at: mentor.created_at,
-            contact: { phone: "" },
-            photos: mentor.photos || [],
-            lon: undefined,
-            createdAt: new Date(mentor.created_at).getTime(),
-            updatedAt: new Date(mentor.created_at).getTime(),
-            hasImage: !!(mentor.photos?.length),
-          }));
-          
-          console.log('✅ Processed mentor listings:', mentorListings.length);
-          setListings(mentorListings);
-        } else if (filters.category === 'match') {
-          let query = supabase
-            .from('match_profiles')
-            .select('*')
-            .eq('active', true);
-          
-          if (filters.city) query = query.eq('city', filters.city);
-          
-          const { data, error } = await query.order('created_at', { ascending: false });
-            
-          if (error) throw error;
-          
-          // Convert match profile data to listing format
-          const matchListings = (data || []).map(profile => ({
-            id: profile.user_id,
-            user_id: profile.user_id,
-            city: profile.city,
-            country: profile.country,
-            category: 'match',
-            subcategory: 'networking',
-            title: profile.display_name || 'Anonymous',
-            description: profile.bio || "",
-            price: null,
-            currency: 'USD',
-            contact_phone: null,
-            contact_whatsapp: null,
-            contact_telegram: null,
-            contact_email: null,
-            website_url: null,
-            tags: profile.seeking ? [profile.seeking] : [],
-            images: profile.photos || [],
-            lat: null,
-            lng: null,
-            created_at: profile.created_at,
-            contact: { phone: "" },
-            photos: profile.photos || [],
-            lon: undefined,
-            createdAt: new Date(profile.created_at).getTime(),
-            updatedAt: new Date(profile.created_at).getTime(),
-            hasImage: !!(profile.photos?.length),
-          }));
-          
-          console.log('✅ Processed match listings:', matchListings.length);
-          setListings(matchListings);
-        } else {
-          // Use contact-aware fetch if user is authenticated, otherwise regular fetch
-          const data = user 
-            ? await fetchListingsWithContacts({
-                city: filters.city,
-                category: filters.category,
-                q: filters.query,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-                subcategory: filters.subcategory,
-              })
-            : await fetchListings({
-                city: filters.city,
-                category: filters.category,
-                q: filters.query,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-                subcategory: filters.subcategory,
-              });
-              
-          console.log('📦 Raw data from database:', data.length, 'listings');
-          console.log('🏙️ Requested city:', filters.city);
-          
-          const processedListings = data.map(row => ({
-            id: row.id,
-            user_id: row.user_id || "",
-            city: row.city,
-            country: row.country,
-            category: row.category as string,
-            subcategory: row.subcategory,
-            title: row.title,
-            description: row.description || "",
-            price: row.price_cents ? row.price_cents / 100 : null,
-            currency: row.currency,
-            contact_phone: hasContactAccess(user, row) ? getContactValue(row.contact, 'phone') : null,
-            contact_whatsapp: hasContactAccess(user, row) ? getContactValue(row.contact, 'whatsapp') : null,
-            contact_telegram: hasContactAccess(user, row) ? getContactValue(row.contact, 'telegram') : null,
-            contact_email: hasContactAccess(user, row) ? getContactValue(row.contact, 'email') : null,
-            website_url: row.website_url,
-            tags: row.tags || [],
-            images: row.images || [],
-            lat: row.location_lat,
-            lng: row.location_lng,
-            created_at: row.created_at,
-            contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
-            photos: row.images || [],
-            lon: row.location_lng || undefined,
-            createdAt: new Date(row.created_at).getTime(),
-            updatedAt: new Date(row.updated_at).getTime(),
-            hasImage: !!(row.images?.length),
-          }));
-          
-          console.log('✅ Processed listings:', processedListings.length);
-          setListings(processedListings);
-        }
-      } catch (error) {
-        console.error("Failed to load listings:", error);
-        toast("Failed to load listings");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadListings();
-  }, [filters.city, filters.category, filters.query, filters.minPrice, filters.maxPrice, filters.subcategory, user, mentorVerifiedOnly, mentorMinRating, mentorSortBy]);
-
-  // Filter and sort listings
-  const processedListings = useMemo(() => {
-    let filtered = [...listings];
-
-    if (filters.category) {
-      filtered = filtered.filter(listing => listing.category === filters.category);
-    }
-
-    if (filters.subcategory) {
-      filtered = filtered.filter(listing => listing.subcategory === filters.subcategory);
-    }
-
-    if (filters.query) {
-      const q = filters.query.toLowerCase();
-      filtered = filtered.filter(listing =>
-        listing.title.toLowerCase().includes(q) ||
-        listing.description.toLowerCase().includes(q) ||
-        listing.tags.some(tag => tag.toLowerCase().includes(q))
-      );
-    }
-
-    if (filters.category === "housing") {
-      if (filters.minPrice != null) filtered = filtered.filter(l => l.price != null && (l.price as number) >= filters.minPrice!);
-      if (filters.maxPrice != null) filtered = filtered.filter(l => l.price != null && (l.price as number) <= filters.maxPrice!);
-    }
-
-    if (filters.category === "jobs" && filters.jobKind) {
-      filtered = filtered.filter(l => (l as any).jobKind === filters.jobKind);
-    }
-
-    // Apply quick filters
-    filtered = applyQuickFilters(filtered, { 
-      hasImage: hasImageFilter || sortKey === "has_image", 
-      postedToday: postedTodayFilter 
-    });
-
-    // Apply sorting
-    return sortListings(filtered, sortKey);
-  }, [listings, filters, hasImageFilter, postedTodayFilter, sortKey]);
-
-  const [cityCoords, setCityCoords] = useState<{ lat: number; lng: number } | undefined>();
-
-  const handleCityChange = (city: string, lat?: number, lon?: number) => {
-    console.log('🗺️ City changed:', { city, lat, lon });
-    updateFilter('city', city);
-    if (lat && lon) {
-      setCityCoords({ lat, lng: lon });
-      console.log('📍 Set city coords:', { lat, lng: lon });
-    } else {
-      setCityCoords(undefined);
-      console.log('📍 Cleared city coords');
-    }
-  };
-
-  const handleFiltersChange = (newFilters: SearchFilters) => {
-    // Clear subcategory if it doesn't belong to the new category
-    if (newFilters.category !== filters.category && newFilters.subcategory) {
-      const categorySubcategories = TAXONOMY[newFilters.category as CategoryKey]?.sub || [];
-      if (!categorySubcategories.includes(newFilters.subcategory)) {
-        newFilters.subcategory = undefined;
+    if (location.state?.openConversationId) {
+      setSelectedConversation(location.state.openConversationId);
+      
+      // Show a welcome message if mentor name is provided
+      if (location.state.mentorName) {
+        toast.success(`Conversation with ${location.state.mentorName} opened`);
       }
     }
-    updateFilters(newFilters);
-  };
+  }, [location.state]);
 
-  const handleClearAll = () => {
-    resetFilters();
-    setHasImageFilter(false);
-    setPostedTodayFilter(false);
-    setMentorVerifiedOnly(false);
-    setMentorMinRating('0');
-    setMentorSortBy('verified');
-    setCityCoords(undefined);
-    // Also clear app state city
-    const next = { ...appState, city: undefined };
-    setAppState(next);
-    saveAppState(next);
-  };
-  
-  // Generate filter chips
-  const filterChips: FilterChip[] = [
-    filters.category && {
-      key: 'category',
-      label: 'Category',
-      value: TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || filters.category,
-      onRemove: () => updateFilter('category', undefined),
-    },
-    filters.subcategory && {
-      key: 'subcategory',
-      label: 'Subcategory',
-      value: LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory,
-      onRemove: () => updateFilter('subcategory', undefined),
-    },
-    filters.city && {
-      key: 'city',
-      label: 'City',
-      value: filters.city,
-      onRemove: () => {
-        updateFilter('city', undefined);
-        setCityCoords(undefined);
-      },
-    },
-    filters.minPrice && {
-      key: 'minPrice',
-      label: 'Min Price',
-      value: `$${filters.minPrice}`,
-      onRemove: () => updateFilter('minPrice', undefined),
-    },
-    filters.maxPrice && {
-      key: 'maxPrice',
-      label: 'Max Price',
-      value: `$${filters.maxPrice}`,
-      onRemove: () => updateFilter('maxPrice', undefined),
-    },
-    hasImageFilter && {
-      key: 'hasImage',
-      label: 'Has Image',
-      value: 'Yes',
-      onRemove: () => setHasImageFilter(false),
-    },
-  ].filter(Boolean) as FilterChip[];
 
-  const handleListingSelect = (listing: Listing) => {
-    // Handle different categories with their specific routes
-    if (listing.category === 'mentor') {
-      navigate(`/mentor/${listing.id}`);
-    } else if (listing.category === 'match') {
-      navigate(`/match/profile/${listing.id}`);
-    } else {
-      navigate(`/l/${listing.id}`);
+  // Demo conversations
+  const conversations: Conversation[] = [
+    {
+      id: '1',
+      name: 'Sara Mehretab',
+      avatar: 'SM',
+      lastMessage: "Hey! I'd love to know more about you 😊",
+      timestamp: '2 min ago',
+      unread: 2,
+      online: true,
+      type: 'match',
+      verified: true,
+      pinned: true,
+      messages: [
+        { id: '1', text: 'Hi! I saw your profile and we seem to have a lot in common', sender: 'other', timestamp: '10:30 AM', read: true },
+        { id: '2', text: 'Hello! Yes, I noticed that too. I love that you enjoy hiking!', sender: 'me', timestamp: '10:32 AM', read: true },
+        { id: '3', text: "Yes! I try to go every weekend. Have you been to any good trails recently?", sender: 'other', timestamp: '10:35 AM', read: true },
+        { id: '4', text: "I went to Shenandoah last month, it was beautiful! Where do you usually go?", sender: 'me', timestamp: '10:38 AM', read: true },
+        { id: '5', text: "Hey! I'd love to know more about you 😊", sender: 'other', timestamp: '10:40 AM', read: false }
+      ]
+    },
+    {
+      id: '2',
+      name: 'Daniel Kidane',
+      avatar: 'DK',
+      lastMessage: "Your session is confirmed for tomorrow at 2 PM",
+      timestamp: '1 hour ago',
+      unread: 0,
+      online: false,
+      type: 'mentor',
+      verified: true,
+      pinned: false,
+      messages: [
+        { id: '1', text: "Hi! I'd like to book a career guidance session", sender: 'me', timestamp: 'Yesterday', read: true },
+        { id: '2', text: "Of course! I have availability tomorrow afternoon. Does 2 PM work?", sender: 'other', timestamp: 'Yesterday', read: true },
+        { id: '3', text: "Perfect! Yes, 2 PM works great for me", sender: 'me', timestamp: 'Yesterday', read: true },
+        { id: '4', text: "Your session is confirmed for tomorrow at 2 PM", sender: 'other', timestamp: '1 hour ago', read: true }
+      ]
+    },
+    {
+      id: '3',
+      name: 'Rahel Woldu',
+      avatar: 'RW',
+      lastMessage: "Is the coffee set still available?",
+      timestamp: '3 hours ago',
+      unread: 1,
+      online: true,
+      type: 'marketplace',
+      verified: false,
+      pinned: false,
+      messages: [
+        { id: '1', text: "Hi! I'm interested in your Traditional Coffee Set listing", sender: 'other', timestamp: '4 hours ago', read: true },
+        { id: '2', text: "Hello! Yes, it's still available. Would you like to see more photos?", sender: 'me', timestamp: '3:30 PM', read: true },
+        { id: '3', text: "Is the coffee set still available?", sender: 'other', timestamp: '3 hours ago', read: false }
+      ]
+    },
+    {
+      id: '4',
+      name: 'Young Professionals Group',
+      avatar: 'YP',
+      lastMessage: "Michael: The networking event is this Friday!",
+      timestamp: '5 hours ago',
+      unread: 5,
+      online: false,
+      type: 'community',
+      verified: true,
+      pinned: false,
+      messages: [
+        { id: '1', text: "Hey everyone! Don't forget about the networking event", sender: 'other', timestamp: '5 hours ago', read: false }
+      ]
+    },
+    {
+      id: '5',
+      name: 'Meron Tekle',
+      avatar: 'MT',
+      lastMessage: "Thanks for the great conversation!",
+      timestamp: '1 day ago',
+      unread: 0,
+      online: false,
+      type: 'match',
+      verified: true,
+      pinned: false,
+      messages: [
+        { id: '1', text: "It was nice chatting with you", sender: 'other', timestamp: '1 day ago', read: true },
+        { id: '2', text: "Thanks for the great conversation!", sender: 'other', timestamp: '1 day ago', read: true }
+      ]
+    },
+    {
+      id: '6',
+      name: 'Solomon Ghebre',
+      avatar: 'SG',
+      lastMessage: "You: Looking forward to the session!",
+      timestamp: '2 days ago',
+      unread: 0,
+      online: false,
+      type: 'mentor',
+      verified: true,
+      pinned: false,
+      messages: [
+        { id: '1', text: "Looking forward to the session!", sender: 'me', timestamp: '2 days ago', read: true }
+      ]
+    }
+  ];
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'match': return Heart;
+      case 'mentor': return Award;
+      case 'marketplace': return ShoppingBag;
+      case 'community': return Users;
+      default: return MessageCircle;
     }
   };
 
-  // Donation handlers
-  const DONATE_PRESETS = [500, 1000, 2000]; // $5, $10, $20
-
-  // Keyboard shortcuts for accessibility
-  useKeyboardShortcut('/', () => {
-    document.querySelector<HTMLInputElement>('[placeholder*="search" i]')?.focus();
-  }, { ctrl: true });
-
-  useKeyboardShortcut('n', () => {
-    if (user) {
-      openPost();
-    } else {
-      openAuth();
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'match': return 'text-pink-600 bg-pink-100 dark:bg-pink-900/30';
+      case 'mentor': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
+      case 'marketplace': return 'text-green-600 bg-green-100 dark:bg-green-900/30';
+      case 'community': return 'text-purple-600 bg-purple-100 dark:bg-purple-900/30';
+      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
     }
-  }, { ctrl: true });
+  };
 
-  useKeyboardShortcut('k', () => {
-    navigate('/chat');
-  }, { ctrl: true });
+  const filteredConversations = conversations.filter(conv => {
+    const matchesSearch = conv.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = filterType === 'all' || conv.type === filterType;
+    return matchesSearch && matchesType;
+  });
 
-  useKeyboardShortcut('i', () => {
-    navigate('/inbox');
-  }, { ctrl: true });
+  const activeConversation = conversations.find(c => c.id === selectedConversation);
+  const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
 
-  
-  const donateDisplayAmount = useMemo(() => {
-    const v = customAmount.trim();
-    if (!v) return donateAmount;
-    const n = Math.round(parseFloat(v) * 100);
-    if (Number.isFinite(n)) return n;
-    return donateAmount;
-  }, [customAmount, donateAmount]);
-
-  const isValidDonateAmount = donateDisplayAmount >= 200 && donateDisplayAmount <= 50000;
-  const donateAmountError = customAmount.trim() && !isValidDonateAmount 
-    ? donateDisplayAmount < 200 
-      ? "Minimum donation is $2" 
-      : "Maximum donation is $500"
-    : "";
-
-  const startDonationCheckout = async () => {
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !selectedConversation) return;
+    
     try {
-      setDonateLoading(true);
-      const { data, error } = await supabase.functions.invoke('create-donation', {
-        body: { amount: donateDisplayAmount, email: donateEmail }
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        try {
-          if (window.top && window.top !== window.self) {
-            (window.top as Window).location.href = data.url;
-          } else {
-            window.location.href = data.url;
-          }
-        } catch {
-          window.open(data.url, "_blank", "noopener,noreferrer");
-        }
-      } else {
-        toast.error("Unable to start checkout");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please sign in to send messages');
+        return;
       }
-    } catch (err) {
-      console.error('Donation error:', err);
-      toast.error("Network error. Please try again.");
-    } finally {
-      setDonateLoading(false);
+
+      // Get conversation to find the other participant
+      const activeConv = conversations.find(c => c.id === selectedConversation);
+      if (!activeConv) return;
+
+      // Create or get conversation from database
+      const { conversationId } = await getOrCreateConversation(
+        activeConv.id, // Using conversation ID as user ID for demo
+        messageText
+      );
+
+      toast.success('Message sent!');
+      setMessageText('');
+      
+      // Reload the conversation (in production, would use real-time subscription)
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
     }
+  };
+
+  const handleAttachment = () => {
+    toast.info('File upload coming soon!', {
+      description: 'This feature is under development'
+    });
+  };
+
+  const handleVideoCall = () => {
+    if (!selectedConversation) return;
+    navigate(`/video/${selectedConversation}`);
+  };
+
+  const handleAudioCall = () => {
+    toast.info('Audio calls coming soon!', {
+      description: 'This feature is under development'
+    });
   };
 
   return (
-    <PageTransition>
     <div className="min-h-screen bg-background">
-      {/* Desktop View */}
-      <div className="hidden md:block">
-        {/* Top Bar with Logo and Search - STICKY */}
-        <header role="banner" className="sticky top-0 z-[50] bg-background/95 backdrop-blur-sm border-b">
-          <div className="container mx-auto px-4 py-3">
-              <div className="flex items-center justify-between gap-4">
-                {/* Left: Logo and City Search */}
-                 <div className="flex items-center gap-4">
-                  <button 
-                    className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity cursor-pointer"
-                    onClick={() => navigate('/')}
-                    title="Go to Homepage"
-                    aria-label="HabeshaCommunity Homepage"
+      <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)]">
+        {/* Conversations List */}
+        <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 border-r`}>
+          {/* Header */}
+          <div className="p-4 border-b bg-background/95 backdrop-blur">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate(-1)}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <h1 className="text-2xl font-bold flex items-center">
+                  <MessageCircle className="w-6 h-6 mr-2" />
+                  Messages
+                </h1>
+              </div>
+              {totalUnread > 0 && (
+                <Badge className="bg-red-500 text-white">
+                  {totalUnread}
+                </Badge>
+              )}
+            </div>
+
+            {/* Search */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  console.log('Search query:', e.target.value);
+                }}
+                className="pl-10 w-full"
+              />
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-x -mx-4 px-4">
+              <div className="inline-flex flex-nowrap items-center space-x-2 whitespace-nowrap">
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('all')}
+                    className="rounded-full"
                   >
-                    <img 
-                      src="/lovable-uploads/d2261896-ec85-45d6-8ecf-9928fb132004.png" 
-                      alt="HabeshaCommunity Logo" 
-                      className="w-8 h-8 rounded-lg"
-                    />
-                    <span className="hover:text-primary transition-colors">HabeshaCommunity</span>
-                  </button>
-                  
-                  <div className="flex gap-2">
-                    <CitySearchBar 
-                      value={filters.city}
-                      onCitySelect={handleCityChange}
-                      placeholder="Enter city or location"
-                      className="w-80"
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Search listings..."
-                      value={filters.query || ''}
-                      onChange={(e) => {
-                        updateFilter('query', e.target.value);
-                        console.log('Browse search query:', e.target.value);
-                      }}
-                      className="w-64"
-                    />
-                  </div>
+                    All
+                  </Button>
                 </div>
-
-                {/* Right: Controls */}
-                <div className="flex items-center gap-3">
-                  <ThemeToggle />
-                  <LanguageToggle value={language} onChange={setLanguage} />
-                  <NotifyBell />
-                  <motion.div whileTap={{ scale: 0.95 }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-2"
-                      onClick={() => navigate('/chat')}
-                      aria-label="Open chat"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      Chat
-                    </Button>
-                  </motion.div>
-                  <motion.div whileTap={{ scale: 0.95 }}>
-                    <Button
-                      size="sm"
-                      className="gap-2"
-                      onClick={openPost}
-                      aria-label="Create new post"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Post
-                    </Button>
-                  </motion.div>
-                  <AuthButtons />
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'match' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('match')}
+                    className="rounded-full"
+                  >
+                    <Heart className="w-4 h-4 mr-1" />
+                    Matches
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'mentor' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('mentor')}
+                    className="rounded-full"
+                  >
+                    <Award className="w-4 h-4 mr-1" />
+                    Mentors
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'marketplace' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('marketplace')}
+                    className="rounded-full"
+                  >
+                    <ShoppingBag className="w-4 h-4 mr-1" />
+                    Market
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'health' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('health')}
+                    className="rounded-full"
+                  >
+                    <Activity className="w-4 h-4 mr-1" />
+                    Health
+                  </Button>
+                </div>
+                <div className="inline-block">
+                  <Button
+                    variant={filterType === 'personal' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('personal')}
+                    className="rounded-full"
+                  >
+                    <User className="w-4 h-4 mr-1" />
+                    Personal
+                  </Button>
                 </div>
               </div>
             </div>
-        </header>
-
-        {/* View Toggle and Sort - STICKY below header */}
-        <div className="sticky top-[61px] z-[45] bg-background/95 backdrop-blur-sm border-b">
-          <div className="container mx-auto px-4 py-2">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {processedListings.length} listings
-                {filters.city && ` in ${filters.city}`}
-              </div>
-              <div className="flex items-center gap-2">
-                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
-              </div>
-            </div>
           </div>
-        </div>
 
-        {/* Navigation Line - Scrollable */}
-        <nav role="navigation" aria-label="Category navigation">
-          <div className="bg-background border-b">
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between py-3">
-                {/* Left: All Navigation Items */}
-                <div className="flex space-x-6">
-                  <ScrollReveal direction="up" delay={0.1}>
-                    <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'community' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                      }`}
-                      onClick={() => updateFilters({ category: 'community', subcategory: undefined })}
-                      aria-label="Filter by community category"
-                      aria-current={filters.category === 'community' ? 'page' : undefined}
-                    >
-                      Community
-                    </button>
-                  </ScrollReveal>
-                  <ScrollReveal direction="up" delay={0.15}>
-                    <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'mentor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                      }`}
-                      onClick={() => updateFilters({ category: 'mentor', subcategory: undefined })}
-                      aria-label="Filter by mentor category"
-                      aria-current={filters.category === 'mentor' ? 'page' : undefined}
-                    >
-                      Mentor
-                    </button>
-                  </ScrollReveal>
-                  <ScrollReveal direction="up" delay={0.2}>
-                    <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'match' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                      }`}
-                      onClick={() => updateFilters({ category: 'match', subcategory: undefined })}
-                      aria-label="Filter by match category"
-                      aria-current={filters.category === 'match' ? 'page' : undefined}
-                    >
-                      Match
-                    </button>
-                  </ScrollReveal>
-                  <ScrollReveal direction="up" delay={0.25}>
-                    <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'housing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                      }`}
-                      onClick={() => updateFilter('category', 'housing')}
-                      aria-label="Filter by housing category"
-                      aria-current={filters.category === 'housing' ? 'page' : undefined}
-                    >
-                      Housing
-                    </button>
-                  </ScrollReveal>
-                  <ScrollReveal direction="up" delay={0.3}>
-                    <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'jobs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                      }`}
-                      onClick={() => updateFilter('category', 'jobs')}
-                      aria-label="Filter by jobs category"
-                      aria-current={filters.category === 'jobs' ? 'page' : undefined}
-                    >
-                      Jobs
-                    </button>
-                  </ScrollReveal>
-                  <ScrollReveal direction="up" delay={0.35}>
-                    <button 
-                      className={`pb-1 border-b-2 font-medium text-sm ${
-                        filters.category === 'services' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                      }`}
-                      onClick={() => updateFilter('category', 'services')}
-                      aria-label="Filter by services category"
-                      aria-current={filters.category === 'services' ? 'page' : undefined}
-                    >
-                      Services
-                    </button>
-                  </ScrollReveal>
-                <ScrollReveal direction="up" delay={0.4}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      filters.category === 'forsale' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => updateFilter('category', 'forsale')}
-                    aria-label="Filter by marketplace category"
-                    aria-current={filters.category === 'forsale' ? 'page' : undefined}
-                  >
-                    Marketplace
-                  </button>
-                </ScrollReveal>
-                <ScrollReveal direction="up" delay={0.45}>
-                  <button 
-                    className={`pb-1 border-b-2 font-medium text-sm ${
-                      false ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setDonateDialogOpen(true)}
-                    aria-label="Support HabeshaCommunity"
-                  >
-                    <Heart className="w-4 h-4 inline mr-1" />
-                    Support HabeshaCommunity
-                  </button>
-                </ScrollReveal>
-              </div>
-            </div>
-          </div>
-        </div>
-        </nav>
-
-        {/* Filter Chips */}
-        {hasActiveFilters() && (
-          <div className="container mx-auto px-4 pt-3">
-            <FilterChips chips={filterChips} onClearAll={handleClearAll} />
-          </div>
-        )}
-
-        {/* Filter Controls Bar - NOT STICKY */}
-        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {/* Category Toggle */}
-                <Popover modal={false} open={categoryOpen} onOpenChange={setCategoryOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1">
-                      {filters.category 
-                        ? TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || "Category"
-                        : language === 'EN' ? "All categories" : "ኩሉ ምድብታት"
-                      }
-                      <ChevronDown className="w-3 h-3 text-primary" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    side="bottom" 
-                    align="start" 
-                    className="w-56 p-1 bg-background z-[51]"
-                    collisionPadding={8}
-                  >
-                    <div className="space-y-1">
-                      <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
-                        onClick={() => {
-                          updateFilters({ category: undefined, subcategory: undefined });
-                          setCategoryOpen(false);
-                        }}
-                      >
-                        All categories
-                      </button>
-                      {Object.entries(TAXONOMY).map(([key, value]) => (
-                        <button
-                          key={key}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
-                          onClick={() => {
-                            updateFilters({ category: key, subcategory: undefined });
-                            setCategoryOpen(false);
-                          }}
-                        >
-                          {value.name[language.toLowerCase() as 'en' | 'ti']}
-                        </button>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-
-                {/* Subcategory Toggle */}
-                <Popover modal={false} open={subcategoryOpen} onOpenChange={setSubcategoryOpen}>
-                  <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="gap-1"
-                      disabled={!filters.category}
-                    >
-                      {filters.subcategory 
-                        ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
-                        : filters.category ? (language === 'EN' ? "Subcategory" : "ንኣብ ምድብ") : (language === 'EN' ? "Select category first" : "ቀዳማይ ምድብ ምረጽ")
-                      }
-                      <ChevronDown className="w-3 h-3 text-primary" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    side="bottom" 
-                    align="start" 
-                    className="w-56 p-1 bg-background z-[51]"
-                    collisionPadding={8}
-                  >
-                    <div className="space-y-1">
-                      <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
-                        onClick={() => {
-                          updateFilter('subcategory', undefined);
-                          setSubcategoryOpen(false);
-                        }}
-                      >
-                        All subcategories
-                      </button>
-                      {filters.category && TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
-                        <button
-                          key={sub}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm transition-colors"
-                          onClick={() => {
-                            updateFilter('subcategory', sub);
-                            setSubcategoryOpen(false);
-                          }}
-                        >
-                          {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
-                        </button>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-
-                {/* Additional Filters based on category */}
-                {filters.category === 'mentor' && (
-                  <>
-                    <MentorFilters
-                      verifiedOnly={mentorVerifiedOnly}
-                      minRating={mentorMinRating}
-                      sortBy={mentorSortBy}
-                      onVerifiedOnlyChange={setMentorVerifiedOnly}
-                      onMinRatingChange={setMentorMinRating}
-                      onSortByChange={setMentorSortBy}
-                    />
-                    <motion.div whileTap={{ scale: 0.95 }}>
-                      <Button 
-                        size="sm" 
-                        className="gap-1"
-                        onClick={() => navigate('/mentor/onboarding')}
-                      >
-                        Become a Mentor
-                      </Button>
-                    </motion.div>
-                  </>
-                )}
+          {/* Conversations */}
+          <ScrollArea className="flex-1">
+            <div className="divide-y">
+              {filteredConversations.map((conversation) => {
+                const TypeIcon = getTypeIcon(conversation.type);
                 
-                {filters.category && filters.category !== 'mentor' && (
-                  <FilterPanel
-                    onApply={() => {}}
-                    onReset={handleClearAll}
-                    onSavePreset={(name) => savePreset(name, filters)}
-                    hasActiveFilters={hasActiveFilters()}
+                return (
+                  <div
+                    key={conversation.id}
+                    onClick={() => setSelectedConversation(conversation.id)}
+                    className={`p-4 hover:bg-muted/50 cursor-pointer transition-colors ${
+                      selectedConversation === conversation.id ? 'bg-muted' : ''
+                    }`}
                   >
-                    {/* Price Range Filter */}
-                    <div className="space-y-2">
-                      <Label>Price Range</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Min"
-                          value={filters.minPrice || ''}
-                          onChange={(e) => updateFilter('minPrice', e.target.value ? Number(e.target.value) : undefined)}
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Max"
-                          value={filters.maxPrice || ''}
-                          onChange={(e) => updateFilter('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Has Image Filter */}
-                    <div className="flex items-center justify-between">
-                      <Label>Only with images</Label>
-                      <input
-                        type="checkbox"
-                        checked={hasImageFilter}
-                        onChange={(e) => setHasImageFilter(e.target.checked)}
-                        className="w-4 h-4"
-                      />
-                    </div>
-
-                    {/* Saved Presets */}
-                    {presets.length > 0 && (
-                      <div className="space-y-2">
-                        <Label>Saved Presets</Label>
-                        <div className="space-y-1">
-                          {presets.map(preset => (
-                            <div key={preset.id} className="flex items-center justify-between p-2 hover:bg-accent rounded">
-                              <button
-                                onClick={() => {
-                                  const presetFilters = applyPreset(preset.id);
-                                  if (presetFilters) updateFilters(presetFilters);
-                                }}
-                                className="flex-1 text-left text-sm"
-                              >
-                                {preset.name}
-                              </button>
-                              <button
-                                onClick={() => deletePreset(preset.id)}
-                                className="p-1 hover:bg-background rounded"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          ))}
+                    <div className="flex gap-3">
+                      <div className="relative">
+                        <Avatar className="w-12 h-12 border-2 border-primary/20">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
+                            {conversation.avatar}
+                          </AvatarFallback>
+                        </Avatar>
+                        {conversation.online && (
+                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
+                        )}
+                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center ${getTypeColor(conversation.type)}`}>
+                          <TypeIcon className="w-3 h-3" />
                         </div>
                       </div>
-                    )}
-                  </FilterPanel>
-                )}
 
-                <motion.div whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearAll}
-                  >
-                    Clear All
-                  </Button>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold truncate">{conversation.name}</h4>
+                            {conversation.pinned && (
+                              <Pin className="w-3 h-3 text-primary" />
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {conversation.timestamp}
+                          </span>
+                        </div>
 
-        {/* Split View: Map on Left (STICKY), Listings on Right */}
-        <main id="main-content" role="main" aria-label="Listings">
-          {/* Live region for results count */}
-          <div 
-            role="status" 
-            aria-live="polite" 
-            aria-atomic="true"
-            className="sr-only"
-          >
-            {processedListings.length} listings found
-            {filters.city && ` in ${filters.city}`}
-          </div>
-
-          <div className="flex">
-            {/* Map Section - Left Side (STICKY) */}
-            <div className="w-1/2 sticky top-[109px] h-[calc(100vh-109px)] overflow-hidden">
-              <LazyMap
-                listings={processedListings}
-                onListingClick={handleListingSelect}
-                center={cityCoords || (filters.city ? undefined : { lat: 20, lng: 0 })}
-                zoom={filters.city ? 12 : 2}
-                height="100%"
-                searchCity={filters.city}
-                searchCityCoords={cityCoords}
-                searchCountry={filters.city}
-              />
-            </div>
-
-            {/* Listings Section - Right Side (SCROLLABLE) */}
-            <div className="w-1/2 bg-background min-h-screen">
-              <div className="p-6">
-                {loading ? (
-                  <GridSkeleton count={6} />
-                ) : processedListings.length === 0 ? (
-                  <EmptyState
-                    icon={Search}
-                    title="No listings found"
-                    description="Try adjusting your filters or search in a different city"
-                    action={{
-                      label: 'Clear Filters',
-                      onClick: handleClearAll,
-                    }}
-                  />
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <ListingGrid
-                      listings={processedListings}
-                      onListingClick={handleListingSelect}
-                      loading={false}
-                      newlyPostedId={null}
-                      viewMode={viewMode}
-                    />
-                  </motion.div>
-                )}
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-
-      {/* Mobile View - OPTIMIZED */}
-      <div className="md:hidden">
-        {/* Mobile Header - Compact */}
-        <MobileHeader />
-
-        {/* Mobile Search - Compact */}
-        <div className="px-4 py-2 border-b bg-background space-y-2">
-          {/* General Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              type="text"
-              placeholder="Search listings..."
-              value={filters.query || ''}
-              onChange={(e) => updateFilter('query', e.target.value)}
-              className="pl-10 w-full h-9"
-            />
-          </div>
-          
-          {/* City Search + Clear */}
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <CitySearchBar 
-                value={filters.city}
-                onCitySelect={handleCityChange}
-                className="h-9"
-              />
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearAll}
-              className="px-3 h-9 text-xs"
-            >
-              Clear
-            </Button>
-          </div>
-        </div>
-
-        {/* Horizontal Scroll Categories - MOBILE OPTIMIZED */}
-        <div className="sticky top-14 z-[35] bg-background/95 backdrop-blur-sm border-b">
-          <div className="px-4 py-2">
-            {/* Category Pills - Horizontal Scroll */}
-            <div className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 scrollbar-hide mb-2">
-              <button 
-                onClick={() => updateFilters({ category: undefined, subcategory: undefined })}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  !filters.category 
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                All
-              </button>
-              
-              <button 
-                onClick={() => updateFilters({ category: 'community', subcategory: undefined })}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  filters.category === 'community'
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                Community
-              </button>
-
-              <button 
-                onClick={() => updateFilters({ category: 'mentor', subcategory: undefined })}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  filters.category === 'mentor'
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                Mentor
-              </button>
-
-              <button 
-                onClick={() => updateFilters({ category: 'match', subcategory: undefined })}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  filters.category === 'match'
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                Match
-              </button>
-
-              <button 
-                onClick={() => updateFilter('category', 'housing')}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  filters.category === 'housing'
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                Housing
-              </button>
-
-              <button 
-                onClick={() => updateFilter('category', 'jobs')}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  filters.category === 'jobs'
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                Jobs
-              </button>
-
-              <button 
-                onClick={() => updateFilter('category', 'services')}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  filters.category === 'services'
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                Services
-              </button>
-
-              <button 
-                onClick={() => updateFilter('category', 'forsale')}
-                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
-                  filters.category === 'forsale'
-                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                    : 'border-border bg-background hover:border-primary/50'
-                }`}
-              >
-                Marketplace
-              </button>
-            </div>
-
-            {/* Subcategory Dropdown - Compact */}
-            {filters.category && (
-              <div className="mb-2">
-                <Popover modal={false}>
-                  <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="gap-1 text-xs h-8"
-                    >
-                      {filters.subcategory 
-                        ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
-                        : "Subcategory"
-                      }
-                      <ChevronDown className="w-3 h-3" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    side="bottom" 
-                    align="start" 
-                    className="w-56 p-1 max-h-64 overflow-y-auto"
-                  >
-                    <div className="space-y-1">
-                      <button
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                        onClick={() => updateFilter('subcategory', undefined)}
-                      >
-                        All
-                      </button>
-                      {TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
-                        <button
-                          key={sub}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                          onClick={() => updateFilter('subcategory', sub)}
-                        >
-                          {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
-                        </button>
-                      ))}
+                        <div className="flex items-center justify-between">
+                          <p className={`text-sm truncate ${conversation.unread > 0 ? 'font-semibold' : 'text-muted-foreground'}`}>
+                            {conversation.lastMessage}
+                          </p>
+                          {conversation.unread > 0 && (
+                            <Badge className="ml-2 bg-primary text-primary-foreground flex-shrink-0">
+                              {conversation.unread}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )}
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </div>
 
-            {/* Mentor Filters - Compact */}
-            {filters.category === 'mentor' && (
-              <div className="mb-2 pb-2 border-t pt-2">
-                <MentorFilters
-                  verifiedOnly={mentorVerifiedOnly}
-                  minRating={mentorMinRating}
-                  sortBy={mentorSortBy}
-                  onVerifiedOnlyChange={setMentorVerifiedOnly}
-                  onMinRatingChange={setMentorMinRating}
-                  onSortByChange={setMentorSortBy}
-                />
-              </div>
-            )}
+        {/* Chat Area */}
+        {selectedConversation && activeConversation ? (
+          <div className="flex flex-col flex-1">
+            {/* Chat Header */}
+            <div className="p-4 border-b bg-background/95 backdrop-blur flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  onClick={() => {
+                    setSelectedConversation(null);
+                    console.log('Back to conversations list');
+                  }}
+                  aria-label="Back to conversations"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
 
-            {/* Results + View Toggle - Compact */}
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-muted-foreground">
-                {processedListings.length} results
-                {filters.city && ` in ${filters.city}`}
+                <Avatar className="w-10 h-10 border-2 border-primary/20">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
+                    {activeConversation.avatar}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold">{activeConversation.name}</h3>
+                    {activeConversation.verified && (
+                      <Badge variant="secondary" className="text-xs">Verified</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {activeConversation.online ? 'Online' : 'Offline'}
+                  </p>
+                </div>
               </div>
+
               <div className="flex items-center gap-2">
-                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-                <SortDropdown sortKey={sortKey} onChange={setSortKey} />
+                <Button variant="ghost" size="icon" onClick={handleAudioCall}>
+                  <Phone className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleVideoCall}>
+                  <Video className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Info className="w-5 h-5" />
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <Star className="w-4 h-4 mr-2" />
+                      Star Conversation
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Archive className="w-4 h-4 mr-2" />
+                      Archive
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4 max-w-4xl mx-auto">
+                {activeConversation.messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`flex gap-2 max-w-[70%] ${message.sender === 'me' ? 'flex-row-reverse' : ''}`}>
+                      {message.sender === 'other' && (
+                        <Avatar className="w-8 h-8 flex-shrink-0">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs font-bold">
+                            {activeConversation.avatar}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+
+                      <div>
+                        <div
+                          className={`rounded-2xl px-4 py-2 ${
+                            message.sender === 'me'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted'
+                          }`}
+                        >
+                          <p className="text-sm">{message.text}</p>
+                        </div>
+                        <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${message.sender === 'me' ? 'justify-end' : ''}`}>
+                          <span>{message.timestamp}</span>
+                          {message.sender === 'me' && (
+                            message.read ? (
+                              <CheckCheck className="w-3 h-3 text-blue-500" />
+                            ) : (
+                              <Check className="w-3 h-3" />
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Typing Indicator */}
+                {activeConversation.online && Math.random() > 0.7 && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs">
+                        {activeConversation.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+
+            {/* Message Input */}
+            <div className="p-4 border-t bg-background/95 backdrop-blur">
+              <div className="flex items-end gap-2 max-w-4xl mx-auto">
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
+                    <Paperclip className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={handleAttachment}>
+                    <Image className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="flex-1">
+                  <Textarea
+                    placeholder="Type a message..."
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    className="min-h-[44px] max-h-32 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="icon">
+                    <Smile className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    onClick={handleSendMessage}
+                    disabled={!messageText.trim()}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  >
+                    <Send className="w-5 h-5" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Main Content - Mobile - Compact */}
-        <main className="px-4 py-4 mb-20 relative z-[1]">
-          {loading ? (
-            <GridSkeleton count={6} />
-          ) : processedListings.length === 0 ? (
-            <EmptyState
-              icon={Search}
-              title="No listings found"
-              description="Try adjusting your filters or search in a different city"
-              action={{
-                label: 'Clear Filters',
-                onClick: handleClearAll,
-              }}
-              variant="minimal"
-            />
-          ) : viewMode === "map" ? (
-            <div className="h-[70vh] w-full">
-              <LazyMap
-                listings={processedListings}
-                onListingClick={handleListingSelect}
-                center={cityCoords || (filters.city ? undefined : { lat: 20, lng: 0 })}
-                zoom={filters.city ? 12 : 2}
-                height="100%"
-                searchCity={filters.city}
-                searchCityCoords={cityCoords}
-                searchCountry={filters.city}
-              />
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-            >
-              <ListingGrid
-                listings={processedListings}
-                onListingClick={handleListingSelect}
-                loading={false}
-                newlyPostedId={null}
-                viewMode={viewMode}
-              />
-            </motion.div>
-          )}
-        </main>
-      </div>
-
-      
-        <Footer />
-        <StickyPostCTA />
-        
-        {/* Modals */}
-        <AuthModal />
-        <PostModal city={filters.city || "Select a city"} />
-        
-        {/* Donation Dialog */}
-        <Dialog open={donateDialogOpen} onOpenChange={setDonateDialogOpen}>
-          <DialogContent className="w-full max-w-md z-[9999]">
-            <DialogHeader>
-              <DialogTitle>Support HabeshaCommunity</DialogTitle>
-            </DialogHeader>
-
-            <p className="text-sm text-muted-foreground mb-4">
-              Choose an amount or enter a custom donation ($2 - $500).
-            </p>
-
-            <div className="flex gap-2 mb-4">
-              {DONATE_PRESETS.map((cents) => (
-                <Button
-                  key={cents}
-                  variant={(!customAmount && donateAmount === cents) ? "default" : "outline"}
-                  onClick={() => { setDonateAmount(cents); setCustomAmount(""); }}
-                  className="flex-1"
-                >
-                  ${(cents / 100).toFixed(0)}
-                </Button>
-              ))}
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="custom-amount">Custom amount (USD)</Label>
-                <Input
-                  id="custom-amount"
-                  inputMode="decimal"
-                  placeholder="e.g. 7.50"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  className={donateAmountError ? "border-destructive" : ""}
-                />
-                {donateAmountError && (
-                  <p className="text-xs text-destructive mt-1">{donateAmountError}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="email">Email (optional for receipt)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={donateEmail}
-                  onChange={(e) => setDonateEmail(e.target.value)}
-                />
-              </div>
-
-              <Button
-                onClick={startDonationCheckout}
-                disabled={donateLoading || !isValidDonateAmount}
-                className="w-full"
-              >
-                {donateLoading ? "Processing..." : `Donate $${(donateDisplayAmount / 100).toFixed(2)}`}
-              </Button>
-
-              <p className="text-center text-xs text-muted-foreground">
-                Powered by Stripe • Test mode enabled
+        ) : (
+          <div className="hidden md:flex flex-1 items-center justify-center bg-muted/20">
+            <div className="text-center">
+              <MessageCircle className="w-24 h-24 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-2xl font-bold mb-2">Select a conversation</h3>
+              <p className="text-muted-foreground">
+                Choose a conversation from the list to start messaging
               </p>
             </div>
-          </DialogContent>
-        </Dialog>
-    </div>
+          </div>
+        )}
+      </div>
 
-    {/* Scrollbar Hide CSS */}
-    <style>{`
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-    `}</style>
-    </PageTransition>
+      <style>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+    </div>
   );
-}
+};
+
+export default Inbox;
+
