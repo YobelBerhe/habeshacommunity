@@ -123,9 +123,17 @@ const FastingPage = lazy(() => import("./pages/health/Fasting"));
 const NutritionPage = lazy(() => import("./pages/health/Nutrition"));
 const FitnessPage = lazy(() => import("./pages/health/Fitness"));
 const HealthDashboard = lazy(() => import("./pages/health/Dashboard"));
+const HealthDashboardMain = lazy(() => import("./pages/health/HealthDashboard"));
 const SelectFastingPlan = lazy(() => import("./pages/health/fasting/SelectFastingPlan"));
 const FastingTrackerLive = lazy(() => import("./pages/health/fasting/FastingTrackerLive"));
 const WeightProgress = lazy(() => import("./pages/health/fasting/WeightProgress"));
+const Hydration = lazy(() => import("./pages/health/Hydration"));
+const SleepTracker = lazy(() => import("./pages/health/Sleep"));
+const FoodLog = lazy(() => import("./pages/health/nutrition/FoodLog"));
+const Recipes = lazy(() => import("./pages/health/nutrition/Recipes"));
+const ShoppingList = lazy(() => import("./pages/health/nutrition/ShoppingList"));
+const Train = lazy(() => import("./pages/health/fitness/Train"));
+const WorkoutInProgress = lazy(() => import("./pages/health/fitness/WorkoutInProgress"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
