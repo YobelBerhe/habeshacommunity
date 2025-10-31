@@ -119,6 +119,7 @@ const ChurchList = lazy(() => import("./pages/church/ChurchList"));
 const ChurchDetail = lazy(() => import("./pages/church/ChurchDetail"));
 const GamificationDashboard = lazy(() => import("./pages/gamification/Dashboard"));
 const HealthHome = lazy(() => import("./pages/health/HealthHome"));
+const FastingPage = lazy(() => import("./pages/health/Fasting"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -331,6 +332,7 @@ const App = () => {
                 
                 {/* Health Routes */}
                 <Route path="/health" element={<HealthHome />} />
+                <Route path="/health/fasting" element={<FastingPage />} />
                 
                 {/* Messaging & Video */}
                 <Route path="/inbox" element={<Inbox />} />
