@@ -52,7 +52,7 @@ export default function HealthHome() {
       name: 'Nutrition', 
       icon: Apple, 
       color: 'from-green-500 to-emerald-500', 
-      route: '/coming-soon',
+      route: '/health/nutrition',
       description: 'Meal plans, food logging, recipes'
     },
     { 
