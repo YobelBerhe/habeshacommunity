@@ -4,7 +4,7 @@ import { GridSkeleton } from '@/components/LoadingStates';
 import { EmptyState } from '@/components/EmptyState';
 import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/layout/MobileHeader";
 import Header from "@/components/Header";
 import ListingGrid from "@/components/ListingGrid";
@@ -352,6 +352,8 @@ export default function Browse() {
           // Only show available mentors (RLS also handles this)
           query = query.eq('available', true);
           
+          if (filters.city) query = query.eq('city', filters.city);
+          
           if (mentorVerifiedOnly) {
             query = query.eq('is_verified', true);
           }
@@ -433,7 +435,6 @@ export default function Browse() {
             lat: null,
             lng: null,
             created_at: mentor.created_at,
-            // Legacy compatibility
             contact: { phone: "" },
             photos: mentor.photos || [],
             lon: undefined,
@@ -445,16 +446,20 @@ export default function Browse() {
           console.log('✅ Processed mentor listings:', mentorListings.length);
           setListings(mentorListings);
         } else if (filters.category === 'match') {
-          const { data, error } = await supabase
+          let query = supabase
             .from('match_profiles')
             .select('*')
-            .order('created_at', { ascending: false });
+            .eq('active', true);
+          
+          if (filters.city) query = query.eq('city', filters.city);
+          
+          const { data, error } = await query.order('created_at', { ascending: false });
             
           if (error) throw error;
           
           // Convert match profile data to listing format
           const matchListings = (data || []).map(profile => ({
-            id: profile.user_id, // Use user_id as the listing ID for match profiles
+            id: profile.user_id,
             user_id: profile.user_id,
             city: profile.city,
             country: profile.country,
@@ -474,7 +479,6 @@ export default function Browse() {
             lat: null,
             lng: null,
             created_at: profile.created_at,
-            // Legacy compatibility
             contact: { phone: "" },
             photos: profile.photos || [],
             lon: undefined,
@@ -529,7 +533,6 @@ export default function Browse() {
             lat: row.location_lat,
             lng: row.location_lng,
             created_at: row.created_at,
-            // Legacy compatibility
             contact: { phone: hasContactAccess(user, row) ? (row.contact.contact_value || "") : "" },
             photos: row.images || [],
             lon: row.location_lng || undefined,
@@ -595,11 +598,14 @@ export default function Browse() {
   const [cityCoords, setCityCoords] = useState<{ lat: number; lng: number } | undefined>();
 
   const handleCityChange = (city: string, lat?: number, lon?: number) => {
+    console.log('🗺️ City changed:', { city, lat, lon });
     updateFilter('city', city);
     if (lat && lon) {
       setCityCoords({ lat, lng: lon });
+      console.log('📍 Set city coords:', { lat, lng: lon });
     } else {
       setCityCoords(undefined);
+      console.log('📍 Cleared city coords');
     }
   };
 
@@ -621,6 +627,7 @@ export default function Browse() {
     setMentorVerifiedOnly(false);
     setMentorMinRating('0');
     setMentorSortBy('verified');
+    setCityCoords(undefined);
     // Also clear app state city
     const next = { ...appState, city: undefined };
     setAppState(next);
@@ -645,7 +652,10 @@ export default function Browse() {
       key: 'city',
       label: 'City',
       value: filters.city,
-      onRemove: () => updateFilter('city', undefined),
+      onRemove: () => {
+        updateFilter('city', undefined);
+        setCityCoords(undefined);
+      },
     },
     filters.minPrice && {
       key: 'minPrice',
@@ -751,7 +761,7 @@ export default function Browse() {
   return (
     <PageTransition>
     <div className="min-h-screen bg-background">
-      {/* Desktop View - Reorganized Layout */}
+      {/* Desktop View */}
       <div className="hidden md:block">
         {/* Top Bar with Logo and Search - STICKY */}
         <header role="banner" className="sticky top-0 z-[50] bg-background/95 backdrop-blur-sm border-b">
@@ -960,7 +970,7 @@ export default function Browse() {
         )}
 
         {/* Filter Controls Bar - NOT STICKY */}
-        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border hidden md:block">
+        <div role="search" aria-label="Search and filter listings" className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -1173,195 +1183,236 @@ export default function Browse() {
           </div>
 
           <div className="flex">
-          {/* Map Section - Left Side (STICKY) */}
-          <div className="w-1/2 sticky top-[109px] h-[calc(100vh-109px)] overflow-hidden">
-            <LazyMap
-              listings={processedListings}
-              onListingClick={handleListingSelect}
-              center={filters.city ? undefined : { lat: 20, lng: 0 }}
-              zoom={filters.city ? 12 : 2}
-              height="100%"
-              searchCity={filters.city}
-              searchCityCoords={cityCoords}
-              searchCountry={filters.city}
-            />
-          </div>
+            {/* Map Section - Left Side (STICKY) */}
+            <div className="w-1/2 sticky top-[109px] h-[calc(100vh-109px)] overflow-hidden">
+              <LazyMap
+                listings={processedListings}
+                onListingClick={handleListingSelect}
+                center={cityCoords || (filters.city ? undefined : { lat: 20, lng: 0 })}
+                zoom={filters.city ? 12 : 2}
+                height="100%"
+                searchCity={filters.city}
+                searchCityCoords={cityCoords}
+                searchCountry={filters.city}
+              />
+            </div>
 
-         {/* Listings Section - Right Side (SCROLLABLE) */}
-<div className="w-1/2 bg-background min-h-screen">
-  <div className="p-6">
-    {loading ? (
-      <GridSkeleton count={6} />
-    ) : processedListings.length === 0 ? (
-      <EmptyState
-        icon={Search}
-        title="No listings found"
-        description="Try adjusting your filters or search in a different city"
-        action={{
-          label: 'Clear Filters',
-          onClick: handleClearAll,
-        }}
-      />
-    ) : (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-      >
-        <ListingGrid
-          listings={processedListings}
-          onListingClick={handleListingSelect}
-          loading={false}
-          newlyPostedId={null}
-          viewMode={viewMode}
-        />
-      </motion.div>
-    )}
-  </div>
-</div>
+            {/* Listings Section - Right Side (SCROLLABLE) */}
+            <div className="w-1/2 bg-background min-h-screen">
+              <div className="p-6">
+                {loading ? (
+                  <GridSkeleton count={6} />
+                ) : processedListings.length === 0 ? (
+                  <EmptyState
+                    icon={Search}
+                    title="No listings found"
+                    description="Try adjusting your filters or search in a different city"
+                    action={{
+                      label: 'Clear Filters',
+                      onClick: handleClearAll,
+                    }}
+                  />
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <ListingGrid
+                      listings={processedListings}
+                      onListingClick={handleListingSelect}
+                      loading={false}
+                      newlyPostedId={null}
+                      viewMode={viewMode}
+                    />
+                  </motion.div>
+                )}
+              </div>
+            </div>
           </div>
         </main>
       </div>
 
-      {/* Mobile View - Keep Existing Layout */}
+      {/* Mobile View - OPTIMIZED */}
       <div className="md:hidden">
-        {/* Mobile Header */}
+        {/* Mobile Header - Compact */}
         <MobileHeader />
 
-        {/* Mobile City Search Bar with Clear Button */}
+        {/* Mobile Search - Compact */}
         <div className="px-4 py-2 border-b bg-background space-y-2">
           {/* General Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               type="text"
-              placeholder={language === 'EN' ? "Search listings..." : "ዝርዝር ኣሰላስል..."}
+              placeholder="Search listings..."
               value={filters.query || ''}
-              onChange={(e) => {
-                updateFilter('query', e.target.value);
-                console.log('Mobile browse search:', e.target.value);
-              }}
-              className="pl-10 w-full"
+              onChange={(e) => updateFilter('query', e.target.value)}
+              className="pl-10 w-full h-9"
             />
           </div>
           
-          {/* City Search */}
+          {/* City Search + Clear */}
           <div className="flex gap-2">
             <div className="flex-1">
               <CitySearchBar 
                 value={filters.city}
                 onCitySelect={handleCityChange}
+                className="h-9"
               />
             </div>
-            <motion.div whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearAll}
-                className="px-3 py-2 h-auto text-xs"
-              >
-                Clear
-              </Button>
-            </motion.div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAll}
+              className="px-3 h-9 text-xs"
+            >
+              Clear
+            </Button>
           </div>
         </div>
 
-        {/* Filter Controls - Sticky */}
-        <div className="sticky top-14 z-[35] bg-background/80 backdrop-blur border-b">
-          <div className="px-4 py-3">
-            <div className="flex items-center gap-1 mb-3 overflow-x-auto">
-              {/* Category Filter */}
-              <Popover modal={false}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1 flex-shrink-0">
-                    {filters.category 
-                      ? TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti'] || "Category"
-                      : language === 'EN' ? "All categories" : "ኩሉ ምድብታት"
-                    }
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  side="bottom" 
-                  align="start" 
-                  className="w-56 p-1"
-                  collisionPadding={8}
-                >
-                  <div className="space-y-1">
-                     <button
-                       className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                       onClick={() => updateFilters({ category: undefined, subcategory: undefined })}
-                     >
-                       All categories
-                     </button>
-                     {Object.entries(TAXONOMY).map(([key, value]) => (
-                       <button
-                         key={key}
-                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
-                         onClick={() => updateFilters({ category: key, subcategory: undefined })}
-                       >
-                         {value.name[language.toLowerCase() as 'en' | 'ti']}
-                       </button>
-                     ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+        {/* Horizontal Scroll Categories - MOBILE OPTIMIZED */}
+        <div className="sticky top-14 z-[35] bg-background/95 backdrop-blur-sm border-b">
+          <div className="px-4 py-2">
+            {/* Category Pills - Horizontal Scroll */}
+            <div className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 scrollbar-hide mb-2">
+              <button 
+                onClick={() => updateFilters({ category: undefined, subcategory: undefined })}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  !filters.category 
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                All
+              </button>
+              
+              <button 
+                onClick={() => updateFilters({ category: 'community', subcategory: undefined })}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  filters.category === 'community'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                Community
+              </button>
 
-              {/* Subcategory Filter */}
-              <Popover modal={false}>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1 flex-shrink-0"
-                    disabled={!filters.category}
+              <button 
+                onClick={() => updateFilters({ category: 'mentor', subcategory: undefined })}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  filters.category === 'mentor'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                Mentor
+              </button>
+
+              <button 
+                onClick={() => updateFilters({ category: 'match', subcategory: undefined })}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  filters.category === 'match'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                Match
+              </button>
+
+              <button 
+                onClick={() => updateFilter('category', 'housing')}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  filters.category === 'housing'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                Housing
+              </button>
+
+              <button 
+                onClick={() => updateFilter('category', 'jobs')}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  filters.category === 'jobs'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                Jobs
+              </button>
+
+              <button 
+                onClick={() => updateFilter('category', 'services')}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  filters.category === 'services'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                Services
+              </button>
+
+              <button 
+                onClick={() => updateFilter('category', 'forsale')}
+                className={`flex-shrink-0 snap-center px-4 py-2 rounded-full border-2 text-sm font-medium transition-all whitespace-nowrap ${
+                  filters.category === 'forsale'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                Marketplace
+              </button>
+            </div>
+
+            {/* Subcategory Dropdown - Compact */}
+            {filters.category && (
+              <div className="mb-2">
+                <Popover modal={false}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1 text-xs h-8"
+                    >
+                      {filters.subcategory 
+                        ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
+                        : "Subcategory"
+                      }
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    side="bottom" 
+                    align="start" 
+                    className="w-56 p-1 max-h-64 overflow-y-auto"
                   >
-                    {filters.subcategory 
-                      ? LABELS[filters.subcategory]?.[language.toLowerCase() as 'en' | 'ti'] || filters.subcategory
-                      : filters.category ? (language === 'EN' ? "Subcategory" : "ንኣብ ምድብ") : (language === 'EN' ? "Select category first" : "ቀዳማይ ምድብ ምረጽ")
-                    }
-                    <ChevronDown className="w-3 h-3 text-primary" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  side="bottom" 
-                  align="start" 
-                  className="w-56 p-1 max-h-64 overflow-y-auto"
-                  collisionPadding={8}
-                >
-                  {filters.category && (
                     <div className="space-y-1">
                       <button
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
                         onClick={() => updateFilter('subcategory', undefined)}
                       >
-                        {language === 'EN' ? 'All' : 'ኩሉ'} {TAXONOMY[filters.category as CategoryKey]?.name[language.toLowerCase() as 'en' | 'ti']?.toLowerCase()}
+                        All
                       </button>
                       {TAXONOMY[filters.category as CategoryKey]?.sub.map((sub) => (
                         <button
                           key={sub}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm text-primary"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-sm"
                           onClick={() => updateFilter('subcategory', sub)}
                         >
                           {LABELS[sub]?.[language.toLowerCase() as 'en' | 'ti'] || sub}
                         </button>
                       ))}
                     </div>
-                  )}
-                </PopoverContent>
-              </Popover>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
 
-              {/* Clear All */}
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" size="sm" className="flex-shrink-0" onClick={handleClearAll}>
-                  {language === 'EN' ? 'Clear' : 'ኣጽዓን'}
-                </Button>
-              </motion.div>
-            </div>
-
-            {/* Mentor-specific filters for mobile */}
+            {/* Mentor Filters - Compact */}
             {filters.category === 'mentor' && (
-              <div className="mt-3 pt-3 border-t border-border">
+              <div className="mb-2 pb-2 border-t pt-2">
                 <MentorFilters
                   verifiedOnly={mentorVerifiedOnly}
                   minRating={mentorMinRating}
@@ -1372,26 +1423,13 @@ export default function Browse() {
                 />
               </div>
             )}
-            
-            {/* Results and controls */}
+
+            {/* Results + View Toggle - Compact */}
             <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {processedListings.length} {language === 'EN' ? 'results' : 'ውጽኢታት'}
-                {filters.city && ` ${language === 'EN' ? 'in' : 'ኣብ'} ${filters.city}`}
+              <div className="text-xs text-muted-foreground">
+                {processedListings.length} results
+                {filters.city && ` in ${filters.city}`}
               </div>
-              
-              <div className="text-sm text-muted-foreground">
-                Sorted by {sortKey === 'relevance' ? 'Recommended' : 
-                          sortKey === 'price_asc' ? 'Price (Low to High)' : 
-                          sortKey === 'price_desc' ? 'Price (High to Low)' :
-                          sortKey === 'newest' ? 'Newest' :
-                          sortKey === 'oldest' ? 'Oldest' : 
-                          sortKey === 'has_image' ? 'Has Image' : 'Upcoming'}
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between pt-2">
-              <div></div>
               <div className="flex items-center gap-2">
                 <ViewToggle viewMode={viewMode} onChange={setViewMode} />
                 <SortDropdown sortKey={sortKey} onChange={setSortKey} />
@@ -1400,51 +1438,50 @@ export default function Browse() {
           </div>
         </div>
 
-
-        {/* Main Content - Mobile */}
-<main className="px-4 py-6 mb-20 relative z-[1]">
-  {loading ? (
-    <GridSkeleton count={6} />
-  ) : processedListings.length === 0 ? (
-    <EmptyState
-      icon={Search}
-      title="No listings found"
-      description="Try adjusting your filters or search in a different city"
-      action={{
-        label: 'Clear Filters',
-        onClick: handleClearAll,
-      }}
-      variant="minimal"
-    />
-  ) : viewMode === "map" ? (
-    <div className="h-[70vh] w-full">
-      <LazyMap
-        listings={processedListings}
-        onListingClick={handleListingSelect}
-        center={filters.city ? undefined : { lat: 20, lng: 0 }}
-        zoom={filters.city ? 12 : 2}
-        height="100%"
-        searchCity={filters.city}
-        searchCityCoords={cityCoords}
-        searchCountry={filters.city}
-      />
-    </div>
-  ) : (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
-      <ListingGrid
-        listings={processedListings}
-        onListingClick={handleListingSelect}
-        loading={false}
-        newlyPostedId={null}
-        viewMode={viewMode}
-      />
-    </motion.div>
-  )}
-</main>
+        {/* Main Content - Mobile - Compact */}
+        <main className="px-4 py-4 mb-20 relative z-[1]">
+          {loading ? (
+            <GridSkeleton count={6} />
+          ) : processedListings.length === 0 ? (
+            <EmptyState
+              icon={Search}
+              title="No listings found"
+              description="Try adjusting your filters or search in a different city"
+              action={{
+                label: 'Clear Filters',
+                onClick: handleClearAll,
+              }}
+              variant="minimal"
+            />
+          ) : viewMode === "map" ? (
+            <div className="h-[70vh] w-full">
+              <LazyMap
+                listings={processedListings}
+                onListingClick={handleListingSelect}
+                center={cityCoords || (filters.city ? undefined : { lat: 20, lng: 0 })}
+                zoom={filters.city ? 12 : 2}
+                height="100%"
+                searchCity={filters.city}
+                searchCityCoords={cityCoords}
+                searchCountry={filters.city}
+              />
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <ListingGrid
+                listings={processedListings}
+                onListingClick={handleListingSelect}
+                loading={false}
+                newlyPostedId={null}
+                viewMode={viewMode}
+              />
+            </motion.div>
+          )}
+        </main>
       </div>
 
       
@@ -1521,6 +1558,17 @@ export default function Browse() {
           </DialogContent>
         </Dialog>
     </div>
+
+    {/* Scrollbar Hide CSS */}
+    <style>{`
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+    `}</style>
     </PageTransition>
   );
 }
