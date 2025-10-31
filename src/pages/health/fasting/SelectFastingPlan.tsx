@@ -451,10 +451,9 @@ export default function SelectFastingPlan() {
                   Find a Coach
                 </Button>
               </CardContent>
-            </Card>
-          </section>
+              </Card>
+            </section>
+          </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      );
+    }

@@ -492,6 +492,5 @@ export default function FastingTrackerLive() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

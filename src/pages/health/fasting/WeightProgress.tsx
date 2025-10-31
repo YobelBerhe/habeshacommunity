@@ -403,6 +403,5 @@ export default function WeightProgress() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
