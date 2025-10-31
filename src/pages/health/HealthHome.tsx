@@ -100,7 +100,7 @@ export default function HealthHome() {
             <h1 className="text-3xl font-bold mb-2">Health & Wellness</h1>
             <p className="text-muted-foreground">Your journey to a healthier you</p>
           </div>
-          <Button onClick={() => navigate('/coming-soon')}>
+          <Button onClick={() => navigate('/health/dashboard')}>
             <TrendingUp className="w-5 h-5 mr-2" /> View Dashboard
           </Button>
         </div>
