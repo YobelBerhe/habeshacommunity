@@ -100,6 +100,25 @@ export default function FastingPage() {
 
         {/* Main Fasting Tracker */}
         <section className="container mx-auto px-4 py-8">
+          {/* Start Journey CTA */}
+          <Card className="mb-8 bg-gradient-to-r from-orange-500 to-purple-600 text-white border-0">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-3xl font-bold mb-3">
+                🔥 Ready to Start Your Fasting Journey?
+              </h2>
+              <p className="text-lg opacity-90 mb-6">
+                Choose your fasting plan and track your progress with live timers and body status updates
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
+                onClick={() => navigate('/health/fasting/select')}
+              >
+                Select Your Fasting Plan →
+              </Button>
+            </CardContent>
+          </Card>
+
           <FastingTracker />
         </section>
 

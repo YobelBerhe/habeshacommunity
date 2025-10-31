@@ -123,6 +123,9 @@ const FastingPage = lazy(() => import("./pages/health/Fasting"));
 const NutritionPage = lazy(() => import("./pages/health/Nutrition"));
 const FitnessPage = lazy(() => import("./pages/health/Fitness"));
 const HealthDashboard = lazy(() => import("./pages/health/Dashboard"));
+const SelectFastingPlan = lazy(() => import("./pages/health/fasting/SelectFastingPlan"));
+const FastingTrackerLive = lazy(() => import("./pages/health/fasting/FastingTrackerLive"));
+const WeightProgress = lazy(() => import("./pages/health/fasting/WeightProgress"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -336,6 +339,9 @@ const App = () => {
                 {/* Health Routes */}
                 <Route path="/health" element={<HealthHome />} />
                 <Route path="/health/fasting" element={<FastingPage />} />
+                <Route path="/health/fasting/select" element={<SelectFastingPlan />} />
+                <Route path="/health/fasting/tracker" element={<FastingTrackerLive />} />
+                <Route path="/health/fasting/progress" element={<WeightProgress />} />
                 <Route path="/health/nutrition" element={<NutritionPage />} />
                 <Route path="/health/fitness" element={<FitnessPage />} />
                 <Route path="/health/dashboard" element={<HealthDashboard />} />
