@@ -44,7 +44,7 @@ export default function HealthHome() {
       name: 'Fitness', 
       icon: Dumbbell, 
       color: 'from-blue-500 to-cyan-500', 
-      route: '/coming-soon',
+      route: '/health/fitness',
       description: 'Workouts, trainers, progress tracking'
     },
     { 

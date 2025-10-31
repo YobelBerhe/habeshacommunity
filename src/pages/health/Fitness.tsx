@@ -1,9 +1,9 @@
 // src/pages/health/Fitness.tsx
 // Complete Fitness Tracking & Workout Planning
 
-import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -366,17 +366,13 @@ export default function FitnessPage() {
     setSelectedTemplate(null);
   }
 
-  return (
-    <>
-      <Helmet>
-        <title>Fitness | HabeshaCommunity Health</title>
-        <meta 
-          name="description" 
-          content="Track workouts, access exercise library, and work with Habesha fitness trainers" 
-        />
-      </Helmet>
+  useSEO({
+    title: 'Fitness | HabeshaCommunity Health',
+    description: 'Track workouts, access exercise library, and work with Habesha fitness trainers'
+  });
 
-      <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background">
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background via-blue-50/20 dark:via-blue-950/10 to-background">
         {/* Header */}
         <section className="border-b bg-background/95 backdrop-blur-lg sticky top-14 z-40">
           <div className="container mx-auto px-4 py-6">
@@ -709,6 +705,5 @@ export default function FitnessPage() {
           </Card>
         </section>
       </div>
-    </>
   );
 }
