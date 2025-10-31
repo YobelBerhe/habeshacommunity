@@ -6,12 +6,38 @@ import { FastingTracker } from '@/components/health/FastingTracker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BookOpen, Users, Share2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function FastingPage() {
+  const navigate = useNavigate();
+  
   useSEO({
     title: 'Orthodox Fasting Tracker | HabeshaCommunity Health',
     description: 'Track your Orthodox Ethiopian/Eritrean fasting periods with traditional meal recommendations and community support'
   });
+
+  const handleShareProgress = async () => {
+    const shareData = {
+      title: 'My Orthodox Fasting Journey',
+      text: 'Join me in Orthodox fasting! Strengthening faith through traditional practices. 🙏',
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success('Shared successfully!');
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        toast.error('Failed to share');
+      }
+    }
+  };
 
   return (
     <>
@@ -37,19 +63,35 @@ export default function FastingPage() {
         {/* Quick Actions */}
         <section className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto py-4 flex flex-col items-center gap-2"
+              onClick={() => navigate('/spiritual/fasting-calendar')}
+            >
               <Calendar className="w-6 h-6" />
               <span className="text-sm">Full Calendar</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto py-4 flex flex-col items-center gap-2"
+              onClick={() => navigate('/spiritual/fasting-calendar')}
+            >
               <BookOpen className="w-6 h-6" />
               <span className="text-sm">Fasting Guide</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto py-4 flex flex-col items-center gap-2"
+              onClick={() => navigate('/community/groups')}
+            >
               <Users className="w-6 h-6" />
               <span className="text-sm">Join Community</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto py-4 flex flex-col items-center gap-2"
+              onClick={handleShareProgress}
+            >
               <Share2 className="w-6 h-6" />
               <span className="text-sm">Share Progress</span>
             </Button>
@@ -121,6 +163,7 @@ export default function FastingPage() {
                 <Button
                   size="lg"
                   className="bg-white text-purple-600 hover:bg-gray-100"
+                  onClick={() => navigate('/community/groups')}
                 >
                   <Users className="w-5 h-5 mr-2" />
                   Join Community Group
@@ -129,6 +172,7 @@ export default function FastingPage() {
                   size="lg"
                   variant="outline"
                   className="border-white text-white hover:bg-white/10"
+                  onClick={() => navigate('/spiritual/fasting-calendar')}
                 >
                   <BookOpen className="w-5 h-5 mr-2" />
                   Download Fasting Guide
