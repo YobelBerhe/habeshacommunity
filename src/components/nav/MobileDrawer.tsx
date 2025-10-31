@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
   Menu, Heart, GraduationCap, ShoppingBag, Users, BookOpen,
   Home, MessageSquare, Calendar, Briefcase, Wrench,
-  ChevronRight
+  ChevronRight, Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';

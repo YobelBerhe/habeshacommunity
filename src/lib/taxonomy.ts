@@ -1,5 +1,5 @@
 // /lib/taxonomy.ts
-export type CategoryKey = "housing" | "jobs" | "services" | "community" | "mentor" | "forsale" | "match";
+export type CategoryKey = "housing" | "jobs" | "services" | "community" | "mentor" | "health" | "forsale" | "match";
 export type JobKind = "regular" | "gig";
 
 export const TAXONOMY: Record<
@@ -59,6 +59,12 @@ export const TAXONOMY: Record<
     name: { en: "Mentor", ti: "መሪሕ" },
     sub: [
       "language","health","career","tech","finance","immigration","business",
+    ],
+  },
+  health: {
+    name: { en: "Health", ti: "ጥዕና" },
+    sub: [
+      "fitness","nutrition","sleep","hydration","mental_health","wellness",
     ],
   },
   forsale: {

@@ -1,4 +1,4 @@
-import { Heart, GraduationCap, ShoppingBag, Users, Grid3x3, BookOpen, Church } from 'lucide-react';
+import { Heart, GraduationCap, ShoppingBag, Users, Grid3x3, BookOpen, Church, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -39,6 +39,15 @@ const AppSwitcher = () => {
       icon: GraduationCap,
       gradient: 'from-blue-500 to-cyan-500',
       description: 'Learn from experts'
+    },
+    {
+      id: 'health',
+      name: 'Health',
+      name_ti: 'ጥዕና',
+      path: '/health',
+      icon: Activity,
+      gradient: 'from-teal-500 to-emerald-500',
+      description: 'Health & wellness'
     },
     {
       id: 'marketplace',
