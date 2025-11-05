@@ -893,6 +893,74 @@ export type Database = {
           },
         ]
       }
+      calendar_subscriptions: {
+        Row: {
+          calendar_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          calendar_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          calendar_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_subscriptions_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendars: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          location: string | null
+          name: string
+          subscribers_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          name: string
+          subscribers_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          name?: string
+          subscribers_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           badge_reward_id: string | null

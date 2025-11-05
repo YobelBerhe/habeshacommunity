@@ -138,6 +138,7 @@ const EventsList = lazy(() => import('./pages/community/EventsList'));
 const EventDetail = lazy(() => import('./pages/community/EventDetail'));
 const CreateEvent = lazy(() => import('./pages/community/CreateEvent'));
 const EventsDiscover = lazy(() => import('./pages/community/EventsDiscover'));
+const Calendars = lazy(() => import('./pages/community/Calendars'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -340,6 +341,7 @@ const App = () => {
             <Route path="/community/events/create" element={<CreateEvent />} />
             <Route path="/community/events/:id" element={<EventDetail />} />
             <Route path="/community/events/discover" element={<EventsDiscover />} />
+            <Route path="/community/calendars" element={<Calendars />} />
                 <Route path="/community/groups" element={<Groups />} />
                 
                 {/* Church Finder Routes */}

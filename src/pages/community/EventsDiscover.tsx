@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSEO } from '@/hooks/useSEO';
+import { useResponsiveColumns } from '@/hooks/useResponsiveColumns';
 import { 
   Monitor, Coffee, Brain, Palette, Leaf, Dumbbell, 
-  Flower2, Bitcoin, MapPin, ChevronRight
+  Flower2, Bitcoin, MapPin, ChevronRight, Landmark
 } from 'lucide-react';
 
 // Mock data
@@ -107,6 +108,8 @@ const CITIES = {
 
 export default function EventsDiscover() {
   const [selectedContinent, setSelectedContinent] = useState('north-america');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useResponsiveColumns() === 1;
 
   useSEO({
     title: 'Discover Events | HabeshaCommunity',
@@ -117,72 +120,127 @@ export default function EventsDiscover() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Discover Events</h1>
-          <p className="text-lg text-muted-foreground">
+        <div className="mb-8 md:mb-12">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Discover Events</h1>
+          <p className="text-base md:text-lg text-muted-foreground">
             Explore popular events near you, browse by category, or check out some of the great community calendars.
           </p>
         </div>
 
         {/* Popular Events */}
-        <section className="mb-16">
+        <section className="mb-12 md:mb-16">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold mb-1">Popular Events</h2>
-              <p className="text-muted-foreground">San Francisco</p>
+              <h2 className="text-xl md:text-2xl font-bold mb-1">Popular Events</h2>
+              <p className="text-sm md:text-base text-muted-foreground">San Francisco</p>
             </div>
             <Button variant="ghost" asChild className="text-muted-foreground hover:text-foreground">
               <Link to="/community/events">
-                View All <ChevronRight className="h-4 w-4 ml-1" />
+                <span className="hidden md:inline">View All</span>
+                <ChevronRight className="h-4 w-4 md:ml-1" />
               </Link>
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {POPULAR_EVENTS.map((event) => (
-              <Link 
-                key={event.id} 
-                to={`/community/events/${event.id}`}
-                className="group"
-              >
-                <Card className="overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02]">
-                  <div className="flex gap-4 p-4">
-                    <div className="relative flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden bg-muted">
-                      {event.image ? (
-                        <img 
-                          src={event.image} 
-                          alt={event.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5" />
-                      )}
-                      {event.isLive && (
-                        <Badge className="absolute top-2 left-2 bg-red-500 text-white">
-                          ● LIVE
-                        </Badge>
-                      )}
+          {isMobile ? (
+            // Mobile: Horizontal scroll with 3 columns
+            <div 
+              ref={scrollContainerRef}
+              className="overflow-x-auto pb-4 -mx-4 px-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              <style>{`::-webkit-scrollbar { display: none; }`}</style>
+              <div className="flex gap-4" style={{ width: 'max-content' }}>
+                {POPULAR_EVENTS.map((event) => (
+                  <Link 
+                    key={event.id} 
+                    to={`/community/events/${event.id}`}
+                    className="flex-shrink-0"
+                    style={{ width: 'calc(100vw - 3rem)' }}
+                  >
+                    <Card className="overflow-hidden h-full">
+                      <div className="flex gap-3 p-3">
+                        <div className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-muted">
+                          {event.image ? (
+                            <img 
+                              src={event.image} 
+                              alt={event.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5" />
+                          )}
+                          {event.isLive && (
+                            <Badge className="absolute top-1 left-1 text-xs bg-red-500 text-white px-1.5 py-0.5">
+                              ● LIVE
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm mb-1 line-clamp-2">
+                            {event.title}
+                          </h3>
+                          <p className="text-xs text-red-500 mb-0.5">{event.isLive ? '● LIVE' : ''} {event.time}</p>
+                          {event.location && (
+                            <p className="text-xs text-muted-foreground line-clamp-1">{event.location}</p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Desktop: Grid layout
+            <div className="grid md:grid-cols-2 gap-6">
+              {POPULAR_EVENTS.map((event) => (
+                <Link 
+                  key={event.id} 
+                  to={`/community/events/${event.id}`}
+                  className="group"
+                >
+                  <Card className="overflow-hidden transition-all hover:shadow-lg">
+                    <div className="flex gap-4 p-4">
+                      <div className="relative flex-shrink-0 w-28 h-28 rounded-lg overflow-hidden bg-muted">
+                        {event.image ? (
+                          <img 
+                            src={event.image} 
+                            alt={event.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5" />
+                        )}
+                        {event.isLive && (
+                          <Badge className="absolute top-2 left-2 bg-red-500 text-white">
+                            ● LIVE
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-base mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                          {event.title}
+                        </h3>
+                        <p className="text-sm mb-1">
+                          {event.isLive && <span className="text-red-500">● LIVE</span>} {event.time}
+                        </p>
+                        {event.location && (
+                          <p className="text-sm text-muted-foreground">{event.location}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                        {event.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-1">{event.time}</p>
-                      {event.location && (
-                        <p className="text-sm text-muted-foreground">{event.location}</p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Browse by Category */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6">Browse by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="mb-12 md:mb-16">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Browse by Category</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {CATEGORIES.map((category) => {
               const Icon = category.icon;
               return (
@@ -190,16 +248,16 @@ export default function EventsDiscover() {
                   key={category.id}
                   to={`/community/events?category=${category.id}`}
                 >
-                  <Card className="p-6 hover:bg-accent transition-colors cursor-pointer group">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center flex-shrink-0`}>
-                        <Icon className="h-6 w-6 text-white" />
+                  <Card className="p-4 md:p-5 hover:bg-accent/50 transition-all cursor-pointer group hover:shadow-md">
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-sm md:text-base group-hover:text-primary transition-colors truncate">
                           {category.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground">{category.count}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{category.count}</p>
                       </div>
                     </div>
                   </Card>
@@ -210,13 +268,13 @@ export default function EventsDiscover() {
         </section>
 
         {/* Featured Calendars */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6">Featured Calendars</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+        <section className="mb-12 md:mb-16">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Featured Calendars</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {FEATURED_CALENDARS.map((calendar) => (
-              <Card key={calendar.id} className="p-6">
-                <div className="flex gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+              <Card key={calendar.id} className="p-5 md:p-6 hover:shadow-lg transition-shadow">
+                <div className="flex gap-3 md:gap-4 mb-4">
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                     {calendar.image && (
                       <img 
                         src={calendar.image} 
@@ -226,17 +284,17 @@ export default function EventsDiscover() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <Button variant="secondary" size="sm" className="float-right">
+                    <Button variant="secondary" size="sm" className="float-right text-xs md:text-sm">
                       Subscribe
                     </Button>
                   </div>
                 </div>
-                <h3 className="font-semibold mb-2 line-clamp-2">{calendar.name}</h3>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                <h3 className="font-semibold text-sm md:text-base mb-2 line-clamp-2">{calendar.name}</h3>
+                <div className="flex items-center gap-1 text-xs md:text-sm text-muted-foreground mb-2">
                   <MapPin className="h-3 w-3" />
                   <span>{calendar.location}</span>
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">{calendar.description}</p>
+                <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">{calendar.description}</p>
               </Card>
             ))}
           </div>
@@ -244,16 +302,17 @@ export default function EventsDiscover() {
 
         {/* Explore Local Events */}
         <section>
-          <h2 className="text-2xl font-bold mb-6">Explore Local Events</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Explore Local Events</h2>
           
           {/* Continent Tabs */}
-          <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+          <div className="flex gap-2 mb-6 md:mb-8 overflow-x-auto pb-2 scrollbar-hide">
             {CONTINENTS.map((continent) => (
               <Button
                 key={continent.id}
                 variant={selectedContinent === continent.id ? 'default' : 'ghost'}
                 onClick={() => setSelectedContinent(continent.id)}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap text-xs md:text-sm"
+                size={isMobile ? 'sm' : 'default'}
               >
                 {continent.name}
               </Button>
@@ -261,22 +320,22 @@ export default function EventsDiscover() {
           </div>
 
           {/* Cities Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {CITIES[selectedContinent as keyof typeof CITIES]?.map((city) => (
               <Link 
                 key={city.name}
                 to={`/community/events?city=${encodeURIComponent(city.name)}`}
               >
-                <Card className="p-4 hover:bg-accent transition-colors cursor-pointer group">
+                <Card className="p-3 md:p-4 hover:bg-accent/50 transition-all cursor-pointer group hover:shadow-md">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full ${city.color} flex items-center justify-center flex-shrink-0`}>
-                      <MapPin className="h-5 w-5 text-white" />
+                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${city.color} flex items-center justify-center flex-shrink-0`}>
+                      <Landmark className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
+                      <h3 className="font-semibold text-sm md:text-base group-hover:text-primary transition-colors truncate">
                         {city.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">{city.count}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">{city.count}</p>
                     </div>
                   </div>
                 </Card>
