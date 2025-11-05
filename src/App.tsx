@@ -69,6 +69,9 @@ const Forums = lazy(() => import("./pages/community/Forums"));
 const ForumsNew = lazy(() => import("./pages/community/ForumsNew"));
 const BibleGroups = lazy(() => import("./pages/community/BibleGroups"));
 const Events = lazy(() => import("./pages/community/Events"));
+const EventsList = lazy(() => import("./pages/community/EventsList"));
+const EventDetail = lazy(() => import("./pages/community/EventDetail"));
+const CreateEvent = lazy(() => import("./pages/community/CreateEvent"));
 const Groups = lazy(() => import("./pages/community/Groups"));
 const MentorPayouts = lazy(() => import("./pages/mentor/MentorPayouts"));
 const VerifyProfile = lazy(() => import("./pages/mentor/VerifyProfile"));
@@ -332,7 +335,9 @@ const App = () => {
                 <Route path="/community/forums" element={<Forums />} />
                 <Route path="/community/forums-new" element={<ForumsNew />} />
                 <Route path="/community/bible-groups" element={<BibleGroups />} />
-                <Route path="/community/events" element={<Events />} />
+                <Route path="/community/events" element={<EventsList />} />
+                <Route path="/community/events/create" element={<CreateEvent />} />
+                <Route path="/community/events/:id" element={<EventDetail />} />
                 <Route path="/community/groups" element={<Groups />} />
                 
                 {/* Church Finder Routes */}

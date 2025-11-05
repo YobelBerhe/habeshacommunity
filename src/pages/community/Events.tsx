@@ -3,7 +3,7 @@ import {
   Calendar, MapPin, Clock, Users, Search, Filter,
   Heart, Share2, Bookmark, Plus, TrendingUp,
   DollarSign, Video, Music, Utensils, GraduationCap,
-  Briefcase
+  Briefcase, ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 interface Event {
   id: string;
@@ -208,15 +208,28 @@ const Events = () => {
                 Discover and join events near you
               </p>
             </div>
-            <Button
-              size="lg"
-              onClick={() => navigate('/community/create-event')}
-              className="bg-white text-green-600 hover:bg-gray-100"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span className="hidden sm:inline">Create Event</span>
-              <span className="sm:hidden">Create</span>
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <Link to="/community/events">
+                  <ArrowRight className="w-5 h-5 mr-2" />
+                  Browse All Events
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                onClick={() => navigate('/community/events/create')}
+                className="bg-white text-green-600 hover:bg-gray-100"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                <span className="hidden sm:inline">Create Event</span>
+                <span className="sm:hidden">Create</span>
+              </Button>
+            </div>
           </div>
 
           {/* Search */}
