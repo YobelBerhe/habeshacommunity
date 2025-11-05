@@ -111,8 +111,8 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14 md:h-16">
-          {/* Left: Hamburger Menu + Logo */}
-          <div className="flex items-center space-x-2 md:space-x-3">
+          {/* Left: Logo + Navigation */}
+          <div className="flex items-center space-x-2 md:space-x-6">
             <MobileDrawer />
             
             <Button
@@ -123,6 +123,34 @@ const Header = () => {
               <span className="hidden sm:inline">HabeshaCommunity</span>
               <span className="sm:hidden">Habesha</span>
             </Button>
+
+            {/* Desktop Navigation - Hidden on mobile */}
+            <nav className="hidden md:flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/community/events')}
+                className="text-sm font-medium"
+              >
+                📅 Events
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/community/calendars')}
+                className="text-sm font-medium"
+              >
+                📆 Calendars
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/community/events/discover')}
+                className="text-sm font-medium"
+              >
+                ◎ Discover
+              </Button>
+            </nav>
           </div>
 
           {/* Right: Actions */}
