@@ -118,11 +118,12 @@ const ChurchHome = lazy(() => import("./pages/church/ChurchHome"));
 const ChurchList = lazy(() => import("./pages/church/ChurchList"));
 const ChurchDetail = lazy(() => import("./pages/church/ChurchDetail"));
 const GamificationDashboard = lazy(() => import("./pages/gamification/Dashboard"));
-const HealthHome = lazy(() => import("./pages/health/HealthDashboard"));
+const HealthHome = lazy(() => import("./pages/health/HealthHome"));
 const FastingPage = lazy(() => import("./pages/health/Fasting"));
 const NutritionPage = lazy(() => import("./pages/health/Nutrition"));
 const FitnessPage = lazy(() => import("./pages/health/Fitness"));
 const HealthDashboard = lazy(() => import("./pages/health/Dashboard"));
+const HealthDashboardMain = lazy(() => import("./pages/health/HealthDashboard"));
 const SelectFastingPlan = lazy(() => import("./pages/health/fasting/SelectFastingPlan"));
 const FastingTrackerLive = lazy(() => import("./pages/health/fasting/FastingTrackerLive"));
 const WeightProgress = lazy(() => import("./pages/health/fasting/WeightProgress"));
@@ -352,13 +353,6 @@ const App = () => {
                 <Route path="/health/nutrition" element={<NutritionPage />} />
                 <Route path="/health/fitness" element={<FitnessPage />} />
                 <Route path="/health/dashboard" element={<HealthDashboard />} />
-                <Route path="/health/hydration" element={<Hydration />} />
-                <Route path="/health/sleep" element={<SleepTracker />} />
-                <Route path="/health/nutrition/food-log" element={<FoodLog />} />
-                <Route path="/health/nutrition/recipes" element={<Recipes />} />
-                <Route path="/health/nutrition/shopping-list" element={<ShoppingList />} />
-                <Route path="/health/fitness/train" element={<Train />} />
-                <Route path="/health/fitness/workout-in-progress" element={<WorkoutInProgress />} />
                 
                 {/* Messaging & Video */}
                 <Route path="/inbox" element={<Inbox />} />
