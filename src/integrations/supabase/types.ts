@@ -1656,6 +1656,7 @@ export type Database = {
           church_id: number | null
           city: string | null
           country: string | null
+          cover_image: string | null
           created_at: string | null
           description_am: string | null
           description_en: string | null
@@ -1697,6 +1698,7 @@ export type Database = {
           church_id?: number | null
           city?: string | null
           country?: string | null
+          cover_image?: string | null
           created_at?: string | null
           description_am?: string | null
           description_en?: string | null
@@ -1738,6 +1740,7 @@ export type Database = {
           church_id?: number | null
           city?: string | null
           country?: string | null
+          cover_image?: string | null
           created_at?: string | null
           description_am?: string | null
           description_en?: string | null
@@ -4571,6 +4574,41 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saints_calendar: {
         Row: {

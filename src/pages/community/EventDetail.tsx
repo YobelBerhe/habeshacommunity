@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Calendar, MapPin, Users, Share2, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users, Share2, Clock, Check, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -16,6 +16,9 @@ export default function EventDetail() {
   const { user } = useAuth();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [rsvpStatus, setRsvpStatus] = useState<'going' | 'maybe' | 'not_going' | null>(null);
+  const [rsvpCount, setRsvpCount] = useState(0);
+  const [isRsvping, setIsRsvping] = useState(false);
 
   useSEO({
     title: event ? `${event.title_en} | Events` : 'Event',
@@ -25,8 +28,11 @@ export default function EventDetail() {
   useEffect(() => {
     if (id) {
       fetchEvent();
+      if (user) {
+        fetchRsvpStatus();
+      }
     }
-  }, [id]);
+  }, [id, user]);
 
   const fetchEvent = async () => {
     try {
@@ -38,11 +44,75 @@ export default function EventDetail() {
 
       if (error) throw error;
       setEvent(data);
+      
+      // Fetch RSVP count
+      const { count } = await supabase
+        .from('rsvps')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', id)
+        .eq('status', 'going');
+      
+      setRsvpCount(count || 0);
     } catch (error: any) {
       toast.error('Event not found');
       navigate('/community/events');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRsvpStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('rsvps')
+        .select('status')
+        .eq('event_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (data) {
+        setRsvpStatus(data.status as 'going' | 'maybe' | 'not_going');
+      }
+    } catch (error) {
+      console.error('Error fetching RSVP:', error);
+    }
+  };
+
+  const handleRsvp = async (status: 'going' | 'maybe' | 'not_going') => {
+    if (!user) {
+      toast.error('Please sign in to RSVP');
+      return;
+    }
+
+    setIsRsvping(true);
+    try {
+      const { error } = await supabase
+        .from('rsvps')
+        .upsert({
+          event_id: id!,
+          user_id: user.id,
+          status,
+        }, {
+          onConflict: 'event_id,user_id'
+        });
+
+      if (error) throw error;
+
+      setRsvpStatus(status);
+      toast.success(
+        status === 'going' ? "You're going!" :
+        status === 'maybe' ? 'Marked as maybe' :
+        'RSVP updated'
+      );
+      
+      // Refresh counts
+      fetchEvent();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to RSVP');
+    } finally {
+      setIsRsvping(false);
     }
   };
 
@@ -80,12 +150,16 @@ export default function EventDetail() {
     <div className="min-h-screen bg-background">
       {/* Cover Image */}
       <div className="relative h-96 bg-gradient-to-br from-primary/10 to-primary/5">
-        {event.featured_image && (
+        {event.cover_image || event.featured_image ? (
           <img
-            src={event.featured_image}
+            src={event.cover_image || event.featured_image}
             alt={event.title_en}
             className="w-full h-full object-cover"
           />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Calendar className="h-24 w-24 text-muted-foreground/30" />
+          </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
       </div>
@@ -117,14 +191,40 @@ export default function EventDetail() {
               )}
             </div>
 
-            <div className="flex gap-4">
-              <Button
-                onClick={() => toast.info('RSVP feature coming soon!')}
-                size="lg"
-                className="flex-1"
-              >
-                RSVP to Event
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {!rsvpStatus || rsvpStatus !== 'going' ? (
+                <Button
+                  onClick={() => handleRsvp('going')}
+                  disabled={isRsvping}
+                  size="lg"
+                  className="flex-1"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  {isRsvping ? 'Processing...' : "I'm Going"}
+                </Button>
+              ) : (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="flex-1"
+                  disabled
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  You're Going!
+                </Button>
+              )}
+              
+              {rsvpStatus === 'going' && (
+                <Button
+                  onClick={() => handleRsvp('not_going')}
+                  disabled={isRsvping}
+                  variant="outline"
+                  size="lg"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel RSVP
+                </Button>
+              )}
               
               <Button
                 onClick={handleShare}
@@ -133,6 +233,11 @@ export default function EventDetail() {
               >
                 <Share2 className="h-4 w-4" />
               </Button>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+              <Users className="h-4 w-4" />
+              <span>{rsvpCount} {rsvpCount === 1 ? 'person is' : 'people are'} going</span>
             </div>
           </Card>
 

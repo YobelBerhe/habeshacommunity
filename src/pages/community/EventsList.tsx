@@ -52,37 +52,42 @@ export default function EventsList() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Community Events</h1>
-            <p className="text-muted-foreground">
-              Discover events happening in the Habesha community
-            </p>
+      {/* Header */}
+      <div className="mb-8 text-center md:text-left">
+        <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+          Community Events
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Discover events happening in the Habesha community
+        </p>
+      </div>
+
+      {/* Search & Create Button */}
+      <Card className="p-6 mb-8 shadow-lg border-border/50">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search events..."
+              className="pl-10 h-12 text-base"
+            />
           </div>
-          
           {user && (
-            <Button asChild className="mt-4 md:mt-0">
+            <Button 
+              asChild
+              size="lg"
+              className="h-12 px-6"
+            >
               <Link to="/community/events/create">
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-5 w-5 mr-2" />
                 Create Event
               </Link>
             </Button>
           )}
         </div>
-
-        {/* Search */}
-        <Card className="p-4 mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search events..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </Card>
+      </Card>
 
         {/* Events Grid */}
         {loading ? (
@@ -110,7 +115,7 @@ export default function EventsList() {
                   id: event.id,
                   slug: event.id,
                   title: event.title_en || 'Untitled Event',
-                  cover_image: event.featured_image,
+                  cover_image: event.cover_image || event.featured_image,
                   start_date: event.start_date,
                   city: event.city,
                   rsvp_count: 0,

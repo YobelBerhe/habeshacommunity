@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Calendar, MapPin, Users, FileText } from 'lucide-react';
+import { Calendar, MapPin, Users, FileText, Image as ImageIcon } from 'lucide-react';
 import { EVENT_THEMES } from '@/config/themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import PhotoUpload from '@/components/PhotoUpload';
 import {
   Select,
   SelectContent,
@@ -33,6 +34,7 @@ const eventSchema = z.object({
   capacity: z.number().int().positive().optional(),
   requireApproval: z.boolean().default(false),
   privacy: z.enum(['public', 'private']).default('public'),
+  coverImage: z.string().optional(),
 });
 
 type EventFormData = z.infer<typeof eventSchema>
@@ -40,12 +42,13 @@ type EventFormData = z.infer<typeof eventSchema>
 interface EventFormProps {
   defaultValues?: Partial<EventFormData>
   calendars: Array<{ id: string; name: string }>
-  onSubmit: (data: EventFormData) => Promise<void>
+  onSubmit: (data: EventFormData & { coverImage?: string }) => Promise<void>
 }
 
 export function EventForm({ defaultValues, calendars, onSubmit }: EventFormProps) {
   const [selectedTheme, setSelectedTheme] = useState(defaultValues?.theme || 'minimal');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photos, setPhotos] = useState<string[]>(defaultValues?.coverImage ? [defaultValues.coverImage] : []);
 
   const {
     register,
@@ -69,7 +72,7 @@ export function EventForm({ defaultValues, calendars, onSubmit }: EventFormProps
   const handleFormSubmit = async (data: EventFormData) => {
     try {
       setIsSubmitting(true);
-      await onSubmit(data);
+      await onSubmit({ ...data, coverImage: photos[0] });
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
@@ -78,12 +81,26 @@ export function EventForm({ defaultValues, calendars, onSubmit }: EventFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Cover Photo Upload */}
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <ImageIcon className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Event Cover Photo</h3>
+        </div>
+        <PhotoUpload
+          photos={photos}
+          onPhotosChange={setPhotos}
+          maxPhotos={1}
+          bucketName="event-covers"
+        />
+      </Card>
+
       {/* Theme Preview */}
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">Event Theme</h3>
         
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {EVENT_THEMES.map((theme) => (
             <button
               key={theme.id}
@@ -93,15 +110,26 @@ export function EventForm({ defaultValues, calendars, onSubmit }: EventFormProps
                 setSelectedTheme(themeId);
                 setValue('theme', themeId);
               }}
-              className={`flex-shrink-0 transition-all rounded-xl ${
+              className={`group relative overflow-hidden rounded-xl transition-all ${
                 selectedTheme === theme.id
-                  ? 'ring-4 ring-primary ring-offset-2'
-                  : 'hover:ring-2 hover:ring-muted'
+                  ? 'ring-2 ring-primary scale-105'
+                  : 'hover:scale-105 hover:shadow-lg'
               }`}
             >
-              <div className="w-40 h-32 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                <span className="text-sm font-medium">{theme.name}</span>
+              <div 
+                className="aspect-[4/3] flex items-center justify-center text-sm font-semibold bg-gradient-to-br from-primary to-primary-glow"
+              >
+                <span className="text-white drop-shadow-md">{theme.name}</span>
               </div>
+              {selectedTheme === theme.id && (
+                <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                  <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              )}
             </button>
           ))}
         </div>

@@ -59,6 +59,7 @@ export default function CreateEvent() {
           requires_registration: formData.requireApproval,
           status: 'published',
           organizer_id: user?.id,
+          cover_image: formData.coverImage,
         });
 
       if (error) throw error;
@@ -81,13 +82,15 @@ export default function CreateEvent() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Create Event</h1>
-          <p className="text-muted-foreground mb-8">
-            Share your event with the community
-          </p>
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8 text-center md:text-left">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3">Create Event</h1>
+            <p className="text-lg text-muted-foreground">
+              Share your event with the community
+            </p>
+          </div>
 
-          <Card className="p-8">
+          <Card className="p-6 md:p-8 shadow-xl">
             <EventForm
               calendars={calendars}
               onSubmit={handleSubmit}
