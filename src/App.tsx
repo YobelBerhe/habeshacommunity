@@ -26,6 +26,7 @@ import BootstrapAuth from "@/components/BootstrapAuth";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
+const Home = lazy(() => import("./pages/Home"));
 const SpiritualHome = lazy(() => import("./pages/spiritual/SpiritualHome"));
 const BibleReader = lazy(() => import("./pages/spiritual/BibleReader"));
 const ReadingPlans = lazy(() => import("./pages/spiritual/ReadingPlans"));
@@ -214,7 +215,9 @@ const App = () => {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 {/* Main Routes */}
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/index" element={<Index />} />
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/chat" element={<Chat />} />

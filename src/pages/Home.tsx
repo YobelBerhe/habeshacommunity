@@ -33,12 +33,12 @@ export default function Home() {
   const fetchUserProfile = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('full_name')
+      .select('display_name')
       .eq('id', user?.id)
       .single();
     
-    if (data?.full_name) {
-      setUserName(data.full_name.split(' ')[0]);
+    if (data?.display_name) {
+      setUserName(data.display_name.split(' ')[0]);
     }
   };
 
