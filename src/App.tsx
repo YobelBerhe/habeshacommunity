@@ -120,6 +120,7 @@ const ChurchList = lazy(() => import("./pages/church/ChurchList"));
 const ChurchDetail = lazy(() => import("./pages/church/ChurchDetail"));
 const GamificationDashboard = lazy(() => import("./pages/gamification/Dashboard"));
 const HealthHome = lazy(() => import("./pages/health/HealthHome"));
+const HealthCommunity = lazy(() => import("./pages/health/HealthCommunity"));
 const FastingPage = lazy(() => import("./pages/health/Fasting"));
 const NutritionPage = lazy(() => import("./pages/health/Nutrition"));
 const FitnessPage = lazy(() => import("./pages/health/Fitness"));
@@ -357,7 +358,8 @@ const App = () => {
                 <Route path="/gamification" element={<GamificationDashboard />} />
                 
                 {/* Health Routes */}
-                <Route path="/health" element={<HealthHome />} />
+                <Route path="/health" element={<HealthCommunity />} />
+                <Route path="/health/home" element={<HealthHome />} />
                 <Route path="/health/fasting" element={<FastingPage />} />
                 <Route path="/health/fasting/select" element={<SelectFastingPlan />} />
                 <Route path="/health/fasting/tracker" element={<FastingTrackerLive />} />
