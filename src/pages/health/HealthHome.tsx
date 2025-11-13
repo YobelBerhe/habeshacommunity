@@ -60,7 +60,7 @@ export default function HealthHome() {
       name: 'Sleep', 
       icon: Moon, 
       color: 'from-purple-500 to-pink-500', 
-      route: '/coming-soon',
+      route: '/health/sleep',
       description: 'Sleep tracking, quality analysis'
     },
     { 
@@ -68,7 +68,7 @@ export default function HealthHome() {
       name: 'Hydration', 
       icon: Droplets, 
       color: 'from-blue-400 to-cyan-400', 
-      route: '/coming-soon',
+      route: '/health/hydration',
       description: 'Water intake, daily goals'
     },
     { 
@@ -76,7 +76,7 @@ export default function HealthHome() {
       name: 'Mental Health', 
       icon: Brain, 
       color: 'from-indigo-500 to-purple-500', 
-      route: '/coming-soon',
+      route: '/health/mental',
       description: 'Meditation, therapy, support'
     },
     { 
