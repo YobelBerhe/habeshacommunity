@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Home, Video, Store, Users, Search, Grid, MessageCircle, 
   Bell, ChevronDown, Plus, Image, Smile, Calendar,
@@ -7,7 +6,6 @@ import {
 } from 'lucide-react';
 
 const HabeshaCommunityHome = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
 
   // Your 7 Categories - matches Facebook's navigation style
@@ -181,27 +179,27 @@ const HabeshaCommunityHome = () => {
           <aside className="hidden lg:block w-[360px] fixed left-0 h-[calc(100vh-56px)] overflow-y-auto pt-4 px-2">
             <div className="space-y-1">
               {/* User Profile */}
-              <button onClick={() => navigate('/dashboard/profile')} className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+              <a href="/profile" className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
                 <img 
                   src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" 
                   alt="Profile"
                   className="w-9 h-9 rounded-full"
                 />
                 <span className="font-medium text-[15px]">Yobel Berhe</span>
-              </button>
+              </a>
 
               {/* Your 7 Categories - Facebook Style */}
               {leftNavItems.map((item, index) => (
-                <button 
+                <a 
                   key={index}
-                  onClick={() => navigate(item.href)}
-                  className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer group w-full"
+                  href={item.href}
+                  className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer group"
                 >
                   <div className={`${item.color} group-hover:scale-110 transition-transform`}>
                     {item.icon}
                   </div>
                   <span className="font-medium text-[15px]">{item.label}</span>
-                </button>
+                </a>
               ))}
 
               <hr className="my-2 border-gray-300" />
