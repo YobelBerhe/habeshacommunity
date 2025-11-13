@@ -13,7 +13,7 @@ export default function Sleep() {
   const navigate = useNavigate();
   const [sleepStart, setSleepStart] = useState("");
   const [sleepEnd, setSleepEnd] = useState("");
-  const [quality, setQuality] = useState<string>("good");
+  const [quality, setQuality] = useState<string>("3");
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
   const [avgSleep, setAvgSleep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -28,17 +28,17 @@ export default function Sleep() {
       if (!user) return;
 
       const { data: logs, error } = await supabase
-        .from('sleep_logs')
+        .from('sleep_records')
         .select('*')
         .eq('user_id', user.id)
-        .order('sleep_start', { ascending: false })
+        .order('wake_time', { ascending: false })
         .limit(7);
 
       if (error) throw error;
 
       setRecentLogs(logs || []);
 
-      const avg = logs?.reduce((sum, log) => sum + (Number(log.duration_hours) || 0), 0) / (logs?.length || 1);
+      const avg = logs?.reduce((sum, log) => sum + (Number(log.total_hours) || 0), 0) / (logs?.length || 1);
       setAvgSleep(avg || 0);
     } catch (error) {
       console.error('Error loading sleep logs:', error);
@@ -68,12 +68,11 @@ export default function Sleep() {
         return;
       }
 
-      const { error } = await supabase.from('sleep_logs').insert({
+      const { error } = await supabase.from('sleep_records').insert({
         user_id: user.id,
-        sleep_start: start.toISOString(),
-        sleep_end: end.toISOString(),
-        duration_hours: durationHours,
-        quality: quality
+        bed_time: start.toISOString(),
+        wake_time: end.toISOString(),
+        quality_rating: parseInt(quality)
       });
 
       if (error) throw error;
@@ -93,7 +92,7 @@ export default function Sleep() {
   const deleteLog = async (logId: string) => {
     try {
       const { error } = await supabase
-        .from('sleep_logs')
+        .from('sleep_records')
         .delete()
         .eq('id', logId);
 
@@ -163,16 +162,17 @@ export default function Sleep() {
             </div>
 
             <div>
-              <Label>Sleep Quality</Label>
+              <Label>Sleep Quality (1-5 stars)</Label>
               <Select value={quality} onValueChange={setQuality}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="poor">Poor</SelectItem>
-                  <SelectItem value="fair">Fair</SelectItem>
-                  <SelectItem value="good">Good</SelectItem>
-                  <SelectItem value="excellent">Excellent</SelectItem>
+                  <SelectItem value="1">⭐ Poor</SelectItem>
+                  <SelectItem value="2">⭐⭐ Fair</SelectItem>
+                  <SelectItem value="3">⭐⭐⭐ Good</SelectItem>
+                  <SelectItem value="4">⭐⭐⭐⭐ Very Good</SelectItem>
+                  <SelectItem value="5">⭐⭐⭐⭐⭐ Excellent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -195,12 +195,14 @@ export default function Sleep() {
                 {recentLogs.map((log) => (
                   <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="font-medium">{Number(log.duration_hours).toFixed(1)} hours</p>
-                      <p className="text-sm text-muted-foreground capitalize">Quality: {log.quality}</p>
+                      <p className="font-medium">{Number(log.total_hours).toFixed(1)} hours</p>
+                      <p className="text-sm text-muted-foreground">
+                        Quality: {'⭐'.repeat(log.quality_rating)}
+                      </p>
                     </div>
                     <div className="flex items-center gap-4">
                       <p className="text-sm text-muted-foreground">
-                        {new Date(log.sleep_start).toLocaleDateString()}
+                        {new Date(log.wake_time).toLocaleDateString()}
                       </p>
                       <Button variant="ghost" size="icon" onClick={() => deleteLog(log.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />

@@ -37,10 +37,10 @@ export default function Mental() {
       if (!user) return;
 
       const { data: logs, error } = await supabase
-        .from('mental_health_logs')
+        .from('mood_records')
         .select('*')
         .eq('user_id', user.id)
-        .order('logged_at', { ascending: false })
+        .order('recorded_at', { ascending: false })
         .limit(7);
 
       if (error) throw error;
@@ -59,13 +59,13 @@ export default function Mental() {
         return;
       }
 
-      const { error } = await supabase.from('mental_health_logs').insert({
+      const { error } = await supabase.from('mood_records').insert({
         user_id: user.id,
-        mood: mood,
+        mood_rating: MOOD_OPTIONS.findIndex(m => m.value === mood) + 1,
+        mood_type: [mood],
         energy_level: energyLevel[0],
         stress_level: stressLevel[0],
-        notes: notes || null,
-        logged_at: new Date().toISOString()
+        notes: notes || null
       });
 
       if (error) throw error;
@@ -175,21 +175,22 @@ export default function Mental() {
             ) : (
               <div className="space-y-3">
                 {recentLogs.map((log) => {
-                  const moodOption = MOOD_OPTIONS.find(m => m.value === log.mood);
+                  const moodRating = log.mood_rating || 3;
+                  const moodOption = MOOD_OPTIONS[Math.min(moodRating - 1, MOOD_OPTIONS.length - 1)];
                   const Icon = moodOption?.icon || Heart;
                   return (
                     <div key={log.id} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <Icon className={`h-5 w-5 ${moodOption?.color}`} />
-                          <span className="font-medium capitalize">{log.mood.replace('_', ' ')}</span>
+                          <span className="font-medium capitalize">{moodOption?.label}</span>
                         </div>
                         <span className="text-sm text-muted-foreground">
-                          {new Date(log.logged_at).toLocaleDateString()}
+                          {new Date(log.recorded_at).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Energy: {log.energy_level}/10 • Stress: {log.stress_level}/10
+                        Energy: {log.energy_level || 'N/A'}/5 • Stress: {log.stress_level || 'N/A'}/5
                       </div>
                       {log.notes && (
                         <p className="text-sm mt-2 text-muted-foreground">{log.notes}</p>

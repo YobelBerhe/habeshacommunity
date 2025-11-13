@@ -26,11 +26,10 @@ export default function Hydration() {
       const today = new Date().toISOString().split('T')[0];
 
       const { data: logs } = await supabase
-        .from('hydration_logs')
+        .from('hydration_records')
         .select('amount_ml')
         .eq('user_id', user.id)
-        .gte('logged_at', `${today}T00:00:00`)
-        .lte('logged_at', `${today}T23:59:59`);
+        .eq('date', today);
 
       const total = logs?.reduce((sum, log) => sum + log.amount_ml, 0) || 0;
       setTodayTotal(total);
@@ -56,11 +55,10 @@ export default function Hydration() {
         return;
       }
 
-      const { error } = await supabase.from('hydration_logs').insert({
+      const { error } = await supabase.from('hydration_records').insert({
         user_id: user.id,
         amount_ml: amount,
-        beverage_type: 'water',
-        logged_at: new Date().toISOString()
+        drink_type: 'water'
       });
 
       if (error) throw error;
