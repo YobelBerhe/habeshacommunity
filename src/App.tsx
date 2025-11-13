@@ -133,8 +133,14 @@ const SleepTracker = lazy(() => import("./pages/health/Sleep"));
 const FoodLog = lazy(() => import("./pages/health/nutrition/FoodLog"));
 const Recipes = lazy(() => import("./pages/health/nutrition/Recipes"));
 const ShoppingList = lazy(() => import("./pages/health/nutrition/ShoppingList"));
-const Train = lazy(() => import("./pages/health/fitness/Train"));
-const WorkoutInProgress = lazy(() => import("./pages/health/fitness/WorkoutInProgress"));
+const Mental = lazy(() => import("./pages/health/Mental"));
+const NutritionSimple = lazy(() => import("./pages/health/NutritionSimple"));
+const FitnessSimple = lazy(() => import("./pages/health/FitnessSimple"));
+const Exercise = lazy(() => import("./pages/health/fitness/Exercise"));
+const ExerciseLibrary = lazy(() => import("./pages/health/fitness/ExerciseLibrary"));
+const LogWorkout = lazy(() => import("./pages/health/fitness/LogWorkout"));
+const TrainWorkout = lazy(() => import("./pages/health/fitness/Train"));
+const WorkoutInProgressPage = lazy(() => import("./pages/health/fitness/WorkoutInProgress"));
 const EventsList = lazy(() => import('./pages/community/EventsList'));
 const EventDetail = lazy(() => import('./pages/community/EventDetail'));
 const CreateEvent = lazy(() => import('./pages/community/CreateEvent'));
@@ -363,7 +369,14 @@ const App = () => {
                 <Route path="/health/fasting/tracker" element={<FastingTrackerLive />} />
                 <Route path="/health/fasting/progress" element={<WeightProgress />} />
                 <Route path="/health/nutrition" element={<NutritionPage />} />
-                <Route path="/health/fitness" element={<FitnessPage />} />
+                <Route path="/health/fitness" element={<Exercise />} />
+                <Route path="/health/fitness/library" element={<ExerciseLibrary />} />
+                <Route path="/health/fitness/log" element={<LogWorkout />} />
+                <Route path="/health/fitness/train" element={<TrainWorkout />} />
+                <Route path="/health/fitness/workout" element={<WorkoutInProgressPage />} />
+                <Route path="/health/sleep" element={<SleepTracker />} />
+                <Route path="/health/hydration" element={<Hydration />} />
+                <Route path="/health/mental" element={<Mental />} />
                 <Route path="/health/dashboard" element={<HealthDashboard />} />
                 
                 {/* Messaging & Video */}
