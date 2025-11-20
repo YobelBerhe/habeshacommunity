@@ -1,231 +1,120 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Calendar, TrendingUp, Heart, Play, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Play, Sun, Moon, Zap, Bell, Home, BookOpen, CheckSquare, Compass } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { useSEO } from "@/hooks/useSEO";
-import { LanguageSwitcher } from "@/components/spiritual/LanguageSwitcher";
-import { useTranslation } from "@/hooks/useTranslation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const SpiritualHome = () => {
-  useSEO({ 
-    title: "Spiritual Growth - HabeshaCommunity", 
-    description: "Read the Bible, join reading plans, and grow in faith" 
-  });
+  useSEO({ title: "Today - HabeshaCommunity", description: "Daily Bible verses, prayers, and spiritual content" });
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const { language, setLanguage, t } = useTranslation();
-
-  const features = [
-    {
-      icon: BookOpen,
-      title: "Bible Reader",
-      description: "Read multiple versions in English, Amharic, and Tigrinya",
-      path: "/spiritual/reader",
-      gradient: "from-blue-500 to-indigo-500",
-      stats: "Multiple versions available"
-    },
-    {
-      icon: Calendar,
-      title: "Reading Plans",
-      description: "Join structured plans to read through the Bible",
-      path: "/spiritual/plans",
-      gradient: "from-purple-500 to-pink-500",
-      stats: "Devotional & topical plans"
-    },
-    {
-      icon: TrendingUp,
-      title: "My Progress",
-      description: "Track your reading streaks and completed plans",
-      path: "/spiritual/progress",
-      gradient: "from-green-500 to-emerald-500",
-      stats: "Build your streak"
-    }
-  ];
-
-  const quickActions = [
-    {
-      label: "Verse of the Day",
-      icon: Heart,
-      action: () => navigate("/spiritual/votd"),
-      color: "text-rose-500"
-    },
-    {
-      label: "Start Reading",
-      icon: Play,
-      action: () => navigate("/spiritual/reader"),
-      color: "text-blue-500"
-    },
-    {
-      label: "Browse Plans",
-      icon: Users,
-      action: () => navigate("/spiritual/plans"),
-      color: "text-purple-500"
-    }
-  ];
+  const [activeTab, setActiveTab] = useState<'today' | 'community'>('today');
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'GOOD MORNING' : hour < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Language Switcher */}
-      <div className="container mx-auto px-4 pt-4">
-        <div className="flex justify-end">
-          <LanguageSwitcher
-            currentLanguage={language}
-            onLanguageChange={setLanguage}
-            variant="compact"
-          />
+    <div className="min-h-screen bg-black text-white pb-20">
+      <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-6">
+            <button onClick={() => setActiveTab('today')} className="relative">
+              <span className={`text-xl font-semibold ${activeTab === 'today' ? 'text-white' : 'text-gray-500'}`}>Today</span>
+              {activeTab === 'today' && <div className="absolute -bottom-3 left-0 right-0 h-1 bg-red-500 rounded-full" />}
+            </button>
+            <button onClick={() => setActiveTab('community')} className="relative">
+              <span className={`text-xl font-semibold ${activeTab === 'community' ? 'text-white' : 'text-gray-500'}`}>Community</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="relative"><Zap className="w-6 h-6" /><span className="absolute -top-1 -right-1 text-xs font-bold">3</span></button>
+            <button><Bell className="w-6 h-6" /></button>
+            <Avatar className="w-10 h-10 border-2 border-white"><AvatarFallback className="bg-purple-600 text-white font-semibold">Y</AvatarFallback></Avatar>
+          </div>
         </div>
       </div>
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white py-20 px-4">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative max-w-4xl mx-auto text-center">
-          <Badge className="mb-4 bg-white/20 hover:bg-white/30">
-            Faith • Growth • Community
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Grow in Your Faith
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/90">
-            Read the Bible, join plans, and track your spiritual journey
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button
-              size="lg"
-              variant="secondary"
-              className="text-lg"
-              onClick={() => navigate("/spiritual/reader")}
-            >
-              <BookOpen className="w-5 h-5 mr-2" />
-              Start Reading
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg bg-white/10 hover:bg-white/20 border-white/30"
-              onClick={() => navigate("/spiritual/plans")}
-            >
-              <Calendar className="w-5 h-5 mr-2" />
-              Browse Plans
-            </Button>
+
+      <div className="px-4 py-6 flex items-center gap-3">
+        {hour < 18 ? <Sun className="w-7 h-7 text-yellow-400" /> : <Moon className="w-7 h-7 text-blue-300" />}
+        <h1 className="text-xl font-bold tracking-wide">{greeting}, YOBEL</h1>
+      </div>
+
+      <div className="px-4 space-y-6">
+        <Card className="relative h-[500px] rounded-3xl overflow-hidden border-0 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          </div>
+          <div className="relative h-full flex flex-col justify-between p-6 text-white">
+            <div className="text-center pt-8">
+              <p className="text-sm text-white/70 mb-2">Verse of the Day</p>
+              <p className="text-lg font-semibold mb-4">2 Timothy 1:7</p>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
+              <blockquote className="text-2xl md:text-3xl font-serif leading-relaxed text-center px-4">
+                "For God has not given us a spirit of fear and timidity, but of power, love, and self-discipline."
+              </blockquote>
+            </div>
+            <div className="flex items-center justify-around pt-4 border-t border-white/20">
+              <button className="flex flex-col items-center gap-1"><Heart className="w-6 h-6" /><span className="text-sm">1.5M</span></button>
+              <button className="flex flex-col items-center gap-1"><MessageCircle className="w-6 h-6" /><span className="text-sm">22.6K</span></button>
+              <button className="flex flex-col items-center gap-1"><Share2 className="w-6 h-6" /><span className="text-sm">560.8K</span></button>
+              <button className="flex flex-col items-center gap-1"><MoreHorizontal className="w-6 h-6" /><span className="text-sm">More</span></button>
+            </div>
+          </div>
+        </Card>
+
+        <div className="space-y-4">
+          <Card className="bg-zinc-900 border-zinc-800 rounded-2xl p-4 flex items-center gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 bg-orange-500 rounded-full" /><span className="text-xs text-gray-400">0</span></div>
+              <p className="text-xs text-gray-400 mb-1">Guided Scripture</p>
+              <h3 className="text-lg font-semibold mb-1">The Power You Need</h3>
+              <div className="flex items-center gap-2 text-gray-400"><Play className="w-4 h-4" /><span className="text-sm">2-5 min</span></div>
+            </div>
+            <div className="w-24 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center"><div className="w-16 h-16 bg-white/20 rounded-lg" /></div>
+          </Card>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Continue Where You Left Off</h2>
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            <Card className="min-w-[280px] rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-700 border-0 cursor-pointer" onClick={() => navigate('/spiritual/plans')}>
+              <div className="relative">
+                <button className="absolute top-4 right-4 w-8 h-8 bg-black/30 rounded-full flex items-center justify-center"><MoreHorizontal className="w-5 h-5" /></button>
+                <div className="h-48 flex items-center justify-center p-6 bg-gradient-to-br from-cyan-400 to-blue-600"><div className="w-24 h-32 bg-black/40 rounded-lg" /></div>
+                <div className="p-4 bg-gradient-to-t from-black/50">
+                  <h3 className="text-lg font-bold mb-2">The Messianic Torah</h3>
+                  <div className="flex items-center gap-2 text-sm"><BookOpen className="w-4 h-4" /><span>22 Sessions</span></div>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
-      </section>
 
-      {/* Quick Actions */}
-      <section className="py-8 px-4 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {quickActions.map((action, idx) => {
-              const Icon = action.icon;
-              return (
-                <Button
-                  key={idx}
-                  variant="outline"
-                  className="h-auto py-4 justify-start"
-                  onClick={action.action}
-                >
-                  <Icon className={`w-5 h-5 mr-3 ${action.color}`} />
-                  <span className="font-semibold">{action.label}</span>
-                </Button>
-              );
-            })}
-          </div>
+        <div className="space-y-3">
+          <Card className="bg-zinc-900 border-zinc-800 rounded-2xl p-5 flex items-center justify-between cursor-pointer" onClick={() => navigate('/spiritual/videos')}>
+            <div><h3 className="text-xl font-bold mb-1">Videos</h3><p className="text-sm text-gray-400">Overviews on Biblical topics</p></div>
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-orange-300 to-red-500" />
+          </Card>
+          <Card className="bg-zinc-900 border-zinc-800 rounded-2xl p-5 flex items-center justify-between cursor-pointer" onClick={() => navigate('/spiritual/podcasts')}>
+            <div><h3 className="text-xl font-bold mb-1">Podcasts</h3><p className="text-sm text-gray-400">Deep-dive conversations</p></div>
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-pink-400 to-orange-400" />
+          </Card>
+          <Card className="bg-zinc-900 border-zinc-800 rounded-2xl p-5 flex items-center justify-between cursor-pointer" onClick={() => navigate('/spiritual/plans')}>
+            <div><h3 className="text-xl font-bold mb-1">Classes</h3><p className="text-sm text-gray-400">Study the Bible with a scholar</p></div>
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600" />
+          </Card>
         </div>
-      </section>
+      </div>
 
-      {/* Prayer & Saints Quick Links */}
-      <section className="py-8 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="text-xl font-bold mb-4">Prayer & Saints</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/daily-prayers")}>
-              <BookOpen className="w-5 h-5 mr-3 text-blue-600 dark:text-blue-400" />
-              <span className="font-semibold">Daily Prayers</span>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/fasting")}>
-              <Calendar className="w-5 h-5 mr-3 text-amber-600 dark:text-amber-400" />
-              <span className="font-semibold">Fasting Calendar</span>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/saints")}>
-              <Users className="w-5 h-5 mr-3 text-purple-600 dark:text-purple-400" />
-              <span className="font-semibold">Saints Calendar</span>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 justify-start" onClick={() => navigate("/spiritual/prayers")}>
-              <Heart className="w-5 h-5 mr-3 text-rose-600 dark:text-rose-400" />
-              <span className="font-semibold">Prayer Requests</span>
-            </Button>
-          </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-white/10 z-50">
+        <div className="flex items-center justify-around py-3 px-4">
+          <button className="flex flex-col items-center gap-1" onClick={() => navigate('/spiritual')}><Home className="w-6 h-6" /><span className="text-xs font-medium">Home</span></button>
+          <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/spiritual/reader')}><BookOpen className="w-6 h-6" /><span className="text-xs">Bible</span></button>
+          <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/spiritual/plans')}><CheckSquare className="w-6 h-6" /><span className="text-xs">Plans</span></button>
+          <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/spiritual/discover')}><Compass className="w-6 h-6" /><span className="text-xs">Discover</span></button>
+          <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/account/settings')}><MoreHorizontal className="w-6 h-6" /><span className="text-xs">More</span></button>
         </div>
-      </section>
-
-      {/* Main Features */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Access the complete Bible, join structured reading plans, and track your spiritual growth
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {features.map((feature, idx) => {
-              const Icon = feature.icon;
-              return (
-                <Card
-                  key={idx}
-                  className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                  onClick={() => navigate(feature.path)}
-                >
-                  <CardHeader>
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-lg`}>
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
-                    <CardDescription className="text-base">{feature.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Badge variant="secondary" className="text-xs">
-                      {feature.stats}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Coming Soon Section */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-4xl mx-auto text-center">
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">
-            More Features Coming Soon
-          </h3>
-          <p className="text-lg text-muted-foreground mb-8">
-            We're building highlights, bookmarks, community discussions, and audio Bible
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Badge variant="outline" className="text-sm py-2 px-4">
-              Audio Bible
-            </Badge>
-            <Badge variant="outline" className="text-sm py-2 px-4">
-              Verse Highlights
-            </Badge>
-            <Badge variant="outline" className="text-sm py-2 px-4">
-              Bookmarks & Notes
-            </Badge>
-            <Badge variant="outline" className="text-sm py-2 px-4">
-              Group Studies
-            </Badge>
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
   );
 };
