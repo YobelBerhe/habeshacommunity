@@ -109,7 +109,7 @@ const SpiritualHome = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-white/10 z-50">
         <div className="flex items-center justify-around py-3 px-4">
           <button className="flex flex-col items-center gap-1" onClick={() => navigate('/spiritual')}><Home className="w-6 h-6" /><span className="text-xs font-medium">Home</span></button>
-          <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/spiritual/reader')}><BookOpen className="w-6 h-6" /><span className="text-xs">Bible</span></button>
+          <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/spiritual/bible-reader')}><BookOpen className="w-6 h-6" /><span className="text-xs">Bible</span></button>
           <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/spiritual/plans')}><CheckSquare className="w-6 h-6" /><span className="text-xs">Plans</span></button>
           <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/spiritual/discover')}><Compass className="w-6 h-6" /><span className="text-xs">Discover</span></button>
           <button className="flex flex-col items-center gap-1 text-gray-500" onClick={() => navigate('/account/settings')}><MoreHorizontal className="w-6 h-6" /><span className="text-xs">More</span></button>
