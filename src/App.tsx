@@ -364,6 +364,7 @@ const App = () => {
                 
                 {/* Health Routes */}
                 <Route path="/health" element={<HealthHome />} />
+                <Route path="/health/dashboard" element={<HealthDashboard />} />
                 <Route path="/health/fasting" element={<FastingPage />} />
                 <Route path="/health/fasting/select" element={<SelectFastingPlan />} />
                 <Route path="/health/fasting/tracker" element={<FastingTrackerLive />} />
@@ -374,10 +375,12 @@ const App = () => {
                 <Route path="/health/fitness/log" element={<LogWorkout />} />
                 <Route path="/health/fitness/train" element={<TrainWorkout />} />
                 <Route path="/health/fitness/workout" element={<WorkoutInProgressPage />} />
+                <Route path="/health/eat" element={<FoodLog />} />
+                <Route path="/health/barcode-scanner" element={<ComingSoon />} />
+                <Route path="/health/recipes" element={<Recipes />} />
                 <Route path="/health/sleep" element={<SleepTracker />} />
                 <Route path="/health/hydration" element={<Hydration />} />
                 <Route path="/health/mental" element={<Mental />} />
-                <Route path="/health/dashboard" element={<HealthDashboard />} />
                 
                 {/* Messaging & Video */}
                 <Route path="/inbox" element={<Inbox />} />

@@ -31,6 +31,20 @@ const MobileDrawer = () => {
       ]
     },
     {
+      name: 'Health',
+      name_ti: 'ጥዕና',
+      icon: Activity,
+      path: '/health/dashboard',
+      gradient: 'from-green-500 to-teal-500',
+      items: [
+        { name: '🌙 Sleep', path: '/health/sleep' },
+        { name: '✔️ Tasks', path: '/health/dashboard' },
+        { name: '🏋️ Workout', path: '/health/fitness' },
+        { name: '🍽️ Meals', path: '/health/eat' },
+        { name: '🙂 Mood', path: '/health/mental' }
+      ]
+    },
+    {
       name: 'Matchmaking',
       name_ti: 'መስዋእቲ',
       icon: Heart,

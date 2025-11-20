@@ -1619,6 +1619,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_targets: {
+        Row: {
+          calories: number
+          carbs_g: number
+          created_at: string | null
+          date: string
+          fats_g: number
+          id: string
+          protein_g: number
+          updated_at: string | null
+          user_id: string
+          water_oz: number | null
+        }
+        Insert: {
+          calories?: number
+          carbs_g?: number
+          created_at?: string | null
+          date: string
+          fats_g?: number
+          id?: string
+          protein_g?: number
+          updated_at?: string | null
+          user_id: string
+          water_oz?: number | null
+        }
+        Update: {
+          calories?: number
+          carbs_g?: number
+          created_at?: string | null
+          date?: string
+          fats_g?: number
+          id?: string
+          protein_g?: number
+          updated_at?: string | null
+          user_id?: string
+          water_oz?: number | null
+        }
+        Relationships: []
+      }
       event_categories: {
         Row: {
           color: string | null
@@ -2005,6 +2044,35 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_recipes: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorite_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -2030,6 +2098,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      food_logs: {
+        Row: {
+          calories: number | null
+          carbs_g: number | null
+          created_at: string | null
+          date: string
+          fats_g: number | null
+          fiber_g: number | null
+          food_name: string
+          id: string
+          meal_type: string | null
+          notes: string | null
+          protein_g: number | null
+          serving_size: string | null
+          sugar_g: number | null
+          time: string | null
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string | null
+          date: string
+          fats_g?: number | null
+          fiber_g?: number | null
+          food_name: string
+          id?: string
+          meal_type?: string | null
+          notes?: string | null
+          protein_g?: number | null
+          serving_size?: string | null
+          sugar_g?: number | null
+          time?: string | null
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string | null
+          date?: string
+          fats_g?: number | null
+          fiber_g?: number | null
+          food_name?: string
+          id?: string
+          meal_type?: string | null
+          notes?: string | null
+          protein_g?: number | null
+          serving_size?: string | null
+          sugar_g?: number | null
+          time?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       forum_categories: {
         Row: {
@@ -4774,6 +4896,86 @@ export type Database = {
           },
         ]
       }
+      recipe_unlocks: {
+        Row: {
+          id: string
+          recipe_id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          recipe_id: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          recipe_id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_unlocks_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          cook_time_minutes: number | null
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          id: string
+          images: string[] | null
+          ingredients: Json | null
+          instructions: Json | null
+          is_premium: boolean | null
+          name: string
+          nutrition_per_serving: Json | null
+          prep_time_minutes: number | null
+          servings: number | null
+          tags: string[] | null
+        }
+        Insert: {
+          cook_time_minutes?: number | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          images?: string[] | null
+          ingredients?: Json | null
+          instructions?: Json | null
+          is_premium?: boolean | null
+          name: string
+          nutrition_per_serving?: Json | null
+          prep_time_minutes?: number | null
+          servings?: number | null
+          tags?: string[] | null
+        }
+        Update: {
+          cook_time_minutes?: number | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          images?: string[] | null
+          ingredients?: Json | null
+          instructions?: Json | null
+          is_premium?: boolean | null
+          name?: string
+          nutrition_per_serving?: Json | null
+          prep_time_minutes?: number | null
+          servings?: number | null
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string | null
@@ -5070,6 +5272,39 @@ export type Database = {
           last_seen?: string | null
           name?: string | null
           params?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scanned_products: {
+        Row: {
+          added_to_diary: boolean | null
+          barcode: string
+          brand: string | null
+          created_at: string | null
+          id: string
+          nutrition_data: Json | null
+          product_name: string | null
+          user_id: string
+        }
+        Insert: {
+          added_to_diary?: boolean | null
+          barcode: string
+          brand?: string | null
+          created_at?: string | null
+          id?: string
+          nutrition_data?: Json | null
+          product_name?: string | null
+          user_id: string
+        }
+        Update: {
+          added_to_diary?: boolean | null
+          barcode?: string
+          brand?: string | null
+          created_at?: string | null
+          id?: string
+          nutrition_data?: Json | null
+          product_name?: string | null
           user_id?: string
         }
         Relationships: []
@@ -5466,6 +5701,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shopping_lists: {
+        Row: {
+          created_at: string | null
+          id: string
+          items: Json | null
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          items?: Json | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          items?: Json | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       sleep_logs: {
         Row: {
