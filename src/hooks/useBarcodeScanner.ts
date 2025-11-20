@@ -23,6 +23,12 @@ export function useBarcodeScanner() {
     setResult(barcode);
   };
 
+  const reset = () => {
+    setDetectedBarcode(null);
+    setResult(null);
+    setError(null);
+  };
+
   return {
     scanning,
     result,
@@ -35,5 +41,6 @@ export function useBarcodeScanner() {
     startScanning,
     stopScanning,
     manualEntry,
+    reset,
   };
 }

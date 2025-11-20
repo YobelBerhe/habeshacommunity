@@ -34,6 +34,8 @@ export interface ScannedProduct {
     brand: string;
     why: string;
     image?: string;
+    health_score?: number;
+    price_diff?: string;
   }>;
 }
 
