@@ -1,31 +1,38 @@
-// src/pages/Home.tsx - Facebook-style Home Page
+// src/pages/Home.tsx - Clean LinkedIn-style Home Page
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
 import { 
-  Search, Bell, Menu, Plus,
+  Search, Bell, Plus,
   Briefcase, ShoppingBag, Heart, Church, 
   Users, Book, Calendar, TrendingUp,
-  MessageCircle, Home as HomeIcon
+  MessageCircle, Home as HomeIcon, ChevronRight,
+  Settings, LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Avatar } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [userName, setUserName] = useState('Friend');
+  const [userInitials, setUserInitials] = useState('U');
 
   useEffect(() => {
     if (user) {
-      // Fetch user name
       fetchUserProfile();
-      // Fetch unread notifications
       fetchUnreadCount();
     }
   }, [user]);
@@ -39,6 +46,7 @@ export default function Home() {
     
     if (data?.display_name) {
       setUserName(data.display_name.split(' ')[0]);
+      setUserInitials(data.display_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase());
     }
   };
 
@@ -52,350 +60,297 @@ export default function Home() {
     setUnreadCount(count || 0);
   };
 
-  // Quick action cards - like Facebook's shortcuts
-  const quickActions = [
-    { icon: Briefcase, label: 'Jobs', href: '/jobs', color: 'bg-blue-500', desc: 'Find work' },
-    { icon: ShoppingBag, label: 'Shop', href: '/marketplace', color: 'bg-green-500', desc: 'Buy & sell' },
-    { icon: Heart, label: 'Match', href: '/match', color: 'bg-pink-500', desc: 'Meet people' },
-    { icon: Church, label: 'Churches', href: '/churches', color: 'bg-purple-500', desc: 'Find community' },
-    { icon: Users, label: 'Events', href: '/community/events', color: 'bg-orange-500', desc: 'Attend events' },
-    { icon: Book, label: 'Bible', href: '/spiritual', color: 'bg-indigo-500', desc: 'Daily reading' },
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
+  // Quick access shortcuts
+  const quickAccess = [
+    { icon: Briefcase, label: 'Jobs', href: '/jobs', color: 'bg-blue-500' },
+    { icon: ShoppingBag, label: 'Shop', href: '/marketplace', color: 'bg-green-500' },
+    { icon: Heart, label: 'Match', href: '/match', color: 'bg-pink-500' },
+    { icon: Church, label: 'Churches', href: '/churches', color: 'bg-purple-500' },
+    { icon: Calendar, label: 'Events', href: '/community/events', color: 'bg-orange-500' },
+    { icon: Book, label: 'Spiritual', href: '/spiritual', color: 'bg-indigo-500' },
+  ];
+
+  // Activity items
+  const activities = [
+    { icon: Briefcase, label: '5 New Jobs', desc: 'Posted in your area', href: '/jobs', color: 'bg-blue-500' },
+    { icon: Heart, label: '3 New Matches', desc: 'People you might like', href: '/match', color: 'bg-pink-500' },
+    { icon: Calendar, label: 'Event This Weekend', desc: 'Ethiopian New Year', href: '/community/events', color: 'bg-orange-500' },
+    { icon: ShoppingBag, label: '12 New Listings', desc: 'In marketplace near you', href: '/marketplace', color: 'bg-green-500' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header - Like Facebook's top bar */}
-      <div className="sticky top-0 z-50 bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
+    <div className="min-h-screen bg-muted/30">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-background border-b">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-14">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-primary">
-                Habesha<span className="text-red-600">Community</span>
-              </h1>
-            </div>
+            <Link to="/home" className="flex items-center gap-2">
+              <span className="text-lg font-bold text-foreground">
+                Habesha<span className="text-primary">Community</span>
+              </span>
+            </Link>
 
-            {/* Search Bar - Center like Facebook */}
-            <div className="flex-1 max-w-2xl hidden md:block">
+            {/* Search - Desktop */}
+            <div className="hidden md:block flex-1 max-w-md mx-8">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                 <Input
-                  type="text"
-                  placeholder="Search for jobs, people, churches, items..."
-                  className="pl-10 pr-4 py-2 w-full bg-gray-100 border-none"
+                  placeholder="Search..."
+                  className="pl-10 bg-muted border-0"
                   onClick={() => navigate('/search')}
                 />
               </div>
             </div>
 
-            {/* Right Icons */}
+            {/* Right Actions */}
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="relative"
                 onClick={() => navigate('/notifications')}
               >
-                <Bell size={24} />
+                <Bell size={20} />
                 {unreadCount > 0 && (
-                  <Badge 
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500"
-                  >
-                    {unreadCount}
-                  </Badge>
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => navigate('/profile')}
-              >
-                <Avatar className="h-8 w-8" />
-              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate('/account/dashboard')}>
+                    <Users size={16} className="mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/account/settings')}>
+                    <Settings size={16} className="mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut size={16} className="mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
           {/* Mobile Search */}
-          <div className="mt-3 md:hidden">
+          <div className="md:hidden pb-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
               <Input
-                type="text"
                 placeholder="Search..."
-                className="pl-10 pr-4 py-2 w-full bg-gray-100 border-none"
+                className="pl-10 bg-muted border-0"
                 onClick={() => navigate('/search')}
               />
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Welcome Message */}
+      <main className="container mx-auto px-4 py-6 pb-24 md:pb-6">
+        {/* Welcome */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-1">
+          <h1 className="text-2xl font-bold text-foreground mb-1">
             Selam, {userName}! 👋
-          </h2>
-          <p className="text-gray-600">Welcome back to your community</p>
+          </h1>
+          <p className="text-muted-foreground">Welcome back to your community</p>
         </div>
 
-        {/* Stories Section - Like Facebook/Instagram */}
-        <Card className="mb-6 p-4">
-          <div className="flex items-center gap-4 overflow-x-auto">
-            {/* Add Your Story */}
-            <div className="flex-shrink-0 text-center">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center cursor-pointer">
-                  <Plus className="text-white" size={24} />
-                </div>
-              </div>
-              <p className="text-xs mt-1 font-medium">Add Story</p>
-            </div>
-
-            {/* Story Placeholders */}
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex-shrink-0 text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 p-[2px]">
-                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                    <Avatar className="w-14 h-14" />
-                  </div>
-                </div>
-                <p className="text-xs mt-1 text-gray-600">User {i}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* What's on your mind? - Like Facebook */}
+        {/* Create Post Card */}
         <Card className="mb-6 p-4">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10" />
-            <div 
-              className="flex-1 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-gray-200 transition-colors"
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {userInitials}
+              </AvatarFallback>
+            </Avatar>
+            <div
+              className="flex-1 bg-muted rounded-full px-4 py-2.5 cursor-pointer hover:bg-muted/80 transition-colors"
               onClick={() => navigate('/feed/create')}
             >
-              <p className="text-gray-500">What's on your mind, {userName}?</p>
+              <span className="text-muted-foreground">What's on your mind?</span>
             </div>
           </div>
-          <div className="flex items-center justify-around mt-3 pt-3 border-t">
-            <Button variant="ghost" className="flex items-center gap-2">
-              <MessageCircle size={20} className="text-blue-500" />
-              <span className="text-sm">Post</span>
+          <div className="flex items-center justify-around mt-4 pt-4 border-t">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/feed/create')}>
+              <MessageCircle size={18} className="mr-2 text-blue-500" />
+              Post
             </Button>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <ShoppingBag size={20} className="text-green-500" />
-              <span className="text-sm">Sell</span>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace/create')}>
+              <ShoppingBag size={18} className="mr-2 text-green-500" />
+              Sell
             </Button>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <Calendar size={20} className="text-orange-500" />
-              <span className="text-sm">Event</span>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/community/create-event')}>
+              <Calendar size={18} className="mr-2 text-orange-500" />
+              Event
             </Button>
           </div>
         </Card>
 
-        {/* Quick Actions Grid - Like Facebook Shortcuts */}
+        {/* Quick Access */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <TrendingUp size={20} />
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {quickActions.map((action) => (
-              <Link key={action.label} to={action.href}>
-                <Card className="p-4 hover:shadow-lg transition-all cursor-pointer group">
-                  <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
-                    <action.icon className="text-white" size={24} />
+          <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <TrendingUp size={18} />
+            Quick Access
+          </h2>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            {quickAccess.map((item) => (
+              <Link key={item.label} to={item.href}>
+                <Card className="p-4 text-center hover:shadow-md transition-all group">
+                  <div className={`w-10 h-10 ${item.color} rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
+                    <item.icon className="text-white" size={20} />
                   </div>
-                  <h4 className="font-semibold text-sm">{action.label}</h4>
-                  <p className="text-xs text-gray-500">{action.desc}</p>
+                  <span className="text-sm font-medium text-foreground">{item.label}</span>
                 </Card>
               </Link>
             ))}
           </div>
         </div>
 
-        {/* For You Section - Personalized */}
+        {/* Activity Feed */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Left Column - Activity */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">What's Happening</h3>
-            
-            {/* Activity Cards */}
-            <Card className="mb-3 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <Briefcase className="text-white" size={20} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">5 New Jobs</h4>
-                  <p className="text-sm text-gray-600">Posted today in your area</p>
-                </div>
-                <Button size="sm">View</Button>
-              </div>
-            </Card>
-
-            <Card className="mb-3 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-pink-500 rounded-lg flex items-center justify-center">
-                  <Heart className="text-white" size={20} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">3 New Matches</h4>
-                  <p className="text-sm text-gray-600">People you might connect with</p>
-                </div>
-                <Button size="sm">See</Button>
-              </div>
-            </Card>
-
-            <Card className="mb-3 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <Calendar className="text-white" size={20} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">Event This Weekend</h4>
-                  <p className="text-sm text-gray-600">Ethiopian New Year Celebration</p>
-                </div>
-                <Button size="sm">RSVP</Button>
-              </div>
-            </Card>
+            <h2 className="text-lg font-semibold text-foreground mb-3">What's Happening</h2>
+            <div className="space-y-3">
+              {activities.map((activity, index) => (
+                <Card key={index} className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 ${activity.color} rounded-lg flex items-center justify-center shrink-0`}>
+                      <activity.icon className="text-white" size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{activity.label}</p>
+                      <p className="text-sm text-muted-foreground truncate">{activity.desc}</p>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => navigate(activity.href)}>
+                      View
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
 
-          {/* Right Column - Nearby */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Nearby You</h3>
-            
-            <Card className="mb-3 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                  <Church className="text-white" size={20} />
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Daily Streak */}
+            <Card className="p-6 bg-primary text-primary-foreground">
+              <h3 className="text-lg font-bold mb-2">🙏 Daily Prayer</h3>
+              <p className="text-primary-foreground/80 mb-4">Keep your 3-day streak going!</p>
+              <Button variant="secondary" onClick={() => navigate('/spiritual/prayers')}>
+                Pray Now
+              </Button>
+              <div className="flex gap-6 mt-4 pt-4 border-t border-primary-foreground/20 text-sm">
+                <div>
+                  <p className="text-primary-foreground/70">Streak</p>
+                  <p className="font-bold">3 days 🔥</p>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">3 Churches</h4>
-                  <p className="text-sm text-gray-600">Within 5 miles of you</p>
+                <div>
+                  <p className="text-primary-foreground/70">Level</p>
+                  <p className="font-bold">5 ⭐</p>
                 </div>
-                <Button size="sm">Find</Button>
               </div>
             </Card>
 
-            <Card className="mb-3 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                  <ShoppingBag className="text-white" size={20} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">New in Marketplace</h4>
-                  <p className="text-sm text-gray-600">12 items posted near you</p>
-                </div>
-                <Button size="sm">Browse</Button>
-              </div>
-            </Card>
-
-            <Card className="mb-3 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-indigo-500 rounded-lg flex items-center justify-center">
-                  <Users className="text-white" size={20} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">Active Groups</h4>
-                  <p className="text-sm text-gray-600">4 groups in your area</p>
-                </div>
-                <Button size="sm">Join</Button>
+            {/* Suggested */}
+            <Card className="p-4">
+              <h3 className="font-semibold text-foreground mb-3">Explore More</h3>
+              <div className="space-y-3">
+                <Link to="/mentor" className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+                  <span className="text-sm text-foreground">Find a mentor</span>
+                  <ChevronRight size={16} className="text-muted-foreground" />
+                </Link>
+                <Link to="/churches" className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+                  <span className="text-sm text-foreground">Discover churches</span>
+                  <ChevronRight size={16} className="text-muted-foreground" />
+                </Link>
+                <Link to="/community/groups" className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+                  <span className="text-sm text-foreground">Join groups</span>
+                  <ChevronRight size={16} className="text-muted-foreground" />
+                </Link>
               </div>
             </Card>
           </div>
         </div>
+      </main>
 
-        {/* Daily Habit Section */}
-        <Card className="mt-6 p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold mb-2">🙏 Daily Prayer</h3>
-              <p className="opacity-90">Keep your 3-day streak going!</p>
-            </div>
-            <Button variant="secondary" size="lg">
-              Pray Now
-            </Button>
-          </div>
-          <div className="mt-4 flex gap-4 text-sm">
-            <div>
-              <p className="opacity-75">Streak</p>
-              <p className="font-bold text-lg">3 days 🔥</p>
-            </div>
-            <div>
-              <p className="opacity-75">Level</p>
-              <p className="font-bold text-lg">5 ⭐</p>
-            </div>
-            <div>
-              <p className="opacity-75">Points</p>
-              <p className="font-bold text-lg">250 XP</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Bottom Navigation - Facebook Style (Mobile) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-50">
+      {/* Bottom Navigation - Mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t md:hidden z-50">
         <div className="flex items-center justify-around py-2">
-          <Button 
-            variant="ghost" 
-            size="icon"
+          <Button
+            variant="ghost"
+            size="sm"
             className="flex flex-col items-center gap-1 h-auto py-2"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
           >
-            <HomeIcon size={24} className="text-primary" />
+            <HomeIcon size={20} className="text-primary" />
             <span className="text-xs font-medium text-primary">Home</span>
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon"
+          <Button
+            variant="ghost"
+            size="sm"
             className="flex flex-col items-center gap-1 h-auto py-2"
-            onClick={() => navigate('/feed')}
+            onClick={() => navigate('/search')}
           >
-            <TrendingUp size={24} className="text-gray-600" />
-            <span className="text-xs text-gray-600">Feed</span>
+            <Search size={20} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Search</span>
           </Button>
           
-          <Button 
-            variant="default"
+          <Button
             size="icon"
             className="rounded-full w-12 h-12 -mt-6 shadow-lg"
-            onClick={() => navigate('/create')}
+            onClick={() => navigate('/feed/create')}
           >
-            <Plus size={28} />
+            <Plus size={24} />
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon"
+          <Button
+            variant="ghost"
+            size="sm"
             className="flex flex-col items-center gap-1 h-auto py-2 relative"
-            onClick={() => navigate('/messages')}
+            onClick={() => navigate('/inbox')}
           >
-            <MessageCircle size={24} className="text-gray-600" />
-            <span className="text-xs text-gray-600">Messages</span>
-            {unreadCount > 0 && (
-              <Badge className="absolute top-0 right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] bg-red-500">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </Badge>
-            )}
+            <MessageCircle size={20} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Messages</span>
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon"
+          <Button
+            variant="ghost"
+            size="sm"
             className="flex flex-col items-center gap-1 h-auto py-2"
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/account/dashboard')}
           >
-            <Avatar className="h-6 w-6" />
-            <span className="text-xs text-gray-600">Me</span>
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                {userInitials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-muted-foreground">Me</span>
           </Button>
         </div>
-      </div>
-
-      {/* Spacing for bottom nav on mobile */}
-      <div className="h-16 md:hidden"></div>
+      </nav>
     </div>
   );
 }
