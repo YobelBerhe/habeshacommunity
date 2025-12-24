@@ -80,7 +80,11 @@ const MentorRequests = lazy(() => import("./pages/mentor/MentorRequests"));
 const MyBookings = lazy(() => import("./pages/mentor/MyBookings"));
 const BookingSuccess = lazy(() => import("./pages/mentor/BookingSuccess"));
 const BookSession = lazy(() => import("./pages/mentor/BookSession")); // NEW IMPORT
+const CommunityLayout = lazy(() => import("./pages/community/CommunityLayout"));
 const CommunityHome = lazy(() => import("./pages/community/CommunityHome"));
+const EventsPage = lazy(() => import("./pages/community/EventsPage"));
+const GroupsPage = lazy(() => import("./pages/community/GroupsPage"));
+const CommunityMore = lazy(() => import("./pages/community/CommunityMore"));
 const Forums = lazy(() => import("./pages/community/Forums"));
 const ForumsNew = lazy(() => import("./pages/community/ForumsNew"));
 const BibleGroups = lazy(() => import("./pages/community/BibleGroups"));
@@ -184,7 +188,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor', '/marketplace'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor', '/marketplace', '/community'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
@@ -379,17 +383,23 @@ const App = () => {
                 <Route path="/market" element={<Marketplace />} />
                 <Route path="/market/:id" element={<MarketplaceDetail />} />
                 
-                {/* Community Routes */}
-                <Route path="/community" element={<CommunityHome />} />
-                <Route path="/community/forums" element={<Forums />} />
-                <Route path="/community/forums-new" element={<ForumsNew />} />
-                <Route path="/community/bible-groups" element={<BibleGroups />} />
-            <Route path="/community/events" element={<EventsList />} />
-            <Route path="/community/events/create" element={<CreateEvent />} />
-            <Route path="/community/events/:id" element={<EventDetail />} />
-            <Route path="/community/events/discover" element={<EventsDiscover />} />
-            <Route path="/community/calendars" element={<Calendars />} />
-                <Route path="/community/groups" element={<Groups />} />
+                {/* Community Routes - Nested with Layout */}
+                <Route path="/community" element={<CommunityLayout />}>
+                  <Route index element={<Navigate to="/community/events" replace />} />
+                  <Route path="events" element={<EventsPage />} />
+                  <Route path="groups" element={<GroupsPage />} />
+                  <Route path="forums" element={<Forums />} />
+                  <Route path="more" element={<CommunityMore />} />
+                  <Route path="events/create" element={<CreateEvent />} />
+                  <Route path="events/:id" element={<EventDetail />} />
+                  <Route path="events/discover" element={<EventsDiscover />} />
+                  <Route path="calendars" element={<Calendars />} />
+                  <Route path="groups/:id" element={<Groups />} />
+                  <Route path="forums-new" element={<ForumsNew />} />
+                  <Route path="bible-groups" element={<BibleGroups />} />
+                  <Route path="my-events" element={<EventsList />} />
+                  <Route path="my-groups" element={<Groups />} />
+                </Route>
                 
                 {/* Church Finder Routes */}
                 <Route path="/churches" element={<ChurchHome />} />
