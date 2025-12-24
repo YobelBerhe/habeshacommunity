@@ -91,11 +91,14 @@ const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminReports = lazy(() => import("./pages/admin/Reports"));
 const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const MatchLayout = lazy(() => import("./pages/match/MatchLayout"));
 const MatchHome = lazy(() => import("./pages/match/MatchHome"));
 const MatchOnboarding = lazy(() => import("./pages/match/MatchOnboarding"));
-const MatchDiscover = lazy(() => import("./pages/match/MatchDiscover"));
+const MatchDiscover = lazy(() => import("./pages/match/Discover"));
 const MatchProfile = lazy(() => import("./pages/match/MatchProfile"));
-const MatchList = lazy(() => import("./pages/match/MatchList"));
+const MatchesList = lazy(() => import("./pages/match/MatchesList"));
+const MatchLiked = lazy(() => import("./pages/match/Liked"));
+const MatchMore = lazy(() => import("./pages/match/MatchMore"));
 const MatchFamilyMode = lazy(() => import("./pages/match/MatchFamilyMode"));
 const MatchQuiz = lazy(() => import("./pages/match/MatchQuiz"));
 const MatchSuccess = lazy(() => import("./pages/match/MatchSuccess"));
@@ -171,7 +174,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
@@ -328,29 +331,21 @@ const App = () => {
               {/* Coming Soon fallback */}
               <Route path="/coming-soon" element={<ComingSoon />} />
               
-              {/* Match Routes - Protected with Flow Guard */}
-              <Route
-                path="/match/*"
-                element={
-                  <MatchFlowGuard>
-                    <>
-                      <Routes>
-                        <Route path="" element={<MatchHome />} />
-                        <Route path="home" element={<MatchHome />} />
-                        <Route path="onboarding" element={<MatchOnboarding />} />
-                        <Route path="quiz" element={<MatchQuiz />} />
-                        <Route path="discover" element={<MatchDiscover />} />
-                        <Route path="matches" element={<MatchList />} />
-                        <Route path="profile/:id" element={<MatchProfile />} />
-                        <Route path="family-mode/:id" element={<MatchFamilyMode />} />
-                        <Route path="success" element={<MatchSuccess />} />
-                        <Route path="dates" element={<MatchDates />} />
-                      </Routes>
-                      <MatchBottomNav />
-                    </>
-                  </MatchFlowGuard>
-                }
-              />
+              {/* Match Routes - Nested with Layout */}
+              <Route path="/match" element={<MatchFlowGuard><MatchLayout /></MatchFlowGuard>}>
+                <Route index element={<Navigate to="/match/discover" replace />} />
+                <Route path="home" element={<MatchHome />} />
+                <Route path="onboarding" element={<MatchOnboarding />} />
+                <Route path="quiz" element={<MatchQuiz />} />
+                <Route path="discover" element={<MatchDiscover />} />
+                <Route path="matches" element={<MatchesList />} />
+                <Route path="liked" element={<MatchLiked />} />
+                <Route path="more" element={<MatchMore />} />
+                <Route path="profile/:id" element={<MatchProfile />} />
+                <Route path="family-mode" element={<MatchFamilyMode />} />
+                <Route path="success" element={<MatchSuccess />} />
+                <Route path="dates" element={<MatchDates />} />
+              </Route>
                 
                 {/* Marketplace Routes */}
                 <Route path="/market" element={<Marketplace />} />
