@@ -46,7 +46,7 @@ const Index = () => {
         if (data && !data.onboarding_completed) {
           navigate('/onboarding/welcome');
         } else {
-          navigate('/home');
+          navigate('/hub');
         }
       }
     };
