@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Heart,
   Users,
@@ -24,11 +24,35 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate, Link } from "react-router-dom";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import { useAuth } from "@/store/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Check onboarding status for logged-in users
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single();
+        
+        if (data && !data.onboarding_completed) {
+          navigate('/onboarding/welcome');
+        } else {
+          navigate('/home');
+        }
+      }
+    };
+    
+    checkOnboarding();
+  }, [user, navigate]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

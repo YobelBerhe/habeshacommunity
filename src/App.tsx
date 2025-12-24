@@ -27,6 +27,11 @@ import BootstrapAuth from "@/components/BootstrapAuth";
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
 const Home = lazy(() => import("./pages/Home"));
+
+// Onboarding pages
+const OnboardingWelcome = lazy(() => import("./pages/onboarding/Welcome"));
+const OnboardingInterests = lazy(() => import("./pages/onboarding/Interests"));
+const OnboardingPersonal = lazy(() => import("./pages/onboarding/PersonalInfo"));
 const SpiritualHome = lazy(() => import("./pages/spiritual/SpiritualHome"));
 const BibleReader = lazy(() => import("./pages/spiritual/BibleReader"));
 const ReadingPlans = lazy(() => import("./pages/spiritual/ReadingPlans"));
@@ -220,6 +225,11 @@ const App = () => {
             <HeaderWrapper />
             <Suspense fallback={<PageLoader />}>
               <Routes>
+                {/* Onboarding Routes */}
+                <Route path="/onboarding/welcome" element={<OnboardingWelcome />} />
+                <Route path="/onboarding/interests" element={<OnboardingInterests />} />
+                <Route path="/onboarding/personal" element={<OnboardingPersonal />} />
+                
                 {/* Main Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/home" element={<Home />} />
