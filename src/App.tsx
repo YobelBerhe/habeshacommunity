@@ -146,8 +146,13 @@ const ChurchHome = lazy(() => import("./pages/church/ChurchHome"));
 const ChurchList = lazy(() => import("./pages/church/ChurchList"));
 const ChurchDetail = lazy(() => import("./pages/church/ChurchDetail"));
 const GamificationDashboard = lazy(() => import("./pages/gamification/Dashboard"));
+const HealthLayout = lazy(() => import("./pages/health/HealthLayout"));
 const HealthHome = lazy(() => import("./pages/health/HealthHome"));
 const FastingPage = lazy(() => import("./pages/health/Fasting"));
+const NutritionPageNew = lazy(() => import("./pages/health/NutritionPage"));
+const FitnessPageNew = lazy(() => import("./pages/health/FitnessPage"));
+const ProgressPage = lazy(() => import("./pages/health/ProgressPage"));
+const HealthMorePage = lazy(() => import("./pages/health/HealthMorePage"));
 const NutritionPage = lazy(() => import("./pages/health/Nutrition"));
 const FitnessPage = lazy(() => import("./pages/health/Fitness"));
 const HealthDashboard = lazy(() => import("./pages/health/Dashboard"));
@@ -188,7 +193,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor', '/marketplace', '/community'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor', '/marketplace', '/community', '/health'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
@@ -410,25 +415,33 @@ const App = () => {
                 {/* Gamification Route */}
                 <Route path="/gamification" element={<GamificationDashboard />} />
                 
-                {/* Health Routes */}
-                <Route path="/health" element={<HealthHome />} />
-                <Route path="/health/dashboard" element={<HealthDashboard />} />
-                <Route path="/health/fasting" element={<FastingPage />} />
-                <Route path="/health/fasting/select" element={<SelectFastingPlan />} />
-                <Route path="/health/fasting/tracker" element={<FastingTrackerLive />} />
-                <Route path="/health/fasting/progress" element={<WeightProgress />} />
-                <Route path="/health/nutrition" element={<NutritionPage />} />
-                <Route path="/health/fitness" element={<Exercise />} />
-                <Route path="/health/fitness/library" element={<ExerciseLibrary />} />
-                <Route path="/health/fitness/log" element={<LogWorkout />} />
-                <Route path="/health/fitness/train" element={<TrainWorkout />} />
-                <Route path="/health/fitness/workout" element={<WorkoutInProgressPage />} />
-                <Route path="/health/eat" element={<FoodLog />} />
-                <Route path="/health/barcode-scanner" element={<ComingSoon />} />
-                <Route path="/health/recipes" element={<Recipes />} />
-                <Route path="/health/sleep" element={<SleepTracker />} />
-                <Route path="/health/hydration" element={<Hydration />} />
-                <Route path="/health/mental" element={<Mental />} />
+                {/* Health Routes - Nested with Layout */}
+                <Route path="/health" element={<HealthLayout />}>
+                  <Route index element={<Navigate to="/health/nutrition" replace />} />
+                  <Route path="nutrition" element={<NutritionPageNew />} />
+                  <Route path="fitness" element={<FitnessPageNew />} />
+                  <Route path="progress" element={<ProgressPage />} />
+                  <Route path="more" element={<HealthMorePage />} />
+                  <Route path="dashboard" element={<HealthDashboard />} />
+                  <Route path="fasting" element={<FastingPage />} />
+                  <Route path="fasting/select" element={<SelectFastingPlan />} />
+                  <Route path="fasting/tracker" element={<FastingTrackerLive />} />
+                  <Route path="fasting/progress" element={<WeightProgress />} />
+                  <Route path="nutrition/add" element={<FoodLog />} />
+                  <Route path="nutrition/search" element={<FoodLog />} />
+                  <Route path="fitness/library" element={<ExerciseLibrary />} />
+                  <Route path="fitness/log" element={<LogWorkout />} />
+                  <Route path="fitness/train" element={<TrainWorkout />} />
+                  <Route path="fitness/workout" element={<WorkoutInProgressPage />} />
+                  <Route path="fitness/history" element={<FitnessPage />} />
+                  <Route path="eat" element={<FoodLog />} />
+                  <Route path="barcode-scanner" element={<ComingSoon />} />
+                  <Route path="recipes" element={<Recipes />} />
+                  <Route path="sleep" element={<SleepTracker />} />
+                  <Route path="hydration" element={<Hydration />} />
+                  <Route path="mental" element={<Mental />} />
+                  <Route path="goals" element={<HealthDashboard />} />
+                </Route>
                 
                 {/* Messaging & Video */}
                 <Route path="/inbox" element={<Inbox />} />
