@@ -4522,6 +4522,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          category_order: string[] | null
           city: string | null
           country: string | null
           created_at: string
@@ -4530,19 +4531,27 @@ export type Database = {
           dietary_restrictions: string[] | null
           display_name: string | null
           email_notifications_enabled: boolean | null
+          faith_background: string | null
           fasting_strictness: string | null
           fitness_level: string | null
           follows_orthodox_fasting: boolean | null
           gender: string | null
           health_goal: string | null
+          hidden_categories: string[] | null
           id: string
+          interests: string[] | null
+          onboarding_completed: boolean | null
+          onboarding_step: number | null
           primary_language: string | null
           referral_code: string | null
+          relationship_status: string | null
           updated_at: string
+          visible_categories: string[] | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          category_order?: string[] | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -4551,19 +4560,27 @@ export type Database = {
           dietary_restrictions?: string[] | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
+          faith_background?: string | null
           fasting_strictness?: string | null
           fitness_level?: string | null
           follows_orthodox_fasting?: boolean | null
           gender?: string | null
           health_goal?: string | null
+          hidden_categories?: string[] | null
           id: string
+          interests?: string[] | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           primary_language?: string | null
           referral_code?: string | null
+          relationship_status?: string | null
           updated_at?: string
+          visible_categories?: string[] | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          category_order?: string[] | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -4572,15 +4589,22 @@ export type Database = {
           dietary_restrictions?: string[] | null
           display_name?: string | null
           email_notifications_enabled?: boolean | null
+          faith_background?: string | null
           fasting_strictness?: string | null
           fitness_level?: string | null
           follows_orthodox_fasting?: boolean | null
           gender?: string | null
           health_goal?: string | null
+          hidden_categories?: string[] | null
           id?: string
+          interests?: string[] | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           primary_language?: string | null
           referral_code?: string | null
+          relationship_status?: string | null
           updated_at?: string
+          visible_categories?: string[] | null
         }
         Relationships: []
       }
