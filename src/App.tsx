@@ -34,7 +34,10 @@ const ManageCategories = lazy(() => import("./pages/hub/ManageCategories"));
 const OnboardingWelcome = lazy(() => import("./pages/onboarding/Welcome"));
 const OnboardingInterests = lazy(() => import("./pages/onboarding/Interests"));
 const OnboardingPersonal = lazy(() => import("./pages/onboarding/PersonalInfo"));
+const SpiritualLayout = lazy(() => import("./pages/spiritual/SpiritualLayout"));
 const SpiritualHome = lazy(() => import("./pages/spiritual/SpiritualHome"));
+const SpiritualToday = lazy(() => import("./pages/spiritual/Today"));
+const SpiritualMore = lazy(() => import("./pages/spiritual/More"));
 const BibleReader = lazy(() => import("./pages/spiritual/BibleReader"));
 const ReadingPlans = lazy(() => import("./pages/spiritual/ReadingPlans"));
 const SpiritualProgress = lazy(() => import("./pages/spiritual/Progress"));
@@ -168,7 +171,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
@@ -245,19 +248,23 @@ const App = () => {
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/l/:id" element={<ListingDetail />} />
                 
-                {/* Spiritual Routes */}
-                <Route path="/spiritual" element={<SpiritualHome />} />
-                <Route path="/spiritual/reader" element={<BibleReader />} />
-                <Route path="/spiritual/plans" element={<ReadingPlans />} />
-                <Route path="/spiritual/plans/:slug" element={<PlanDetail />} />
-                <Route path="/spiritual/votd" element={<VerseOfTheDayPage />} />
-                <Route path="/spiritual/bookmarks" element={<BookmarksPage />} />
-                <Route path="/spiritual/highlights" element={<HighlightsPage />} />
-                <Route path="/spiritual/progress" element={<SpiritualProgress />} />
-                <Route path="/spiritual/prayers" element={<PrayerRequests />} />
-                <Route path="/spiritual/daily-prayers" element={<DailyPrayers />} />
-                <Route path="/spiritual/fasting" element={<FastingCalendar />} />
-                <Route path="/spiritual/saints" element={<SaintsCalendar />} />
+                {/* Spiritual Routes - Nested with Layout */}
+                <Route path="/spiritual" element={<SpiritualLayout />}>
+                  <Route index element={<Navigate to="/spiritual/today" replace />} />
+                  <Route path="today" element={<SpiritualToday />} />
+                  <Route path="bible" element={<BibleReader />} />
+                  <Route path="plans" element={<ReadingPlans />} />
+                  <Route path="plans/:slug" element={<PlanDetail />} />
+                  <Route path="more" element={<SpiritualMore />} />
+                  <Route path="verse-of-the-day" element={<VerseOfTheDayPage />} />
+                  <Route path="bookmarks" element={<BookmarksPage />} />
+                  <Route path="highlights" element={<HighlightsPage />} />
+                  <Route path="progress" element={<SpiritualProgress />} />
+                  <Route path="prayer-requests" element={<PrayerRequests />} />
+                  <Route path="daily-prayers" element={<DailyPrayers />} />
+                  <Route path="fasting-calendar" element={<FastingCalendar />} />
+                  <Route path="saints-calendar" element={<SaintsCalendar />} />
+                </Route>
                 
                 {/* Auth Routes */}
                 <Route path="/auth/callback" element={<AuthCallback />} />
