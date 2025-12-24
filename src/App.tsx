@@ -64,10 +64,15 @@ const Payouts = lazy(() => import("./pages/account/Payouts"));
 const ForumsBoards = lazy(() => import("./pages/forums/Boards"));
 const BoardTopics = lazy(() => import("./pages/forums/BoardTopics"));
 const TopicView = lazy(() => import("./pages/forums/TopicView"));
+const MentorLayout = lazy(() => import("./pages/mentor/MentorLayout"));
 const MentorHome = lazy(() => import("./pages/mentor/MentorHome"));
 const MentorProfile = lazy(() => import("./pages/mentor/MentorProfile"));
 const MySessions = lazy(() => import("./pages/mentor/MySessions"));
 const MentorList = lazy(() => import("./pages/mentor/MentorList"));
+const BrowseMentors = lazy(() => import("./pages/mentor/BrowseMentors"));
+const SessionsPage = lazy(() => import("./pages/mentor/SessionsPage"));
+const BecomeMentor = lazy(() => import("./pages/mentor/BecomeMentor"));
+const MentorMore = lazy(() => import("./pages/mentor/MentorMore"));
 const MentorOnboarding = lazy(() => import("./pages/mentor/MentorOnboarding"));
 const MentorDetail = lazy(() => import("./pages/mentor/MentorDetail"));
 const MentorDashboard = lazy(() => import("./pages/mentor/MentorDashboard"));
@@ -174,7 +179,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
@@ -292,23 +297,26 @@ const App = () => {
                 <Route path="/forums/:boardKey" element={<BoardTopics />} />
                 <Route path="/forums/topic/:id" element={<TopicView />} />
                 
-                {/* Mentor Routes */}
-                <Route path="/mentor" element={<MentorHome />} />
-                <Route path="/mentor/list" element={<MentorList />} />
-                <Route path="/mentor/profile/:id" element={<MentorProfile />} />
-                <Route path="/mentor/profile/:id/book" element={<BookSession />} />
-                <Route path="/mentor/sessions" element={<MySessions />} />
-                <Route path="/mentor/onboarding" element={<MentorOnboarding />} />
-                {/* Alias route to handle common casing mistake */}
-                <Route path="/mentor/MentorOnboarding" element={<Navigate to="/mentor/onboarding" replace />} />
-                <Route path="/mentor/dashboard" element={<MentorDashboard />} />
-                <Route path="/mentor/requests" element={<MentorRequests />} />
-                <Route path="/mentor/bookings" element={<MyBookings />} />
-                <Route path="/mentor/booking-success" element={<BookingSuccess />} />
-                <Route path="/mentor/payouts" element={<MentorPayouts />} />
-                <Route path="/mentor/verify" element={<VerifyProfile />} />
-                <Route path="/mentor/availability" element={<ManageAvailability />} />
-                <Route path="/mentor/:id" element={<MentorDetail />} />
+                {/* Mentor Routes - Nested with Layout */}
+                <Route path="/mentor" element={<MentorLayout />}>
+                  <Route index element={<Navigate to="/mentor/browse" replace />} />
+                  <Route path="browse" element={<BrowseMentors />} />
+                  <Route path="sessions" element={<SessionsPage />} />
+                  <Route path="become" element={<BecomeMentor />} />
+                  <Route path="more" element={<MentorMore />} />
+                  <Route path="list" element={<MentorList />} />
+                  <Route path="profile/:id" element={<MentorProfile />} />
+                  <Route path="book/:id" element={<BookSession />} />
+                  <Route path="onboarding" element={<MentorOnboarding />} />
+                  <Route path="dashboard" element={<MentorDashboard />} />
+                  <Route path="requests" element={<MentorRequests />} />
+                  <Route path="bookings" element={<MyBookings />} />
+                  <Route path="booking-success" element={<BookingSuccess />} />
+                  <Route path="payouts" element={<MentorPayouts />} />
+                  <Route path="verify" element={<VerifyProfile />} />
+                  <Route path="availability" element={<ManageAvailability />} />
+                  <Route path=":id" element={<MentorDetail />} />
+                </Route>
                 <Route path="/session/:sessionId" element={<SessionRoom />} />
                 
                 {/* Badges */}
