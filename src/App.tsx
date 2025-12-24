@@ -110,6 +110,11 @@ const MatchSuccess = lazy(() => import("./pages/match/MatchSuccess"));
 const MatchDates = lazy(() => import("./pages/match/MatchDates"));
 const Marketplace = lazy(() => import("./pages/marketplace/Marketplace"));
 const MarketplaceHome = lazy(() => import("./pages/marketplace/MarketplaceHome"));
+const MarketplaceLayout = lazy(() => import("./pages/marketplace/MarketplaceLayout"));
+const BrowseMarketplace = lazy(() => import("./pages/marketplace/BrowseMarketplace"));
+const SellingPage = lazy(() => import("./pages/marketplace/SellingPage"));
+const SavedListings = lazy(() => import("./pages/marketplace/SavedListings"));
+const MarketplaceMore = lazy(() => import("./pages/marketplace/MarketplaceMore"));
 const CreateListing = lazy(() => import("./pages/marketplace/CreateListing"));
 const MarketplaceDetail = lazy(() => import("./pages/marketplace/MarketplaceDetail"));
 const MyListings = lazy(() => import("./pages/marketplace/MyListings"));
@@ -179,7 +184,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor', '/marketplace'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
@@ -355,17 +360,24 @@ const App = () => {
                 <Route path="dates" element={<MatchDates />} />
               </Route>
                 
-                {/* Marketplace Routes */}
+                {/* Marketplace Routes - Nested with Layout */}
+                <Route path="/marketplace" element={<MarketplaceLayout />}>
+                  <Route index element={<Navigate to="/marketplace/browse" replace />} />
+                  <Route path="browse" element={<BrowseMarketplace />} />
+                  <Route path="selling" element={<SellingPage />} />
+                  <Route path="saved" element={<SavedListings />} />
+                  <Route path="more" element={<MarketplaceMore />} />
+                  <Route path="create" element={<CreateListing />} />
+                  <Route path="my-listings" element={<MyListings />} />
+                  <Route path="listing/:id" element={<MarketplaceDetail />} />
+                  <Route path=":type/:id" element={<ListingDetail />} />
+                  <Route path="products" element={<BrowseMarketplace />} />
+                  <Route path="housing" element={<BrowseMarketplace />} />
+                  <Route path="jobs" element={<BrowseMarketplace />} />
+                  <Route path="services" element={<BrowseMarketplace />} />
+                </Route>
                 <Route path="/market" element={<Marketplace />} />
                 <Route path="/market/:id" element={<MarketplaceDetail />} />
-                <Route path="/marketplace" element={<MarketplaceHome />} />
-                <Route path="/marketplace/create" element={<CreateListing />} />
-                <Route path="/marketplace/my-listings" element={<MyListings />} />
-                <Route path="/marketplace/:type/:id" element={<ListingDetail />} />
-                <Route path="/marketplace/products" element={<MarketplaceHome />} />
-                <Route path="/marketplace/housing" element={<MarketplaceHome />} />
-                <Route path="/marketplace/jobs" element={<MarketplaceHome />} />
-                <Route path="/marketplace/services" element={<MarketplaceHome />} />
                 
                 {/* Community Routes */}
                 <Route path="/community" element={<CommunityHome />} />
