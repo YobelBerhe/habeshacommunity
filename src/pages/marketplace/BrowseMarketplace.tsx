@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Search, 
   Plus, 
@@ -11,6 +12,9 @@ import {
   Filter,
   Heart
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/store/auth';
+import { toast } from 'sonner';
 
 interface Listing {
   id: string;
@@ -19,103 +23,115 @@ interface Listing {
   image: string;
   category: string;
   location: string;
-  distance: string;
+  isFree: boolean;
+  saved: boolean;
   seller: {
     name: string;
     verified: boolean;
   };
-  isFree: boolean;
-  saved: boolean;
 }
 
 export default function BrowseMarketplace() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchListings();
-  }, []);
+    if (user) fetchSavedListings();
+  }, [user]);
 
   const fetchListings = async () => {
-    setListings([
-      {
-        id: '1',
-        title: 'Studio Apartment - Downtown SF',
-        price: 2200,
-        image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400',
-        category: 'Housing',
-        location: 'San Francisco, CA',
-        distance: '2 miles away',
-        seller: { name: 'Sarah K.', verified: true },
-        isFree: false,
-        saved: false
-      },
-      {
-        id: '2',
-        title: 'Software Engineer Position',
-        price: 0,
-        image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400',
-        category: 'Jobs',
-        location: 'Mountain View, CA',
-        distance: '15 miles away',
-        seller: { name: 'TechCorp', verified: true },
-        isFree: true,
-        saved: false
-      },
-      {
-        id: '3',
-        title: 'Traditional Netela - Hand Woven',
-        price: 150,
-        image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400',
-        category: 'Products',
-        location: 'Oakland, CA',
-        distance: '8 miles away',
-        seller: { name: 'Meron T.', verified: false },
-        isFree: false,
-        saved: true
-      },
-      {
-        id: '4',
-        title: '2015 Honda Accord - Clean Title',
-        price: 12500,
-        image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=400',
-        category: 'Vehicles',
-        location: 'San Jose, CA',
-        distance: '25 miles away',
-        seller: { name: 'Daniel A.', verified: true },
-        isFree: false,
-        saved: false
-      },
-      {
-        id: '5',
-        title: 'House Cleaning Services',
-        price: 80,
-        image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400',
-        category: 'Services',
-        location: 'Berkeley, CA',
-        distance: '5 miles away',
-        seller: { name: 'Clean Team', verified: true },
-        isFree: false,
-        saved: false
-      },
-      {
-        id: '6',
-        title: 'Ethiopian Coffee Set - Complete',
-        price: 45,
-        image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=400',
-        category: 'Products',
-        location: 'San Francisco, CA',
-        distance: '3 miles away',
-        seller: { name: 'Habesha Store', verified: true },
-        isFree: false,
-        saved: false
-      },
-    ]);
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('listings')
+        .select(`
+          id,
+          title,
+          price_cents,
+          images,
+          category,
+          city,
+          user_id
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (error) throw error;
+
+      // Get unique user IDs to fetch profiles
+      const userIds = [...new Set(data?.map(l => l.user_id).filter(Boolean))] as string[];
+      
+      let profilesMap: Record<string, { display_name: string }> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name')
+          .in('id', userIds);
+        
+        profiles?.forEach(p => {
+          profilesMap[p.id] = { display_name: p.display_name || 'Anonymous' };
+        });
+      }
+
+      const formattedListings: Listing[] = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        price: (item.price_cents || 0) / 100,
+        image: item.images?.[0] || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400',
+        category: formatCategory(item.category),
+        location: item.city || 'Unknown',
+        isFree: !item.price_cents || item.price_cents === 0,
+        saved: false,
+        seller: {
+          name: profilesMap[item.user_id!]?.display_name || 'Anonymous',
+          verified: false
+        }
+      }));
+
+      setListings(formattedListings);
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+      toast.error('Failed to load listings');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const categories = ['All', 'Housing', 'Jobs', 'Products', 'Services', 'Vehicles'];
+  const fetchSavedListings = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('favorites')
+      .select('listing_id')
+      .eq('user_id', user.id);
+    
+    if (data) {
+      setSavedIds(new Set(data.map(f => f.listing_id)));
+    }
+  };
+
+  const formatCategory = (category: string): string => {
+    const categoryMap: Record<string, string> = {
+      'housing': 'Housing',
+      'jobs': 'Jobs',
+      'job': 'Jobs',
+      'services': 'Services',
+      'service': 'Services',
+      'forsale': 'Products',
+      'product': 'Products',
+      'community': 'Community'
+    };
+    return categoryMap[category] || category;
+  };
+
+  const categories = ['All', 'Housing', 'Jobs', 'Products', 'Services'];
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -123,10 +139,42 @@ export default function BrowseMarketplace() {
     return matchesSearch && matchesCategory;
   });
 
-  const toggleSave = (id: string) => {
-    setListings(prev => prev.map(item => 
-      item.id === id ? { ...item, saved: !item.saved } : item
-    ));
+  const toggleSave = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error('Please sign in to save listings');
+      return;
+    }
+
+    const isSaved = savedIds.has(id);
+
+    try {
+      if (isSaved) {
+        await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('listing_id', id);
+        
+        setSavedIds(prev => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+        toast.success('Removed from saved');
+      } else {
+        await supabase
+          .from('favorites')
+          .insert({ user_id: user.id, listing_id: id });
+        
+        setSavedIds(prev => new Set(prev).add(id));
+        toast.success('Saved to favorites');
+      }
+    } catch (error) {
+      console.error('Error toggling save:', error);
+      toast.error('Failed to update saved listings');
+    }
   };
 
   return (
@@ -183,58 +231,73 @@ export default function BrowseMarketplace() {
         {/* Results Count */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {filteredListings.length} items • Near you
+            {loading ? 'Loading...' : `${filteredListings.length} items`}
           </p>
         </div>
 
-        {/* Listings Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {filteredListings.map((listing) => (
-            <Card
-              key={listing.id}
-              className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
-            >
-              {/* Image */}
-              <div className="relative aspect-square">
-                <img
-                  src={listing.image}
-                  alt={listing.title}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleSave(listing.id);
-                  }}
-                >
-                  <Heart className={`h-4 w-4 ${listing.saved ? 'fill-red-500 text-red-500' : 'text-foreground'}`} />
-                </button>
-                {listing.isFree && (
-                  <Badge className="absolute bottom-2 left-2 bg-green-500">Free</Badge>
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="p-3">
-                <p className="font-semibold text-foreground">
-                  {listing.isFree ? 'Free' : `$${listing.price.toLocaleString()}`}
-                </p>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {listing.title}
-                </p>
-                <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  {listing.location}
+        {/* Loading Skeleton */}
+        {loading && (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="aspect-square w-full" />
+                <div className="p-3 space-y-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-24" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{listing.distance}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        )}
 
-        {filteredListings.length === 0 && (
+        {/* Listings Grid */}
+        {!loading && (
+          <div className="grid grid-cols-2 gap-3">
+            {filteredListings.map((listing) => (
+              <Card
+                key={listing.id}
+                className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+              >
+                {/* Image */}
+                <div className="relative aspect-square">
+                  <img
+                    src={listing.image}
+                    alt={listing.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <button
+                    className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full"
+                    onClick={(e) => toggleSave(listing.id, e)}
+                  >
+                    <Heart className={`h-4 w-4 ${savedIds.has(listing.id) ? 'fill-red-500 text-red-500' : 'text-foreground'}`} />
+                  </button>
+                  {listing.isFree && (
+                    <Badge className="absolute bottom-2 left-2 bg-green-500">Free</Badge>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="p-3">
+                  <p className="font-semibold text-foreground">
+                    {listing.isFree ? 'Free' : `$${listing.price.toLocaleString()}`}
+                  </p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {listing.title}
+                  </p>
+                  <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    {listing.location}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {!loading && filteredListings.length === 0 && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No items found matching your search.</p>
           </div>
