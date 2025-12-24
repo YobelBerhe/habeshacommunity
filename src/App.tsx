@@ -166,7 +166,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
