@@ -3340,6 +3340,36 @@ export type Database = {
         }
         Relationships: []
       }
+      match_interactions: {
+        Row: {
+          action: string
+          comment: string | null
+          created_at: string | null
+          id: string
+          is_mutual: boolean | null
+          target_user_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_mutual?: boolean | null
+          target_user_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_mutual?: boolean | null
+          target_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       match_profiles: {
         Row: {
           active: boolean | null
