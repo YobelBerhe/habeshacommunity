@@ -27,6 +27,8 @@ import BootstrapAuth from "@/components/BootstrapAuth";
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
 const Home = lazy(() => import("./pages/Home"));
+const Hub = lazy(() => import("./pages/Hub"));
+const ManageCategories = lazy(() => import("./pages/hub/ManageCategories"));
 
 // Onboarding pages
 const OnboardingWelcome = lazy(() => import("./pages/onboarding/Welcome"));
@@ -166,7 +168,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
@@ -230,8 +232,12 @@ const App = () => {
                 <Route path="/onboarding/interests" element={<OnboardingInterests />} />
                 <Route path="/onboarding/personal" element={<OnboardingPersonal />} />
                 
+                {/* Hub Routes */}
+                <Route path="/hub" element={<Hub />} />
+                <Route path="/hub/manage-categories" element={<ManageCategories />} />
+                
                 {/* Main Routes */}
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Index />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/index" element={<Index />} />
                 <Route path="/browse" element={<Browse />} />

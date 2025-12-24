@@ -50,10 +50,26 @@ export default {
 				900: '#064E3B',
 			},
 			spiritual: {
+				DEFAULT: '#AF52DE',
 				50: '#F5F3FF',
 				500: '#8B5CF6',
 				700: '#7C3AED',
 				900: '#581C87',
+			},
+			match: {
+				DEFAULT: '#FF2D55',
+			},
+			mentor: {
+				DEFAULT: '#007AFF',
+			},
+			marketplace: {
+				DEFAULT: '#34C759',
+			},
+			community: {
+				DEFAULT: '#5856D6',
+			},
+			health: {
+				DEFAULT: '#32ADE6',
 			},
 			bronze: '#CD7F32',
 			silver: '#C0C0C0',
