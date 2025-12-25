@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/store/auth';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, Video, MapPin } from 'lucide-react';
+import { Calendar, Clock, Video, MapPin, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface Session {
   id: string;
@@ -26,41 +28,107 @@ interface Session {
 
 export default function SessionsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data
-    setSessions([
-      {
-        id: '1',
-        mentor: {
-          id: 'm1',
-          name: 'Daniel Abraham',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
-          title: 'Senior Software Engineer'
-        },
-        date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-        duration: 60,
-        type: 'video',
-        status: 'upcoming',
-        price: 75
-      },
-      {
-        id: '2',
-        mentor: {
-          id: 'm2',
-          name: 'Sara Tesfaye',
-          avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100',
-          title: 'Immigration Attorney'
-        },
-        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        duration: 90,
-        type: 'video',
-        status: 'completed',
-        price: 150
-      },
-    ]);
-  }, []);
+    if (user) {
+      fetchSessions();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const fetchSessions = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Fetch user's booked sessions
+      const { data: bookingsData, error } = await supabase
+        .from('bookings')
+        .select(`
+          id,
+          mentor_id,
+          session_date,
+          scheduled_time,
+          duration_minutes,
+          amount_cents,
+          status,
+          meeting_url,
+          notes
+        `)
+        .eq('user_id', user.id)
+        .order('session_date', { ascending: true });
+
+      if (error) throw error;
+
+      if (!bookingsData || bookingsData.length === 0) {
+        setSessions([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get mentor details
+      const mentorIds = [...new Set(bookingsData.map(b => b.mentor_id))];
+      
+      const { data: mentorsData } = await supabase
+        .from('mentors')
+        .select(`
+          id,
+          name,
+          display_name,
+          title,
+          avatar_url
+        `)
+        .in('id', mentorIds);
+
+      const mentorMap = new Map();
+      mentorsData?.forEach(m => {
+        mentorMap.set(m.id, m);
+      });
+
+      // Format for UI
+      const formatted: Session[] = bookingsData.map(booking => {
+        const mentor = mentorMap.get(booking.mentor_id);
+        const sessionDate = new Date(booking.session_date);
+        const now = new Date();
+        
+        // Determine status based on date if not explicitly cancelled
+        let status: 'upcoming' | 'completed' | 'cancelled' = 'upcoming';
+        if (booking.status === 'cancelled') {
+          status = 'cancelled';
+        } else if (sessionDate < now) {
+          status = 'completed';
+        }
+
+        return {
+          id: booking.id,
+          mentor: {
+            id: booking.mentor_id,
+            name: mentor?.display_name || mentor?.name || 'Mentor',
+            avatar: mentor?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
+            title: mentor?.title || 'Professional Mentor'
+          },
+          date: sessionDate,
+          duration: booking.duration_minutes || 60,
+          type: 'video' as const,
+          status: status,
+          location: booking.meeting_url,
+          price: booking.amount_cents ? booking.amount_cents / 100 : 0
+        };
+      });
+
+      setSessions(formatted);
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      toast.error('Failed to load sessions');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const upcomingSessions = sessions.filter(s => s.status === 'upcoming');
   const completedSessions = sessions.filter(s => s.status === 'completed');
@@ -127,6 +195,14 @@ export default function SessionsPage() {
       </div>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-mentor" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">

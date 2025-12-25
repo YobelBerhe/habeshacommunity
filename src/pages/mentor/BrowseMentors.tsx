@@ -13,8 +13,10 @@ import {
   DollarSign, 
   Filter,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Mentor {
   id: string;
@@ -42,49 +44,63 @@ export default function BrowseMentors() {
   }, []);
 
   const fetchMentors = async () => {
-    // Mock data - later connect to real mentor profiles
-    setMentors([
-      {
-        id: '1',
-        name: 'Daniel Abraham',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-        title: 'Senior Software Engineer',
-        expertise: ['Career', 'Tech', 'Interview Prep'],
-        rating: 4.9,
-        reviewCount: 127,
-        pricePerHour: 75,
-        location: 'San Francisco, CA',
-        verified: true,
+    try {
+      setLoading(true);
+
+      // Fetch available mentors
+      const { data: mentorsData, error } = await supabase
+        .from('mentors')
+        .select(`
+          id,
+          user_id,
+          name,
+          display_name,
+          title,
+          bio,
+          expertise,
+          hourly_rate_cents,
+          avatar_url,
+          city,
+          country,
+          is_verified,
+          available,
+          rating_avg,
+          rating_count
+        `)
+        .eq('available', true)
+        .order('is_verified', { ascending: false })
+        .limit(30);
+
+      if (error) throw error;
+
+      if (!mentorsData || mentorsData.length === 0) {
+        setMentors([]);
+        setLoading(false);
+        return;
+      }
+
+      // Format for UI
+      const formatted: Mentor[] = mentorsData.map(mentor => ({
+        id: mentor.id,
+        name: mentor.display_name || mentor.name || 'Mentor',
+        avatar: mentor.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+        title: mentor.title || 'Professional Mentor',
+        expertise: Array.isArray(mentor.expertise) ? mentor.expertise : ['General'],
+        rating: mentor.rating_avg ? Number(mentor.rating_avg) : 4.5,
+        reviewCount: mentor.rating_count || 0,
+        pricePerHour: mentor.hourly_rate_cents ? mentor.hourly_rate_cents / 100 : 75,
+        location: mentor.city && mentor.country ? `${mentor.city}, ${mentor.country}` : (mentor.city || 'Remote'),
+        verified: mentor.is_verified || false,
         responseTime: 'Usually responds in 2 hours'
-      },
-      {
-        id: '2',
-        name: 'Sara Tesfaye',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-        title: 'Immigration Attorney',
-        expertise: ['Immigration', 'Legal', 'Citizenship'],
-        rating: 5.0,
-        reviewCount: 89,
-        pricePerHour: 150,
-        location: 'Washington, DC',
-        verified: true,
-        responseTime: 'Usually responds in 1 hour'
-      },
-      {
-        id: '3',
-        name: 'Michael Gebre',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-        title: 'Business Development Manager',
-        expertise: ['Business', 'Startups', 'Marketing'],
-        rating: 4.8,
-        reviewCount: 64,
-        pricePerHour: 100,
-        location: 'New York, NY',
-        verified: true,
-        responseTime: 'Usually responds in 4 hours'
-      },
-    ]);
-    setLoading(false);
+      }));
+
+      setMentors(formatted);
+    } catch (error) {
+      console.error('Error fetching mentors:', error);
+      toast.error('Failed to load mentors');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const categories = ['All', 'Career', 'Immigration', 'Business', 'Education', 'Finance', 'Life Skills'];
@@ -99,6 +115,14 @@ export default function BrowseMentors() {
     
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-mentor" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -187,8 +211,10 @@ export default function BrowseMentors() {
                   <div className="flex items-center gap-3 mt-2 text-sm">
                     <div className="flex items-center gap-1 text-amber-500">
                       <Star className="h-4 w-4 fill-current" />
-                      <span className="font-medium">{mentor.rating}</span>
-                      <span className="text-muted-foreground">({mentor.reviewCount})</span>
+                      <span className="font-medium">{mentor.rating.toFixed(1)}</span>
+                      {mentor.reviewCount > 0 && (
+                        <span className="text-muted-foreground">({mentor.reviewCount})</span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <MapPin className="h-3 w-3" />
