@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, X, MessageCircle, MapPin, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { likeUser, passUser } from '@/utils/matchActions';
 
 interface Profile {
   id: string;
+  user_id: string;
   display_name: string;
   age: number;
   location: string;
@@ -37,85 +37,104 @@ export default function Discover() {
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    fetchProfiles();
-  }, []);
+    if (user) {
+      fetchProfiles();
+    }
+  }, [user]);
 
   const fetchProfiles = async () => {
-    // Mock data for now - later connect to real match_profiles table
-    setProfiles([
-      {
-        id: '1',
-        display_name: 'Sarah',
-        age: 28,
-        location: 'San Francisco, CA',
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Get IDs of users we've already interacted with
+      const { data: interactions } = await supabase
+        .from('match_interactions')
+        .select('target_user_id')
+        .eq('user_id', user.id);
+
+      const interactedIds = new Set(
+        interactions?.map(i => i.target_user_id) || []
+      );
+
+      // Fetch active match profiles excluding current user
+      const { data: matchProfiles, error } = await supabase
+        .from('match_profiles')
+        .select('*')
+        .eq('active', true)
+        .neq('user_id', user.id)
+        .limit(20);
+
+      if (error) throw error;
+
+      // Filter out already interacted profiles
+      const availableProfiles = matchProfiles?.filter(
+        p => !interactedIds.has(p.user_id)
+      ) || [];
+
+      // Format for UI
+      const formatted: Profile[] = availableProfiles.map(p => ({
+        id: p.id,
+        user_id: p.user_id,
+        display_name: p.display_name || p.name || 'Someone Special',
+        age: p.age || 25,
+        location: p.city && p.country ? `${p.city}, ${p.country}` : 'Nearby',
         distance: '5 miles away',
-        photos: [
-          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-          'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400',
-        ],
+        photos: Array.isArray(p.photos) && p.photos.length > 0 
+          ? p.photos 
+          : ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'],
         prompts: [
           {
-            question: 'A perfect day involves',
-            answer: 'Morning coffee, church service, and quality time with family over Ethiopian food'
-          },
-          {
-            question: "I'm looking for",
-            answer: 'A God-fearing partner who values family and shares my Orthodox faith'
-          },
+            question: "About me",
+            answer: p.bio || "Getting to know the community!"
+          }
         ],
         basics: {
-          height: '5\'6"',
-          education: "Bachelor's Degree",
           religion: 'Orthodox Christian',
-          languages: ['Tigrinya', 'English'],
+          languages: Array.isArray(p.interests) ? p.interests : undefined
         }
-      },
-      {
-        id: '2',
-        display_name: 'Meron',
-        age: 26,
-        location: 'Oakland, CA',
-        distance: '12 miles away',
-        photos: [
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-        ],
-        prompts: [
-          {
-            question: 'The key to my heart is',
-            answer: 'Good Ethiopian food, genuine conversations, and someone who makes me laugh'
-          },
-        ],
-        basics: {
-          height: '5\'4"',
-          education: "Master's Degree",
-          religion: 'Orthodox Christian',
-        }
-      },
-    ]);
-    setLoading(false);
+      }));
+
+      setProfiles(formatted);
+    } catch (error) {
+      console.error('Error fetching profiles:', error);
+      toast.error('Failed to load profiles');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const currentProfile = profiles[currentIndex];
 
   const handleLike = async () => {
-    if (!currentProfile || actionLoading) return;
+    if (!currentProfile || actionLoading || !user) return;
     
     setActionLoading(true);
     try {
-      const result = await likeUser(currentProfile.id);
-      
-      if (result.isMatch) {
-        toast.success(`It's a match with ${currentProfile.display_name}! 💕`);
+      // Insert like interaction
+      const { data, error } = await supabase
+        .from('match_interactions')
+        .insert({
+          user_id: user.id,
+          target_user_id: currentProfile.user_id,
+          action: 'like'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Check if it's a mutual match
+      if (data?.is_mutual) {
+        toast.success(`It's a match with ${currentProfile.display_name}! 💕`, {
+          duration: 5000
+        });
       } else {
         toast.success(`You liked ${currentProfile.display_name}!`);
       }
       
-      // Move to next profile
-      if (currentIndex < profiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        toast.info('No more profiles for now. Check back later!');
-      }
+      moveToNext();
     } catch (error) {
       console.error('Error liking profile:', error);
       toast.error('Something went wrong');
@@ -125,23 +144,32 @@ export default function Discover() {
   };
 
   const handlePass = async () => {
-    if (actionLoading) return;
+    if (actionLoading || !user || !currentProfile) return;
     
     setActionLoading(true);
     try {
-      if (currentProfile) {
-        await passUser(currentProfile.id);
-      }
+      await supabase
+        .from('match_interactions')
+        .insert({
+          user_id: user.id,
+          target_user_id: currentProfile.user_id,
+          action: 'pass'
+        });
       
-      if (currentIndex < profiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        toast.info('No more profiles for now. Check back later!');
-      }
+      moveToNext();
     } catch (error) {
       console.error('Error passing profile:', error);
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const moveToNext = () => {
+    if (currentIndex < profiles.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setProfiles([]);
+      toast.info('No more profiles for now. Check back later!');
     }
   };
 
@@ -152,15 +180,19 @@ export default function Discover() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-match" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-match mx-auto mb-4" />
+          <p className="text-muted-foreground">Finding great matches for you...</p>
+        </div>
       </div>
     );
   }
 
-  if (!currentProfile) {
+  if (!currentProfile || profiles.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <Card className="p-8 text-center max-w-md">
+          <p className="text-4xl mb-4">💕</p>
           <h2 className="text-2xl font-bold mb-4">You're all caught up!</h2>
           <p className="text-muted-foreground mb-6">
             Check back later for new profiles
@@ -282,9 +314,9 @@ export default function Discover() {
                   {currentProfile.basics.religion}
                 </Badge>
               )}
-              {currentProfile.basics.languages && (
+              {currentProfile.basics.languages && currentProfile.basics.languages.length > 0 && (
                 <Badge variant="secondary" className="py-1 px-3">
-                  <span className="text-muted-foreground mr-1">Languages:</span>
+                  <span className="text-muted-foreground mr-1">Interests:</span>
                   {currentProfile.basics.languages.join(', ')}
                 </Badge>
               )}
@@ -299,7 +331,11 @@ export default function Discover() {
               onClick={handlePass}
               disabled={actionLoading}
             >
-              <X className="h-6 w-6" />
+              {actionLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <X className="h-6 w-6" />
+              )}
               Pass
             </Button>
             <Button

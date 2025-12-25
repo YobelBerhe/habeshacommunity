@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/store/auth';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -18,34 +20,73 @@ interface Match {
 
 export default function MatchesList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMatches();
-  }, []);
+    if (user) {
+      fetchMatches();
+    }
+  }, [user]);
 
   const fetchMatches = async () => {
-    // Mock data - later connect to real matches
-    setMatches([
-      {
-        id: '1',
-        name: 'Sarah',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
-        lastMessage: 'Hi! Love your profile 😊',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        unread: true,
-      },
-      {
-        id: '2',
-        name: 'Meron',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-        lastMessage: 'Thanks for the like!',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        unread: false,
-      },
-    ]);
-    setLoading(false);
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Get mutual matches
+      const { data: mutualMatches, error } = await supabase
+        .from('match_interactions')
+        .select('target_user_id, created_at')
+        .eq('user_id', user.id)
+        .eq('action', 'like')
+        .eq('is_mutual', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (!mutualMatches || mutualMatches.length === 0) {
+        setMatches([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get profile info for matches
+      const matchUserIds = mutualMatches.map(m => m.target_user_id);
+      
+      const { data: profiles } = await supabase
+        .from('match_profiles')
+        .select('user_id, display_name, name, photos')
+        .in('user_id', matchUserIds);
+
+      // Create a map of profiles
+      const profileMap = new Map();
+      profiles?.forEach(p => {
+        profileMap.set(p.user_id, p);
+      });
+
+      // Format matches
+      const formatted: Match[] = mutualMatches.map(match => {
+        const profile = profileMap.get(match.target_user_id);
+
+        return {
+          id: match.target_user_id,
+          name: profile?.display_name || profile?.name || 'Someone Special',
+          avatar: profile?.photos?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
+          lastMessage: 'Say hi! 👋',
+          timestamp: new Date(match.created_at),
+          unread: false
+        };
+      });
+
+      setMatches(formatted);
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
