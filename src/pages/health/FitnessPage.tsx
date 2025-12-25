@@ -96,7 +96,7 @@ export default function FitnessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="bg-primary text-primary-foreground">
         <div className="max-w-lg mx-auto px-4 py-4">
