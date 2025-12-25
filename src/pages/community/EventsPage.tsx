@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/store/auth';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,13 +14,16 @@ import {
   MapPin,
   Users,
   Filter,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface Event {
   id: string;
   title: string;
+  description: string;
   date: Date;
   time: string;
   location: string;
@@ -32,97 +37,196 @@ interface Event {
   maxAttendees?: number;
   category: string;
   price: number;
+  isAttending: boolean;
 }
 
 export default function EventsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [user]);
 
   const fetchEvents = async () => {
-    setEvents([
-      {
-        id: '1',
-        title: 'Ethiopian New Year Celebration',
-        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        time: '6:00 PM',
-        location: 'Oakland Community Center',
-        type: 'in-person',
-        image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400',
-        organizer: {
-          name: 'Habesha Cultural Association',
-          avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100'
-        },
-        attendees: 87,
-        maxAttendees: 150,
-        category: 'Cultural',
-        price: 0
-      },
-      {
-        id: '2',
-        title: 'Tech Career Workshop',
-        date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        time: '2:00 PM',
-        location: 'Online via Zoom',
-        type: 'online',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400',
-        organizer: {
-          name: 'Habesha Professionals Network',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100'
-        },
-        attendees: 124,
-        category: 'Professional',
-        price: 0
-      },
-      {
-        id: '3',
-        title: 'Coffee Ceremony & Networking',
-        date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-        time: '10:00 AM',
-        location: 'San Francisco, CA',
-        type: 'in-person',
-        image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=400',
-        organizer: {
-          name: 'SF Bay Area Habesha Group',
-          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100'
-        },
-        attendees: 23,
-        maxAttendees: 30,
-        category: 'Social',
-        price: 0
-      },
-      {
-        id: '4',
-        title: 'Tigrinya Language Class',
-        date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-        time: '7:00 PM',
-        location: 'Berkeley Public Library',
-        type: 'in-person',
-        image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400',
-        organizer: {
-          name: 'Language Learning Circle',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
-        },
-        attendees: 15,
-        maxAttendees: 20,
-        category: 'Educational',
-        price: 15
-      },
-    ]);
+    try {
+      setLoading(true);
+
+      // Fetch published events
+      const { data: eventsData, error } = await supabase
+        .from('events')
+        .select(`
+          id,
+          title_en,
+          description_en,
+          start_date,
+          end_date,
+          venue_name,
+          address,
+          city,
+          state,
+          event_type,
+          location_type,
+          cover_image,
+          featured_image,
+          max_attendees,
+          organizer_id,
+          created_at
+        `)
+        .eq('status', 'published')
+        .gte('start_date', new Date().toISOString())
+        .order('start_date', { ascending: true })
+        .limit(30);
+
+      if (error) throw error;
+
+      if (!eventsData || eventsData.length === 0) {
+        setEvents([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get organizer profiles
+      const organizerIds = [...new Set(eventsData.map(e => e.organizer_id).filter(Boolean))];
+      
+      let profilesMap: Record<string, any> = {};
+      if (organizerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url')
+          .in('id', organizerIds);
+
+        profiles?.forEach(p => {
+          profilesMap[p.id] = p;
+        });
+      }
+
+      // Get attendee counts from event_rsvps
+      const eventIds = eventsData.map(e => e.id);
+      const { data: rsvpData } = await supabase
+        .from('event_rsvps')
+        .select('event_id, user_id')
+        .in('event_id', eventIds)
+        .eq('status', 'going');
+
+      const attendeeMap = new Map<string, number>();
+      rsvpData?.forEach(r => {
+        attendeeMap.set(r.event_id, (attendeeMap.get(r.event_id) || 0) + 1);
+      });
+
+      // Check if current user is attending
+      let userAttendingSet = new Set<string>();
+      if (user) {
+        const { data: userRsvps } = await supabase
+          .from('event_rsvps')
+          .select('event_id')
+          .eq('user_id', user.id)
+          .eq('status', 'going');
+        
+        userAttendingSet = new Set(userRsvps?.map(r => r.event_id) || []);
+      }
+
+      // Format for UI
+      const formatted: Event[] = eventsData.map(event => {
+        const organizer = profilesMap[event.organizer_id];
+        
+        return {
+          id: event.id,
+          title: event.title_en,
+          description: event.description_en || '',
+          date: new Date(event.start_date),
+          time: format(new Date(event.start_date), 'h:mm a'),
+          location: event.venue_name || event.address || `${event.city || ''}, ${event.state || ''}`.replace(/^, |, $/g, '') || 'TBD',
+          type: (event.location_type === 'virtual' ? 'online' : 'in-person') as 'in-person' | 'online',
+          image: event.cover_image || event.featured_image || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400',
+          organizer: {
+            name: organizer?.display_name || 'Community Organizer',
+            avatar: organizer?.avatar_url || ''
+          },
+          attendees: attendeeMap.get(event.id) || 0,
+          maxAttendees: event.max_attendees || undefined,
+          category: event.event_type || 'Social',
+          price: 0,
+          isAttending: userAttendingSet.has(event.id)
+        };
+      });
+
+      setEvents(formatted);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      toast.error('Failed to load events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAttend = async (eventId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error('Please sign in to RSVP');
+      return;
+    }
+
+    try {
+      const event = events.find(ev => ev.id === eventId);
+      if (!event) return;
+
+      if (event.isAttending) {
+        // Remove attendance
+        await supabase
+          .from('event_rsvps')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('user_id', user.id);
+        
+        toast.success('Removed from event');
+      } else {
+        // Add attendance
+        await supabase
+          .from('event_rsvps')
+          .insert({
+            event_id: eventId,
+            user_id: user.id,
+            status: 'going'
+          });
+        
+        toast.success("You're attending!");
+      }
+
+      // Refresh events
+      fetchEvents();
+    } catch (error) {
+      console.error('Error updating attendance:', error);
+      toast.error('Something went wrong');
+    }
   };
 
   const categories = ['All', 'Cultural', 'Social', 'Professional', 'Religious', 'Educational', 'Sports'];
 
   const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || event.category.toLowerCase() === selectedCategory.toLowerCase();
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="flex-1 pb-20">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Loading events...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 pb-20">
@@ -255,12 +359,10 @@ export default function EventsPage() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/community/events/${event.id}`);
-                      }}
+                      variant={event.isAttending ? 'outline' : 'default'}
+                      onClick={(e) => handleAttend(event.id, e)}
                     >
-                      Attend
+                      {event.isAttending ? 'Attending' : 'Attend'}
                     </Button>
                   </div>
                 </div>

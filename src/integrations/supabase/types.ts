@@ -1509,6 +1509,83 @@ export type Database = {
           },
         ]
       }
+      community_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          role: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "community_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_groups: {
+        Row: {
+          category: string | null
+          city: string | null
+          cover_image: string | null
+          created_at: string
+          creator_id: string | null
+          description: string | null
+          id: string
+          is_private: boolean | null
+          name: string
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          city?: string | null
+          cover_image?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          name: string
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          city?: string | null
+          cover_image?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          name?: string
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           booking_id: string | null
