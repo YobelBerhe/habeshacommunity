@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/store/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Plus, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Search, Loader2 } from 'lucide-react';
 import { format, addDays, subDays } from 'date-fns';
+import { toast } from 'sonner';
 
 interface FoodEntry {
   id: string;
@@ -18,33 +21,59 @@ interface FoodEntry {
 
 export default function NutritionPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [entries] = useState<FoodEntry[]>([
-    {
-      id: '1',
-      name: 'Injera with Shiro Wot',
-      calories: 420,
-      protein: 15,
-      carbs: 65,
-      fat: 12,
-      meal: 'lunch'
-    },
-    {
-      id: '2',
-      name: 'Ethiopian Coffee',
-      calories: 5,
-      protein: 0,
-      carbs: 1,
-      fat: 0,
-      meal: 'breakfast'
-    },
-  ]);
+  const [entries, setEntries] = useState<FoodEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const dailyGoals = {
     calories: 2000,
     protein: 150,
     carbs: 200,
     fat: 65
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchFoodLogs();
+    } else {
+      setLoading(false);
+    }
+  }, [user, selectedDate]);
+
+  const fetchFoodLogs = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+
+      const { data, error } = await supabase
+        .from('food_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('date', dateStr)
+        .order('time', { ascending: true });
+
+      if (error) throw error;
+
+      const formatted: FoodEntry[] = (data || []).map(log => ({
+        id: log.id,
+        name: log.food_name || 'Food Item',
+        calories: log.calories || 0,
+        protein: Number(log.protein_g) || 0,
+        carbs: Number(log.carbs_g) || 0,
+        fat: Number(log.fats_g) || 0,
+        meal: (log.meal_type || 'snacks') as 'breakfast' | 'lunch' | 'dinner' | 'snacks'
+      }));
+
+      setEntries(formatted);
+    } catch (error) {
+      console.error('Error fetching food logs:', error);
+      toast.error('Failed to load food logs');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const totals = entries.reduce(
@@ -71,6 +100,14 @@ export default function NutritionPage() {
   const getMealTotal = (meal: keyof typeof mealGroups) => {
     return mealGroups[meal].reduce((sum, entry) => sum + entry.calories, 0);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,7 +180,7 @@ export default function NutritionPage() {
                   strokeWidth="12"
                   fill="none"
                   strokeDasharray={440}
-                  strokeDashoffset={440 - (440 * (totals.calories / dailyGoals.calories))}
+                  strokeDashoffset={440 - (440 * Math.min(totals.calories / dailyGoals.calories, 1))}
                   className="text-primary"
                   strokeLinecap="round"
                 />
@@ -182,7 +219,7 @@ export default function NutritionPage() {
                   {totals.protein}g / {dailyGoals.protein}g
                 </span>
               </div>
-              <Progress value={(totals.protein / dailyGoals.protein) * 100} className="h-2" />
+              <Progress value={Math.min((totals.protein / dailyGoals.protein) * 100, 100)} className="h-2" />
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
@@ -191,7 +228,7 @@ export default function NutritionPage() {
                   {totals.carbs}g / {dailyGoals.carbs}g
                 </span>
               </div>
-              <Progress value={(totals.carbs / dailyGoals.carbs) * 100} className="h-2" />
+              <Progress value={Math.min((totals.carbs / dailyGoals.carbs) * 100, 100)} className="h-2" />
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
@@ -200,7 +237,7 @@ export default function NutritionPage() {
                   {totals.fat}g / {dailyGoals.fat}g
                 </span>
               </div>
-              <Progress value={(totals.fat / dailyGoals.fat) * 100} className="h-2" />
+              <Progress value={Math.min((totals.fat / dailyGoals.fat) * 100, 100)} className="h-2" />
             </div>
           </div>
         </Card>
