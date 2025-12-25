@@ -4,20 +4,13 @@ import { useAuth } from '@/store/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Book, Heart, Users, ShoppingBag, Calendar, Activity,
-  Bell, Settings, LogOut, ChevronRight, Sparkles
+  ChevronRight, MessageCircle
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import { GlobalHeader } from '@/components/navigation/GlobalHeader';
 
 interface CategoryConfig {
   id: string;
@@ -27,6 +20,7 @@ interface CategoryConfig {
   bgColor: string;
   href: string;
   description: string;
+  badge?: number;
 }
 
 const ALL_CATEGORIES: CategoryConfig[] = [
@@ -34,8 +28,8 @@ const ALL_CATEGORIES: CategoryConfig[] = [
     id: 'spiritual', 
     label: 'Spiritual', 
     icon: Book, 
-    color: 'text-spiritual',
-    bgColor: 'bg-spiritual',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-500',
     href: '/spiritual/today',
     description: 'Bible, prayers, reading plans'
   },
@@ -43,8 +37,8 @@ const ALL_CATEGORIES: CategoryConfig[] = [
     id: 'match', 
     label: 'Match', 
     icon: Heart, 
-    color: 'text-match',
-    bgColor: 'bg-match',
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-500',
     href: '/match/discover',
     description: 'Find your life partner'
   },
@@ -52,8 +46,8 @@ const ALL_CATEGORIES: CategoryConfig[] = [
     id: 'mentor', 
     label: 'Mentor', 
     icon: Users, 
-    color: 'text-mentor',
-    bgColor: 'bg-mentor',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-500',
     href: '/mentor',
     description: 'Get guidance & advice'
   },
@@ -61,8 +55,8 @@ const ALL_CATEGORIES: CategoryConfig[] = [
     id: 'marketplace', 
     label: 'Marketplace', 
     icon: ShoppingBag, 
-    color: 'text-marketplace',
-    bgColor: 'bg-marketplace',
+    color: 'text-green-600',
+    bgColor: 'bg-green-500',
     href: '/marketplace',
     description: 'Jobs, housing, products'
   },
@@ -70,8 +64,8 @@ const ALL_CATEGORIES: CategoryConfig[] = [
     id: 'community', 
     label: 'Community', 
     icon: Calendar, 
-    color: 'text-community',
-    bgColor: 'bg-community',
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-500',
     href: '/community',
     description: 'Events, groups, forums'
   },
@@ -79,10 +73,19 @@ const ALL_CATEGORIES: CategoryConfig[] = [
     id: 'health', 
     label: 'Health', 
     icon: Activity, 
-    color: 'text-health',
-    bgColor: 'bg-health',
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-500',
     href: '/health',
     description: 'Nutrition, fitness, wellness'
+  },
+  { 
+    id: 'inbox', 
+    label: 'Inbox', 
+    icon: MessageCircle, 
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-500',
+    href: '/inbox',
+    description: 'Messages & conversations'
   },
 ];
 
@@ -90,17 +93,16 @@ export default function Hub() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [userName, setUserName] = useState('Friend');
-  const [userInitials, setUserInitials] = useState('U');
   const [visibleCategories, setVisibleCategories] = useState<string[]>(ALL_CATEGORIES.map(c => c.id));
   const [hiddenCategories, setHiddenCategories] = useState<string[]>([]);
   const [lastActiveCategory, setLastActiveCategory] = useState<string | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [greeting, setGreeting] = useState('Good morning');
 
   useEffect(() => {
     if (user) {
       fetchUserProfile();
-      fetchUnreadCount();
+      fetchUnreadMessages();
       setGreeting(getGreeting());
     }
   }, [user]);
@@ -113,53 +115,38 @@ export default function Hub() {
   };
 
   const fetchUserProfile = async () => {
+    if (!user) return;
+    
     const { data } = await supabase
       .from('profiles')
       .select('display_name, visible_categories, hidden_categories')
-      .eq('id', user?.id)
+      .eq('id', user.id)
       .single();
     
     if (data) {
       if (data.display_name) {
         setUserName(data.display_name.split(' ')[0]);
-        setUserInitials(
-          data.display_name
-            .split(' ')
-            .map((n: string) => n[0])
-            .join('')
-            .substring(0, 2)
-            .toUpperCase()
-        );
       }
       
       setVisibleCategories(data.visible_categories || ALL_CATEGORIES.map(c => c.id));
       setHiddenCategories(data.hidden_categories || []);
       
       // Get last active category from localStorage
-      const lastActive = localStorage.getItem(`lastActiveCategory_${user?.id}`);
+      const lastActive = localStorage.getItem(`lastActiveCategory_${user.id}`);
       setLastActiveCategory(lastActive);
     }
   };
 
-  const fetchUnreadCount = async () => {
-    const { count } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user?.id)
-      .eq('read', false);
-    
-    setUnreadCount(count || 0);
+  const fetchUnreadMessages = async () => {
+    // Placeholder - would query messages table if available
+    setUnreadMessages(0);
   };
 
   const handleCategoryClick = (categoryId: string, href: string) => {
-    // Save as last active category
-    localStorage.setItem(`lastActiveCategory_${user?.id}`, categoryId);
+    if (user) {
+      localStorage.setItem(`lastActiveCategory_${user.id}`, categoryId);
+    }
     navigate(href);
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
   };
 
   const activeCategories = ALL_CATEGORIES.filter(cat => 
@@ -174,75 +161,18 @@ export default function Hub() {
     ? ALL_CATEGORIES.find(c => c.id === lastActiveCategory)
     : null;
 
+  // Add unread badge to inbox category
+  const categoriesWithBadges = activeCategories.map(cat => {
+    if (cat.id === 'inbox' && unreadMessages > 0) {
+      return { ...cat, badge: unreadMessages };
+    }
+    return cat;
+  });
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="h-14 flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-foreground">
-                HabeshaCommunity
-              </span>
-            </div>
-
-            {/* Right Actions */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative"
-                onClick={() => navigate('/notifications')}
-              >
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </Badge>
-                )}
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                        {userInitials}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{userName}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/account/dashboard')}>
-                    <Users className="mr-2 h-4 w-4" />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/account/settings')}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/hub/manage-categories')}>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Manage Categories
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Global Header */}
+      <GlobalHeader showSearch />
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 py-6 pb-24">
@@ -262,8 +192,7 @@ export default function Hub() {
         {/* Continue Card */}
         {continueCategory && visibleCategories.includes(continueCategory.id) && (
           <Card 
-            className="mb-6 p-4 cursor-pointer hover:shadow-md transition-shadow border-l-4"
-            style={{ borderLeftColor: `hsl(var(--${continueCategory.id}))` }}
+            className="mb-6 p-4 cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-primary"
             onClick={() => handleCategoryClick(continueCategory.id, continueCategory.href)}
           >
             <div className="flex items-center gap-4">
@@ -282,16 +211,31 @@ export default function Hub() {
 
         {/* Your Categories */}
         <section className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Your Services</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Your Services</h2>
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => navigate('/hub/manage-categories')}
+              className="text-primary"
+            >
+              Manage
+            </Button>
+          </div>
           <div className="grid grid-cols-2 gap-4">
-            {activeCategories.map((category) => {
+            {categoriesWithBadges.map((category) => {
               const Icon = category.icon;
               return (
                 <Card 
                   key={category.id}
-                  className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+                  className="p-4 cursor-pointer hover:shadow-md transition-shadow relative"
                   onClick={() => handleCategoryClick(category.id, category.href)}
                 >
+                  {category.badge !== undefined && category.badge > 0 && (
+                    <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                      {category.badge}
+                    </Badge>
+                  )}
                   <div className={`w-12 h-12 rounded-full ${category.bgColor}/10 flex items-center justify-center mb-3`}>
                     <Icon className={`h-6 w-6 ${category.color}`} />
                   </div>
@@ -326,7 +270,10 @@ export default function Hub() {
                       variant="outline" 
                       size="sm" 
                       className="mt-3 w-full"
-                      onClick={() => navigate('/hub/manage-categories')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('/hub/manage-categories');
+                      }}
                     >
                       Enable
                     </Button>
