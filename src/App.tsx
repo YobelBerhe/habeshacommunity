@@ -19,7 +19,7 @@ import { PerformanceDebug } from "@/components/PerformanceDebug";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { useAuth } from "@/store/auth";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
-import { useMatchNotifications } from "@/hooks/useMatchNotifications";
+import { MatchNotificationListener } from "@/components/MatchNotificationListener";
 import { MatchFlowGuard } from "@/components/match/MatchFlowGuard";
 import { MatchBottomNav } from "@/components/match/MatchBottomNav";
 import Header from "@/components/Header";
@@ -207,7 +207,6 @@ const App = () => {
   const { user } = useAuth();
   useServiceWorker();
   usePerformanceMonitor();
-  useMatchNotifications();
 
   // Ctrl+Z to undo
   useKeyboardShortcut('z', () => {
@@ -250,6 +249,7 @@ const App = () => {
             onDismiss={() => setShowUndoBanner(false)}
           />
           <BrowserRouter>
+            {user && <MatchNotificationListener />}
             {user && <LiveUpdateStream />}
             <HeaderWrapper />
             <Suspense fallback={<PageLoader />}>
