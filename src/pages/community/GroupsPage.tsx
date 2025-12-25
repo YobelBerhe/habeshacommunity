@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/store/auth';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Users, MapPin, Filter } from 'lucide-react';
+import { Search, Plus, Users, MapPin, Filter, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Group {
   id: string;
@@ -20,61 +23,136 @@ interface Group {
 
 export default function GroupsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchGroups();
-  }, []);
+  }, [user]);
 
   const fetchGroups = async () => {
-    setGroups([
-      {
-        id: '1',
-        name: 'SF Bay Area Habesha Professionals',
-        description: 'A community of Ethiopian and Eritrean professionals in the Bay Area',
-        image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400',
-        members: 847,
-        category: 'Professional',
-        location: 'San Francisco Bay Area',
-        isPrivate: false,
-        isMember: true
-      },
-      {
-        id: '2',
-        name: 'Habesha Book Club',
-        description: 'Monthly discussions of books by African authors and about African history',
-        image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=400',
-        members: 234,
-        category: 'Social',
-        location: 'Virtual',
-        isPrivate: false,
-        isMember: false
-      },
-      {
-        id: '3',
-        name: 'Orthodox Bible Study Group',
-        description: 'Weekly Bible study and spiritual growth for Orthodox Christians',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-        members: 456,
-        category: 'Religious',
-        location: 'Oakland, CA',
-        isPrivate: true,
-        isMember: true
-      },
-      {
-        id: '4',
-        name: 'Habesha Soccer League',
-        description: 'Weekend soccer games and tournaments for all skill levels',
-        image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400',
-        members: 189,
-        category: 'Sports',
-        location: 'San Jose, CA',
-        isPrivate: false,
-        isMember: false
-      },
-    ]);
+    try {
+      setLoading(true);
+
+      const { data: groupsData, error } = await supabase
+        .from('community_groups')
+        .select(`
+          id,
+          name,
+          description,
+          category,
+          cover_image,
+          city,
+          state,
+          is_private,
+          created_at
+        `)
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (error) throw error;
+
+      if (!groupsData || groupsData.length === 0) {
+        setGroups([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get member counts
+      const groupIds = groupsData.map(g => g.id);
+      const { data: memberData } = await supabase
+        .from('community_group_members')
+        .select('group_id, user_id')
+        .in('group_id', groupIds)
+        .eq('status', 'active');
+
+      const memberMap = new Map<string, number>();
+      memberData?.forEach(m => {
+        memberMap.set(m.group_id, (memberMap.get(m.group_id) || 0) + 1);
+      });
+
+      // Check if user is member
+      let userMemberships = new Set<string>();
+      if (user) {
+        const { data: memberships } = await supabase
+          .from('community_group_members')
+          .select('group_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+        
+        userMemberships = new Set(memberships?.map(m => m.group_id) || []);
+      }
+
+      // Format for UI
+      const formatted: Group[] = groupsData.map(group => ({
+        id: group.id,
+        name: group.name,
+        description: group.description || '',
+        image: group.cover_image || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400',
+        members: memberMap.get(group.id) || 1,
+        category: group.category || 'Social',
+        location: group.city && group.state ? `${group.city}, ${group.state}` : 'Virtual',
+        isPrivate: group.is_private || false,
+        isMember: userMemberships.has(group.id)
+      }));
+
+      setGroups(formatted);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+      toast.error('Failed to load groups');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinGroup = async (groupId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error('Please sign in to join groups');
+      return;
+    }
+
+    try {
+      const group = groups.find(g => g.id === groupId);
+      if (!group) return;
+
+      if (group.isMember) {
+        // Leave group
+        await supabase
+          .from('community_group_members')
+          .delete()
+          .eq('group_id', groupId)
+          .eq('user_id', user.id);
+        
+        toast.success('Left group');
+      } else {
+        // Join group
+        await supabase
+          .from('community_group_members')
+          .insert({
+            group_id: groupId,
+            user_id: user.id,
+            status: group.isPrivate ? 'pending' : 'active',
+            role: 'member'
+          });
+        
+        if (group.isPrivate) {
+          toast.success('Join request sent');
+        } else {
+          toast.success('Joined group!');
+        }
+      }
+
+      // Refresh groups
+      fetchGroups();
+    } catch (error) {
+      console.error('Error joining group:', error);
+      toast.error('Something went wrong');
+    }
   };
 
   const categories = ['All', 'Professional', 'Social', 'Religious', 'Educational', 'Sports', 'Cultural'];
@@ -85,6 +163,19 @@ export default function GroupsPage() {
     const matchesCategory = selectedCategory === 'All' || group.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="flex-1 pb-20">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Loading groups...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 pb-20">
@@ -191,9 +282,7 @@ export default function GroupsPage() {
                 <Button
                   className="w-full"
                   variant={group.isMember ? 'outline' : 'default'}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
+                  onClick={(e) => handleJoinGroup(group.id, e)}
                 >
                   {group.isMember ? 'View Group' : 'Join Group'}
                 </Button>
