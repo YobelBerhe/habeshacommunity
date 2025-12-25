@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Book, Heart, Users, ShoppingBag, Calendar, Activity,
-  Bell, Search, Settings, LogOut, ChevronRight, Sparkles
+  Bell, Settings, LogOut, ChevronRight, Sparkles
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
+import { GlobalSearch } from '@/components/GlobalSearch';
 
 interface CategoryConfig {
   id: string;
@@ -190,14 +191,6 @@ export default function Hub() {
             <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
-                size="icon"
-                onClick={() => navigate('/search')}
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-
-              <Button 
-                variant="ghost" 
                 size="icon" 
                 className="relative"
                 onClick={() => navigate('/notifications')}
@@ -254,11 +247,16 @@ export default function Hub() {
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 py-6 pb-24">
         {/* Greeting */}
-        <div className="mb-6">
+        <div className="mb-4">
           <h1 className="text-2xl font-bold text-foreground">
             {greeting}, {userName} 👋
           </h1>
           <p className="text-muted-foreground">Welcome to your community hub</p>
+        </div>
+
+        {/* Global Search */}
+        <div className="mb-6">
+          <GlobalSearch />
         </div>
 
         {/* Continue Card */}

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Share2, Play, ChevronRight, BookOpen } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Play, ChevronRight, BookOpen, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 interface VerseOfDay {
   text: string;
@@ -16,18 +18,68 @@ export default function Today() {
   const [verse, setVerse] = useState<VerseOfDay | null>(null);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(1234);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchVerseOfDay();
   }, []);
 
   const fetchVerseOfDay = async () => {
-    // For now, use a static verse. Later connect to API
-    setVerse({
-      text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
-      reference: "John 3:16",
-      imageUrl: "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=800&h=400&fit=crop"
-    });
+    try {
+      setLoading(true);
+      const today = format(new Date(), 'yyyy-MM-dd');
+
+      // Try to fetch from database first
+      const { data: votdData, error } = await supabase
+        .from('verse_of_the_day')
+        .select(`
+          id,
+          date,
+          usfm,
+          images,
+          verse_id,
+          bible_verses (
+            text,
+            usfm
+          )
+        `)
+        .eq('date', today)
+        .single();
+
+      if (!error && votdData) {
+        const verseText = (votdData.bible_verses as any)?.text || '';
+        const reference = votdData.usfm?.replace(/\./g, ' ').replace(':', ':') || 'John 3:16';
+        const images = votdData.images as string[] | null;
+        
+        setVerse({
+          text: verseText || "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+          reference: reference,
+          imageUrl: images?.[0] || 'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=800&h=400&fit=crop'
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to Bible API
+      const response = await fetch('https://bible-api.com/john 3:16?translation=kjv');
+      const data = await response.json();
+      
+      setVerse({
+        text: data.text?.trim() || "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+        reference: data.reference || "John 3:16",
+        imageUrl: 'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=800&h=400&fit=crop'
+      });
+    } catch (error) {
+      console.error('Error fetching verse:', error);
+      // Use fallback verse
+      setVerse({
+        text: "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+        reference: "John 3:16",
+        imageUrl: 'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=800&h=400&fit=crop'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLike = () => {
@@ -51,8 +103,16 @@ export default function Today() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
         <div className="max-w-lg mx-auto px-4 py-3">
@@ -102,7 +162,7 @@ export default function Today() {
                 variant="ghost" 
                 size="sm" 
                 className="gap-1"
-                onClick={() => toast.info('Comments coming soon!')}
+                onClick={() => navigate('/spiritual/verse-of-the-day')}
               >
                 <MessageCircle className="h-4 w-4" />
                 234
@@ -120,7 +180,7 @@ export default function Today() {
           <h2 className="text-lg font-semibold mb-3 text-foreground">Guided Scripture</h2>
           <Card 
             className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => toast.info('Audio devotionals coming soon!')}
+            onClick={() => navigate('/spiritual/bible')}
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-spiritual/10 flex items-center justify-center">
