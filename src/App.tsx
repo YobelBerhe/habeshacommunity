@@ -27,7 +27,7 @@ import BootstrapAuth from "@/components/BootstrapAuth";
 
 // Lazy load all page components
 const Index = lazy(() => import("./pages/Index"));
-const Home = lazy(() => import("./pages/Home"));
+const Home = lazy(() => import("./pages/HabeshaCommunityHome"));
 const Hub = lazy(() => import("./pages/Hub"));
 const ManageCategories = lazy(() => import("./pages/hub/ManageCategories"));
 
@@ -194,7 +194,7 @@ const queryClient = new QueryClient({
 // Component to conditionally show header
 const HeaderWrapper = () => {
   const location = useLocation();
-  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/spiritual', '/match', '/mentor', '/marketplace', '/community', '/health'];
+  const hideHeaderRoutes = ['/auth/login', '/auth/register', '/auth/reset', '/auth/callback', '/onboarding', '/hub', '/home', '/spiritual', '/match', '/mentor', '/marketplace', '/community', '/health'];
   const shouldHideHeader = hideHeaderRoutes.some(route => location.pathname.startsWith(route));
   
   if (shouldHideHeader) return null;
