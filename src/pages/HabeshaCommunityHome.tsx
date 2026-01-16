@@ -165,6 +165,71 @@ const EXTENDED_SERVICES: ServiceTile[] = [
   { id: 'fasting', name: 'Fasting', icon: () => <Moon className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600" />, href: '/health/fasting', bgColor: 'bg-violet-50' }
 ];
 
+// Featured promos/restaurants data
+const PROMO_CARDS = [
+  {
+    id: 1,
+    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=300&fit=crop',
+    title: 'Ethiopian Cuisine Festival',
+    subtitle: 'Enjoy 15% off traditional dishes',
+    tag: 'Featured',
+    tagColor: 'bg-emerald-500'
+  },
+  {
+    id: 2,
+    image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop',
+    title: 'Habesha Food Week',
+    subtitle: 'Special discounts on injera platters',
+    tag: 'New',
+    tagColor: 'bg-orange-500'
+  }
+];
+
+const FEATURED_PLACES = [
+  {
+    id: 1,
+    image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&h=200&fit=crop',
+    name: 'Addis Kitchen',
+    discount: '33% OFF',
+    rating: 4.8
+  },
+  {
+    id: 2,
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=200&fit=crop',
+    name: 'Habesha Grill',
+    discount: 'Up to 15% OFF',
+    rating: 4.6
+  },
+  {
+    id: 3,
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&h=200&fit=crop',
+    name: 'Eritrean Cafe',
+    discount: '10% OFF',
+    rating: 4.5
+  }
+];
+
+const RECOMMENDED_PLACES = [
+  {
+    id: 1,
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop',
+    name: 'Mesob Restaurant',
+    cuisine: 'Ethiopian'
+  },
+  {
+    id: 2,
+    image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=300&h=300&fit=crop',
+    name: 'Axum Coffee House',
+    cuisine: 'Coffee & Pastries'
+  },
+  {
+    id: 3,
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=300&fit=crop',
+    name: 'Selam Bistro',
+    cuisine: 'Fusion'
+  }
+];
+
 // ============================================
 // MAIN COMPONENT
 // ============================================
@@ -297,24 +362,24 @@ export default function HabeshaCommunityHome() {
       {/* Main scrollable content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-          {/* Services Grid */}
-          <div className="bg-white px-4 lg:px-8 pt-6 pb-8">
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-3 sm:gap-4 lg:gap-6">
+          {/* Services Grid - Mobile: 4 columns, 2 rows | Desktop: 8 columns */}
+          <div className="bg-white px-4 lg:px-8 pt-6 pb-6">
+            <div className="grid grid-cols-4 lg:grid-cols-8 gap-y-4 gap-x-2 sm:gap-4 lg:gap-6">
               {MAIN_SERVICES.map((service) => {
                 const IconComponent = service.icon;
                 return (
                   <button
                     key={service.id}
                     onClick={() => handleServiceClick(service)}
-                    className="flex flex-col items-center gap-2 group"
+                    className="flex flex-col items-center gap-1.5 sm:gap-2 group"
                   >
                     <div className={cn(
-                      "w-14 h-14 sm:w-[72px] sm:h-[72px] lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105",
+                      "w-16 h-16 sm:w-[72px] sm:h-[72px] lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105",
                       service.bgColor
                     )}>
                       <IconComponent />
                     </div>
-                    <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-gray-900">{service.name}</span>
+                    <span className="text-xs sm:text-xs lg:text-sm font-semibold text-gray-900">{service.name}</span>
                   </button>
                 );
               })}
@@ -325,7 +390,7 @@ export default function HabeshaCommunityHome() {
           <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:px-8">
             {/* Main content area */}
             <div className="lg:col-span-2">
-              {/* Quick Action Cards */}
+              {/* Quick Action Cards - horizontal scroll on mobile, grid on desktop */}
               <div className="px-4 lg:px-0 py-4 flex lg:grid lg:grid-cols-3 gap-3 overflow-x-auto lg:overflow-visible scrollbar-hide">
                 {/* Points Card */}
                 <div className="flex-shrink-0 w-32 sm:w-36 lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100">
@@ -365,7 +430,7 @@ export default function HabeshaCommunityHome() {
               </div>
 
               {/* Hero Banner Section */}
-              <div className="relative mt-2 lg:mt-4 overflow-hidden bg-gradient-to-b from-emerald-100 via-emerald-50 to-amber-50 min-h-[320px] sm:min-h-[380px] lg:rounded-2xl">
+              <div className="relative mt-2 lg:mt-4 overflow-hidden bg-gradient-to-b from-emerald-100 via-emerald-50 to-amber-50 min-h-[280px] sm:min-h-[340px] lg:rounded-2xl">
                 {/* Ethiopian Pattern Decoration */}
                 <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 opacity-20">
                   <svg viewBox="0 0 200 200" fill="none">
@@ -387,12 +452,12 @@ export default function HabeshaCommunityHome() {
                   </div>
                   <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">Find mentors, matches & community events</p>
 
-                  {/* Promo Cards */}
-                  <div className="flex lg:grid lg:grid-cols-3 gap-3 overflow-x-auto lg:overflow-visible pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6 scrollbar-hide">
+                  {/* Promo Cards - horizontal scroll */}
+                  <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6 scrollbar-hide">
                     {/* Card 1 - Match */}
                     <button 
                       onClick={() => navigate('/match')}
-                      className="flex-shrink-0 w-44 sm:w-52 lg:w-full h-28 sm:h-32 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm text-left hover:scale-[1.02] transition-transform"
+                      className="flex-shrink-0 w-40 sm:w-48 lg:w-52 h-28 sm:h-32 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm text-left hover:scale-[1.02] transition-transform"
                     >
                       <div>
                         <h3 className="text-sm sm:text-base font-bold text-white leading-tight">Find Your</h3>
@@ -406,7 +471,7 @@ export default function HabeshaCommunityHome() {
                     {/* Card 2 - Mentor */}
                     <button 
                       onClick={() => navigate('/mentor')}
-                      className="flex-shrink-0 w-44 sm:w-52 lg:w-full h-28 sm:h-32 bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm text-left hover:scale-[1.02] transition-transform"
+                      className="flex-shrink-0 w-40 sm:w-48 lg:w-52 h-28 sm:h-32 bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm text-left hover:scale-[1.02] transition-transform"
                     >
                       <div>
                         <h3 className="text-sm sm:text-base font-bold text-white leading-tight">Book a</h3>
@@ -420,7 +485,7 @@ export default function HabeshaCommunityHome() {
                     {/* Card 3 - Community */}
                     <button 
                       onClick={() => navigate('/community/events')}
-                      className="flex-shrink-0 w-44 sm:w-52 lg:w-full h-28 sm:h-32 bg-gradient-to-br from-blue-400 to-blue-500 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm text-left hover:scale-[1.02] transition-transform"
+                      className="flex-shrink-0 w-40 sm:w-48 lg:w-52 h-28 sm:h-32 bg-gradient-to-br from-blue-400 to-blue-500 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm text-left hover:scale-[1.02] transition-transform"
                     >
                       <div>
                         <h3 className="text-sm sm:text-base font-bold text-white leading-tight">Upcoming</h3>
@@ -438,6 +503,101 @@ export default function HabeshaCommunityHome() {
               <div className="bg-gray-800 text-white px-4 sm:px-6 lg:px-6 py-3 sm:py-4 flex items-center justify-between lg:rounded-b-2xl lg:mt-0">
                 <span className="text-xs sm:text-sm">Connecting the Habesha diaspora worldwide 🇪🇹🇪🇷</span>
                 <ChevronRight className="w-4 h-4" />
+              </div>
+
+              {/* ============================================ */}
+              {/* SECONDARY CONTENT SECTIONS - Below the fold */}
+              {/* ============================================ */}
+
+              {/* Featured Promos Section - Horizontal Scroll */}
+              <div className="px-4 lg:px-0 py-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">Learn More</h3>
+                  <button className="flex items-center gap-1 text-emerald-600 font-medium text-sm">
+                    <span>Star</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                  {PROMO_CARDS.map((promo) => (
+                    <div key={promo.id} className="flex-shrink-0 w-72 sm:w-80 lg:w-[calc(50%-0.5rem)]">
+                      <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+                        <img 
+                          src={promo.image} 
+                          alt={promo.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <span className={cn("px-2 py-0.5 rounded text-xs font-semibold text-white mb-2 inline-block", promo.tagColor)}>
+                            {promo.tag}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{promo.title}</h4>
+                        <p className="text-xs sm:text-sm text-gray-500">Ad · {promo.subtitle}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Eating Out / Featured Places Section */}
+              <div className="px-4 lg:px-0 py-6 bg-white lg:bg-transparent lg:rounded-2xl">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+                  Eating out? Explore Community Spots
+                </h3>
+                
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                  {FEATURED_PLACES.map((place) => (
+                    <div key={place.id} className="flex-shrink-0 w-40 sm:w-48">
+                      <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+                        <img 
+                          src={place.image} 
+                          alt={place.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <p className="text-white font-semibold text-sm truncate">{place.name}</p>
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <span className="text-orange-500 font-bold text-sm">{place.discount}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Restaurants You May Like Section */}
+              <div className="px-4 lg:px-0 py-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">Places you may like</h3>
+                  <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <ArrowRight className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+                
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                  {RECOMMENDED_PLACES.map((place) => (
+                    <div key={place.id} className="flex-shrink-0 w-40 sm:w-48">
+                      <div className="rounded-2xl overflow-hidden aspect-square">
+                        <img 
+                          src={place.image} 
+                          alt={place.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="mt-2">
+                        <h4 className="font-semibold text-gray-900 text-sm truncate">{place.name}</h4>
+                        <p className="text-xs text-gray-500">{place.cuisine}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -550,7 +710,7 @@ export default function HabeshaCommunityHome() {
           {/* Wallet */}
           <button className="flex flex-col items-center gap-1 px-3">
             <Wallet className="w-6 h-6 text-gray-400" />
-            <span className="text-xs font-medium text-gray-500">Wallet</span>
+            <span className="text-xs font-medium text-gray-500">Payment</span>
           </button>
 
           {/* Activity */}
