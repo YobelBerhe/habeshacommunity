@@ -7,12 +7,131 @@ import {
   Activity, Church, Calendar, Flame, Star,
   MessageCircle, Home as HomeIcon, Wallet,
   Grid3X3, X, ArrowRight, Sparkles, TrendingUp,
-  BookOpen, Dumbbell, UtensilsCrossed, Moon
+  BookOpen, Dumbbell, UtensilsCrossed, Moon,
+  Menu, Compass, History
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+
+// ============================================
+// CUSTOM SVG SERVICE ICONS (Grab-style)
+// ============================================
+
+const HealthIcon = () => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 38L12 26C8 22 8 16 12 12C16 8 22 8 24 14C26 8 32 8 36 12C40 16 40 22 36 26L24 38Z" fill="#10B981" />
+      <path d="M20 22H28M24 18V26" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  </div>
+);
+
+const MatchIcon = () => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="7" fill="#EC4899" />
+      <circle cx="30" cy="18" r="7" fill="#F472B6" />
+      <path d="M24 38L14 28C11 25 11 20 14 17L24 27L34 17C37 20 37 25 34 28L24 38Z" fill="#EC4899" />
+    </svg>
+  </div>
+);
+
+const MarketIcon = () => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="12" y="18" width="24" height="20" fill="#10B981" rx="2" />
+      <path d="M16 16V12C16 9.79 17.79 8 20 8H28C30.21 8 32 9.79 32 12V16" stroke="#F97316" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <circle cx="24" cy="12" r="2" fill="#F97316" />
+      <rect x="15" y="22" width="5" height="5" fill="#6EE7B7" rx="1" />
+      <rect x="21.5" y="22" width="5" height="5" fill="#6EE7B7" rx="1" />
+      <rect x="28" y="22" width="5" height="5" fill="#6EE7B7" rx="1" />
+      <rect x="15" y="29" width="5" height="5" fill="#6EE7B7" rx="1" />
+      <rect x="21.5" y="29" width="5" height="5" fill="#6EE7B7" rx="1" />
+      <rect x="28" y="29" width="5" height="5" fill="#6EE7B7" rx="1" />
+    </svg>
+  </div>
+);
+
+const MentorIcon = () => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="16" r="8" fill="#8B5CF6" />
+      <path d="M12 40C12 30 17 26 24 26C31 26 36 30 36 40" fill="#A78BFA" />
+      <path d="M20 14L24 10L28 14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="24" cy="16" r="3" fill="white" />
+    </svg>
+  </div>
+);
+
+const CommunityIcon = () => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="16" r="6" fill="#3B82F6" />
+      <circle cx="14" cy="22" r="5" fill="#60A5FA" />
+      <circle cx="34" cy="22" r="5" fill="#60A5FA" />
+      <path d="M8 42C8 34 12 30 18 30" fill="#93C5FD" />
+      <path d="M40 42C40 34 36 30 30 30" fill="#93C5FD" />
+      <path d="M14 42C14 32 18 28 24 28C30 28 34 32 34 42" fill="#3B82F6" />
+    </svg>
+  </div>
+);
+
+const SpiritualIcon = () => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="12" y="8" width="24" height="32" rx="2" fill="#F59E0B" />
+      <rect x="14" y="10" width="20" height="28" rx="1" fill="#FEF3C7" />
+      <path d="M24 14V26M20 20H28" stroke="#B45309" strokeWidth="2" strokeLinecap="round" />
+      <path d="M18 32H30" stroke="#D97706" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M18 35H26" stroke="#D97706" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  </div>
+);
+
+const ChurchIcon = () => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 6V12" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
+      <path d="M20 9H28" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
+      <path d="M16 40V24L24 16L32 24V40H16Z" fill="#FEE2E2" />
+      <path d="M12 40V28L24 18L36 28V40H12Z" fill="#DC2626" />
+      <rect x="21" y="32" width="6" height="8" fill="#7F1D1D" />
+      <circle cx="24" cy="26" r="3" fill="#FEE2E2" />
+    </svg>
+  </div>
+);
+
+const AllServicesIcon = () => (
+  <div className="w-12 h-12 flex items-center justify-center">
+    <div className="grid grid-cols-2 gap-1">
+      <div className="w-4 h-4 bg-emerald-600 rounded-md"></div>
+      <div className="w-4 h-4 bg-emerald-500 rounded-md"></div>
+      <div className="w-4 h-4 bg-emerald-500 rounded-md"></div>
+      <div className="w-4 h-4 bg-emerald-600 rounded-md"></div>
+    </div>
+  </div>
+);
+
+// Quick action icons
+const WalletIconSmall = () => (
+  <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+    <Wallet className="w-4 h-4 text-white" />
+  </div>
+);
+
+const HeartIconSmall = () => (
+  <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+    <Heart className="w-4 h-4 text-white" fill="white" />
+  </div>
+);
+
+const PointsIconSmall = () => (
+  <div className="w-8 h-8 flex items-center justify-center">
+    <span className="text-xl">✨</span>
+  </div>
+);
 
 // ============================================
 // TYPES & CONSTANTS
@@ -21,413 +140,30 @@ import { cn } from '@/lib/utils';
 interface ServiceTile {
   id: string;
   name: string;
-  icon: React.ReactNode;
+  icon: React.FC;
   href: string;
-  color: string;
   bgColor: string;
-  description?: string;
 }
 
-interface QuickAction {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  href: string;
-  badge?: string;
-}
-
-interface ActivityItem {
-  id: string;
-  type: 'match' | 'event' | 'mentor' | 'health' | 'spiritual' | 'marketplace';
-  title: string;
-  description: string;
-  href: string;
-  icon: React.ReactNode;
-  color: string;
-  count?: number;
-}
-
-// Main 6 Pillars - Primary Services
 const MAIN_SERVICES: ServiceTile[] = [
-  {
-    id: 'health',
-    name: 'Health',
-    icon: <Activity className="w-8 h-8" />,
-    href: '/health',
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
-    description: 'Track nutrition, fitness & fasting'
-  },
-  {
-    id: 'match',
-    name: 'Match',
-    icon: <Heart className="w-8 h-8" />,
-    href: '/match',
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50',
-    description: 'Find your soulmate'
-  },
-  {
-    id: 'marketplace',
-    name: 'Market',
-    icon: <ShoppingBag className="w-8 h-8" />,
-    href: '/marketplace',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
-    description: 'Buy, sell & find jobs'
-  },
-  {
-    id: 'mentor',
-    name: 'Mentor',
-    icon: <GraduationCap className="w-8 h-8" />,
-    href: '/mentor',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    description: 'Learn from experts'
-  },
-  {
-    id: 'community',
-    name: 'Community',
-    icon: <Users className="w-8 h-8" />,
-    href: '/community',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    description: 'Events, forums & groups'
-  },
-  {
-    id: 'spiritual',
-    name: 'Spiritual',
-    icon: <BookOpen className="w-8 h-8" />,
-    href: '/spiritual',
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
-    description: 'Bible, prayers & plans'
-  },
-  {
-    id: 'churches',
-    name: 'Churches',
-    icon: <Church className="w-8 h-8" />,
-    href: '/churches',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    description: 'Find Habesha churches'
-  },
-  {
-    id: 'all',
-    name: 'All',
-    icon: <Grid3X3 className="w-8 h-8" />,
-    href: '#all',
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-100',
-    description: 'View all services'
-  }
+  { id: 'health', name: 'Health', icon: HealthIcon, href: '/health', bgColor: 'bg-emerald-50' },
+  { id: 'match', name: 'Match', icon: MatchIcon, href: '/match', bgColor: 'bg-pink-50' },
+  { id: 'marketplace', name: 'Market', icon: MarketIcon, href: '/marketplace', bgColor: 'bg-orange-50' },
+  { id: 'mentor', name: 'Mentor', icon: MentorIcon, href: '/mentor', bgColor: 'bg-purple-50' },
+  { id: 'community', name: 'Community', icon: CommunityIcon, href: '/community', bgColor: 'bg-blue-50' },
+  { id: 'spiritual', name: 'Spiritual', icon: SpiritualIcon, href: '/spiritual', bgColor: 'bg-amber-50' },
+  { id: 'churches', name: 'Churches', icon: ChurchIcon, href: '/church', bgColor: 'bg-red-50' },
+  { id: 'all', name: 'All', icon: AllServicesIcon, href: '#all', bgColor: 'bg-white shadow-sm' }
 ];
 
-// Extended services for "All" drawer
-const ALL_SERVICES: ServiceTile[] = [
-  ...MAIN_SERVICES.filter(s => s.id !== 'all'),
-  {
-    id: 'events',
-    name: 'Events',
-    icon: <Calendar className="w-7 h-7" />,
-    href: '/community/events',
-    color: 'text-rose-600',
-    bgColor: 'bg-rose-50'
-  },
-  {
-    id: 'forums',
-    name: 'Forums',
-    icon: <MessageCircle className="w-7 h-7" />,
-    href: '/community/forums',
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50'
-  },
-  {
-    id: 'nutrition',
-    name: 'Nutrition',
-    icon: <UtensilsCrossed className="w-7 h-7" />,
-    href: '/health/nutrition',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50'
-  },
-  {
-    id: 'fitness',
-    name: 'Fitness',
-    icon: <Dumbbell className="w-7 h-7" />,
-    href: '/health/fitness',
-    color: 'text-red-600',
-    bgColor: 'bg-red-50'
-  },
-  {
-    id: 'fasting',
-    name: 'Fasting',
-    icon: <Moon className="w-7 h-7" />,
-    href: '/health/fasting',
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50'
-  },
-  {
-    id: 'jobs',
-    name: 'Jobs',
-    icon: <TrendingUp className="w-7 h-7" />,
-    href: '/marketplace/jobs',
-    color: 'text-sky-600',
-    bgColor: 'bg-sky-50'
-  }
+// Extended services for drawer
+const EXTENDED_SERVICES: ServiceTile[] = [
+  { id: 'events', name: 'Events', icon: () => <Calendar className="w-6 h-6 text-rose-600" />, href: '/community/events', bgColor: 'bg-rose-50' },
+  { id: 'forums', name: 'Forums', icon: () => <MessageCircle className="w-6 h-6 text-cyan-600" />, href: '/community/forums', bgColor: 'bg-cyan-50' },
+  { id: 'nutrition', name: 'Nutrition', icon: () => <UtensilsCrossed className="w-6 h-6 text-green-600" />, href: '/health/nutrition', bgColor: 'bg-green-50' },
+  { id: 'fitness', name: 'Fitness', icon: () => <Dumbbell className="w-6 h-6 text-red-600" />, href: '/health/fitness', bgColor: 'bg-red-50' },
+  { id: 'fasting', name: 'Fasting', icon: () => <Moon className="w-6 h-6 text-violet-600" />, href: '/health/fasting', bgColor: 'bg-violet-50' }
 ];
-
-// ============================================
-// SUB-COMPONENTS
-// ============================================
-
-// Service Tile Component
-const ServiceTileCard = ({ 
-  service, 
-  onClick 
-}: { 
-  service: ServiceTile; 
-  onClick?: () => void;
-}) => {
-  const navigate = useNavigate();
-  
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    } else if (service.href !== '#all') {
-      navigate(service.href);
-    }
-  };
-
-  return (
-    <motion.div
-      whileHover={{ scale: 0.98 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={handleClick}
-      className="flex flex-col items-center justify-center cursor-pointer"
-    >
-      <div className={cn(
-        "w-[72px] h-[72px] rounded-2xl flex items-center justify-center",
-        "shadow-sm border border-black/5 transition-all",
-        service.bgColor, service.color
-      )}>
-        {service.icon}
-      </div>
-      <span className="text-[13px] font-semibold text-gray-800 text-center mt-2 leading-tight">
-        {service.name}
-      </span>
-    </motion.div>
-  );
-};
-
-// Quick Action Card Component
-const QuickActionCard = ({ action }: { action: QuickAction }) => {
-  const navigate = useNavigate();
-  
-  return (
-    <motion.div
-      whileTap={{ scale: 0.98 }}
-      onClick={() => navigate(action.href)}
-      className="flex-none min-w-[140px] bg-white rounded-2xl p-3 shadow-sm border border-gray-100 cursor-pointer"
-    >
-      <div className="flex items-start justify-between mb-2">
-        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-white">
-          {action.icon}
-        </div>
-        {action.badge && (
-          <Badge variant="secondary" className="text-[10px] bg-emerald-100 text-emerald-700">
-            {action.badge}
-          </Badge>
-        )}
-      </div>
-      <p className="text-xs text-gray-500 mb-0.5">{action.subtitle}</p>
-      <h4 className="text-sm font-bold text-gray-900 leading-tight">{action.title}</h4>
-    </motion.div>
-  );
-};
-
-// Activity Item Component
-const ActivityItemCard = ({ item }: { item: ActivityItem }) => {
-  const navigate = useNavigate();
-  
-  return (
-    <motion.div
-      whileTap={{ scale: 0.98 }}
-      onClick={() => navigate(item.href)}
-      className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 cursor-pointer"
-    >
-      <div className={cn(
-        "w-10 h-10 rounded-full flex items-center justify-center",
-        item.color === 'pink' && "bg-pink-100 text-pink-600",
-        item.color === 'blue' && "bg-blue-100 text-blue-600",
-        item.color === 'green' && "bg-emerald-100 text-emerald-600",
-        item.color === 'orange' && "bg-orange-100 text-orange-600",
-        item.color === 'purple' && "bg-purple-100 text-purple-600",
-        item.color === 'amber' && "bg-amber-100 text-amber-600"
-      )}>
-        {item.icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-bold text-gray-900">{item.title}</h4>
-        <p className="text-xs text-gray-500 truncate">{item.description}</p>
-      </div>
-      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-    </motion.div>
-  );
-};
-
-// All Services Drawer (Bottom Sheet)
-const AllServicesDrawer = ({ 
-  isOpen, 
-  onClose 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void;
-}) => {
-  const navigate = useNavigate();
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-40"
-          />
-          
-          {/* Drawer */}
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[32px] z-50 max-h-[85vh] overflow-hidden"
-          >
-            {/* Drag Handle */}
-            <div className="flex justify-center pt-3 pb-2">
-              <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
-            </div>
-            
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
-
-            {/* Content */}
-            <div className="px-6 pb-8 pt-2 overflow-y-auto max-h-[calc(85vh-60px)]">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">All Services</h2>
-              
-              {/* Services Grid */}
-              <div className="grid grid-cols-4 gap-4 gap-y-6">
-                {ALL_SERVICES.map(service => (
-                  <motion.div
-                    key={service.id}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      navigate(service.href);
-                      onClose();
-                    }}
-                    className="flex flex-col items-center cursor-pointer"
-                  >
-                    <div className={cn(
-                      "w-16 h-16 rounded-2xl flex items-center justify-center",
-                      "shadow-sm border border-black/5",
-                      service.bgColor, service.color
-                    )}>
-                      {service.icon}
-                    </div>
-                    <span className="text-[11px] font-semibold text-gray-700 text-center mt-2 leading-tight">
-                      {service.name}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Quick Links Section */}
-              <div className="mt-8 pt-6 border-t border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Links</h3>
-                <div className="space-y-3">
-                  <Link to="/account/settings" className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                    <span className="font-medium text-gray-700">Settings</span>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </Link>
-                  <Link to="/gamification" className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                    <div className="flex items-center gap-2">
-                      <Star className="w-5 h-5 text-amber-500" />
-                      <span className="font-medium text-gray-700">Points & Badges</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-};
-
-// Bottom Navigation Component
-const BottomNav = ({ activeTab }: { activeTab: string }) => {
-  const navigate = useNavigate();
-  const [unreadMessages, setUnreadMessages] = useState(0);
-
-  const navItems = [
-    { id: 'home', label: 'Home', icon: HomeIcon, href: '/home' },
-    { id: 'discover', label: 'Discover', icon: Search, href: '/browse' },
-    { id: 'inbox', label: 'Messages', icon: MessageCircle, href: '/inbox' },
-    { id: 'activity', label: 'Activity', icon: Bell, href: '/notifications' },
-    { id: 'account', label: 'Account', icon: User, href: '/account/dashboard' }
-  ];
-
-  return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-2 py-2 z-30 safe-area-bottom">
-      <div className="flex justify-around items-center max-w-md mx-auto">
-        {navItems.map(item => {
-          const isActive = activeTab === item.id;
-          const Icon = item.icon;
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => navigate(item.href)}
-              className="flex flex-col items-center gap-1 px-3 py-1 relative"
-            >
-              <div className={cn(
-                "p-1.5 rounded-xl transition-colors",
-                isActive ? "bg-emerald-100" : "bg-transparent"
-              )}>
-                <Icon className={cn(
-                  "w-5 h-5 transition-colors",
-                  isActive ? "text-emerald-600" : "text-gray-400"
-                )} />
-              </div>
-              <span className={cn(
-                "text-[10px] font-semibold transition-colors",
-                isActive ? "text-emerald-600" : "text-gray-400"
-              )}>
-                {item.label}
-              </span>
-              {item.id === 'inbox' && unreadMessages > 0 && (
-                <div className="absolute top-0 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-[9px] text-white font-bold">{unreadMessages}</span>
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
 
 // ============================================
 // MAIN COMPONENT
@@ -436,344 +172,385 @@ const BottomNav = ({ activeTab }: { activeTab: string }) => {
 export default function HabeshaCommunityHome() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [userName, setUserName] = useState('');
-  const [userCity, setUserCity] = useState('');
   const [showAllServices, setShowAllServices] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const [streak, setStreak] = useState(0);
   const [points, setPoints] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  // Fetch user data
   useEffect(() => {
     if (user) {
-      fetchUserProfile();
-      fetchNotifications();
-      fetchGamificationData();
+      fetchUserData();
+      fetchUnreadCounts();
     }
   }, [user]);
 
-  const fetchUserProfile = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('display_name, city')
-      .eq('id', user?.id)
-      .single();
+  const fetchUserData = async () => {
+    if (!user) return;
     
-    if (data) {
-      setUserName(data.display_name?.split(' ')[0] || 'Friend');
-      setUserCity(data.city || 'Your City');
-    }
-  };
-
-  const fetchNotifications = async () => {
-    const { count } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user?.id)
-      .eq('read', false);
-    
-    setUnreadNotifications(count || 0);
-  };
-
-  const fetchGamificationData = async () => {
-    // Fetch user points
     const { data: pointsData } = await supabase
       .from('user_points')
       .select('total_points')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .single();
     
     if (pointsData) setPoints(pointsData.total_points || 0);
-
-    // Fetch streak (simplified)
-    const { data: streakData } = await supabase
-      .from('user_streaks')
-      .select('current_streak')
-      .eq('user_id', user?.id)
-      .order('current_streak', { ascending: false })
-      .limit(1)
-      .single();
-    
-    if (streakData) setStreak(streakData.current_streak || 0);
   };
 
-  // Quick Actions Data
-  const quickActions: QuickAction[] = [
-    {
-      id: 'profile',
-      title: 'Complete Profile',
-      subtitle: 'Get better matches',
-      icon: <User className="w-5 h-5" />,
-      href: '/dashboard/profile',
-      badge: 'Priority'
-    },
-    {
-      id: 'streak',
-      title: `${streak} Day Streak`,
-      subtitle: 'Keep it going!',
-      icon: <Flame className="w-5 h-5" />,
-      href: '/health',
-      badge: streak > 0 ? '🔥' : undefined
-    },
-    {
-      id: 'points',
-      title: `${points} Points`,
-      subtitle: 'View rewards',
-      icon: <Star className="w-5 h-5" />,
-      href: '/gamification'
-    }
-  ];
+  const fetchUnreadCounts = async () => {
+    if (!user) return;
 
-  // Activity Feed Data (would be dynamic in production)
-  const activities: ActivityItem[] = [
-    {
-      id: '1',
-      type: 'match',
-      title: '3 New Likes',
-      description: 'People interested in you',
-      href: '/match/liked',
-      icon: <Heart className="w-5 h-5" />,
-      color: 'pink',
-      count: 3
-    },
-    {
-      id: '2',
-      type: 'event',
-      title: 'Event This Weekend',
-      description: 'Ethiopian New Year Celebration',
-      href: '/community/events',
-      icon: <Calendar className="w-5 h-5" />,
-      color: 'orange'
-    },
-    {
-      id: '3',
-      type: 'mentor',
-      title: '5 Mentors Available',
-      description: 'Book a session today',
-      href: '/mentor',
-      icon: <GraduationCap className="w-5 h-5" />,
-      color: 'blue'
-    },
-    {
-      id: '4',
-      type: 'marketplace',
-      title: '12 New Listings',
-      description: 'Near you in ' + userCity,
-      href: '/marketplace',
-      icon: <ShoppingBag className="w-5 h-5" />,
-      color: 'amber'
-    },
-    {
-      id: '5',
-      type: 'spiritual',
-      title: "Today's Reading",
-      description: 'Continue your plan',
-      href: '/spiritual/today',
-      icon: <BookOpen className="w-5 h-5" />,
-      color: 'purple'
+    const { count: messagesCount } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .neq('sender_id', user.id)
+      .eq('read', false);
+
+    setUnreadMessages(messagesCount || 0);
+
+    const { count: notificationsCount } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('read', false);
+
+    setUnreadNotifications(notificationsCount || 0);
+  };
+
+  const handleServiceClick = (service: ServiceTile) => {
+    if (service.id === 'all') {
+      setShowAllServices(true);
+    } else {
+      navigate(service.href);
     }
-  ];
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header with Gradient */}
-      <div className="bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 text-white">
-        {/* Top Bar */}
-        <div className="px-4 pt-12 pb-4">
-          <div className="flex items-center justify-between mb-4">
-            {/* Logo & Location */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <span className="text-xl font-bold">H</span>
-              </div>
-              <div>
-                <p className="text-xs opacity-80 font-medium">Welcome back</p>
-                <h1 className="text-lg font-bold">{userName} 👋</h1>
-              </div>
-            </div>
-
-            {/* Notification Bell */}
-            <button 
-              onClick={() => navigate('/notifications')}
-              className="relative p-2.5 bg-white/20 rounded-xl backdrop-blur-sm"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadNotifications > 0 && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-emerald-500">
-                  <span className="text-[10px] font-bold">{unreadNotifications}</span>
-                </div>
-              )}
-            </button>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+    <div className="h-screen w-full max-w-md mx-auto bg-gray-50 flex flex-col overflow-hidden font-sans">
+      {/* Header with gradient background */}
+      <div className="bg-gradient-to-b from-emerald-500 to-emerald-400 pb-4">
+        <div className="px-4 pt-3 pb-4 flex items-center gap-3">
+          {/* Menu icon */}
+          <button className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <Menu className="w-6 h-6 text-white" strokeWidth={2.5} />
+          </button>
+          
+          {/* Search bar */}
+          <div className="flex-1 bg-white rounded-xl h-12 flex items-center px-4 gap-3 shadow-sm">
+            <Search className="w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search jobs, mentors, events..."
-              onClick={() => navigate('/browse')}
-              readOnly
-              className="w-full h-12 pl-12 pr-4 bg-white rounded-xl text-gray-800 text-sm font-medium placeholder:text-gray-400 shadow-lg cursor-pointer"
+              placeholder="Search Habesha Community"
+              className="flex-1 bg-transparent border-none outline-none text-gray-600 placeholder-gray-400 text-base"
             />
           </div>
-
-          {/* Location Bar */}
-          <div className="flex items-center gap-2 text-sm opacity-90">
-            <MapPin className="w-4 h-4" />
-            <span>Viewing services in <strong>{userCity}</strong></span>
-            <ChevronRight className="w-4 h-4" />
-          </div>
+          
+          {/* Profile icon */}
+          <button 
+            onClick={() => navigate('/account/dashboard')}
+            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
+          >
+            <User className="w-6 h-6 text-white" strokeWidth={2.5} />
+          </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="px-4 -mt-2">
+      {/* Main scrollable content */}
+      <div className="flex-1 overflow-y-auto">
         {/* Services Grid */}
-        <div className="bg-white rounded-3xl shadow-lg p-4 pt-6 mb-4">
-          <div className="grid grid-cols-4 gap-4 gap-y-5">
-            {MAIN_SERVICES.map(service => (
-              <ServiceTileCard
-                key={service.id}
-                service={service}
-                onClick={service.id === 'all' ? () => setShowAllServices(true) : undefined}
-              />
-            ))}
+        <div className="bg-white px-4 pt-6 pb-8">
+          <div className="grid grid-cols-4 gap-4">
+            {MAIN_SERVICES.map((service) => {
+              const IconComponent = service.icon;
+              return (
+                <button
+                  key={service.id}
+                  onClick={() => handleServiceClick(service)}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className={cn(
+                    "w-[72px] h-[72px] rounded-2xl flex items-center justify-center",
+                    service.bgColor
+                  )}>
+                    <IconComponent />
+                  </div>
+                  <span className="text-xs font-semibold text-gray-900">{service.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="mb-6">
-          <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
-            {quickActions.map(action => (
-              <QuickActionCard key={action.id} action={action} />
-            ))}
+        {/* Quick Action Cards */}
+        <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide">
+          {/* Points Card */}
+          <div className="flex-shrink-0 w-36 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-start justify-between mb-2">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Points</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-2xl font-bold text-gray-900">{points}</span>
+              <PointsIconSmall />
+            </div>
+          </div>
+
+          {/* Find Match Card */}
+          <button
+            onClick={() => navigate('/match')}
+            className="flex-shrink-0 w-44 bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
+          >
+            <div className="flex items-start justify-between mb-2">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Discover</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-base font-bold text-gray-900">Find Match</span>
+              <HeartIconSmall />
+            </div>
+          </button>
+
+          {/* Donate Card */}
+          <button className="flex-shrink-0 w-40 bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left">
+            <div className="flex items-start justify-between mb-2">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Support</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-base font-bold text-gray-900">Donate</span>
+              <WalletIconSmall />
+            </div>
+          </button>
+        </div>
+
+        {/* Hero Banner Section */}
+        <div className="relative mt-2 overflow-hidden bg-gradient-to-b from-emerald-100 via-emerald-50 to-amber-50 min-h-[380px]">
+          {/* Ethiopian Pattern Decoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 opacity-20">
+            <svg viewBox="0 0 200 200" fill="none">
+              <pattern id="ethiopian" patternUnits="userSpaceOnUse" width="40" height="40">
+                <path d="M20 0L40 20L20 40L0 20Z" fill="#10B981" />
+                <circle cx="20" cy="20" r="5" fill="#059669" />
+              </pattern>
+              <rect width="200" height="200" fill="url(#ethiopian)" />
+            </svg>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 px-6 pt-8">
+            <div className="flex items-center gap-2 mb-2">
+              <h2 className="text-2xl font-bold text-gray-900">Connect with your roots</h2>
+              <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
+                <ChevronRight className="w-5 h-5 text-white" />
+              </div>
+            </div>
+            <p className="text-base text-gray-700 mb-6">Find mentors, matches & community events</p>
+
+            {/* Promo Cards */}
+            <div className="flex gap-3 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
+              {/* Card 1 - Match */}
+              <button 
+                onClick={() => navigate('/match')}
+                className="flex-shrink-0 w-52 h-32 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl p-5 flex flex-col justify-between shadow-sm text-left"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">Find Your</h3>
+                  <h3 className="text-base font-bold text-white leading-tight">Perfect Match</h3>
+                </div>
+                <div className="flex justify-end">
+                  <Heart className="w-8 h-8 text-white/80" fill="currentColor" />
+                </div>
+              </button>
+
+              {/* Card 2 - Mentor */}
+              <button 
+                onClick={() => navigate('/mentor')}
+                className="flex-shrink-0 w-52 h-32 bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl p-5 flex flex-col justify-between shadow-sm text-left"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">Book a</h3>
+                  <h3 className="text-base font-bold text-white leading-tight">Mentor Session</h3>
+                </div>
+                <div className="flex justify-end">
+                  <Sparkles className="w-8 h-8 text-white/80" />
+                </div>
+              </button>
+
+              {/* Card 3 - Community */}
+              <button 
+                onClick={() => navigate('/community/events')}
+                className="flex-shrink-0 w-52 h-32 bg-gradient-to-br from-blue-400 to-blue-500 rounded-2xl p-5 flex flex-col justify-between shadow-sm text-left"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">Upcoming</h3>
+                  <h3 className="text-base font-bold text-white leading-tight">Events Near You</h3>
+                </div>
+                <div className="flex justify-end">
+                  <Users className="w-8 h-8 text-white/80" />
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Promo Banner */}
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-4 mb-6 relative overflow-hidden">
-          <div className="relative z-10">
-            <Badge className="bg-white/20 text-white border-0 mb-2">Featured</Badge>
-            <h3 className="text-white text-lg font-bold mb-1">Find Your Perfect Match</h3>
-            <p className="text-white/80 text-sm mb-3">
-              Join thousands of Habesha singles
-            </p>
-            <button 
-              onClick={() => navigate('/match')}
-              className="bg-white text-orange-600 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2"
-            >
-              Start Matching <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="absolute right-0 bottom-0 opacity-20">
-            <Heart className="w-32 h-32" />
-          </div>
+        {/* Location Banner */}
+        <div className="bg-gray-800 text-white px-6 py-4 flex items-center justify-between">
+          <span className="text-sm">Connecting the Habesha diaspora worldwide 🇪🇹🇪🇷</span>
+          <ChevronRight className="w-4 h-4" />
         </div>
 
-        {/* Activity Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900">Your Activity</h2>
-            <button 
-              onClick={() => navigate('/notifications')}
-              className="text-emerald-600 text-sm font-semibold flex items-center gap-1"
-            >
-              See all <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          
-          <div className="space-y-3">
-            {activities.map(item => (
-              <ActivityItemCard key={item.id} item={item} />
-            ))}
-          </div>
-        </div>
-
-        {/* Near You Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900">Near You in {userCity}</h2>
-            <button 
-              onClick={() => navigate('/browse')}
-              className="text-emerald-600 text-sm font-semibold flex items-center gap-1"
-            >
-              Explore <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          
-          <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
-            {/* Event Card */}
-            <motion.div
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/community/events')}
-              className="flex-none w-64 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer"
-            >
-              <div className="h-32 bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Calendar className="w-12 h-12 text-white/80" />
-              </div>
-              <div className="p-3">
-                <Badge variant="secondary" className="text-[10px] mb-2">This Weekend</Badge>
-                <h4 className="font-bold text-gray-900 text-sm">Community Events</h4>
-                <p className="text-xs text-gray-500">3 events near you</p>
-              </div>
-            </motion.div>
-
-            {/* Marketplace Card */}
-            <motion.div
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/marketplace')}
-              className="flex-none w-64 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer"
-            >
-              <div className="h-32 bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 text-white/80" />
-              </div>
-              <div className="p-3">
-                <Badge variant="secondary" className="text-[10px] mb-2">New</Badge>
-                <h4 className="font-bold text-gray-900 text-sm">Marketplace</h4>
-                <p className="text-xs text-gray-500">12 new listings</p>
-              </div>
-            </motion.div>
-
-            {/* Churches Card */}
-            <motion.div
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/churches')}
-              className="flex-none w-64 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer"
-            >
-              <div className="h-32 bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
-                <Church className="w-12 h-12 text-white/80" />
-              </div>
-              <div className="p-3">
-                <Badge variant="secondary" className="text-[10px] mb-2">Find</Badge>
-                <h4 className="font-bold text-gray-900 text-sm">Habesha Churches</h4>
-                <p className="text-xs text-gray-500">Orthodox & more</p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
+        {/* Bottom spacing for nav */}
+        <div className="h-24" />
       </div>
-
-      {/* All Services Drawer */}
-      <AllServicesDrawer 
-        isOpen={showAllServices} 
-        onClose={() => setShowAllServices(false)} 
-      />
 
       {/* Bottom Navigation */}
-      <BottomNav activeTab="home" />
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 pt-2 pb-6 max-w-md mx-auto">
+        <div className="flex items-center justify-around">
+          {/* Home */}
+          <button className="flex flex-col items-center gap-1 px-3">
+            <div className="relative">
+              <HomeIcon className="w-6 h-6 text-emerald-600" fill="currentColor" />
+            </div>
+            <span className="text-xs font-medium text-emerald-600">Home</span>
+          </button>
 
-      {/* Custom Scrollbar Hide */}
+          {/* Discover */}
+          <button 
+            onClick={() => navigate('/browse')}
+            className="flex flex-col items-center gap-1 px-3"
+          >
+            <Compass className="w-6 h-6 text-gray-400" />
+            <span className="text-xs font-medium text-gray-500">Discover</span>
+          </button>
+
+          {/* Wallet */}
+          <button className="flex flex-col items-center gap-1 px-3">
+            <Wallet className="w-6 h-6 text-gray-400" />
+            <span className="text-xs font-medium text-gray-500">Wallet</span>
+          </button>
+
+          {/* Activity */}
+          <button 
+            onClick={() => navigate('/notifications')}
+            className="flex flex-col items-center gap-1 px-3"
+          >
+            <div className="relative">
+              <History className="w-6 h-6 text-gray-400" />
+              {unreadNotifications > 0 && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+              )}
+            </div>
+            <span className="text-xs font-medium text-gray-500">Activity</span>
+          </button>
+
+          {/* Messages */}
+          <button 
+            onClick={() => navigate('/inbox')}
+            className="flex flex-col items-center gap-1 px-3"
+          >
+            <div className="relative">
+              <MessageCircle className="w-6 h-6 text-gray-400" />
+              {unreadMessages > 0 && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+              )}
+            </div>
+            <span className="text-xs font-medium text-gray-500">Messages</span>
+          </button>
+        </div>
+      </div>
+
+      {/* All Services Bottom Sheet */}
+      <AnimatePresence>
+        {showAllServices && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setShowAllServices(false)}
+            />
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 max-w-md mx-auto max-h-[85vh] overflow-hidden"
+            >
+              <div className="p-4">
+                <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6" />
+                
+                {/* Close button */}
+                <button
+                  onClick={() => setShowAllServices(false)}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+
+                <h2 className="text-xl font-bold text-gray-900 mb-6">All Services</h2>
+                
+                {/* Main Services */}
+                <div className="grid grid-cols-4 gap-4 pb-6">
+                  {MAIN_SERVICES.filter(s => s.id !== 'all').map((service) => {
+                    const IconComponent = service.icon;
+                    return (
+                      <button
+                        key={service.id}
+                        onClick={() => {
+                          setShowAllServices(false);
+                          navigate(service.href);
+                        }}
+                        className="flex flex-col items-center gap-2"
+                      >
+                        <div className={cn(
+                          "w-16 h-16 rounded-2xl flex items-center justify-center",
+                          service.bgColor
+                        )}>
+                          <IconComponent />
+                        </div>
+                        <span className="text-xs font-medium text-gray-700">{service.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Extended Services */}
+                <div className="border-t border-gray-100 pt-6">
+                  <h3 className="text-sm font-semibold text-gray-500 mb-4">More Services</h3>
+                  <div className="grid grid-cols-4 gap-4 pb-8">
+                    {EXTENDED_SERVICES.map((service) => {
+                      const IconComponent = service.icon;
+                      return (
+                        <button
+                          key={service.id}
+                          onClick={() => {
+                            setShowAllServices(false);
+                            navigate(service.href);
+                          }}
+                          className="flex flex-col items-center gap-2"
+                        >
+                          <div className={cn(
+                            "w-14 h-14 rounded-2xl flex items-center justify-center",
+                            service.bgColor
+                          )}>
+                            <IconComponent />
+                          </div>
+                          <span className="text-[11px] font-medium text-gray-700">{service.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <style>{`
-        .no-scrollbar::-webkit-scrollbar {
+        .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        .no-scrollbar {
+        .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
-        }
-        .safe-area-bottom {
-          padding-bottom: max(env(safe-area-inset-bottom), 8px);
         }
       `}</style>
     </div>
