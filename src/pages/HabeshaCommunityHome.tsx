@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 // ============================================
 
 const HealthIcon = () => (
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M24 38L12 26C8 22 8 16 12 12C16 8 22 8 24 14C26 8 32 8 36 12C40 16 40 22 36 26L24 38Z" fill="#10B981" />
       <path d="M20 22H28M24 18V26" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
@@ -29,7 +29,7 @@ const HealthIcon = () => (
 );
 
 const MatchIcon = () => (
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="18" cy="18" r="7" fill="#EC4899" />
       <circle cx="30" cy="18" r="7" fill="#F472B6" />
@@ -39,7 +39,7 @@ const MatchIcon = () => (
 );
 
 const MarketIcon = () => (
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="12" y="18" width="24" height="20" fill="#10B981" rx="2" />
       <path d="M16 16V12C16 9.79 17.79 8 20 8H28C30.21 8 32 9.79 32 12V16" stroke="#F97316" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -55,7 +55,7 @@ const MarketIcon = () => (
 );
 
 const MentorIcon = () => (
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="16" r="8" fill="#8B5CF6" />
       <path d="M12 40C12 30 17 26 24 26C31 26 36 30 36 40" fill="#A78BFA" />
@@ -66,7 +66,7 @@ const MentorIcon = () => (
 );
 
 const CommunityIcon = () => (
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="16" r="6" fill="#3B82F6" />
       <circle cx="14" cy="22" r="5" fill="#60A5FA" />
@@ -79,7 +79,7 @@ const CommunityIcon = () => (
 );
 
 const SpiritualIcon = () => (
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="12" y="8" width="24" height="32" rx="2" fill="#F59E0B" />
       <rect x="14" y="10" width="20" height="28" rx="1" fill="#FEF3C7" />
@@ -91,7 +91,7 @@ const SpiritualIcon = () => (
 );
 
 const ChurchIcon = () => (
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M24 6V12" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
       <path d="M20 9H28" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
@@ -104,12 +104,12 @@ const ChurchIcon = () => (
 );
 
 const AllServicesIcon = () => (
-  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-    <div className="grid grid-cols-2 gap-1">
-      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-emerald-600 rounded-md"></div>
-      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-md"></div>
-      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-md"></div>
-      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-emerald-600 rounded-md"></div>
+  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center">
+    <div className="grid grid-cols-2 gap-0.5 sm:gap-1">
+      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-emerald-600 rounded-sm sm:rounded-md"></div>
+      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-emerald-500 rounded-sm sm:rounded-md"></div>
+      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-emerald-500 rounded-sm sm:rounded-md"></div>
+      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-emerald-600 rounded-sm sm:rounded-md"></div>
     </div>
   </div>
 );
@@ -362,24 +362,24 @@ export default function HabeshaCommunityHome() {
       {/* Main scrollable content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-          {/* Services Grid - Mobile: 4 columns, 2 rows | Desktop: 8 columns */}
-          <div className="bg-white px-4 lg:px-8 pt-6 pb-6">
-            <div className="grid grid-cols-4 lg:grid-cols-8 gap-y-4 gap-x-2 sm:gap-4 lg:gap-6">
+          {/* Services Grid - 4 columns on mobile, 8 on desktop */}
+          <div className="bg-white px-3 sm:px-4 lg:px-8 pt-6 pb-6">
+            <div className="services-grid">
               {MAIN_SERVICES.map((service) => {
                 const IconComponent = service.icon;
                 return (
                   <button
                     key={service.id}
                     onClick={() => handleServiceClick(service)}
-                    className="flex flex-col items-center gap-1.5 sm:gap-2 group"
+                    className="flex flex-col items-center gap-1 sm:gap-1.5 lg:gap-2 group min-w-0"
                   >
                     <div className={cn(
-                      "w-16 h-16 sm:w-[72px] sm:h-[72px] lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105",
+                      "w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0",
                       service.bgColor
                     )}>
                       <IconComponent />
                     </div>
-                    <span className="text-xs sm:text-xs lg:text-sm font-semibold text-gray-900">{service.name}</span>
+                    <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-gray-900 text-center truncate w-full">{service.name}</span>
                   </button>
                 );
               })}
@@ -833,6 +833,22 @@ export default function HabeshaCommunityHome() {
       </AnimatePresence>
 
       <style>{`
+        .services-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 1rem 0.25rem;
+        }
+        @media (min-width: 640px) {
+          .services-grid {
+            gap: 1rem 0.5rem;
+          }
+        }
+        @media (min-width: 1024px) {
+          .services-grid {
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 1.5rem;
+          }
+        }
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
