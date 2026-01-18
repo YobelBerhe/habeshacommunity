@@ -14,6 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { LocationScopeProvider } from '@/contexts/LocationScopeContext';
+import LocationScopeBanner from '@/components/LocationScopeBanner';
 
 // ============================================
 // CUSTOM SVG SERVICE ICONS (Grab-style)
@@ -290,6 +292,7 @@ export default function HabeshaCommunityHome() {
   };
 
   return (
+    <LocationScopeProvider>
     <div className="min-h-screen w-full bg-gray-50 flex flex-col font-sans">
       {/* Header with gradient background */}
       <div className="bg-gradient-to-b from-emerald-500 to-emerald-400 pb-4 lg:pb-6">
@@ -391,42 +394,44 @@ export default function HabeshaCommunityHome() {
             {/* Main content area */}
             <div className="lg:col-span-2">
               {/* Quick Action Cards - horizontal scroll on mobile, grid on desktop */}
-              <div className="px-4 lg:px-0 py-4 flex lg:grid lg:grid-cols-3 gap-3 overflow-x-auto lg:overflow-visible scrollbar-hide">
-                {/* Points Card */}
-                <div className="flex-shrink-0 w-32 sm:w-36 lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Points</span>
+              <div className="px-4 lg:px-0 py-4">
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-3 lg:overflow-visible">
+                  {/* Points Card */}
+                  <div className="flex-shrink-0 min-w-[140px] w-[140px] sm:min-w-[160px] sm:w-auto lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 snap-start">
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="text-xs text-gray-500 uppercase tracking-wide">Points</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl sm:text-2xl font-bold text-gray-900">{points}</span>
+                      <PointsIconSmall />
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl sm:text-2xl font-bold text-gray-900">{points}</span>
-                    <PointsIconSmall />
-                  </div>
+
+                  {/* Find Match Card */}
+                  <button
+                    onClick={() => navigate('/match')}
+                    className="flex-shrink-0 min-w-[160px] w-[160px] sm:min-w-[180px] sm:w-auto lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left snap-start"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="text-xs text-gray-500 uppercase tracking-wide">Discover</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm sm:text-base font-bold text-gray-900">Find Match</span>
+                      <HeartIconSmall />
+                    </div>
+                  </button>
+
+                  {/* Donate Card */}
+                  <button className="flex-shrink-0 min-w-[160px] w-[160px] sm:min-w-[180px] sm:w-auto lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left snap-start">
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="text-xs text-gray-500 uppercase tracking-wide">Support</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm sm:text-base font-bold text-gray-900">Donate</span>
+                      <WalletIconSmall />
+                    </div>
+                  </button>
                 </div>
-
-                {/* Find Match Card */}
-                <button
-                  onClick={() => navigate('/match')}
-                  className="flex-shrink-0 w-40 sm:w-44 lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Discover</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm sm:text-base font-bold text-gray-900">Find Match</span>
-                    <HeartIconSmall />
-                  </div>
-                </button>
-
-                {/* Donate Card */}
-                <button className="flex-shrink-0 w-36 sm:w-40 lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Support</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm sm:text-base font-bold text-gray-900">Donate</span>
-                    <WalletIconSmall />
-                  </div>
-                </button>
               </div>
 
               {/* Hero Banner Section */}
@@ -499,11 +504,8 @@ export default function HabeshaCommunityHome() {
                 </div>
               </div>
 
-              {/* Location Banner */}
-              <div className="bg-gray-800 text-white px-4 sm:px-6 lg:px-6 py-3 sm:py-4 flex items-center justify-between lg:rounded-b-2xl lg:mt-0">
-                <span className="text-xs sm:text-sm">Connecting the Habesha diaspora worldwide 🇪🇹🇪🇷</span>
-                <ChevronRight className="w-4 h-4" />
-              </div>
+              {/* Location Banner - Tappable to change scope */}
+              <LocationScopeBanner className="lg:rounded-b-2xl lg:mt-0" />
 
               {/* ============================================ */}
               {/* SECONDARY CONTENT SECTIONS - Below the fold */}
@@ -861,5 +863,6 @@ export default function HabeshaCommunityHome() {
         }
       `}</style>
     </div>
+    </LocationScopeProvider>
   );
 }
