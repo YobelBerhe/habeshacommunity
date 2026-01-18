@@ -520,9 +520,9 @@ export default function HabeshaCommunityHome() {
                   </button>
                 </div>
                 
-                <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                <div className="flex flex-row flex-nowrap gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2 lg:mx-0 lg:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
                   {PROMO_CARDS.map((promo) => (
-                    <div key={promo.id} className="flex-shrink-0 w-72 sm:w-80 lg:w-[calc(50%-0.5rem)]">
+                    <div key={promo.id} className="flex-shrink-0 w-72 sm:w-80 lg:w-[calc(50%-0.5rem)] snap-start">
                       <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
                         <img 
                           src={promo.image} 
@@ -551,9 +551,9 @@ export default function HabeshaCommunityHome() {
                   Eating out? Explore Community Spots
                 </h3>
                 
-                <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                <div className="flex flex-row flex-nowrap gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2 lg:mx-0 lg:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
                   {FEATURED_PLACES.map((place) => (
-                    <div key={place.id} className="flex-shrink-0 w-40 sm:w-48">
+                    <div key={place.id} className="flex-shrink-0 w-40 sm:w-48 snap-start">
                       <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
                         <img 
                           src={place.image} 
@@ -582,9 +582,9 @@ export default function HabeshaCommunityHome() {
                   </button>
                 </div>
                 
-                <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                <div className="flex flex-row flex-nowrap gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2 lg:mx-0 lg:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
                   {RECOMMENDED_PLACES.map((place) => (
-                    <div key={place.id} className="flex-shrink-0 w-40 sm:w-48">
+                    <div key={place.id} className="flex-shrink-0 w-40 sm:w-48 snap-start">
                       <div className="rounded-2xl overflow-hidden aspect-square">
                         <img 
                           src={place.image} 
