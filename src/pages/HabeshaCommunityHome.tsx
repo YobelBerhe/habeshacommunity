@@ -394,29 +394,10 @@ export default function HabeshaCommunityHome() {
             {/* Main content area */}
             <div className="lg:col-span-2">
               {/* Quick Action Cards - horizontal scroll on mobile, grid on desktop */}
-              <div className="py-4">
-                <div 
-                  className="flex gap-3 pb-2 lg:grid lg:grid-cols-3"
-                  style={{ 
-                    overflowX: 'auto', 
-                    scrollSnapType: 'x mandatory',
-                    WebkitOverflowScrolling: 'touch',
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none',
-                    paddingLeft: '1rem',
-                    paddingRight: '1rem'
-                  }}
-                >
+              <div className="py-4 px-4 lg:px-0 overflow-hidden">
+                <div className="flex flex-nowrap gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 lg:mx-0 lg:overflow-visible lg:grid lg:grid-cols-3 scrollbar-hide">
                   {/* Points Card */}
-                  <div 
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-                    style={{ 
-                      flexShrink: 0, 
-                      minWidth: '140px', 
-                      width: '140px',
-                      scrollSnapAlign: 'start'
-                    }}
-                  >
+                  <div className="flex-shrink-0 min-w-[140px] w-[140px] lg:w-auto lg:min-w-0 snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Points</span>
                     </div>
@@ -429,13 +410,7 @@ export default function HabeshaCommunityHome() {
                   {/* Find Match Card */}
                   <button
                     onClick={() => navigate('/match')}
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
-                    style={{ 
-                      flexShrink: 0, 
-                      minWidth: '160px', 
-                      width: '160px',
-                      scrollSnapAlign: 'start'
-                    }}
+                    className="flex-shrink-0 min-w-[160px] w-[160px] lg:w-auto lg:min-w-0 snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Discover</span>
@@ -447,15 +422,7 @@ export default function HabeshaCommunityHome() {
                   </button>
 
                   {/* Donate Card */}
-                  <button 
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
-                    style={{ 
-                      flexShrink: 0, 
-                      minWidth: '160px', 
-                      width: '160px',
-                      scrollSnapAlign: 'start'
-                    }}
-                  >
+                  <button className="flex-shrink-0 min-w-[160px] w-[160px] lg:w-auto lg:min-w-0 snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left">
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Support</span>
                     </div>
