@@ -5,10 +5,10 @@ import {
   Search, Bell, User, ChevronRight, MapPin, 
   Heart, Users, ShoppingBag, GraduationCap, 
   Activity, Church, Calendar, Flame, Star,
-  MessageCircle, Home as HomeIcon, Wallet,
+  MessageCircle, Wallet,
   Grid3X3, X, ArrowRight, Sparkles, TrendingUp,
   BookOpen, Dumbbell, UtensilsCrossed, Moon,
-  Menu, Compass, History
+  Menu
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/store/auth';
@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { LocationScopeProvider } from '@/contexts/LocationScopeContext';
 import LocationScopeBanner from '@/components/LocationScopeBanner';
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 
 // ============================================
 // CUSTOM SVG SERVICE ICONS (Grab-style)
@@ -389,15 +390,51 @@ export default function HabeshaCommunityHome() {
             </div>
           </div>
 
+          {/* Location Context + Personalized Feed (mobile-first) */}
+          <div className="px-4 lg:px-8 py-4">
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-emerald-600" />
+                <h2 className="text-sm font-semibold text-gray-900">Near You in [City]</h2>
+              </div>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• 3 events this weekend</li>
+                <li>• 12 new marketplace listings</li>
+                <li>• 5 mentors available</li>
+              </ul>
+            </div>
+
+            <div className="mt-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Flame className="w-4 h-4 text-amber-600" />
+                <h2 className="text-sm font-semibold text-gray-900">Your Activity</h2>
+              </div>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• Health: 5-day streak!</li>
+                <li>• Match: 2 new likes</li>
+                <li>• Spiritual: Today&apos;s reading ready</li>
+              </ul>
+            </div>
+          </div>
+
           {/* Desktop: Two column layout */}
           <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:px-8">
             {/* Main content area */}
             <div className="lg:col-span-2">
-              {/* Quick Action Cards - horizontal scroll on mobile, grid on desktop */}
-              <div className="py-4 px-4 lg:px-0 overflow-hidden">
-                <div className="flex flex-nowrap gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 lg:mx-0 lg:overflow-visible lg:grid lg:grid-cols-3 scrollbar-hide">
+              {/* Quick Action Cards - horizontal snap scroll on mobile, grid on desktop */}
+              <div className="py-4 px-4 lg:px-0">
+                <div
+                  className={cn(
+                    "flex flex-nowrap gap-3 overflow-x-auto pb-2 -mx-4 px-4",
+                    "snap-x snap-mandatory",
+                    "scrollbar-hide",
+                    "touch-pan-x",
+                    "lg:mx-0 lg:px-0 lg:overflow-visible lg:grid lg:grid-cols-3"
+                  )}
+                  style={{ WebkitOverflowScrolling: 'touch' }}
+                >
                   {/* Points Card */}
-                  <div className="flex-shrink-0 min-w-[140px] w-[140px] lg:w-auto lg:min-w-0 snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex-shrink-0 w-[70vw] max-w-[280px] sm:w-[260px] lg:w-auto snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Points</span>
                     </div>
@@ -410,7 +447,7 @@ export default function HabeshaCommunityHome() {
                   {/* Find Match Card */}
                   <button
                     onClick={() => navigate('/match')}
-                    className="flex-shrink-0 min-w-[160px] w-[160px] lg:w-auto lg:min-w-0 snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
+                    className="flex-shrink-0 w-[70vw] max-w-[280px] sm:w-[260px] lg:w-auto snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Discover</span>
@@ -422,7 +459,9 @@ export default function HabeshaCommunityHome() {
                   </button>
 
                   {/* Donate Card */}
-                  <button className="flex-shrink-0 min-w-[160px] w-[160px] lg:w-auto lg:min-w-0 snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left">
+                  <button
+                    className="flex-shrink-0 w-[70vw] max-w-[280px] sm:w-[260px] lg:w-auto snap-start bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Support</span>
                     </div>
@@ -693,69 +732,16 @@ export default function HabeshaCommunityHome() {
         </div>
       </div>
 
-      {/* Fixed Location Scope Banner - Above bottom nav on mobile */}
-      <div className="fixed bottom-[72px] left-0 right-0 z-30 lg:hidden safe-area-bottom-banner">
+      {/* Fixed Location Scope Banner - sits directly above bottom nav on mobile */}
+      <div
+        className="fixed left-0 right-0 z-50 lg:hidden"
+        style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
+      >
         <LocationScopeBanner />
       </div>
 
-      {/* Bottom Navigation - Mobile only with 5 items inline */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 lg:hidden safe-area-bottom">
-        <div className="max-w-md mx-auto flex items-center justify-around px-1 pt-2 pb-2">
-          {/* Home */}
-          <button className="flex flex-col items-center gap-0.5 px-2 min-w-0">
-            <div className="relative">
-              <HomeIcon className="w-5 h-5 text-emerald-600" fill="currentColor" />
-            </div>
-            <span className="text-[10px] font-medium text-emerald-600">Home</span>
-          </button>
-
-          {/* Discover */}
-          <button 
-            onClick={() => navigate('/browse')}
-            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
-          >
-            <Compass className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] font-medium text-gray-500">Discover</span>
-          </button>
-
-          {/* Messages - inline with others */}
-          <button 
-            onClick={() => navigate('/inbox')}
-            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
-          >
-            <div className="relative">
-              <MessageCircle className="w-5 h-5 text-gray-400" />
-              {unreadMessages > 0 && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-              )}
-            </div>
-            <span className="text-[10px] font-medium text-gray-500">Messages</span>
-          </button>
-
-          {/* Activity */}
-          <button 
-            onClick={() => navigate('/notifications')}
-            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
-          >
-            <div className="relative">
-              <History className="w-5 h-5 text-gray-400" />
-              {unreadNotifications > 0 && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-              )}
-            </div>
-            <span className="text-[10px] font-medium text-gray-500">Activity</span>
-          </button>
-
-          {/* Account */}
-          <button 
-            onClick={() => navigate('/account/dashboard')}
-            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
-          >
-            <User className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] font-medium text-gray-500">Account</span>
-          </button>
-        </div>
-      </div>
+      {/* Bottom Navigation - Mobile (shared component) */}
+      <BottomNavigation className="lg:hidden" />
 
       {/* All Services Bottom Sheet */}
       <AnimatePresence>
