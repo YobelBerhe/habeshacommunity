@@ -394,10 +394,29 @@ export default function HabeshaCommunityHome() {
             {/* Main content area */}
             <div className="lg:col-span-2">
               {/* Quick Action Cards - horizontal scroll on mobile, grid on desktop */}
-              <div className="px-4 lg:px-0 py-4">
-                <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-3 lg:overflow-visible">
+              <div className="py-4">
+                <div 
+                  className="flex gap-3 pb-2 lg:grid lg:grid-cols-3"
+                  style={{ 
+                    overflowX: 'auto', 
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    paddingLeft: '1rem',
+                    paddingRight: '1rem'
+                  }}
+                >
                   {/* Points Card */}
-                  <div className="flex-shrink-0 min-w-[140px] w-[140px] sm:min-w-[160px] sm:w-auto lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 snap-start">
+                  <div 
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                    style={{ 
+                      flexShrink: 0, 
+                      minWidth: '140px', 
+                      width: '140px',
+                      scrollSnapAlign: 'start'
+                    }}
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Points</span>
                     </div>
@@ -410,7 +429,13 @@ export default function HabeshaCommunityHome() {
                   {/* Find Match Card */}
                   <button
                     onClick={() => navigate('/match')}
-                    className="flex-shrink-0 min-w-[160px] w-[160px] sm:min-w-[180px] sm:w-auto lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left snap-start"
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
+                    style={{ 
+                      flexShrink: 0, 
+                      minWidth: '160px', 
+                      width: '160px',
+                      scrollSnapAlign: 'start'
+                    }}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Discover</span>
@@ -422,7 +447,15 @@ export default function HabeshaCommunityHome() {
                   </button>
 
                   {/* Donate Card */}
-                  <button className="flex-shrink-0 min-w-[160px] w-[160px] sm:min-w-[180px] sm:w-auto lg:w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left snap-start">
+                  <button 
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-left"
+                    style={{ 
+                      flexShrink: 0, 
+                      minWidth: '160px', 
+                      width: '160px',
+                      scrollSnapAlign: 'start'
+                    }}
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-xs text-gray-500 uppercase tracking-wide">Support</span>
                     </div>
@@ -504,8 +537,7 @@ export default function HabeshaCommunityHome() {
                 </div>
               </div>
 
-              {/* Location Banner - Tappable to change scope */}
-              <LocationScopeBanner className="lg:rounded-b-2xl lg:mt-0" />
+              {/* Location banner moved to fixed position above bottom nav */}
 
               {/* ============================================ */}
               {/* SECONDARY CONTENT SECTIONS - Below the fold */}
@@ -605,7 +637,12 @@ export default function HabeshaCommunityHome() {
 
             {/* Sidebar - Desktop only */}
             <div className="hidden lg:block lg:col-span-1 space-y-4">
-              {/* Quick Links */}
+            {/* Desktop only Location Scope */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+              <LocationScopeBanner className="lg:rounded-2xl" />
+            </div>
+            
+            {/* Quick Links */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h3 className="font-semibold text-gray-900 mb-4">Quick Links</h3>
                 <div className="space-y-3">
@@ -684,63 +721,71 @@ export default function HabeshaCommunityHome() {
             </div>
           </div>
 
-          {/* Bottom spacing for nav - mobile only */}
-          <div className="h-24 lg:h-8" />
+          {/* Bottom spacing for nav + location banner - mobile only */}
+          <div className="h-36 lg:h-8" />
         </div>
       </div>
 
-      {/* Bottom Navigation - Mobile only */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 pt-2 pb-6 lg:hidden safe-area-bottom">
-        <div className="max-w-md mx-auto flex items-center justify-around">
+      {/* Fixed Location Scope Banner - Above bottom nav on mobile */}
+      <div className="fixed bottom-[72px] left-0 right-0 z-30 lg:hidden safe-area-bottom-banner">
+        <LocationScopeBanner />
+      </div>
+
+      {/* Bottom Navigation - Mobile only with 5 items inline */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 lg:hidden safe-area-bottom">
+        <div className="max-w-md mx-auto flex items-center justify-around px-1 pt-2 pb-2">
           {/* Home */}
-          <button className="flex flex-col items-center gap-1 px-3">
+          <button className="flex flex-col items-center gap-0.5 px-2 min-w-0">
             <div className="relative">
-              <HomeIcon className="w-6 h-6 text-emerald-600" fill="currentColor" />
+              <HomeIcon className="w-5 h-5 text-emerald-600" fill="currentColor" />
             </div>
-            <span className="text-xs font-medium text-emerald-600">Home</span>
+            <span className="text-[10px] font-medium text-emerald-600">Home</span>
           </button>
 
           {/* Discover */}
           <button 
             onClick={() => navigate('/browse')}
-            className="flex flex-col items-center gap-1 px-3"
+            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
           >
-            <Compass className="w-6 h-6 text-gray-400" />
-            <span className="text-xs font-medium text-gray-500">Discover</span>
+            <Compass className="w-5 h-5 text-gray-400" />
+            <span className="text-[10px] font-medium text-gray-500">Discover</span>
           </button>
 
-          {/* Wallet */}
-          <button className="flex flex-col items-center gap-1 px-3">
-            <Wallet className="w-6 h-6 text-gray-400" />
-            <span className="text-xs font-medium text-gray-500">Payment</span>
+          {/* Messages - inline with others */}
+          <button 
+            onClick={() => navigate('/inbox')}
+            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
+          >
+            <div className="relative">
+              <MessageCircle className="w-5 h-5 text-gray-400" />
+              {unreadMessages > 0 && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+              )}
+            </div>
+            <span className="text-[10px] font-medium text-gray-500">Messages</span>
           </button>
 
           {/* Activity */}
           <button 
             onClick={() => navigate('/notifications')}
-            className="flex flex-col items-center gap-1 px-3"
+            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
           >
             <div className="relative">
-              <History className="w-6 h-6 text-gray-400" />
+              <History className="w-5 h-5 text-gray-400" />
               {unreadNotifications > 0 && (
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
               )}
             </div>
-            <span className="text-xs font-medium text-gray-500">Activity</span>
+            <span className="text-[10px] font-medium text-gray-500">Activity</span>
           </button>
 
-          {/* Messages */}
+          {/* Account */}
           <button 
-            onClick={() => navigate('/inbox')}
-            className="flex flex-col items-center gap-1 px-3"
+            onClick={() => navigate('/account/dashboard')}
+            className="flex flex-col items-center gap-0.5 px-2 min-w-0"
           >
-            <div className="relative">
-              <MessageCircle className="w-6 h-6 text-gray-400" />
-              {unreadMessages > 0 && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-              )}
-            </div>
-            <span className="text-xs font-medium text-gray-500">Messages</span>
+            <User className="w-5 h-5 text-gray-400" />
+            <span className="text-[10px] font-medium text-gray-500">Account</span>
           </button>
         </div>
       </div>
@@ -859,7 +904,10 @@ export default function HabeshaCommunityHome() {
           scrollbar-width: none;
         }
         .safe-area-bottom {
-          padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+          padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+        }
+        .safe-area-bottom-banner {
+          /* Position above the bottom nav which is ~72px */
         }
       `}</style>
     </div>
