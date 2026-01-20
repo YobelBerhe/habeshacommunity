@@ -101,13 +101,13 @@ const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminReports = lazy(() => import("./pages/admin/Reports"));
 const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
-const MatchLayout = lazy(() => import("./pages/match/MatchLayout"));
-const MatchHome = lazy(() => import("./pages/match/MatchHome"));
+const MatchLayout = lazy(() => import("./pages/match/MatchLayoutCrisp"));
+const MatchHome = lazy(() => import("./pages/match/MatchHomeCrisp"));
 const MatchOnboarding = lazy(() => import("./pages/match/MatchOnboarding"));
-const MatchDiscover = lazy(() => import("./pages/match/Discover"));
+const MatchDiscover = lazy(() => import("./pages/match/MatchDiscoverCrisp"));
 const MatchProfile = lazy(() => import("./pages/match/MatchProfile"));
 const MatchesList = lazy(() => import("./pages/match/MatchesList"));
-const MatchLiked = lazy(() => import("./pages/match/Liked"));
+const MatchLiked = lazy(() => import("./pages/match/MatchLikesCrisp"));
 const MatchMore = lazy(() => import("./pages/match/MatchMore"));
 const MatchFamilyMode = lazy(() => import("./pages/match/MatchFamilyMode"));
 const MatchQuiz = lazy(() => import("./pages/match/MatchQuiz"));
@@ -357,12 +357,13 @@ const App = () => {
               
               {/* Match Routes - Nested with Layout */}
               <Route path="/match" element={<MatchFlowGuard><MatchLayout /></MatchFlowGuard>}>
-                <Route index element={<Navigate to="/match/discover" replace />} />
+                <Route index element={<MatchHome />} />
                 <Route path="home" element={<MatchHome />} />
                 <Route path="onboarding" element={<MatchOnboarding />} />
                 <Route path="quiz" element={<MatchQuiz />} />
                 <Route path="discover" element={<MatchDiscover />} />
                 <Route path="matches" element={<MatchesList />} />
+                <Route path="likes" element={<MatchLiked />} />
                 <Route path="liked" element={<MatchLiked />} />
                 <Route path="more" element={<MatchMore />} />
                 <Route path="profile/:id" element={<MatchProfile />} />
