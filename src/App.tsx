@@ -147,13 +147,13 @@ const ChurchHome = lazy(() => import("./pages/church/ChurchHome"));
 const ChurchList = lazy(() => import("./pages/church/ChurchList"));
 const ChurchDetail = lazy(() => import("./pages/church/ChurchDetail"));
 const GamificationDashboard = lazy(() => import("./pages/gamification/Dashboard"));
-const HealthLayout = lazy(() => import("./pages/health/HealthLayout"));
-const HealthHome = lazy(() => import("./pages/health/HealthHome"));
+const HealthLayout = lazy(() => import("./pages/health/HealthLayoutCrisp"));
+const HealthHome = lazy(() => import("./pages/health/HealthHomeCrisp"));
 const FastingPage = lazy(() => import("./pages/health/Fasting"));
 const NutritionPageNew = lazy(() => import("./pages/health/NutritionPage"));
 const FitnessPageNew = lazy(() => import("./pages/health/FitnessPage"));
 const ProgressPage = lazy(() => import("./pages/health/ProgressPage"));
-const HealthMorePage = lazy(() => import("./pages/health/HealthMorePage"));
+const HealthMorePage = lazy(() => import("./pages/health/HealthMoreCrisp"));
 const NutritionPage = lazy(() => import("./pages/health/Nutrition"));
 const FitnessPage = lazy(() => import("./pages/health/Fitness"));
 const HealthDashboard = lazy(() => import("./pages/health/Dashboard"));
@@ -419,7 +419,7 @@ const App = () => {
                 
                 {/* Health Routes - Nested with Layout */}
                 <Route path="/health" element={<HealthLayout />}>
-                  <Route index element={<Navigate to="/health/nutrition" replace />} />
+                  <Route index element={<HealthHome />} />
                   <Route path="nutrition" element={<NutritionPageNew />} />
                   <Route path="fitness" element={<FitnessPageNew />} />
                   <Route path="progress" element={<ProgressPage />} />
