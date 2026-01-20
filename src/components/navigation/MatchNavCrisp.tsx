@@ -30,24 +30,24 @@ export default function MatchNavCrisp() {
     if (!user) return;
 
     try {
-      // Get likes count - simplified query
-      const { data: likesData } = await supabase
+      // Get likes count
+      const likesResult = await supabase
         .from('match_interactions')
         .select('id')
         .eq('target_user_id', user.id)
         .eq('action', 'like');
       
-      const likes = likesData?.length || 0;
-
+      const likes = likesResult.data?.length || 0;
       setLikesCount(likes || 3); // Demo fallback
 
-      // Get unread messages count
-      const { count: messages } = await supabase
+      // Get unread messages count - use any to avoid deep type instantiation
+      const messagesResult = await (supabase as any)
         .from('messages')
-        .select('*', { count: 'exact', head: true })
+        .select('id')
         .eq('to_user_id', user.id)
         .eq('read', false);
 
+      const messages = messagesResult?.data?.length || 0;
       setMessagesCount(messages || 1); // Demo fallback
     } catch (error) {
       console.error('Error loading counts:', error);
