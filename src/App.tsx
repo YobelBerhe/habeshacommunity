@@ -466,7 +466,7 @@ const App = () => {
                 <Route path="/terms" element={<Terms />} />
                 
                 {/* 404 Catch-all - MUST BE LAST */}
-                <Route path="*" element={<div>Page not found</div>} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </BrowserRouter>
