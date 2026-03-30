@@ -131,6 +131,7 @@ const DisputeResolution = lazy(() => import("./pages/admin/DisputeResolution"));
 const RoleManagement = lazy(() => import("./pages/admin/RoleManagement"));
 const SessionRoom = lazy(() => import("./pages/mentor/SessionRoom"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 const DonateSuccess = lazy(() => import("./pages/donate/Success"));
 const DonateCancel = lazy(() => import("./pages/donate/Cancel"));
 const ListingDetail = lazy(() => import("./pages/ListingDetail"));
