@@ -39,7 +39,7 @@ const ALL_CATEGORIES: CategoryConfig[] = [
     icon: Heart, 
     color: 'text-pink-600',
     bgColor: 'bg-pink-500',
-    href: '/match/discover',
+    href: '/match',
     description: 'Find your life partner'
   },
   { 
